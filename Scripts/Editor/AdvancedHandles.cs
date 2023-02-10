@@ -133,7 +133,7 @@ public class AdvancedHandles
                 break;
         }
 
-        return new HandleResult() {clickPosition = _sDragHandleWorldStart, newPosition = position, handleEvent = handleEventType };
+        return new() {clickPosition = _sDragHandleWorldStart, newPosition = position, handleEvent = handleEventType };
     }
 
 

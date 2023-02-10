@@ -88,7 +88,7 @@ namespace VoxelSystem
 
         protected virtual void DrawHandles()
         {
-            HandleExample handleExample = new HandleExample();
+            HandleExample handleExample = new();
 
             if (handleExample == null)
             {
@@ -97,7 +97,7 @@ namespace VoxelSystem
 
             Handles.color = Color.yellow;
 
-            GUIStyle style = new GUIStyle();
+            GUIStyle style = new();
             style.normal.textColor = Color.green;
 
             Vector3 position = handleExample.transform.position + Vector3.up * 2f;

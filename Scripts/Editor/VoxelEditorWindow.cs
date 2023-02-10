@@ -6,22 +6,22 @@ using MUtility;
 
 namespace VoxelSystem
 {
+    enum VoxelTool { Non, Attach, Erase, Recolor, Face, Select, Move, Turn, Mirror, Resize, Repeat, Rescale, FloodFill, Picker }
+    enum VoxelAction {Clear, Fill, Separate, CopyUp}
+        
     public partial class VoxelEditorWindow : EditorWindow
     {
         // ----------------------- STATE ------------------------
+        
+        static readonly VoxelTool[] _handleTools = { VoxelTool.Move, VoxelTool.Turn, VoxelTool.Mirror, VoxelTool.Resize, VoxelTool.Repeat, VoxelTool.Rescale };
+        static readonly VoxelTool[] _cursorTools = { VoxelTool.Select, VoxelTool.Attach, VoxelTool.Erase, VoxelTool.Recolor, VoxelTool.Face, VoxelTool.FloodFill, VoxelTool.Picker };
+        static readonly VoxelTool[] _paletteUsingTools = { VoxelTool.Attach, VoxelTool.Recolor, VoxelTool.Face, VoxelTool.FloodFill};
 
-        enum VoxelTool { Non, Attach, Erase, Recolor, Face, Select, Move, Turn, Mirror, Resize, Repeat, Rescale, FloodFill, ColorPicker }
-        enum VoxelAction {Clear, Fill, Separate, CopyUp}
-                       
-        static readonly VoxelTool[] HandleTools = { VoxelTool.Move, VoxelTool.Turn, VoxelTool.Mirror, VoxelTool.Resize, VoxelTool.Repeat, VoxelTool.Rescale };
-        static readonly VoxelTool[] CursorTools = { VoxelTool.Select, VoxelTool.Attach, VoxelTool.Erase, VoxelTool.Recolor, VoxelTool.Face, VoxelTool.FloodFill, VoxelTool.ColorPicker };
-        static readonly VoxelTool[] PaletteUsingTools = { VoxelTool.Attach, VoxelTool.Recolor, VoxelTool.Face, VoxelTool.FloodFill};
+        static readonly VoxelTool[] _transformTools = { VoxelTool.Move, VoxelTool.Turn, VoxelTool.Mirror };
+        static readonly VoxelTool[] _sizeTools = { VoxelTool.Resize, VoxelTool.Repeat, VoxelTool.Rescale };
 
-        static readonly VoxelTool[] TransformTools = { VoxelTool.Move, VoxelTool.Turn, VoxelTool.Mirror };
-        static readonly VoxelTool[] SizeTools = { VoxelTool.Resize, VoxelTool.Repeat, VoxelTool.Rescale };
-
-        static readonly VoxelTool[] BasicEditTools = { VoxelTool.Attach, VoxelTool.Erase, VoxelTool.Recolor };
-        static readonly VoxelTool[] SecondaryTools = { VoxelTool.Face, VoxelTool.FloodFill, VoxelTool.ColorPicker};
+        static readonly VoxelTool[] _basicEditTools = { VoxelTool.Attach, VoxelTool.Erase, VoxelTool.Recolor };
+        static readonly VoxelTool[] _secondaryTools = { VoxelTool.Face, VoxelTool.FloodFill, VoxelTool.Picker};
 
         static VoxelMap.VoxelAreaAction ToolToAreaAction() // Need to refactor
         {
@@ -42,12 +42,14 @@ namespace VoxelSystem
 
         void OnEnable()
         {
-            titleContent = new GUIContent("Voxel Exitor");
+            titleContent = new("Voxel Exitor");
             Undo.undoRedoPerformed += UndoRedoCalled;
             Selection.selectionChanged += ChangeTarget;
             SceneView.duringSceneGui += OnSceneGUI;
             _originalMap = null;
             ChangeTarget();
+            
+            //SceneView.over
         }
 
         void OnDisable()
@@ -110,7 +112,6 @@ namespace VoxelSystem
             {
                 parent.Map?.UndoRedoEvenInvokedOnMap();
             }
-
         }
 
         static bool IsMapSideSeen(GeneralDirection3D side)
@@ -119,8 +120,8 @@ namespace VoxelSystem
 
             Vector3 sideNormal = side.ToVectorInt();
             Vector3Int size = _targetVoxelObject.Map.Size;
-            Vector3 halfSize = new Vector3(size.x / 2f,size.y / 2f, size.z / 2f) ;
-            Vector3 halfNormalInSize = new Vector3(halfSize.x * sideNormal.x, halfSize.y * sideNormal.y, halfSize.z * sideNormal.z);
+            Vector3 halfSize = new(size.x / 2f,size.y / 2f, size.z / 2f) ;
+            Vector3 halfNormalInSize = new(halfSize.x * sideNormal.x, halfSize.y * sideNormal.y, halfSize.z * sideNormal.z);
             Vector3 planeOrigin = halfSize + halfNormalInSize;
 
             // Transform points
@@ -137,7 +138,6 @@ namespace VoxelSystem
             const float epsylon = 0.1f;
             return angle > 90 -epsylon;
         }
-
     }
 }
 #endif

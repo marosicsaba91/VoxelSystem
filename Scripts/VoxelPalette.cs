@@ -7,13 +7,7 @@ namespace VoxelSystem
     {
         public Material material;
 
-        public struct PaletteItem
-        {
-            public int value;
-            public string name;
-            public Color color;
-            public Sprite image;
-        }
+
 
         public virtual PaletteItem[] GetPletteItems()
         {
@@ -22,3 +16,5 @@ namespace VoxelSystem
 
     }
 }
+
+

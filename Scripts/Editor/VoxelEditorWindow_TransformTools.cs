@@ -13,7 +13,7 @@ namespace VoxelSystem
 
         void HandleArrowHandles()
         {
-            if (!HandleTools.Contains(Tool)) { return; }
+            if (!_handleTools.Contains(Tool)) { return; }
 
             if (_targetVoxelObject == null) { return; }
             VoxelMap map = _targetVoxelObject.Map;
@@ -65,14 +65,14 @@ namespace VoxelSystem
             Vector3 handlePos = worldPos;
             if (_handleDirection.HasValue && _handleDirection.Value == dir)
             {
-                GUIStyle style = new GUIStyle();
+                GUIStyle style = new();
                 style.normal.textColor = (color + Color.black) / 2;
                 style.fontSize = 15;
 
                 //handlePos += targetGameObject.transform.TransformVector(handleVector);
                 string label = (_handleSteps >= 0 ? "+" : "") + _handleSteps.ToString();
 
-                if (SizeTools.Contains(Tool))
+                if (_sizeTools.Contains(Tool))
                 {
                     label += " : " + _targetVoxelObject.Map.GetSize(axis);
                 }
@@ -163,7 +163,7 @@ namespace VoxelSystem
                 Undo.RecordObject(_targetGameObject.transform, "VoxelMapMoved");
                 Translate(direction, steps);
             }
-            else if (SizeTools.Contains(Tool))
+            else if (_sizeTools.Contains(Tool))
             {
                 ResizeMapRelease(direction, steps);
             }
@@ -197,7 +197,7 @@ namespace VoxelSystem
                 Undo.RecordObject(_targetGameObject.transform, "VoxelMapMoved");
                 Translate(direction, steps);
             }
-            else if(SizeTools.Contains(Tool))
+            else if(_sizeTools.Contains(Tool))
             {
                 ResizeMapDrag(direction, steps);
             }
@@ -238,12 +238,12 @@ namespace VoxelSystem
         {
             Vector3 dir = side.ToVector();
             Vector3 position =
-                side == GeneralDirection3D.Right ? new Vector3(size.x, size.y / 2f, size.z / 2f) :
-                side == GeneralDirection3D.Up ? new Vector3(size.x / 2f, size.y, size.z / 2f) :
-                side == GeneralDirection3D.Forward ? new Vector3(size.x / 2f, size.y / 2f, size.z) :
-                side == GeneralDirection3D.Left ? new Vector3(x: 0, size.y / 2f, size.z / 2f) :
-                side == GeneralDirection3D.Down ? new Vector3(size.x / 2f, y: 0, size.z / 2f) :
-                side == GeneralDirection3D.Back ? new Vector3(size.x / 2f, size.y / 2f, z: 0) :
+                side == GeneralDirection3D.Right ? new(size.x, size.y / 2f, size.z / 2f) :
+                side == GeneralDirection3D.Up ? new(size.x / 2f, size.y, size.z / 2f) :
+                side == GeneralDirection3D.Forward ? new(size.x / 2f, size.y / 2f, size.z) :
+                side == GeneralDirection3D.Left ? new(x: 0, size.y / 2f, size.z / 2f) :
+                side == GeneralDirection3D.Down ? new(size.x / 2f, y: 0, size.z / 2f) :
+                side == GeneralDirection3D.Back ? new(size.x / 2f, size.y / 2f, z: 0) :
                 Vector3.zero;
 
             return _targetGameObject.transform.TransformPoint(position) + _targetGameObject.transform.TransformDirection(dir) * arrowSpacing;

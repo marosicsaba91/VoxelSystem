@@ -3,10 +3,9 @@ using UnityEngine;
 using MUtility; 
 
 namespace VoxelSystem
-{  
-
-    [ExecuteInEditMode]
-    public class VoxelObject : MonoBehaviour
+{
+    [ExecuteAlways]
+    public partial class VoxelObject : MonoBehaviour
     {
         [Serializable]
         public struct References
@@ -105,7 +104,8 @@ namespace VoxelSystem
         // Update is called once per frame
         void Update()
         {
-            if (_lastFrameConnectedMap != connectedMap) {
+            if (_lastFrameConnectedMap != connectedMap)
+            {
                 if (_lastFrameConnectedMap != null) _lastFrameConnectedMap.map.MapChangedEvent -= SetMeshDirty;
                 else if (innerMap != null) innerMap.MapChangedEvent -= SetMeshDirty;
 
@@ -114,6 +114,8 @@ namespace VoxelSystem
                 _lastFrameConnectedMap = connectedMap;
                 SetMeshDirty();
             }
+
+            DoLockTransform();
         }
 
         void DoLockTransform()

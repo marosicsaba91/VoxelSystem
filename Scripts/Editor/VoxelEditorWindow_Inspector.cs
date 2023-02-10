@@ -1,9 +1,7 @@
 #if UNITY_EDITOR
-using System;
-using System.Collections;
+using MUtility;
 using UnityEngine;
 using UnityEditor;
-using static VoxelSystem.VoxelPalette;
 
 namespace VoxelSystem
 {
@@ -17,142 +15,212 @@ namespace VoxelSystem
             VoxelEditorWindow window = (VoxelEditorWindow) GetWindow(typeof(VoxelEditorWindow));
             window.Show();
         }
+ 
+        const float bigSpacing = 5f;
+        const float smallSpacing = 2f;
+        const int columnCount = 3;
 
-        const float fullW = 185;
-        const float separatorW = 3f;
-        const float smallButtonW = 25f;
-        static readonly GUILayoutOption _columnWidth = GUILayout.Width(fullW / 1 - separatorW);
-        static readonly GUILayoutOption _smallButtonWidth = GUILayout.Width(smallButtonW);
-
+        GUIStyle _boldMiddleTextStyle;
+        Font _normalFont;
+        
         void OnGUI()
         {
-            GUIStyle boldMiddle = new GUIStyle(EditorStyles.boldLabel);
-            boldMiddle.alignment = TextAnchor.MiddleCenter;
+            SetupStyles();
+
             if (_targetVoxelObject == null)
             {
-                EditorGUILayout.Space();
-                GUILayout.Label("No VoxleObject Selected!\nSelect a VoxleObject to edit!", boldMiddle);
-
+                GUI.Label(position,"No VoxelObject Selected!\nSelect a VoxelObject to edit!", _boldMiddleTextStyle); 
                 return;
             }
 
-            if (position.height < position.width) EditorGUILayout.BeginHorizontal();
+            FindRects(out Rect mapRect, out Rect transformRect, out Rect editRect, out Rect paletteRect);
+ 
+            /*
+            // Debug Drawing the Main Areas
+            EditorHelper.DrawBox(mapRect, new Color(0f, 1f, 1f, 0.3f)); 
+            EditorHelper.DrawBox(transformRect,new Color(1f, 0, 1f, 0.3f)); 
+            EditorHelper.DrawBox(editRect,new Color(1f, 1f, 0f, 0.3f));
+            EditorHelper.DrawBox(paletteRect,new Color(0f, 1f, 0f, 0.3f));
+            */
+                        
+            DrawMapTools(mapRect);
+            
+            if (_targetVoxelObject.Builder == null)
+                return;
+            
+            DrawTransform(transformRect);
+            DrawEditTools(editRect);
+            DrawPalette(paletteRect, _targetVoxelObject);
+        }
 
-            // Map            
-            EditorGUILayout.BeginVertical(_columnWidth);
+        void SetupStyles()
+        {
+            // if (_normalButtonStyle == null)
+                //return;
+ 
+            _normalFont = GUI.skin.font;
+            _boldMiddleTextStyle = new(EditorStyles.boldLabel)
+            {
+                alignment = TextAnchor.MiddleCenter
+            };
+        }
+
+        void FindRects(out Rect mapRect, out Rect transformRect, out Rect editRect, out Rect paletteRect)
+        {
+            Rect pos = new(bigSpacing, bigSpacing, position.width - bigSpacing * 2, position.height - bigSpacing * 2);
+
+            float columnWidth = pos.width;
+            float columnHeight = 100;
+ 
+            bool horizontalLayout = pos.height < columnWidth;
+            if (horizontalLayout)
+            {
+                columnWidth -= (columnCount - 1) * bigSpacing;
+                columnWidth /= columnCount;
+
+                mapRect = new(pos.x, pos.y, columnWidth, columnHeight);
+                transformRect = new(columnWidth + bigSpacing * 2, pos.y, columnWidth, columnHeight);
+                editRect = new(columnWidth * 2 + bigSpacing * 3, pos.y, columnWidth, columnHeight);
+                paletteRect = new(pos.x, columnHeight + bigSpacing * 2, pos.width, pos.height - columnHeight - bigSpacing);
+            }
+            else
+            {
+                mapRect = new(pos.x, pos.y, columnWidth, columnHeight);
+                transformRect = new(pos.x, columnHeight + bigSpacing, columnWidth, columnHeight);
+                editRect = new(pos.x, (columnHeight + bigSpacing) * 2, columnWidth, columnHeight);
+
+                float startY = columnHeight * 3 + bigSpacing * 3;
+                paletteRect = new(pos.x, startY, columnWidth, pos.height - startY + bigSpacing);
+            }
+        }
+
+        void DrawMapTools(Rect rect)
+        {
+            const int lineCount = 5;
+            float lineHeight = (rect.height - (lineCount - 1) * smallSpacing) / lineCount;
+            rect.height = lineHeight;
+            
             string label = "Map";
             if (_targetVoxelObject.HasConnectedMap())
             {
                 label += ": " + _targetVoxelObject.ConnectedMap.name;
             }
 
-            GUILayout.Label(label, boldMiddle);
+            GUI.Label(rect, label, _boldMiddleTextStyle);
             Vector3Int s = _targetVoxelObject.Map.Size;
-            GUIStyle small = new GUIStyle(EditorStyles.centeredGreyMiniLabel);
-            GUILayout.Label(" (" + s.x + "x" + s.y + "x" + s.z + ")", small);
+            GUIStyle small = new(EditorStyles.centeredGreyMiniLabel);
+            rect.y += lineHeight + smallSpacing;
+            GUI.Label(rect, " (" + s.x + "x" + s.y + "x" + s.z + ")", small);
 
             if (_targetVoxelObject.Builder == null)
             {
-
                 EditorGUILayout.Space();
-                GUILayout.Label("VoxelObject Has No Builder!", boldMiddle);
+                GUILayout.Label("VoxelObject Has No Builder!", _boldMiddleTextStyle);
                 ClearEditor();
-                EditorGUILayout.EndVertical();
-                EditorGUILayout.EndHorizontal();
                 return;
             }
 
-            DrawToolLine(new VoxelTool[] {VoxelTool.Select});
-            DrawCommandLine(new VoxelAction[] {VoxelAction.Clear, VoxelAction.Fill});
-            DrawCommandLine(new VoxelAction[] {VoxelAction.Separate, VoxelAction.CopyUp});
-            EditorGUILayout.EndVertical();
-
-            EditorGUILayout.Separator();
-
-
-            // Transform
-            EditorGUILayout.BeginVertical(_columnWidth);
-            GUILayout.Label("Transform", boldMiddle);
-            DrawToolLine(TransformTools);
-            DrawToolLine(SizeTools);
-            DrawTransformLocks(_columnWidth);
-            DrawTransformApplyButtons(_columnWidth);
-            EditorGUILayout.EndVertical();
-
-            EditorGUILayout.Separator();
-            // Draw Tools
-            EditorGUILayout.BeginVertical(_columnWidth);
-            GUILayout.Label("Edit", boldMiddle);
-            DrawToolLine(BasicEditTools);
-            DrawToolLine(SecondaryTools);
-            EditorGUILayout.EndVertical();
-
-            /*
-            // Palette
-            EditorGUILayout.Space();
-            GUILayout.Label("Palette", boldMiddle);
-            DrawPalette(targetGameObject, targetVoxelObject);
-            */
-            if (position.height < position.width) EditorGUILayout.EndHorizontal();
+            rect.y += lineHeight + smallSpacing;
+            DrawToolLine(rect, new[] { VoxelTool.Select });
+            rect.y += lineHeight + smallSpacing;
+            DrawCommandLine(rect, new[] { VoxelAction.Clear, VoxelAction.Fill });
+            rect.y += lineHeight + smallSpacing;
+            DrawCommandLine(rect, new[] { VoxelAction.Separate, VoxelAction.CopyUp });
         }
 
-        void DrawTransformLocks(GUILayoutOption width)
-        {
-            EditorGUILayout.BeginHorizontal(width);
-
-            GUILayout.Label("Lock Transform");
-            GUI.backgroundColor = _targetVoxelObject.lockPosition ? Color.gray : Color.white;
-            if (GUILayout.Button("P", _smallButtonWidth))
-                _targetVoxelObject.lockPosition = !_targetVoxelObject.lockPosition;
-            GUI.backgroundColor = _targetVoxelObject.lockRotation ? Color.gray : Color.white;
-            if (GUILayout.Button("R", _smallButtonWidth))
-                _targetVoxelObject.lockRotation = !_targetVoxelObject.lockRotation;
-            GUI.backgroundColor = _targetVoxelObject.lockScale ? Color.gray : Color.white;
-            if (GUILayout.Button("S", _smallButtonWidth))
-                _targetVoxelObject.lockScale = !_targetVoxelObject.lockScale;
-
-            GUI.backgroundColor = Color.white;
-            EditorGUILayout.EndHorizontal();
+        void DrawTransform(Rect rect)
+        { 
+            const int lineCount = 5;
+            float lineHeight = (rect.height - (lineCount - 1) * smallSpacing) / lineCount;
+            rect.height = lineHeight;
+            GUI.Label(rect, "Transform", _boldMiddleTextStyle);
+            rect.y += lineHeight + smallSpacing;
+            DrawToolLine(rect, _transformTools);
+            rect.y += lineHeight + smallSpacing;
+            DrawToolLine(rect, _sizeTools);
+            rect.y += lineHeight + smallSpacing;
+            DrawTransformLocks(rect);
+            rect.y += lineHeight + smallSpacing;
+            DrawTransformApplyButtons(rect); 
         }
 
-        void DrawTransformApplyButtons(GUILayoutOption width)
+        void DrawTransformLocks(Rect rect)
         {
-            EditorGUILayout.BeginHorizontal(width);
+            GUI.Label(rect, "Lock");
+            const float labelWidth = 40;
 
+            float buttonWidth = (rect.width - labelWidth - (smallSpacing * 2)) / 3f; 
+            rect.x += labelWidth;
+            rect.width = buttonWidth;
+            ToggleButton(rect, "Position", ref _targetVoxelObject.lockPosition); 
+            rect.x += buttonWidth + smallSpacing;
+            ToggleButton(rect, "Rotation", ref _targetVoxelObject.lockRotation); 
+            rect.x += buttonWidth + smallSpacing;
+            ToggleButton(rect, "Scale", ref _targetVoxelObject.lockScale);
+            
+            void ToggleButton(Rect r, string label, ref bool value)
+            { 
+                int textLength = _normalFont.GetTextLength(label);
+                if(textLength > r.width-12)
+                    label = label.Substring(0, 3);
+                textLength = _normalFont.GetTextLength(label);
+                if(textLength > r.width-10)
+                    label = label.Substring(0, 1);
+                
+                GUI.backgroundColor = value ? Color.gray : Color.white;
+                if(GUI.Button(rect, label))
+                    value = !value;
+                GUI.backgroundColor = Color.white;
+            }
+        }
+
+        void DrawTransformApplyButtons(Rect rect)
+        {
             GUI.enabled = _targetVoxelObject.lockRotation && _targetVoxelObject.lockScale;
-            if (GUILayout.Button("Apply Scale & Rotation"))
+            if (GUI.Button(rect, "Apply Scale & Rotation"))
             {
-                RecordVoxelObjectForUndo(_targetVoxelObject, "Rotation Applyed to Map");
+                RecordVoxelObjectForUndo(_targetVoxelObject, "Rotation Applied to Map");
                 _targetVoxelObject.ApplyScale();
                 _targetVoxelObject.ApplyRotation();
             }
 
             GUI.enabled = true;
-            EditorGUILayout.EndHorizontal();
         }
 
-        void DrawToolLine(VoxelTool[] tools)
+        void DrawEditTools(Rect rect )
+        {
+            const int lineCount = 5;
+            float lineHeight = (rect.height - (lineCount - 1) * smallSpacing) / lineCount;
+            rect.height = lineHeight;
+            GUI.Label(rect, "Edit", _boldMiddleTextStyle);
+            rect.y += lineHeight + smallSpacing;
+            rect.height += lineHeight + smallSpacing;
+            DrawToolLine(rect, _basicEditTools);
+            rect.y += rect.height + smallSpacing;
+            DrawToolLine(rect, _secondaryTools);
+        }
+        
+
+        void DrawToolLine(Rect rect, VoxelTool[] tools)
         {
             if (tools ==null || tools.Length == 0)
-            {
                 return;
-            }
 
-            GUILayoutOption width = GUILayout.Width(fullW / tools.Length - separatorW);
+            float buttonWidth = (rect.width - (tools.Length-1) * smallSpacing) / tools.Length;
+            rect.width = buttonWidth;
 
-            EditorGUILayout.BeginHorizontal();
-            for (int i = 0; i < tools.Length; i++)
+            foreach (VoxelTool t in tools)
             {
-                DrawToolButton(tools[i], width);
+                DrawToolButton(rect, t);
+                rect.x += buttonWidth + smallSpacing;
             }
-
-            EditorGUILayout.EndHorizontal();
         }
 
-        void DrawToolButton(VoxelTool buttonTool, GUILayoutOption width)
+        void DrawToolButton(Rect rect, VoxelTool buttonTool)
         {
-            GUI.backgroundColor = buttonTool == Tool ? Color.gray : Color.white;
-            if (GUILayout.Button(buttonTool.ToString(), width))
+            GUI.backgroundColor = buttonTool == Tool ? Color.gray : Color.white; 
+            
+            if (GUI.Button(rect, buttonTool.ToString()))
             {
                 if (Tool != buttonTool)
                 {
@@ -170,30 +238,27 @@ namespace VoxelSystem
         }
 
 
-        void DrawCommandLine(VoxelAction[] actions)
+        void DrawCommandLine(Rect rect, VoxelAction[] actions )
         {
 
             if ( actions ==null || actions.Length == 0)
-            {
                 return;
-            }
 
-            GUILayoutOption width = GUILayout.Width(fullW / actions.Length - separatorW);
-
-            EditorGUILayout.BeginHorizontal();
-            for (int i = 0; i < actions.Length; i++)
+            float buttonWidth = (rect.width - (actions.Length-1) * smallSpacing) / actions.Length; 
+            rect.width = buttonWidth; 
+            foreach (VoxelAction t in actions)
             {
-                GUI.enabled = IsActionEnabled(actions[i]);
-                if (GUILayout.Button(actions[i].ToString(), width))
+                GUI.enabled = IsActionEnabled(t);
+                if (GUI.Button(rect, t.ToString()))
                 {
-                    DoVoxelAction(actions[i]);
+                    DoVoxelAction(t);
                 }
+                rect.x += buttonWidth + smallSpacing;
             }
 
-            GUI.enabled = true;
-            EditorGUILayout.EndHorizontal();
+            GUI.enabled = true; 
         }
-
+        
         bool IsActionEnabled(object action)
         {
             switch (action)
@@ -269,27 +334,41 @@ namespace VoxelSystem
             }
         }
 
-        void DrawPalette(GameObject go, VoxelObject vo)
+        void DrawPalette(Rect rect, VoxelObject vo)
         {
-            if (!((IList)PaletteUsingTools).Contains(Tool))
+            GUI.enabled = _paletteUsingTools.Contains(Tool);
+            
+            const float minWidth = 50;
+            const float height = 40; 
+            
+            int allItemCount = vo.Builder.PaletteLength;
+            
+            int columns = 1;
+            while (rect.width >= columns * minWidth + (columns - 1) * smallSpacing)
+                columns++;
+            
+            float itemWidth = (rect.width - (columns - 1) * smallSpacing) / columns;
+            int rows = Mathf.CeilToInt(allItemCount / (float) columns);
+            float fullHeight = rows * height + (rows - 1) * smallSpacing;
+            
+            Rect r = new Rect(rect.x, rect.y, itemWidth, height);
+            int index = 0;
+            foreach (PaletteItem item in vo.Builder.GetPaletteItems())
             {
-                GUI.enabled = false;
-            }
-
-            PaletteItem[] palette = vo.Builder.palette.GetPletteItems();
-
-            EditorGUILayout.BeginHorizontal();
-            for (int i = 0; i < palette.Length; i++)
-            {
-                PaletteItem item = palette[i];
                 GUI.backgroundColor = item.color;
-                if (GUILayout.Button(ValueIndex == item.value ? "X" : ""))
+                if (GUI.Button(r, ValueIndex == item.value ? "X" : ""))
                 {
                     ValueIndex = item.value;
                 }
+                r.x += itemWidth + smallSpacing;
+                index++;
+                if(index % columns == 0)
+                {
+                    r.x = rect.x;
+                    r.y += height + smallSpacing;
+                }
             }
 
-            EditorGUILayout.EndHorizontal();
             GUI.backgroundColor = Color.white;
             GUI.enabled = true;
         }

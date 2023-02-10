@@ -23,7 +23,7 @@ namespace VoxelSystem
 
             var separatedVo = separatedGo.AddComponent<VoxelObject>();
             separatedVo.ConnectedBuilder = _targetVoxelObject.ConnectedBuilder; 
-            separatedVo.Map = new VoxelMap(_selectionSize);
+            separatedVo.Map = new(_selectionSize);
             separatedVo.Map.ClearWhole();
             separatedVo.RegenerateMesh();
             
@@ -53,7 +53,7 @@ namespace VoxelSystem
 
             //Vector3Int parentMax = parent.Map.Size;
             Vector3 childPos = _targetGameObject.transform.localPosition;
-            Vector3Int childMin = new Vector3Int(Mathf.RoundToInt(childPos.x), Mathf.RoundToInt(childPos.y), Mathf.RoundToInt(childPos.z));
+            Vector3Int childMin = new(Mathf.RoundToInt(childPos.x), Mathf.RoundToInt(childPos.y), Mathf.RoundToInt(childPos.z));
             //Vector3 childMax = childMin + targetVoxelObject.Map.Size;
             /*
             if (childMin.x < 0 || childMin.y < 0 || childMin.x < 0 ||

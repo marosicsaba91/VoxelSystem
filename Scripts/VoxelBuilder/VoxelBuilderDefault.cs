@@ -7,10 +7,18 @@ namespace VoxelSystem
     [CreateAssetMenu(fileName = "DefaultVoxelBuilder", menuName = "VoxelSystem/DefaultVoxelBuilder", order = 3)]
     public class VoxelBuilderDefault : VoxelBuilder
     {
-        protected override void BuildMesh(VoxelMap map,  List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> tringles)
+        protected override void BuildMesh(VoxelMap map,  List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles)
         {
-            BuildTiledMesh(map, vertices, normals, uv, tringles);
+            BuildTiledMesh(map, vertices, normals, uv, triangles);
         }
+
+        public override IEnumerable<PaletteItem> GetPaletteItems()
+        {
+            // TODO
+            yield break;
+        }
+
+        public override int PaletteLength => 0;
 
         public static void BuildTiledMesh(VoxelMap map, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv,
             List<int> triangles)

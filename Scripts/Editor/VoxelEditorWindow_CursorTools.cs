@@ -67,7 +67,7 @@ namespace VoxelSystem
             if (e.button != leftMouseButtonIndex) { return; }
             if (e.type != EventType.MouseDown && e.type != EventType.MouseUp && e.type != EventType.MouseDrag && e.type != EventType.MouseMove) { return; }
 
-            if (CursorTools.Contains(Tool))
+            if (_cursorTools.Contains(Tool))
             {
                 // Calculate Ray from Mouse Position
                 
@@ -102,7 +102,7 @@ namespace VoxelSystem
         void HandleMouseDown(Vector3Int? voxel)
         {
             if (voxel == null) { return; }
-            if (BasicEditTools.Contains(Tool))
+            if (_basicEditTools.Contains(Tool))
             {
                 _mouseDownCursorVoxel = voxel;
                 _lastValidMouseDragCursorVoxel = voxel;
@@ -164,11 +164,11 @@ namespace VoxelSystem
 
         void FreshSelection() {
             Vector3Int size = _targetVoxelObject.Map.Size;
-            _selectionMin = new Vector3Int(
+            _selectionMin = new(
                    Mathf.Clamp(Mathf.Min(_selectionStart.x, _selectionEnd.x), min: 0,  size.x - 1),
                    Mathf.Clamp(Mathf.Min(_selectionStart.y, _selectionEnd.y), min: 0,  size.y - 1),
                    Mathf.Clamp(Mathf.Min(_selectionStart.z, _selectionEnd.z), min: 0,  size.z - 1));
-            _selectionMax = new Vector3Int(
+            _selectionMax = new(
                 Mathf.Clamp(Mathf.Max(_selectionStart.x, _selectionEnd.x), min: 0, size.x - 1),
                 Mathf.Clamp(Mathf.Max(_selectionStart.y, _selectionEnd.y), min: 0, size.y - 1),
                 Mathf.Clamp(Mathf.Max(_selectionStart.z, _selectionEnd.z), min: 0, size.z - 1));
@@ -180,7 +180,7 @@ namespace VoxelSystem
             if (voxelObjectTransform == null || map == null) { return null; }
 
             // Transform the Vector by the VoxelObject Transform
-            Ray transformedRay = new Ray(voxelObjectTransform.InverseTransformPoint(globalRay.origin), voxelObjectTransform.InverseTransformVector(globalRay.direction));
+            Ray transformedRay = new(voxelObjectTransform.InverseTransformPoint(globalRay.origin), voxelObjectTransform.InverseTransformVector(globalRay.direction));
 
             // Try Find the entry point
             VoxelRayCollidingInfo? voxelMapEntry = FindEntryPointToVoxelMap(transformedRay, map);
@@ -213,13 +213,13 @@ namespace VoxelSystem
                     if (!positive)
                     {
                         entryPoint = (mapSize + entryPoint);
-                        firstFoundVoxel = new Vector3Int((int)entryPoint.Value.x, (int)entryPoint.Value.y,
+                        firstFoundVoxel = new((int)entryPoint.Value.x, (int)entryPoint.Value.y,
                             (int)entryPoint.Value.z);
                         firstFoundVoxel += sideNormal;
                     }
                     else
                     {
-                        firstFoundVoxel = new Vector3Int((int)entryPoint.Value.x, (int)entryPoint.Value.y,
+                        firstFoundVoxel = new((int)entryPoint.Value.x, (int)entryPoint.Value.y,
                             (int)entryPoint.Value.z);
                     }
 
@@ -269,7 +269,7 @@ namespace VoxelSystem
             var cursorPathVoxels = new List<Vector3Int>(); 
             Vector3Int lastFoundVoxel = entryVoxel;
 
-            VoxelRayCollidingInfo cursor = new VoxelRayCollidingInfo();
+            VoxelRayCollidingInfo cursor = new();
             // Side found outside the box
             if (map.Get(entryVoxel).IsFilled)
             {
