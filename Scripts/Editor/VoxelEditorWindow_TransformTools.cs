@@ -84,7 +84,7 @@ namespace VoxelSystem
 
             switch (handleResult.handleEvent)
             {
-                case AdvancedHandles.HandleEvent.LmbPress:
+                case HandleEvent.LmbPress:
                     if (Tool == VoxelTool.Turn)
                     {
                         Turn(axis, dir, side);
@@ -101,7 +101,7 @@ namespace VoxelSystem
                         StartArrowHandleAction(dir);
                     }
                     break;
-                case AdvancedHandles.HandleEvent.LmbDrag:
+                case HandleEvent.LmbDrag:
                     if (Tool == VoxelTool.Turn || Tool == VoxelTool.Mirror) { break; }
 
                     _handleSteps = (int)Vector3.Dot(_targetGameObject.transform.InverseTransformVector(handleResult.IsDragged), dir.ToVector());
@@ -112,9 +112,9 @@ namespace VoxelSystem
                     if (changed) DragArrowHandleAction(_handleDirection.Value, _handleSteps);
 
                     break;
-                case AdvancedHandles.HandleEvent.LmbRelease:
-                case AdvancedHandles.HandleEvent.LmbClick:
-                case AdvancedHandles.HandleEvent.LmbDoubleClick:
+                case HandleEvent.LmbRelease:
+                case HandleEvent.LmbClick:
+                case HandleEvent.LmbDoubleClick:
                     if (Tool == VoxelTool.Turn || Tool == VoxelTool.Mirror) { break; }
 
                     _handleSteps = (int)Vector3.Dot(_targetGameObject.transform.InverseTransformVector(handleResult.IsDragged), dir.ToVector());
