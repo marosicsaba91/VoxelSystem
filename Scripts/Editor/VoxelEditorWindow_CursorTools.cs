@@ -107,7 +107,7 @@ namespace VoxelSystem
                 _mouseDownCursorVoxel = voxel;
                 _lastValidMouseDragCursorVoxel = voxel;
                 _originalMap = _targetVoxelObject.Map.GetCopy();
-                _targetVoxelObject.Map.Set(_mouseDownCursorVoxel.Value, ToolToAreaAction(), ValueIndex);
+                _targetVoxelObject.Map.Set(_mouseDownCursorVoxel.Value, ToolToAreaAction(), SelectedPaletteIndex);
                 //targetVO.RegenerateMesh();
             }
             else if (Tool == VoxelTool.Select) {
@@ -132,7 +132,7 @@ namespace VoxelSystem
                 {
                     _targetVoxelObject.Map = _originalMap.GetCopy();
                     _lastValidMouseDragCursorVoxel = voxel;
-                    _targetVoxelObject.Map.SetRange(_mouseDownCursorVoxel.Value, voxel.Value, ToolToAreaAction(), ValueIndex);
+                    _targetVoxelObject.Map.SetRange(_mouseDownCursorVoxel.Value, voxel.Value, ToolToAreaAction(), SelectedPaletteIndex);
                 }
             }
         }
@@ -154,7 +154,7 @@ namespace VoxelSystem
                 {
                     _targetVoxelObject.Map = _originalMap.GetCopy();
                     RecordVoxelObjectForUndo(_targetVoxelObject, "VoxelMapChanged");
-                    _targetVoxelObject.Map.SetRange(_mouseDownCursorVoxel.Value, _lastValidMouseDragCursorVoxel.Value, ToolToAreaAction(), ValueIndex);
+                    _targetVoxelObject.Map.SetRange(_mouseDownCursorVoxel.Value, _lastValidMouseDragCursorVoxel.Value, ToolToAreaAction(), SelectedPaletteIndex);
                 }
                 _lastValidMouseDragCursorVoxel = null;
                 _mouseDownCursorVoxel = null;

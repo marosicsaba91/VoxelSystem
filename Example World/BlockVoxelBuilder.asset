@@ -12,4 +12,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: af22213eeeb046a08c0403e3e3bf2edc, type: 3}
   m_Name: BlockVoxelBuilder
   m_EditorClassIdentifier: 
-  palette: {fileID: 0}
+  drawingSettings:
+    drawVoxels: 0
+    voxelGizmoColor: {r: 1, g: 1, b: 1, a: 0.0627451}
+    drawBlocks: 1
+    blockColors:
+      keys: 0200000001000000000000000400000003000000050000000600000007000000
+      values:
+      - {r: 0, g: 0, b: 0, a: 0}
+      - {r: 1, g: 0.43867922, b: 0.43867922, a: 0}
+      - {r: 0, g: 1, b: 0.8941176, a: 0}
+      - {r: 0, g: 0.8367977, b: 1, a: 1}
+      - {r: 1, g: 0.627451, b: 0, a: 0.45490196}
+      - {r: 0, g: 1, b: 0.00002193451, a: 1}
+      - {r: 0.95568323, g: 0, b: 1, a: 1}
+      - {r: 0, g: 1, b: 0.48473144, a: 1}
+    margin: 0.1016
+  blockLibraries:
+  - {fileID: 11400000, guid: 400c10b9405cdc347aad8594c883ca51, type: 2}

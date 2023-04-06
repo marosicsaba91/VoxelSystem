@@ -30,7 +30,7 @@ namespace VoxelSystem
             // TODO: SET NEW MAP
             separatedVo.Map.CopyFromOtherMap(_targetVoxelObject.Map, _selectionMin, Vector3Int.zero, _selectionSize);
 
-            _targetVoxelObject.Map.SetRange(_selectionMin, _selectionMax, VoxelMap.VoxelAreaAction.Clear, ValueIndex);
+            _targetVoxelObject.Map.SetRange(_selectionMin, _selectionMax, VoxelMap.VoxelAreaAction.Clear, SelectedPaletteIndex);
             _targetVoxelObject.RegenerateMesh();
 
             Selection.activeGameObject = separatedGo;

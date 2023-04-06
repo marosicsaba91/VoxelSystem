@@ -1,0 +1,152 @@
+﻿using MUtility;
+using UnityEngine;
+
+namespace VoxelSystem
+{
+    public struct Block
+    {
+        public static readonly Vector3 halfVoxel = new(0.5f, 0.5f, 0.5f);
+        public readonly BlockType blockType;
+            
+        public Vector3Int doubleSize;           
+        public Vector3Int inVoxelDirection;
+        public Vector3Int normal;
+            
+        public Vector3 position;       // Center of the first half voxel
+
+        public Block(BlockType blockType, Vector3Int inVoxelDirection, Vector3Int doubleSize, Vector3Int normal, Vector3 position)
+        {
+            this.blockType = blockType;
+            this.doubleSize = doubleSize;
+            this.normal = normal;
+            this.position = position;
+            this.inVoxelDirection = inVoxelDirection;
+        }
+
+        public Vector3 RealSize => (Vector3)doubleSize / 2f;
+        
+        public Vector3 Center => position + RealSize / 2f;
+        
+        
+        
+        // Methods
+        
+        public void DrawGizmo(float margin)
+        {
+            if (blockType == BlockType.SidePositive)
+                DrawSide(margin);
+            else if (blockType == BlockType.EdgePositive)
+                DrawEdge(margin);
+            else if (blockType == BlockType.CornerPositive)
+                DrawCorner(margin);
+            else
+                DrawAnything();
+        }
+        
+        void DrawCorner(float margin)
+        {
+            Vector3 center = Center;
+            Vector3 realSize = RealSize - margin * Vector3.one;
+            
+            Vector3 c1 = center +
+                         new Vector3(normal.x * 0.25f, normal.y * margin / 2f, normal.z * margin / 2f);
+            Vector3 c2 = center +
+                         new Vector3(normal.x * margin / 2f, normal.y * 0.25f, normal.z * margin / 2f);
+            Vector3 c3 = center +
+                         new Vector3(normal.x * margin / 2f, normal.y * margin / 2f, normal.z * 0.25f);
+            
+            Vector3 n1 = normal.MultiplyAllAxis(1, 0, 0);
+            Vector3 n2 = normal.MultiplyAllAxis(0, 1, 0);
+            Vector3 n3 = normal.MultiplyAllAxis(0, 0, 1);
+
+            DrawRect(c1, realSize, n1);
+            DrawRect(c2, realSize, n2);
+            DrawRect(c3, realSize, n3);
+        }
+
+        void DrawEdge(float margin)
+        {
+            Vector3 c1, c2;
+            
+            Vector3 n1, n2;
+            Vector3 realSize = RealSize;
+            Vector3 center = Center;
+
+            if (normal.x == 0)
+            {
+                c1 = center + new Vector3(0, normal.y * 0.25f, normal.z * margin / 2f);
+                c2 = center + new Vector3(0, normal.y * margin / 2f, normal.z * 0.25f);
+                n1 = normal.MultiplyAllAxis(0, 1, 0);
+                n2 = normal.MultiplyAllAxis(0, 0, 1);
+                realSize.x -= margin*2;
+                realSize.y -= margin;
+                realSize.z -= margin;
+            }
+            else if (normal.y == 0)
+            {
+                c1 = center + new Vector3(normal.x * 0.25f, 0, normal.z * margin / 2f);
+                c2 = center + new Vector3(normal.x * margin / 2f, 0, normal.z * 0.25f);
+                n1 = normal.MultiplyAllAxis(1, 0, 0);
+                n2 = normal.MultiplyAllAxis(0, 0, 1);
+                realSize.x -= margin;
+                realSize.y -= margin*2;
+                realSize.z -= margin;
+            }
+            else
+            {
+                c1 = center + new Vector3(normal.x * 0.25f, normal.y * margin / 2f, 0);
+                c2 = center + new Vector3(normal.x * margin / 2f, normal.y * 0.25f, 0);
+                n1 = normal.MultiplyAllAxis(1, 0, 0);
+                n2 = normal.MultiplyAllAxis(0, 1, 0);
+                realSize.x -= margin;
+                realSize.y -= margin;
+                realSize.z -= margin*2;
+            }
+            
+            DrawRect(c1, realSize, n1);
+            DrawRect(c2, realSize, n2);
+        }
+
+        void DrawSide(float margin)
+        {
+            Vector3 center = Center + (Vector3)normal * 0.25f;
+            Vector3 realSize = RealSize - (2 * margin * Vector3.one);
+            DrawRect(center, realSize, normal);
+        }
+
+        static void DrawRect(Vector3 center, Vector3 size, Vector3 normal)
+        {
+            // Gizmos.DrawWireSphere(center, 0.03f);
+            // Gizmos.DrawLine(center , center + normal * 0.1f);
+
+            Vector3 d1, d2;
+            if (normal.x != 0)
+            {
+                d1 = Vector3.up * (size.y / 2f);
+                d2 = Vector3.forward * (size.z / 2f);
+            }
+            else if (normal.y != 0)
+            {
+                d1 = Vector3.right * (size.x / 2f);
+                d2 = Vector3.forward * (size.z / 2f);
+            }
+            else
+            {
+                d1 = Vector3.right * (size.x / 2f);
+                d2 = Vector3.up * (size.y / 2f);
+            }
+
+            Gizmos.DrawLine(center - d1 + d2, center + d1 + d2);
+            Gizmos.DrawLine(center - d1 - d2, center + d1 - d2);
+            Gizmos.DrawLine(center - d1 + d2, center - d1 - d2);
+            Gizmos.DrawLine(center + d1 + d2, center + d1 - d2);
+        }
+        
+        void DrawAnything()
+        {
+            Vector3 center = Center;
+            Gizmos.DrawWireSphere(center, 0.1f);
+            Gizmos.DrawLine(center, center + (Vector3)normal * 0.25f);
+        }
+    }
+}

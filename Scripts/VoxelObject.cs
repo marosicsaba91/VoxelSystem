@@ -5,7 +5,7 @@ using MUtility;
 namespace VoxelSystem
 {
     [ExecuteAlways]
-    public partial class VoxelObject : MonoBehaviour
+    public class VoxelObject : MonoBehaviour
     {
         [Serializable]
         public struct References
@@ -26,7 +26,7 @@ namespace VoxelSystem
         [SerializeField, HideInInspector] internal VoxelBuilder connectedBuilder = null;
 
         [SerializeField, HideInInspector] internal VoxelMap innerMap = null;
-        [SerializeField, HideInInspector] internal VoxelBuilder defaultBuilder =null;
+        // [SerializeField, HideInInspector] internal VoxelBuilder defaultBuilder = null;
 
         int _meshDirtyCounter = 0;
         VoxelMapScriptableObject _lastFrameConnectedMap;
@@ -69,9 +69,6 @@ namespace VoxelSystem
             }
         }
 
-
-        public VoxelBuilder Builder => connectedBuilder != null ? connectedBuilder : defaultBuilder;
-
         public VoxelMap Map
         {
             get => connectedMap != null ? connectedMap.map : innerMap;
@@ -104,18 +101,21 @@ namespace VoxelSystem
         // Update is called once per frame
         void Update()
         {
-            if (_lastFrameConnectedMap != connectedMap)
-            {
-                if (_lastFrameConnectedMap != null) _lastFrameConnectedMap.map.MapChangedEvent -= SetMeshDirty;
-                else if (innerMap != null) innerMap.MapChangedEvent -= SetMeshDirty;
-
-                if (connectedMap != null) connectedMap.map.MapChangedEvent += SetMeshDirty;
-                else if(innerMap != null) innerMap.MapChangedEvent += SetMeshDirty;
-                _lastFrameConnectedMap = connectedMap;
-                SetMeshDirty();
-            }
-
+            SubscribeToChange();
             DoLockTransform();
+        }
+
+        void SubscribeToChange()
+        {
+            if (_lastFrameConnectedMap == connectedMap) return;
+            
+            if (_lastFrameConnectedMap != null) _lastFrameConnectedMap.map.MapChangedEvent -= SetMeshDirty;
+            else if (innerMap != null) innerMap.MapChangedEvent -= SetMeshDirty;
+
+            if (connectedMap != null) connectedMap.map.MapChangedEvent += SetMeshDirty;
+            else if (innerMap != null) innerMap.MapChangedEvent += SetMeshDirty;
+            _lastFrameConnectedMap = connectedMap;
+            SetMeshDirty();
         }
 
         void DoLockTransform()
@@ -148,7 +148,7 @@ namespace VoxelSystem
         public void RegenerateMesh()
         {
             VoxelMap map = Map;
-            VoxelBuilder builder = Builder;
+            VoxelBuilder builder = connectedBuilder;
 
             if (map == null || builder == null) { return; }
             Mesh mesh = builder.VoxelModelToMesh(map) ;
@@ -298,6 +298,18 @@ namespace VoxelSystem
         public bool IsValidCoord(Vector3Int coord)
         {
             return Map.IsValidCoord(coord);
+        }
+
+        void OnDrawGizmosSelected()
+        {
+            if (connectedBuilder == null) { return; }
+            if (Map == null) { return; }
+            
+            Matrix4x4 oldMatrix = Gizmos.matrix;
+            Gizmos.matrix = transform.localToWorldMatrix;
+            connectedBuilder.DrawGizmos(Map);
+            Gizmos.matrix = oldMatrix;
+            
         }
     }
 }

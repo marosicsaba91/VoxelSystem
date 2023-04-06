@@ -45,7 +45,7 @@ namespace VoxelSystem
                         
             DrawMapTools(mapRect);
             
-            if (_targetVoxelObject.Builder == null)
+            if (_targetVoxelObject.ConnectedBuilder == null)
                 return;
             
             DrawTransform(transformRect);
@@ -112,7 +112,7 @@ namespace VoxelSystem
             rect.y += lineHeight + smallSpacing;
             GUI.Label(rect, " (" + s.x + "x" + s.y + "x" + s.z + ")", small);
 
-            if (_targetVoxelObject.Builder == null)
+            if (_targetVoxelObject.ConnectedBuilder == null)
             {
                 EditorGUILayout.Space();
                 GUILayout.Label("VoxelObject Has No Builder!", _boldMiddleTextStyle);
@@ -293,7 +293,7 @@ namespace VoxelSystem
                     {
                         RecordVoxelObjectForUndo(_targetVoxelObject, "Selection Cleared");
                         _targetVoxelObject.Map.SetRange(_selectionMin, _selectionMax, VoxelMap.VoxelAreaAction.Clear,
-                            ValueIndex);
+                            SelectedPaletteIndex);
                     }
 
                     break;
@@ -301,13 +301,13 @@ namespace VoxelSystem
                     if (Tool != VoxelTool.Select)
                     {
                         RecordVoxelObjectForUndo(_targetVoxelObject, "Map Filled");
-                        _targetVoxelObject.FillWholeMap(ValueIndex);
+                        _targetVoxelObject.FillWholeMap(SelectedPaletteIndex);
                     }
                     else
                     {
                         RecordVoxelObjectForUndo(_targetVoxelObject, "Selection Filled");
                         _targetVoxelObject.Map.SetRange(_selectionMin, _selectionMax, VoxelMap.VoxelAreaAction.Fill,
-                            ValueIndex);
+                            SelectedPaletteIndex);
                     }
 
                     break;
@@ -341,7 +341,7 @@ namespace VoxelSystem
             const float minWidth = 50;
             const float height = 40; 
             
-            int allItemCount = vo.Builder.PaletteLength;
+            int allItemCount = vo.ConnectedBuilder.PaletteLength;
             
             int columns = 1;
             while (rect.width >= columns * minWidth + (columns - 1) * smallSpacing)
@@ -351,14 +351,14 @@ namespace VoxelSystem
             int rows = Mathf.CeilToInt(allItemCount / (float) columns);
             float fullHeight = rows * height + (rows - 1) * smallSpacing;
             
-            Rect r = new Rect(rect.x, rect.y, itemWidth, height);
-            int index = 0;
-            foreach (PaletteItem item in vo.Builder.GetPaletteItems())
+            var r = new Rect(rect.x, rect.y, itemWidth, height);
+            var index = 0;
+            foreach (PaletteItem item in vo.ConnectedBuilder.GetPaletteItems())
             {
                 GUI.backgroundColor = item.color;
-                if (GUI.Button(r, ValueIndex == item.value ? "X" : ""))
+                if (GUI.Button(r, SelectedPaletteIndex == item.value ? "X" : ""))
                 {
-                    ValueIndex = item.value;
+                    SelectedPaletteIndex = item.value;
                 }
                 r.x += itemWidth + smallSpacing;
                 index++;

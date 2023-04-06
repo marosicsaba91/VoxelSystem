@@ -30,5 +30,10 @@ namespace VoxelSystem
         public abstract IEnumerable<PaletteItem> GetPaletteItems();
         
         public abstract int PaletteLength { get; }
+
+        public virtual void DrawGizmos(VoxelMap map)
+        {
+            
+        }
     }
 }

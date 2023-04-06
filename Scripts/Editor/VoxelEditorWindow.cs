@@ -35,7 +35,7 @@ namespace VoxelSystem
         }
 
         static VoxelTool Tool { get; set; } = VoxelTool.Non;
-        static int ValueIndex { get; set; } = 0;
+        public static int SelectedPaletteIndex { get; private set; } = 0;
 
         static GameObject _targetGameObject;
         static VoxelObject _targetVoxelObject;
@@ -63,7 +63,7 @@ namespace VoxelSystem
         void ClearEditor()
         {
             Tool = VoxelTool.Non;
-            ValueIndex = 0;
+            SelectedPaletteIndex = 0;
             _originalMap = null;
         }
 
@@ -135,8 +135,8 @@ namespace VoxelSystem
                     planeOrigin - cam.transform.position;
             float angle = Vector3.Angle(cameraDir, sideNormal);
 
-            const float epsylon = 0.1f;
-            return angle > 90 -epsylon;
+            const float epsilon = 0.1f;
+            return angle > 90 -epsilon;
         }
     }
 }

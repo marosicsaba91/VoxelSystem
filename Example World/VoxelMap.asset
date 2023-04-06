@@ -14,40 +14,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   map:
     width: 20
-    height: 20
-    depth: 20
+    height: 19
+    depth: 19
     voxelData:
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
     - value: -1
     - value: -1
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
     - value: 0
     - value: 0
     - value: 0
@@ -65,10 +45,10 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
     - value: 0
     - value: 0
     - value: 0
@@ -88,8 +68,8 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
-    - value: 0
+    - value: -1
+    - value: -1
     - value: 0
     - value: 0
     - value: 0
@@ -110,15 +90,13 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
+    - value: -1
     - value: 0
     - value: 0
     - value: 0
     - value: 0
     - value: 0
     - value: 0
-    - value: -1
-    - value: -1
     - value: -1
     - value: -1
     - value: -1
@@ -134,6 +112,11 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -417,9 +400,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
     - value: 0
     - value: 0
     - value: 0
@@ -441,22 +421,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -473,10 +437,6 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -487,8 +447,8 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
-    - value: 0
+    - value: -1
+    - value: -1
     - value: 0
     - value: 0
     - value: 0
@@ -532,9 +492,11 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -835,8 +797,6 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: 0
-    - value: 0
-    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -857,26 +817,8 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: 0
-    - value: -1
-    - value: -1
     - value: -1
     - value: -1
-    - value: -1
-    - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -895,8 +837,6 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: 0
-    - value: 0
-    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -909,7 +849,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: -1
     - value: 0
     - value: 0
     - value: 0
@@ -917,7 +856,7 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: 0
-    - value: -1
+    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -934,9 +873,10 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: 0
-    - value: -1
-    - value: -1
+    - value: 0
     - value: 0
+    - value: 0
+    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -957,8 +897,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: 0
-    - value: -1
-    - value: -1
     - value: -1
     - value: -1
     - value: -1
@@ -975,8 +913,10 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
+    - value: 0
     - value: -1
     - value: -1
+    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -1217,12 +1157,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
     - value: 0
     - value: 0
     - value: 0
@@ -1243,23 +1177,7 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
+    - value: -1
     - value: 0
     - value: 0
     - value: 0
@@ -1279,6 +1197,8 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: 0
+    - value: -1
+    - value: -1
     - value: 0
     - value: 0
     - value: 0
@@ -1308,8 +1228,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: -1
-    - value: -1
     - value: 0
     - value: 0
     - value: 0
@@ -1317,7 +1235,8 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: 0
-    - value: -1
+    - value: 0
+    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -1334,9 +1253,10 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: 0
-    - value: -1
-    - value: -1
+    - value: 0
     - value: 0
+    - value: 0
+    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -1417,8 +1337,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: 0
-    - value: -1
-    - value: -1
     - value: -1
     - value: -1
     - value: -1
@@ -1435,8 +1353,10 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
+    - value: 0
     - value: -1
     - value: -1
+    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -1617,8 +1537,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
-    - value: 0
     - value: 0
     - value: 0
     - value: 0
@@ -1659,8 +1577,7 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: 0
-    - value: 0
-    - value: 0
+    - value: -1
     - value: 0
     - value: 0
     - value: 0
@@ -1680,6 +1597,9 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: 0
+    - value: -1
+    - value: -1
+    - value: -1
     - value: 0
     - value: 0
     - value: 0
@@ -1710,7 +1630,7 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
+    - value: -1
     - value: 0
     - value: 0
     - value: 0
@@ -1834,26 +1754,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: 0
     - value: 0
     - value: 0
@@ -1876,7 +1776,7 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: -1
+    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -2017,8 +1917,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
-    - value: 0
     - value: 0
     - value: 0
     - value: 0
@@ -2079,6 +1977,8 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: 0
+    - value: -1
+    - value: -1
     - value: 0
     - value: 0
     - value: 0
@@ -2098,10 +1998,6 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -2110,32 +2006,16 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
+    - value: -1
+    - value: -1
+    - value: -1
     - value: -1
     - value: 0
     - value: 0
     - value: 0
     - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: 0
-    - value: -1
-    - value: -1
+    - value: 0
     - value: 0
     - value: -1
     - value: -1
@@ -2153,8 +2033,10 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
+    - value: 0
     - value: -1
     - value: -1
+    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -2234,8 +2116,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
-    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -2256,7 +2136,6 @@ MonoBehaviour:
     - value: -1
     - value: 0
     - value: 0
-    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -2277,6 +2156,7 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
+    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -2497,18 +2377,18 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
+    - value: -1
+    - value: -1
+    - value: -1
     - value: 0
     - value: 0
     - value: 0
     - value: -1
     - value: -1
-    - value: 0
-    - value: 0
     - value: 0
     - value: 0
+    - value: -1
+    - value: -1
     - value: 0
     - value: 0
     - value: 0
@@ -2518,9 +2398,9 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
+    - value: -1
+    - value: -1
+    - value: -1
     - value: 0
     - value: 0
     - value: -1
@@ -2653,17 +2533,10 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
     - value: -1
     - value: -1
     - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
+    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -2804,19 +2677,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: 0
     - value: 0
     - value: 0
@@ -3017,9 +2877,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
     - value: -1
     - value: -1
     - value: -1
@@ -3035,28 +2892,11 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: -1
     - value: -1
     - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: 0
     - value: 0
     - value: 0
-    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -3077,7 +2917,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: 0
-    - value: -1
     - value: -1
     - value: -1
     - value: -1
@@ -3097,7 +2936,7 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: -1
+    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -3144,6 +2983,7 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
+    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -3217,7 +3057,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
     - value: 0
     - value: 0
     - value: 0
@@ -3298,6 +3137,7 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: 0
+    - value: -1
     - value: 0
     - value: 0
     - value: 0
@@ -3397,7 +3237,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: 0
-    - value: -1
     - value: -1
     - value: -1
     - value: -1
@@ -3416,32 +3255,16 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
     - value: -1
-    - value: -1
-    - value: -1
     - value: 0
-    - value: 0
-    - value: -1
     - value: -1
     - value: -1
     - value: -1
     - value: -1
     - value: -1
     - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: 0
     - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: -1
     - value: -1
     - value: -1
@@ -3452,11 +3275,8 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: -1
-    - value: 0
     - value: 0
     - value: 0
-    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -3477,7 +3297,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: 0
-    - value: -1
     - value: -1
     - value: -1
     - value: -1
@@ -3497,7 +3316,7 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: -1
+    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -3544,6 +3363,7 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
+    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -3685,7 +3505,6 @@ MonoBehaviour:
     - value: 0
     - value: -1
     - value: -1
-    - value: 0
     - value: 0
     - value: 0
     - value: 0
@@ -3698,6 +3517,7 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: 0
+    - value: -1
     - value: 0
     - value: 0
     - value: 0
@@ -3705,9 +3525,6 @@ MonoBehaviour:
     - value: 0
     - value: -1
     - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
     - value: 0
     - value: 0
     - value: 0
@@ -3720,7 +3537,10 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: 0
-    - value: 0
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
     - value: 0
     - value: -1
     - value: -1
@@ -3736,11 +3556,11 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
     - value: 0
-    - value: 0
+    - value: -1
     - value: -1
     - value: -1
+    - value: -1
     - value: 0
     - value: -1
     - value: -1
@@ -3826,42 +3646,25 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
     - value: -1
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
     - value: -1
     - value: -1
     - value: -1
     - value: -1
-    - value: -1
-    - value: -1
     - value: 0
     - value: 0
-    - value: -1
-    - value: -1
+    - value: 0
     - value: -1
     - value: -1
     - value: -1
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
     - value: 0
     - value: 0
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: -1
     - value: -1
     - value: -1
@@ -3873,24 +3676,14 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: -1
     - value: -1
     - value: -1
     - value: -1
     - value: -1
     - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
+    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -3903,12 +3696,14 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
+    - value: 0
     - value: -1
     - value: -1
     - value: -1
     - value: -1
     - value: -1
     - value: -1
+    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -3928,6 +3723,7 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
+    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -3947,6 +3743,9 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -3964,6 +3763,7 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
+    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -4088,7 +3888,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
     - value: 0
     - value: 0
     - value: 0
@@ -4098,6 +3897,7 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: 0
+    - value: -1
     - value: 0
     - value: 0
     - value: -1
@@ -4108,7 +3908,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
     - value: 0
     - value: 0
     - value: 0
@@ -4118,7 +3917,7 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: 0
-    - value: 0
+    - value: -1
     - value: -1
     - value: -1
     - value: -1
@@ -4129,6 +3928,7 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
+    - value: -1
     - value: 0
     - value: -1
     - value: -1
@@ -4136,9 +3936,8 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
     - value: 0
-    - value: 0
+    - value: -1
     - value: -1
     - value: -1
     - value: -1
@@ -4156,6 +3955,7 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
+    - value: -1
     - value: 0
     - value: -1
     - value: -1
@@ -4197,9 +3997,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
     - value: -1
     - value: -1
     - value: -1
@@ -4216,34 +4013,18 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
     - value: -1
     - value: -1
     - value: -1
     - value: 0
-    - value: 0
-    - value: -1
     - value: -1
     - value: -1
     - value: -1
     - value: -1
     - value: -1
     - value: -1
-    - value: -1
-    - value: 0
     - value: 0
     - value: 0
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: -1
     - value: -1
     - value: -1
@@ -4256,7 +4037,6 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: 0
-    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -4297,7 +4077,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: 0
-    - value: -1
     - value: -1
     - value: -1
     - value: -1
@@ -4317,6 +4096,7 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
+    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -4489,7 +4269,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
     - value: 0
     - value: 0
     - value: 0
@@ -4498,6 +4277,7 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: 0
+    - value: -1
     - value: 0
     - value: -1
     - value: -1
@@ -4509,7 +4289,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
     - value: 0
     - value: 0
     - value: 0
@@ -4518,7 +4297,7 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: 0
-    - value: 0
+    - value: -1
     - value: -1
     - value: -1
     - value: -1
@@ -4529,6 +4308,7 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
+    - value: -1
     - value: 0
     - value: -1
     - value: -1
@@ -4617,13 +4397,6 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: -1
     - value: -1
     - value: -1
@@ -4633,14 +4406,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: -1
     - value: -1
     - value: -1
@@ -4649,14 +4414,9 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: 0
     - value: 0
     - value: 0
-    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -4677,7 +4437,6 @@ MonoBehaviour:
     - value: -1
     - value: 0
     - value: 0
-    - value: -1
     - value: -1
     - value: -1
     - value: -1
@@ -4697,7 +4456,7 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: 0
-    - value: -1
+    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -4717,6 +4476,7 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
+    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -4909,7 +4669,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
     - value: 0
     - value: 0
     - value: 0
@@ -4918,7 +4677,7 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: 0
-    - value: 0
+    - value: -1
     - value: -1
     - value: -1
     - value: -1
@@ -4929,6 +4688,7 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
+    - value: -1
     - value: 0
     - value: -1
     - value: -1
@@ -5097,17 +4857,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: -1
     - value: -1
     - value: -1
@@ -5208,15 +4957,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: 0
     - value: 0
     - value: 0
@@ -5309,7 +5049,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
     - value: 0
     - value: 0
     - value: 0
@@ -5318,6 +5057,7 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: 0
+    - value: -1
     - value: 0
     - value: -1
     - value: -1
@@ -5517,11 +5257,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: -1
     - value: -1
     - value: -1
@@ -5602,21 +5337,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: 0
     - value: 0
     - value: 0
@@ -5917,7 +5637,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: 0
-    - value: -1
     - value: -1
     - value: -1
     - value: -1
@@ -5998,25 +5717,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: 0
     - value: 0
     - value: 0
@@ -6317,20 +6017,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: -1
     - value: -1
     - value: -1
@@ -6411,12 +6097,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: 0
     - value: 0
     - value: 0
@@ -6717,14 +6397,6 @@ MonoBehaviour:
     - value: -1
     - value: 0
     - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: -1
     - value: -1
     - value: -1
@@ -6805,18 +6477,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: 0
     - value: 0
     - value: 0
@@ -7117,9 +6777,6 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
     - value: -1
     - value: -1
     - value: -1
@@ -7200,23 +6857,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: 0
     - value: 0
     - value: 0
@@ -7363,28 +7003,9 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
     - value: 0
     - value: 0
     - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: 0
     - value: 0
     - value: 0
@@ -7397,9 +7018,6 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: 0
-    - value: 0
-    - value: -1
-    - value: -1
     - value: -1
     - value: -1
     - value: -1
@@ -7407,10 +7025,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
     - value: 0
     - value: 0
     - value: 0
@@ -7418,27 +7032,12 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: 0
     - value: 0
     - value: 0
     - value: 0
     - value: 0
     - value: 0
-    - value: 0
-    - value: -1
     - value: -1
     - value: -1
     - value: -1
@@ -7448,56 +7047,17 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
     - value: 0
-    - value: 0
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: 0
     - value: 0
     - value: 0
     - value: 0
     - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: 0
     - value: 0
     - value: 0
     - value: 0
     - value: 0
-    - value: -1
     - value: -1
     - value: -1
     - value: -1
@@ -7511,97 +7071,13 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: -1
-    - value: -1
     - value: 0
     - value: 0
     - value: 0
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: -1
     - value: -1
     - value: -1
@@ -7610,195 +7086,24 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
     - value: -1
     - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
     - value: -1
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
     - value: 0
     - value: 0
     - value: 0
     - value: 0
     - value: 0
     - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
     - value: -1
     - value: -1
     - value: -1
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -7807,22 +7112,11 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
     - value: 0
     - value: 0
     - value: 0
     - value: 0
     - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: -1
     - value: -1
     - value: -1
@@ -7831,17 +7125,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
     - value: -1
     - value: -1
     - value: -1
@@ -7849,35 +7132,13 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: -1
-    - value: -1
-    - value: 0
-    - value: 0
     - value: 0
     - value: 0
     - value: 0
     - value: 0
     - value: 0
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: -1
     - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -7892,34 +7153,16 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
     - value: 0
     - value: 0
     - value: 0
     - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: -1
     - value: -1
     - value: -1
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
     - value: -1
     - value: -1
     - value: -1
@@ -7934,14 +7177,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: -1
     - value: -1
     - value: -1
@@ -7954,13 +7189,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: -1
     - value: -1
     - value: -1
@@ -7968,14 +7196,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: 0
     - value: 0
     - value: -1
     - value: -1

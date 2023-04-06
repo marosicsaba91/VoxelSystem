@@ -6,10 +6,7 @@ namespace VoxelSystem
     public class VoxelPalette : ScriptableObject
     {
         public Material material;
-
-
-
-        public virtual PaletteItem[] GetPletteItems()
+        public virtual PaletteItem[] GetPaletteItems()
         {
             return Array.Empty<PaletteItem>();
         }
