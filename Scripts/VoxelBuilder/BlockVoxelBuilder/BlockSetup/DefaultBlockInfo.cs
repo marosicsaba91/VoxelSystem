@@ -19,15 +19,34 @@ namespace VoxelSystem
     }
     
     
-    [CreateAssetMenu(fileName = "DefaultBlockSetup", menuName = "VoxelSystem/DefaultBlockSetup")]
-    class DefaultBlockSetup : ScriptableObject
+    [CreateAssetMenu(fileName = "DefaultBlockInfo", menuName = "VoxelSystem/DefaultBlockInfo")]
+    class DefaultBlockInfo : ScriptableObject
     {
         [SerializeField] Material basicMaterial;
+        [SerializeField] Material testMaterial;
         [SerializeField] Material selectableMaterial;
         [SerializeField] Material selectedMaterial;
         
         [SerializeField] MeshDictionary meshDictionary = new ();
         [SerializeField] TransformDictionary transformDictionary = new ();
+        
+        
+        static DefaultBlockInfo _instance;
+        public static DefaultBlockInfo Instance
+        {
+            get
+            {
+                if(_instance == null)
+                    _instance = Resources.Load<DefaultBlockInfo>("DefaultBlockInfo");
+
+                if (_instance == null)
+                    Debug.LogError("DefaultBlockInfo not found");
+                
+                return _instance;
+            }
+        }
+
+        
         
         public Mesh GetMesh(BlockType blockType) => meshDictionary[blockType];
         
@@ -35,8 +54,6 @@ namespace VoxelSystem
         public Material GetSelectableMaterial() => selectableMaterial;
         public Material GetSelectedMaterial() => selectedMaterial;
         
-        int num = 0;
-
         public void AddBlock(BlockComponent block)
         {
             if (!transformDictionary.ContainsKey(block.blockType))

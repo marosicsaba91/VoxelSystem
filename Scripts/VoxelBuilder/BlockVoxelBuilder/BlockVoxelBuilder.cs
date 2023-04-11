@@ -24,7 +24,7 @@ namespace VoxelSystem
     public class BlockVoxelBuilder : VoxelBuilder
     {
         [SerializeField] BlockDrawingSettings drawingSettings = new();
-        [SerializeField] List<BlockLibrary> blockLibraries;
+        [SerializeField] List<BlockLibrary_Legcy> blockLibraries;
 
         List<Block> _blocks;
         
@@ -36,9 +36,9 @@ namespace VoxelSystem
             {
                 int selected = VoxelEditorWindow.SelectedPaletteIndex;
                 selected = Mathf.Clamp(selected, 0, blockLibraries.Count - 1);
-                BlockLibrary blockLibrary = blockLibraries[selected];
+                BlockLibrary_Legcy blockLibraryLegcy = blockLibraries[selected];
                 
-                if (blockLibrary.TryGetMesh(block, out Mesh mesh))
+                if (blockLibraryLegcy.TryGetMesh(block, out Mesh mesh))
                 {
                     Vector3 offset = block.Center;
                     vertices.AddRange(mesh.vertices.Select(v => v + offset));
@@ -63,8 +63,8 @@ namespace VoxelSystem
         {
             for (var index = 0; index < blockLibraries.Count; index++)
             {
-                BlockLibrary blockLibrary = blockLibraries[index];
-                yield return new PaletteItem { value = index, name = blockLibrary.name, color = blockLibrary.color };
+                BlockLibrary_Legcy blockLibraryLegcy = blockLibraries[index];
+                yield return new PaletteItem { value = index, name = blockLibraryLegcy.name, color = blockLibraryLegcy.color };
             }
         }
 

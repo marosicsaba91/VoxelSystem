@@ -20,7 +20,7 @@ namespace VoxelSystem
         public Vector3 InVoxelVector
         {
             get => inVoxelDirection.ToVector();
-            set => inVoxelDirection = inVoxelDirection = InVoxelDirectionUtility.FromVector(value);
+            set => inVoxelDirection = inVoxelDirection = VoxelUtility.FromVector(value);
         }
             
 
@@ -75,7 +75,7 @@ namespace VoxelSystem
 
         public void SetPosition(Vector3 pos)
         { 
-            inVoxelDirection = InVoxelDirectionUtility.FromVector(ToInVoxelPos(pos));
+            inVoxelDirection = VoxelUtility.FromVector(ToInVoxelPos(pos));
         }
 
         static Vector3Int ToInVoxelPos(Vector3 pos) => new (ToInVoxelPos(pos.x), ToInVoxelPos(pos.y), ToInVoxelPos(pos.z));
