@@ -1,46 +1,24 @@
-using System;
+using System; 
 using UnityEngine;
 using Utility.SerializableCollection;
-using VoxelSystem;
 
-[Serializable]
-class TransformDictionary : SerializableDictionary<Matrix4x4, bool> { }
-
-[Serializable]
-
-class OnBlockSetup
+namespace VoxelSystem
 {
-    [SerializeField] BlockType blockType;
-    [SerializeField] Material material;
-    [SerializeField] Mesh mesh;
-}
 
-
-[ExecuteAlways]
-public class BlockSetup : MonoBehaviour
-{
-    [SerializeField] DefaultBlockSetup defaultBlockSetup;
-    
-    [Space]
-    [SerializeField] BlockType blockType;
-    [SerializeField] Material material;
-    [SerializeField] Mesh mesh;
-    [SerializeField] TransformDictionary transformDictionary = new ();
-
-    
-    void Update()
+    [Serializable]
+    class EnabledTransformDictionary : SerializableDictionary<BlockTransformation, bool> { }
+ 
+    public class BlockSetup : MonoBehaviour
     {
-        foreach (BlockMarker marker in GetComponentsInChildren<BlockMarker>())
-        {
-            marker.meshRenderer.material =
-                blockType != marker.blockType ? defaultBlockSetup.GetBasicMaterial() :
-                !marker.enableTransformation ? defaultBlockSetup.GetSelectableMaterial() :
-                material != null ? material :
-                defaultBlockSetup.GetSelectedMaterial();
+        [SerializeField] DefaultBlockSetup defaultBlockSetup;
 
-            marker.meshFilter.mesh = blockType == marker.blockType && mesh != null && marker.enableTransformation
-                ? mesh
-                : defaultBlockSetup.GetMesh(marker.blockType);
-        }
+        [Space] 
+        public BlockType blockType;
+        public Mesh mesh;
+        
+        [SerializeField] EnabledTransformDictionary transformations = new();
+
+        public bool IsTransformEnabled(BlockTransformation t) => 
+            transformations.TryGetValue(t, out bool value) && value; 
     }
 }
