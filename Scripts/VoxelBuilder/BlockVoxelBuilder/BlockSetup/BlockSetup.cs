@@ -7,33 +7,43 @@ namespace VoxelSystem
 { 
     [Serializable]
     class TransformDirectory : SerializableDictionary<InVoxelDirection, Transform> { }
- 
-     [ExecuteAlways]
+  
     public class BlockSetup : MonoBehaviour
     {
         public BlockType blockType;
         [ShowIf(nameof(HaveAxis))] public Axis3D axis = Axis3D.X;
         public Mesh mesh;
-        public Material testMaterial;
         
         [Header("Visualisation")]
         [SerializeField, Range(0,0.5f)] float testDistance = 0;
-        [SerializeField] bool drawGizmo = true;
-
-
+        //  [SerializeField] bool drawGizmo = true;
+        
         [SerializeField, HideInInspector] TransformDirectory presentationObjects = new(); 
+        [SerializeField, HideInInspector] BlockLibrary library;
+        
+        // TODO: WARNING - NO LIBRARY
         
         
         bool HaveAxis => blockType.HaveAxis();
 
-        void Update()
+        void OnValidate()
         {
-            if (Application.isPlaying) return;
+            library = GetComponentInParent<BlockLibrary>();
+            if (!blockType.HaveAxis())
+                axis = default;
+        }
+
+        public void Setup()
+        {
             transform.localRotation = Quaternion.identity;
             transform.localScale = Vector3.one;
             
+            if (!blockType.HaveAxis())
+                axis = default;
+            
             CleanInternalState();
         }
+
 
         void CleanInternalState()
         { 
@@ -81,11 +91,14 @@ namespace VoxelSystem
             return t;
         }
         
-        void SetupChild(Transform t, InVoxelDirection d)
+        Vector3 GetChildLocalPosition(InVoxelDirection dir) => (Vector3)dir.ToVector() * (0.25f + testDistance);
+
+        void SetupChild(Transform t, InVoxelDirection dir)
         { 
+            
             t.SetParent(transform);
-            t.localPosition = (Vector3)d.ToVector() * (0.25f + testDistance);
-            t.name = d.ToString();
+            t.localPosition = GetChildLocalPosition(dir);
+            t.name = dir.ToString();
 
             Mesh mesh = this.mesh != null ? this.mesh : DefaultBlockInfo.Instance.GetMesh(blockType);
             
@@ -97,27 +110,39 @@ namespace VoxelSystem
                 meshFilter.sharedMesh = mesh;
             }
 
-            Material material = testMaterial != null ? testMaterial : DefaultBlockInfo.Instance.GetBasicMaterial();
-            
+            Material material =
+                this.mesh == null ? DefaultBlockInfo.Instance.MeshNotFoundMaterial:
+                library == null || library.material == null ? DefaultBlockInfo.Instance.MaterialNotFoundMaterial:
+                library.material;
+                    
             var meshRenderer = t.GetComponent<MeshRenderer>();
             if (meshRenderer == null)
                 meshRenderer = t.gameObject.AddComponent<MeshRenderer>();
             meshRenderer.sharedMaterial = material;
         }
 
-        public BlockTransformation GetTransformation(Transform blockTransform)
+        
+        
+        public bool ContainsDirection(InVoxelDirection dir)
         {
-            BlockTransformation transformation = new ()
-            {
-                Rotation = blockTransform.rotation.eulerAngles,
-                Scale = blockTransform.lossyScale
-            };
-            transformation.SetPosition(blockTransform.position);
-            return transformation;
+            if (presentationObjects.TryGetValue(dir, out Transform child))
+                return child.gameObject.activeInHierarchy;
+
+            return false;
         }
-        
-        
-        // bool ContainsValue<TK, TV>(IDictionary<TK, TV> dictionary, TV value) => 
-        //    dictionary.Any(kvp => kvp.Value.Equals(value));
+
+        public Matrix4x4 GetTransformation(InVoxelDirection dir)
+        {
+            if (!presentationObjects.TryGetValue(dir, out Transform child))
+                return Matrix4x4.identity;
+
+            Vector3 pos = GetChildLocalPosition(dir);
+            Matrix4x4 m = child.localToWorldMatrix;
+            // Add offset to matrix
+            m.m03 += pos.x;
+            m.m13 += pos.y;
+            m.m23 += pos.z;
+            return m;
+        }
     }
 }

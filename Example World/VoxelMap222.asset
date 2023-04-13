@@ -13,15 +13,79 @@ MonoBehaviour:
   m_Name: VoxelMap222
   m_EditorClassIdentifier: 
   map:
-    width: 5
+    width: 7
     height: 4
-    depth: 5
+    depth: 7
     voxelData:
     - value: 0
     - value: 0
     - value: 0
     - value: 0
     - value: 0
+    - value: 0
+    - value: 0
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: 0
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: 0
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: 0
+    - value: 0
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: -1
+    - value: -1
+    - value: 0
+    - value: 0
+    - value: -1
+    - value: -1
     - value: -1
     - value: -1
     - value: -1
@@ -42,30 +106,18 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: 0
-    - value: -1
-    - value: -1
     - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
+    - value: 0
     - value: -1
     - value: -1
     - value: 0
     - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
     - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
     - value: -1
     - value: -1
     - value: -1
@@ -82,7 +134,60 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: 0
+    - value: 0
     - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: 0
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: 0
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: 0
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: 0
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: 0
+    - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
     - value: 0
     - value: 0
     - value: 0
@@ -97,15 +202,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
     - value: -1
     - value: -1
     - value: -1

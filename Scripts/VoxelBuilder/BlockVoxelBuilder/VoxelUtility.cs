@@ -1,15 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using MUtility;
 using UnityEngine;
 
 namespace VoxelSystem
 {
     public static class VoxelUtility
     {
-        static List <InVoxelDirection> _allInVoxelDirection; 
-        public static IReadOnlyList<InVoxelDirection> AllInVoxelDirection =>
-            _allInVoxelDirection ??= Enum.GetValues(typeof(InVoxelDirection)).Cast<InVoxelDirection>().ToList();
+        static readonly List <InVoxelDirection> _allInVoxelDirection; 
+        static readonly List<BlockType> _allBlockType;
+        static readonly List<Axis3D> _allAxis;
+        public static IReadOnlyList<InVoxelDirection> AllInVoxelDirection => _allInVoxelDirection;
+        public static IReadOnlyList<BlockType> AllBlockType => _allBlockType;
+        public static IReadOnlyList<Axis3D> AllAxis => _allAxis;
+
+        static VoxelUtility()
+        {
+            _allBlockType = Enum.GetValues(typeof(BlockType)).Cast<BlockType>().ToList();
+            _allInVoxelDirection = Enum.GetValues(typeof(InVoxelDirection)).Cast<InVoxelDirection>().ToList();
+            _allAxis = Enum.GetValues(typeof(Axis3D)).Cast<Axis3D>().ToList();
+        }
+
+
 
         public static bool HaveAxis(this BlockType blockType)
         {

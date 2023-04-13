@@ -553,9 +553,9 @@ MonoBehaviour:
   blockType: 4
   axis: 1
   mesh: {fileID: 7158193405000700429, guid: 449d71d544f258b4a82cfcfec06ce78f, type: 3}
-  testMaterial: {fileID: 2100000, guid: 8ff9db01eb61da7498144898bdf76da9, type: 2}
   testDistance: 0
   drawGizmo: 1
+  autoSetup: 0
   presentationObjects:
     keys: 0000000001000000020000000300000004000000050000000600000007000000
     values:
@@ -567,6 +567,7 @@ MonoBehaviour:
     - {fileID: 6045989409359363417}
     - {fileID: 62410868502775469}
     - {fileID: 5508925569649642387}
+  library: {fileID: 0}
 --- !u!1 &8745032893131739943
 GameObject:
   m_ObjectHideFlags: 0

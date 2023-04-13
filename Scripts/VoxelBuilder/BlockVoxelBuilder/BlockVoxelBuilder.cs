@@ -24,7 +24,7 @@ namespace VoxelSystem
     public class BlockVoxelBuilder : VoxelBuilder
     {
         [SerializeField] BlockDrawingSettings drawingSettings = new();
-        [SerializeField] List<BlockLibrary_Legcy> blockLibraries;
+        [SerializeField] List<BlockLibrary> blockLibraries;
 
         List<Block> _blocks;
         
@@ -36,9 +36,9 @@ namespace VoxelSystem
             {
                 int selected = VoxelEditorWindow.SelectedPaletteIndex;
                 selected = Mathf.Clamp(selected, 0, blockLibraries.Count - 1);
-                BlockLibrary_Legcy blockLibraryLegcy = blockLibraries[selected];
+                BlockLibrary blockLibrary = blockLibraries[selected];
                 
-                if (blockLibraryLegcy.TryGetMesh(block, out Mesh mesh))
+                if (blockLibrary.TryGetMesh(block, out Mesh mesh))
                 {
                     Vector3 offset = block.Center;
                     vertices.AddRange(mesh.vertices.Select(v => v + offset));
@@ -63,8 +63,8 @@ namespace VoxelSystem
         {
             for (var index = 0; index < blockLibraries.Count; index++)
             {
-                BlockLibrary_Legcy blockLibraryLegcy = blockLibraries[index];
-                yield return new PaletteItem { value = index, name = blockLibraryLegcy.name, color = blockLibraryLegcy.color };
+                BlockLibrary blockLibrary = blockLibraries[index];
+                yield return new PaletteItem { value = index, name = blockLibrary.name, color = blockLibrary.libraryColor };
             }
         }
 
@@ -109,13 +109,13 @@ namespace VoxelSystem
         { 
             Voxel voxel = voxelMap.Get(vXi, vYi, vZi);
             bool vf = voxel.IsFilled; // Is Voxel Filled
-            Vector3Int voxelIndex = new Vector3Int(vXi, vYi, vZi);
+            var voxelIndex = new Vector3Int(vXi, vYi, vZi);
             
             Vector3Int blockSize = Vector3Int.one;
 
-            for (var dX = -1; dX <= 1; dX += 2) // In Voxel Direction
-            for (var dY = -1; dY <= 1; dY += 2)
-            for (var dZ = -1; dZ <= 1; dZ += 2)
+            for (int dX = -1; dX <= 1; dX += 2) // In Voxel Direction
+            for (int dY = -1; dY <= 1; dY += 2)
+            for (int dZ = -1; dZ <= 1; dZ += 2)
             {
                 int nXi = vXi + dX; // Neighbour Voxel Index
                 int nYi = vYi + dY;
@@ -134,10 +134,16 @@ namespace VoxelSystem
                 bool nXf = nXe && voxelMap.Get(nXi, vYi, vZi).IsFilled; // Is Neighbour Filled
                 bool nYf = nYe && voxelMap.Get(vXi, nYi, vZi).IsFilled;
                 bool nZf = nZe && voxelMap.Get(vXi, vYi, nZi).IsFilled;
+                
+                bool nXYf = nXe && nYe && voxelMap.Get(nXi, nYi, vZi).IsFilled; // Is Cross Neighbour Filled
+                bool nYZf = nYe && nZe && voxelMap.Get(vXi, nYi, nZi).IsFilled;
+                bool nZXf = nZe && nXe && voxelMap.Get(nXi, vYi, nZi).IsFilled;
+                
 
                 // ---------------------------------------------------------------------------------------------
                 
                 int neighbourCount = (nXf ? 1 : 0) + (nYf ? 1 : 0) + (nZf ? 1 : 0);
+                int crossNeighbourCount = (nXf ? 1 : 0) + (nYf ? 1 : 0) + (nZf ? 1 : 0);
 
                 var normal = new Vector3Int(); 
 
@@ -149,18 +155,23 @@ namespace VoxelSystem
 
                     if (neighbourCount == 2) // SIDE
                     {
+                        Axis3D axis = normal.ToAxis();
                         if (TestSide(voxelMap, voxelIndex, normal, inVoxelDir))
-                            yield return new Block(BlockType.SidePositive, inVoxelDir, blockSize, normal, blockPosition);
+                            yield return new Block(BlockType.SidePositive, inVoxelDir, blockSize, axis, blockPosition);
 
                     }
-                    else if (neighbourCount == 1)
+                    else if (neighbourCount == 1) // EDGE
                     {
+                        float axisX = normal.x == 0 ? 1 : 0;
+                        float axisY = normal.y == 0 ? 1 : 0;
+                        float axisZ = normal.z == 0 ? 1 : 0;
+                        Axis3D axis = new Vector3(axisX, axisY, axisZ).ToAxis(); // NEM JÓ
                         if (TestEdge(voxelMap, voxelIndex, normal, inVoxelDir))
-                            yield return new Block(BlockType.EdgePositive, inVoxelDir, blockSize, normal, blockPosition);
+                            yield return new Block(BlockType.EdgePositive, inVoxelDir, blockSize, axis, blockPosition);
                     }
-                    else if (neighbourCount == 0)
+                    else if (neighbourCount == 0)  // CORNER
                     {
-                        yield return new Block(BlockType.CornerPositive, inVoxelDir, blockSize, normal, blockPosition);
+                        yield return new Block(BlockType.CornerPositive, inVoxelDir, blockSize,  blockPosition);
                     }
                 }
                 else
@@ -171,11 +182,12 @@ namespace VoxelSystem
 
                     if (neighbourCount == 3)
                     {
-                        yield return new Block(BlockType.CornerNegative, inVoxelDir, blockSize, normal, blockPosition);
+                        yield return new Block(BlockType.CornerNegative, inVoxelDir, blockSize, blockPosition);
                     }
                     else if (neighbourCount == 2)
                     {
-                        yield return new Block(BlockType.EdgeNegative, inVoxelDir, blockSize, normal, blockPosition); 
+                        Axis3D axis = normal.ToAxis(); // NEM JÓ
+                        yield return new Block(BlockType.EdgeNegative, inVoxelDir, blockSize, axis, blockPosition); 
                     }
                 }
             }
