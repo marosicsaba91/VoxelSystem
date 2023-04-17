@@ -9,7 +9,7 @@ namespace VoxelSystem
     class TransformDirectory : SerializableDictionary<InVoxelDirection, Transform>
     {
     }
-
+    
     public class BlockSetup : MonoBehaviour
     {
         public BlockType blockType;
@@ -18,7 +18,6 @@ namespace VoxelSystem
 
         [Header("Visualisation")] [SerializeField, Range(0, 0.5f)]
         float testDistance = 0;
-        //  [SerializeField] bool drawGizmo = true;
 
         [SerializeField, HideInInspector] TransformDirectory presentationObjects = new();
         [SerializeField, HideInInspector] BlockLibrary library;

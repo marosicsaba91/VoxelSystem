@@ -15,7 +15,7 @@ MonoBehaviour:
   drawingSettings:
     drawVoxels: 0
     voxelGizmoColor: {r: 0, g: 0, b: 0, a: 0.0627451}
-    drawBlocks: 0
+    drawBlocks: 1
     blockColors:
       keys: 02000000010000000000000004000000030000000500000006000000070000000800000009000000
       values:
@@ -31,6 +31,6 @@ MonoBehaviour:
       - {r: 1, g: 0, b: 0, a: 1}
     margin: 0
   blockLibraries:
-  - {fileID: 11400000, guid: 3fb4fc3150268cb4d92c39c7646d9b33, type: 2}
+  - {fileID: 600516466261922535, guid: ffa1274364fac9e4697a58fd5789b1a2, type: 3}
   mergeCloseEdges: 0
   randomSeed: 30

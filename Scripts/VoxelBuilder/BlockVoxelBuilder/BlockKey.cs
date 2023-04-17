@@ -1,23 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 using MUtility;
 using UnityEngine;
-using Utility.SerializableCollection;
+using UnityEngine.Serialization;
 
 namespace VoxelSystem
 {
     [Serializable]
-    public class BakedBlock
-    {
-        public List<Mesh> meshes;
-    }
-    
-    [Serializable]
     public struct BlockKey
     {
         public BlockType blockType;
-        public InVoxelDirection inVoxelDirection;
+        [FormerlySerializedAs("subVoxelDirection")] public InVoxelDirection inVoxelDirection;
         public Axis3D axis;
         public Vector3Int doubleSize;
             
@@ -50,10 +43,5 @@ namespace VoxelSystem
         }
 
     }
-    
-    [Serializable]
-    public class BlockDictionary : SerializableDictionary<BlockKey, BakedBlock>
-    {
 
-    }
 }

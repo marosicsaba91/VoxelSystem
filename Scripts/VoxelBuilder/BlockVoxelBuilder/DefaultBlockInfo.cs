@@ -9,7 +9,6 @@ namespace VoxelSystem
     class MeshDictionary : SerializableDictionary<BlockType, Mesh> { }
     
     
-    
     [CreateAssetMenu(fileName = "DefaultBlockInfo", menuName = "VoxelSystem/DefaultBlockInfo")]
     class DefaultBlockInfo : ScriptableObject
     {
@@ -34,8 +33,7 @@ namespace VoxelSystem
                 return _instance;
             }
         }
-        
-        
+
         public Mesh GetMesh(BlockType blockType) => meshDictionary[blockType];
         
         public Material BasicMaterial => basicMaterial;

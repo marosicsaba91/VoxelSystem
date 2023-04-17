@@ -27,7 +27,7 @@ namespace VoxelSystem
     public class BlockVoxelBuilder : VoxelBuilder
     {
         [SerializeField] BlockDrawingSettings drawingSettings = new();
-        [SerializeField] List<BlockLibrarySO> blockLibraries;
+        [SerializeField] List<BlockLibrary> blockLibraries;
 
         [SerializeField] bool mergeCloseEdges = true;
         [SerializeField] int randomSeed = 0;
@@ -41,7 +41,7 @@ namespace VoxelSystem
             {
                 int selected = VoxelEditorWindow.SelectedPaletteIndex;
                 selected = Mathf.Clamp(selected, 0, blockLibraries.Count - 1);
-                BlockLibrarySO blockLibrary = blockLibraries[selected];
+                BlockLibrary blockLibrary = blockLibraries[selected];
                 
                 if (blockLibrary.TryGetMesh(block, out CustomMesh mesh))
                 {
@@ -71,9 +71,9 @@ namespace VoxelSystem
         {
             for (var index = 0; index < blockLibraries.Count; index++)
             {
-                BlockLibrarySO blockLibrary = blockLibraries[index];
+                BlockLibrary blockLibrary = blockLibraries[index];
                 yield return new PaletteItem
-                    { value = index, name = blockLibrary.name, color = blockLibrary.libraryColor };
+                    { value = index, name = blockLibrary.name, color = blockLibrary.LibraryColor };
             }
         }
 
