@@ -31,7 +31,7 @@ namespace VoxelSystem
         }
         
         
-        public static SubVoxel ToNewVersion(this InVoxelDirection ivd) => ivd switch
+        public static SubVoxel ToSubVoxel(this InVoxelDirection ivd) => ivd switch
         {
             InVoxelDirection.RightUpForward => SubVoxel.RightUpForward,
             InVoxelDirection.RightUpBackward => SubVoxel.RightUpBackward,

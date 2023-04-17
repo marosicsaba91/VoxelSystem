@@ -10,6 +10,11 @@ namespace VoxelSystem
     {
     }
     
+    [Serializable]
+    class TransformDirectory2 : SerializableDictionary<SubVoxel, Transform>
+    {
+    }
+    
     public class BlockSetup : MonoBehaviour
     {
         public BlockType blockType;
@@ -19,7 +24,8 @@ namespace VoxelSystem
         [Header("Visualisation")] [SerializeField, Range(0, 0.5f)]
         float testDistance = 0;
 
-        [SerializeField, HideInInspector] TransformDirectory presentationObjects = new();
+        [SerializeField] TransformDirectory presentationObjects = new();
+        [SerializeField] TransformDirectory2 presentationObjects2 = new();
         [SerializeField, HideInInspector] BlockLibrary library;
 
         // TODO: WARNING - NO LIBRARY
@@ -32,6 +38,12 @@ namespace VoxelSystem
             library = GetComponentInParent<BlockLibrary>();
             if (!blockType.HaveAxis())
                 axis = default;
+            
+            if(presentationObjects2.Count == 0)
+                foreach (var subVoxel in presentationObjects)
+                { 
+                    presentationObjects2.Add(subVoxel.Key.ToSubVoxel(), subVoxel.Value);
+                }
         }
 
         public void Setup()
@@ -48,12 +60,12 @@ namespace VoxelSystem
 
         void CleanInternalState()
         {
-            int allDirectionsCount = BlockVoxelUtility.AllInVoxelDirection.Count;
+            int allDirectionsCount = SubVoxelUtility.AllSubVoxel.Count;
 
             // Setup presentationObjects list
             for (var i = 0; i < allDirectionsCount; i++)
             {
-                InVoxelDirection voxelDirection = BlockVoxelUtility.AllInVoxelDirection[i];
+                InVoxelDirection voxelDirection = SubVoxelUtility.AllInVoxelDirection[i];
                 if (!presentationObjects.TryGetValue(voxelDirection, out Transform child) || child == null)
                 {
                     presentationObjects.Remove(voxelDirection);
@@ -69,7 +81,7 @@ namespace VoxelSystem
             // Setup list order
             for (var i = 0; i < allDirectionsCount; i++)
             {
-                InVoxelDirection voxelDirection = BlockVoxelUtility.AllInVoxelDirection[i];
+                InVoxelDirection voxelDirection =SubVoxelUtility.AllInVoxelDirection[i];
                 Transform child = presentationObjects[voxelDirection];
                 child.SetSiblingIndex(i);
             }
