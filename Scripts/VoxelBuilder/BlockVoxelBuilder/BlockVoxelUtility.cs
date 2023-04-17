@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace VoxelSystem
 {
-    public static class VoxelUtility
+    public static class BlockVoxelUtility
     {
         static readonly List <InVoxelDirection> _allInVoxelDirection; 
         static readonly List<BlockType> _allBlockType;
@@ -15,7 +15,7 @@ namespace VoxelSystem
         public static IReadOnlyList<BlockType> AllBlockType => _allBlockType;
         public static IReadOnlyList<Axis3D> AllAxis => _allAxis;
 
-        static VoxelUtility()
+        static BlockVoxelUtility()
         {
             _allBlockType = Enum.GetValues(typeof(BlockType)).Cast<BlockType>().ToList();
             _allInVoxelDirection = Enum.GetValues(typeof(InVoxelDirection)).Cast<InVoxelDirection>().ToList();

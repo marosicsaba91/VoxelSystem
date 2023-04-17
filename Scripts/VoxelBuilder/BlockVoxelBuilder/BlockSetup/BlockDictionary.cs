@@ -54,14 +54,6 @@ namespace VoxelSystem
     [Serializable]
     public class BlockDictionary : SerializableDictionary<BlockKey, BakedBlock>
     {
-        public void AddBlock(BlockKey key, Mesh mesh)
-        {
-            if (!ContainsKey(key))              
-                Add(key, new BakedBlock { meshes = new List<Mesh>() });
 
-            var meshList = this[key].meshes;
-            if(!meshList.Contains(mesh))
-                meshList.Add(mesh);
-        }
     }
 }

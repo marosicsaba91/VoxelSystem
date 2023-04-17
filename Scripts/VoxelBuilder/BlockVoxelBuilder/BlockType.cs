@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace VoxelSystem
+﻿namespace VoxelSystem
 {
     public enum BlockType
     {
@@ -13,6 +11,9 @@ namespace VoxelSystem
         SideToPositiveEdge,
         SideToNegativeEdge,
         
-        CrossCorner
+        CrossCorner,
+        EdgeToEdge,
+        
+        BreakPoint,
     }
 }

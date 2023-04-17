@@ -308,8 +308,8 @@ namespace VoxelSystem
             Matrix4x4 oldMatrix = Gizmos.matrix;
             Gizmos.matrix = transform.localToWorldMatrix;
             connectedBuilder.DrawGizmos(Map);
+         
             Gizmos.matrix = oldMatrix;
-            
         }
     }
 }

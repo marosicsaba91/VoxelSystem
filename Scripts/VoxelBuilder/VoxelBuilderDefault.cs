@@ -111,7 +111,6 @@ namespace VoxelSystem
                 }
             }
 
-            // Debug.Log("COUNT "+ counting);
         }
 
 
@@ -142,61 +141,3 @@ namespace VoxelSystem
         }
     }
 }
-
-// GREEDY: 
-
-/*
-// [CreateAssetMenu(fileName = "GreedyVoxelMaterial", menuName = "VoxelSystem/VoxelMaterial/GreedyVoxelMaterial", order = 1)]
-public class VoxelBuilder_Greedy : VoxelBuilder
-{
-    protected override void BuildMesh(VoxelMap map, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> tringles)
-    {
-        BuildGreedyMesh(map, vertices, normals, uv, tringles);
-    }
-
-    public static void BuildGreedyMesh(VoxelMap map, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> tringles)
-    {
-        List<VoxelFace> faces = VoxelMapToFaces(map);
-        for (int i = 0; i < faces.Count; i++)
-        {
-            AppendPlygonToFaceMesh(faces[i],  vertices, normals, uv, tringles);
-        }
-    }
-
-    public static List<VoxelFace> VoxelMapToFaces(VoxelMap map)
-    {
-        List<VoxelFace> faces = new List<VoxelFace>();
-        foreach (Direction6 direction in Enum.GetValues(typeof(Direction6)))
-        {
-            Axis a = direction.GetAxis();
-            int length =
-                a == Axis.X ? map.Size.x :
-                a == Axis.Y ? map.Size.y :
-                map.Size.z;
-            bool positive = direction == Direction6.Right || direction == Direction6.Up || direction == Direction6.Forward;
-            for (int planeIndex = 0; planeIndex < length; planeIndex++)
-            {
-                // TODO FIND FACE MAPS
-                AppendFacesByDirection(new int[0, 0], direction, planeIndex, faces);
-            }
-        }
-
-        return faces;
-    }
-
-    private static void AppendFacesByDirection(int[,] face, Direction6 direction, int planeIndex, List<VoxelFace> result)
-    {
-        // TODO: FIND FACES IN PLANE
-        VoxelFace faceFound1 = new VoxelFace() { normal = direction, planeIndex = planeIndex, colorIndexes = face };
-        VoxelFace faceFound2 = new VoxelFace() { normal = direction, planeIndex = planeIndex, colorIndexes = face };
-        VoxelFace faceFound3 = new VoxelFace() { normal = direction, planeIndex = planeIndex, colorIndexes = face };
-        result.Add(faceFound1);
-    }
-
-    public static void AppendPlygonToFaceMesh(VoxelFace voxelFace, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> tringles)
-    {
-        // TODO: Faces to Mesh
-    }
-
-}
-*/

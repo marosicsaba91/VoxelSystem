@@ -2,13 +2,7 @@ using UnityEngine;
 using MUtility;
 
 namespace VoxelSystem
-{
-    public struct VoxelFace
-    {
-        public GeneralDirection3D normal;
-        public int planeIndex;
-        public int[,] colorIndexes;
-    }
+{ 
 
     public struct TextureQuad
     {
@@ -24,12 +18,5 @@ namespace VoxelSystem
             bottomLeft = bl;
             bottomRight = br;
         }
-    }
-
-    enum MeshTexturingType
-    {
-        OneColor, // Mesh is most optimalizes 
-        MoreColor, // Every color 
-        Textured // Every face is 2 rectangle
-    }
+    } 
 }

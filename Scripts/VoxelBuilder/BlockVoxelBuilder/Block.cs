@@ -11,13 +11,9 @@ namespace VoxelSystem
         public Vector3Int doubleSize;
 
         public Vector3Int inVoxelDirection;
-
-        // public Vector3Int normal;
-        public Axis3D axis;
-
+        public Axis3D axis; 
         public Vector3 position; // Center of the first half voxel
-
-
+ 
         public Block(BlockType blockType, Vector3Int inVoxelDirection, Vector3Int doubleSize, Axis3D axis,
             Vector3 position)
         {
@@ -25,7 +21,7 @@ namespace VoxelSystem
             this.doubleSize = doubleSize;
             this.position = position;
             this.axis = axis;
-            this.inVoxelDirection = inVoxelDirection;
+            this.inVoxelDirection = inVoxelDirection; 
         }
 
         public Block(BlockType blockType, Vector3Int inVoxelDirection, Vector3Int doubleSize, Vector3 position)
@@ -34,7 +30,7 @@ namespace VoxelSystem
             this.doubleSize = doubleSize;
             this.position = position;
             this.inVoxelDirection = inVoxelDirection;
-            axis = default;
+            axis = default; 
         }
 
 
@@ -44,9 +40,7 @@ namespace VoxelSystem
         public Vector3 Center => position + RealSize / 2f;
 
 
-        // Methods
-
-        public void DrawGizmo(float margin)
+        public void DrawGizmo(float margin, System.Random random)
         {
             if (blockType == BlockType.SidePositive)
                 DrawSide(margin);
@@ -55,7 +49,7 @@ namespace VoxelSystem
             else if (blockType == BlockType.CornerPositive)
                 DrawCorner(margin);
             else
-                DrawAnything();
+                DrawAnything(random);
         }
 
         void DrawCorner(float margin)
@@ -169,16 +163,36 @@ namespace VoxelSystem
             Gizmos.DrawLine(center + d1 + d2, center + d1 - d2);
         }
 
-        void DrawAnything()
+        void DrawAnything(System.Random random)
         {
             Vector3 center = Center;
-            Gizmos.DrawWireSphere(center, 0.1f);
+            var rand = (float) random.NextDouble();
+            rand *= 0.5f;
+            rand += 1;
+            float radius = 0.1f * rand;
+            Gizmos.DrawWireSphere(center, radius);
+            Vector3 center2 = center + (Vector3)inVoxelDirection * (radius * 0.5f);
+            Gizmos.DrawWireCube(center2, new Vector3(radius, radius, radius));
+            
 
             if (blockType.HaveAxis())
             {
-
                 Vector3 axisVector = axis.ToVector();
                 Gizmos.DrawLine(center - axisVector * 0.25f, center + axisVector * 0.25f);
+            }
+
+            if (blockType == BlockType.EdgeToEdge)
+            {
+                Axis3D connectedAxis = axis switch
+                    {
+                        Axis3D.X => Axis3D.Y,
+                        Axis3D.Y => Axis3D.Z,
+                        _ => Axis3D.X
+                    };
+                
+                Vector3 axisVector = connectedAxis.ToVector();
+                Vector3 center3 = center + Vector3.up * 0.25f;
+                Gizmos.DrawLine(center3 - axisVector * 0.15f, center3 + axisVector * 0.15f);
             }
         }
     }
