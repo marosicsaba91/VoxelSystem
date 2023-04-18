@@ -1,14 +1,14 @@
 Multiple Mesh for one type of block
-Connection stones to break points
-
+Code Clean
 Gismos to Setup
 Automatic Setup options
 
+Connection stones to break points
 
 
+Endless Maps 2^3 algoryth
 
 10 * 10 mesh Generation (5*5 ?)
-Endless Maps
 Side Tool
 
 Bigger Blocks

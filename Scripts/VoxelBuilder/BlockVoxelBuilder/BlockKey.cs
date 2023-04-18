@@ -10,22 +10,22 @@ namespace VoxelSystem
     public struct BlockKey
     {
         public BlockType blockType;
-        [FormerlySerializedAs("subVoxelDirection")] public InVoxelDirection inVoxelDirection;
+        [FormerlySerializedAs("inVoxelDirection")] public SubVoxel subVoxel;
         public Axis3D axis;
         public Vector3Int doubleSize;
             
-        public BlockKey(BlockType blockType, InVoxelDirection inVoxelDirection, Axis3D axis, Vector3Int doubleSize)
+        public BlockKey(BlockType blockType, SubVoxel subVoxel, Axis3D axis, Vector3Int doubleSize)
         {
             this.blockType = blockType;
-            this.inVoxelDirection = inVoxelDirection;
+            this.subVoxel = subVoxel;
             this.doubleSize = doubleSize;
             this.axis = axis;
         }
         
-        public BlockKey(BlockType blockType, InVoxelDirection inVoxelDirection, Axis3D axis)
+        public BlockKey(BlockType blockType, SubVoxel subVoxel, Axis3D axis)
         {
             this.blockType = blockType;
-            this.inVoxelDirection = inVoxelDirection;
+            this.subVoxel = subVoxel;
             this.axis = axis;
             doubleSize = Vector3Int.one;
         }
@@ -34,7 +34,7 @@ namespace VoxelSystem
         {
             builder.Append(blockType);
             builder.Append("\t");
-            builder.Append(inVoxelDirection);
+            builder.Append(subVoxel);
             if (blockType.HaveAxis())
             {
                 builder.Append("\t");

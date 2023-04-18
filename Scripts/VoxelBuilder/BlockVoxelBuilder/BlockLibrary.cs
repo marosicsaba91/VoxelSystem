@@ -40,18 +40,19 @@ namespace VoxelSystem
             foreach (BlockSetup setup in blockSetups)
             {
                 setup.Setup();
-                if (setup.mesh == null) continue;
 
                 BlockType blockType = setup.blockType;
                 Axis3D axis = setup.axis;
 
-                foreach (InVoxelDirection dir in BlockVoxelUtility.AllInVoxelDirection)
+                foreach (SubVoxel subVoxel in SubVoxelUtility.AllSubVoxel)
                 {
-                    if (!setup.ContainsDirection(dir)) continue;
-                    Matrix4x4 matrix4X4 = setup.GetTransformation(dir);
-                    CustomMesh mesh = MeshUtility.GetTransformedMesh(setup.mesh, matrix4X4);
-                    if (setup.ContainsDirection(dir))
-                        AddBlock(new BlockKey(blockType, dir, axis), mesh);
+                    Mesh mesh = setup.TryFindMesh(subVoxel);
+                    
+                    if (mesh == null) continue;
+                    
+                    Matrix4x4 matrix4X4 = setup.GetTransformation(subVoxel);
+                    CustomMesh customMesh = MeshUtility.GetTransformedMesh(mesh, matrix4X4);
+                    AddBlock(new BlockKey(blockType, subVoxel, axis), customMesh);
                 }
             }
 
@@ -105,7 +106,7 @@ namespace VoxelSystem
             mesh = default;
             BlockType blockType = block.blockType;
             Axis3D axis = block.axis;
-            InVoxelDirection dir = SubVoxelUtility.FromVector(block.inVoxelDirection);
+            SubVoxel dir = SubVoxelUtility.FromVector(block.inVoxelDirection);
             int index = keys.IndexOf(new BlockKey(blockType, dir, axis));
             if (index < 0)
                 return false;
@@ -134,7 +135,7 @@ namespace VoxelSystem
                 {
                     if (blockType == BlockType.BreakPoint) continue;
                     
-                    foreach (InVoxelDirection dir in BlockVoxelUtility.AllInVoxelDirection)
+                    foreach (SubVoxel dir in SubVoxelUtility.AllSubVoxel)
                     {
                         if (blockType.HaveAxis())
                         {
@@ -148,7 +149,7 @@ namespace VoxelSystem
 
                 return stringBuilder.ToString();
 
-                void MissingKey(BlockType blockType, InVoxelDirection dir, Axis3D axis)
+                void MissingKey(BlockType blockType, SubVoxel dir, Axis3D axis)
                 {
                     BlockKey key = new(blockType, dir, axis);
                     if (!keys.Contains(key))

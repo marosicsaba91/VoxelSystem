@@ -15,7 +15,7 @@ MonoBehaviour:
   drawingSettings:
     drawVoxels: 0
     voxelGizmoColor: {r: 0, g: 0, b: 0, a: 0.0627451}
-    drawBlocks: 1
+    drawBlocks: 0
     blockColors:
       keys: 02000000010000000000000004000000030000000500000006000000070000000800000009000000
       values:

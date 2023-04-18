@@ -1,35 +1,38 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using MUtility;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Utility.SerializableCollection;
 
 namespace VoxelSystem
 {
+
     [Serializable]
-    class TransformDirectory : SerializableDictionary<InVoxelDirection, Transform>
+    class TransformDirectory : SerializableDictionary<SubVoxel, Transform>
     {
     }
-    
+
     [Serializable]
-    class TransformDirectory2 : SerializableDictionary<SubVoxel, Transform>
+    struct MeshInfo
     {
+        public List<Mesh> meshes;
+        public SubVoxel subVoxel;
     }
     
     public class BlockSetup : MonoBehaviour
     {
         public BlockType blockType;
         [ShowIf(nameof(HaveAxis))] public Axis3D axis = Axis3D.X;
-        public Mesh mesh;
 
         [Header("Visualisation")] [SerializeField, Range(0, 0.5f)]
         float testDistance = 0;
-
-        [SerializeField] TransformDirectory presentationObjects = new();
-        [SerializeField] TransformDirectory2 presentationObjects2 = new();
+ 
+        [FormerlySerializedAs("presentationObjects2")] [SerializeField] TransformDirectory transformDictionary = new();
         [SerializeField, HideInInspector] BlockLibrary library;
 
-        // TODO: WARNING - NO LIBRARY
-
+        [SerializeField] List<MeshInfo> meshInfos;
 
         bool HaveAxis => blockType.HaveAxis();
 
@@ -38,12 +41,6 @@ namespace VoxelSystem
             library = GetComponentInParent<BlockLibrary>();
             if (!blockType.HaveAxis())
                 axis = default;
-            
-            if(presentationObjects2.Count == 0)
-                foreach (var subVoxel in presentationObjects)
-                { 
-                    presentationObjects2.Add(subVoxel.Key.ToSubVoxel(), subVoxel.Value);
-                }
         }
 
         public void Setup()
@@ -65,12 +62,12 @@ namespace VoxelSystem
             // Setup presentationObjects list
             for (var i = 0; i < allDirectionsCount; i++)
             {
-                InVoxelDirection voxelDirection = SubVoxelUtility.AllInVoxelDirection[i];
-                if (!presentationObjects.TryGetValue(voxelDirection, out Transform child) || child == null)
+                SubVoxel voxelDirection = SubVoxelUtility.AllSubVoxel[i];
+                if (!transformDictionary.TryGetValue(voxelDirection, out Transform child) || child == null)
                 {
-                    presentationObjects.Remove(voxelDirection);
+                    transformDictionary.Remove(voxelDirection);
                     child = CreateNewChild(voxelDirection);
-                    presentationObjects.Add(voxelDirection, child);
+                    transformDictionary.Add(voxelDirection, child);
                 }
                 else
                 {
@@ -81,13 +78,13 @@ namespace VoxelSystem
             // Setup list order
             for (var i = 0; i < allDirectionsCount; i++)
             {
-                InVoxelDirection voxelDirection =SubVoxelUtility.AllInVoxelDirection[i];
-                Transform child = presentationObjects[voxelDirection];
+                SubVoxel voxelDirection =SubVoxelUtility.AllSubVoxel[i];
+                Transform child = transformDictionary[voxelDirection];
                 child.SetSiblingIndex(i);
             }
 
             // Destroy extra children
-            presentationObjects.SortByKey();
+            transformDictionary.SortByKey();
             for (int i = transform.childCount - 1; i >= allDirectionsCount; i--)
             {
                 Transform child = transform.GetChild(i);
@@ -95,7 +92,7 @@ namespace VoxelSystem
             }
         }
 
-        Transform CreateNewChild(InVoxelDirection d)
+        Transform CreateNewChild(SubVoxel d)
         {
             Transform t = new GameObject(d.ToString()).transform;
             SetupChild(t, d);
@@ -104,15 +101,18 @@ namespace VoxelSystem
             return t;
         }
 
-        Vector3 GetChildLocalPosition(InVoxelDirection dir) => (Vector3)dir.ToVector() * (0.25f + testDistance);
+        Vector3 GetChildLocalPosition(SubVoxel dir) => (Vector3)dir.ToVector() * (0.25f + testDistance);
 
-        void SetupChild(Transform t, InVoxelDirection dir)
+        void SetupChild(Transform t, SubVoxel subVoxel)
         {
             t.SetParent(transform);
-            t.localPosition = GetChildLocalPosition(dir);
-            t.name = dir.ToString();
-
-            Mesh mesh = this.mesh != null ? this.mesh : DefaultBlockInfo.Instance.GetMesh(blockType);
+            t.localPosition = GetChildLocalPosition(subVoxel);
+            t.name = subVoxel.ToString();
+            
+            Mesh mesh = TryFindMesh(subVoxel);
+            bool isMeshFound = mesh != null;
+            if(mesh == null) 
+                mesh = DefaultBlockInfo.Instance.GetMesh(blockType);
 
             if (mesh != null)
             {
@@ -123,7 +123,7 @@ namespace VoxelSystem
             }
 
             Material material =
-                this.mesh == null ? DefaultBlockInfo.Instance.MeshNotFoundMaterial :
+                !isMeshFound ? DefaultBlockInfo.Instance.MeshNotFoundMaterial :
                 library == null || library.material == null ? DefaultBlockInfo.Instance.MaterialNotFoundMaterial :
                 library.material;
 
@@ -133,18 +133,20 @@ namespace VoxelSystem
             meshRenderer.sharedMaterial = material;
         }
 
-
-        public bool ContainsDirection(InVoxelDirection dir)
+        public Mesh TryFindMesh(SubVoxel subVoxel)
         {
-            if (presentationObjects.TryGetValue(dir, out Transform child))
-                return child.gameObject.activeInHierarchy;
+            foreach (MeshInfo meshInfo in meshInfos)
+            {
+                if (meshInfo.subVoxel.HasFlag(subVoxel))
+                    return meshInfo.meshes.FirstOrDefault();
+            }
 
-            return false;
+            return null;
         }
 
-        public Matrix4x4 GetTransformation(InVoxelDirection dir)
+        public Matrix4x4 GetTransformation(SubVoxel subVoxel)
         {
-            if (!presentationObjects.TryGetValue(dir, out Transform child))
+            if (!transformDictionary.TryGetValue(subVoxel, out Transform child))
             {
                 return Matrix4x4.identity;
             }
