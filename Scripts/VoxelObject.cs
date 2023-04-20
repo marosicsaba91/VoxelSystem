@@ -26,7 +26,6 @@ namespace VoxelSystem
         [SerializeField, HideInInspector] internal VoxelBuilder connectedBuilder = null;
 
         [SerializeField, HideInInspector] internal VoxelMap innerMap = null;
-        // [SerializeField, HideInInspector] internal VoxelBuilder defaultBuilder = null;
 
         int _meshDirtyCounter = 0;
         VoxelMapScriptableObject _lastFrameConnectedMap;
@@ -151,7 +150,7 @@ namespace VoxelSystem
             VoxelBuilder builder = connectedBuilder;
 
             if (map == null || builder == null) { return; }
-            Mesh mesh = builder.VoxelModelToMesh(map) ;
+            Mesh mesh = builder.VoxelMapToMesh(map) ;
 
             if (mesh == null) { return; }
             MaintainReferences();

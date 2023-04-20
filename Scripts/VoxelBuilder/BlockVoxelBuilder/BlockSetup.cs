@@ -30,7 +30,7 @@ namespace VoxelSystem
         float testDistance = 0;
  
         [FormerlySerializedAs("presentationObjects2")] [SerializeField] TransformDirectory transformDictionary = new();
-        [SerializeField, HideInInspector] BlockLibrary library;
+        [SerializeField] BlockLibrary library;
 
         [SerializeField] List<MeshInfo> meshInfos;
 

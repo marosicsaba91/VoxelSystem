@@ -22,6 +22,8 @@ namespace VoxelSystem
         [Range(0, 0.25f)] public float margin = 0.1f;
     }
 
+    
+    
 
     [CreateAssetMenu(fileName = "BlockVoxelBuilder", menuName = "VoxelSystem/BlockVoxelBuilder", order = 4)]
     public class BlockVoxelBuilder : VoxelBuilder
@@ -32,39 +34,51 @@ namespace VoxelSystem
         [SerializeField] bool mergeCloseEdges = true;
         [SerializeField] int randomSeed = 0;
 
+        static readonly List<Block> _blocks = new();
 
         protected override void BuildMesh(VoxelMap voxelMap, List<Vector3> vertices, List<Vector3> normals,
             List<Vector2> uv, List<int> triangles)
         { 
-            CalculateBlocks(voxelMap);
-            foreach (Block block in _blocks)
-            {
-                int selected = VoxelEditorWindow.SelectedPaletteIndex;
-                selected = Mathf.Clamp(selected, 0, blockLibraries.Count - 1);
-                BlockLibrary blockLibrary = blockLibraries[selected];
-                
-                if (blockLibrary.TryGetMesh(block, out CustomMesh mesh))
-                {
-                    Vector3 offset = block.Center;
-                    vertices.AddRange(mesh.vertices.Select(v => v + offset));
-                    normals.AddRange(mesh.normals);
-                    uv.AddRange(mesh.uv);
-                    triangles.AddRange(mesh.triangles.Select(t => t + vertices.Count - mesh.vertices.Length));
-                }
-            }
+            CalculateBlocks(voxelMap,_blocks, mergeCloseEdges);
+            
+            int selected = VoxelEditorWindow.SelectedPaletteIndex;
+            selected = Mathf.Clamp(selected, 0, blockLibraries.Count - 1);
+            BlockLibrary blockLibrary = blockLibraries[selected];
+
+            BuildMeshFromBlocks(blockLibrary, _blocks, vertices, normals, uv, triangles);
         }
-
-        static readonly List<Block> _blocks = new();
         
-
-        void CalculateBlocks(VoxelMap voxelMap)
+        
+        internal static void BuildMeshFromBlocks(IBlockLibrary blockLibrary, List<Block> blocksList,
+            List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles)
+        { 
+            BenchmarkTimer timer = new("Mesh Building");
+            foreach (Block block in blocksList)
+            {
+                timer.StartModule("Search Mesh");
+                if (!blockLibrary.TryGetMesh(block, out CustomMesh mesh, timer)) continue;
+                Vector3 offset = block.Center;
+                timer.StartModule("Add Verticles");
+                vertices.AddRange(mesh.vertices.Select(v => v + offset));
+                normals.AddRange(mesh.normals);
+                uv.AddRange(mesh.uv);
+                timer.StartModule("Add Triangles");
+                triangles.AddRange(mesh.triangles.Select(t => t + vertices.Count - mesh.vertices.Length));
+            }
+            timer.Stop();
+            Debug.Log(timer);
+        }
+        
+        internal static void CalculateBlocks(VoxelMap voxelMap, List<Block> blocks, bool mergeCloseEdges)
         {
-            _blocks.Clear();
-
+            blocks.Clear();
+            
             for (int x = voxelMap.Width - 1; x >= 0; x--)
             for (int y = voxelMap.Height - 1; y >= 0; y--)
             for (int z = voxelMap.Depth - 1; z >= 0; z--)
-                _blocks.AddRange(VoxelToBlocks(voxelMap, x, y, z));
+                blocks.AddRange(VoxelToBlocks(voxelMap, x, y, z, mergeCloseEdges));
+
+            Debug.Log($"Block Count: {blocks.Count}");
         }
 
         public override IEnumerable<PaletteItem> GetPaletteItems()
@@ -102,7 +116,7 @@ namespace VoxelSystem
             {
                 if (_blocks.IsEmpty())
                 { 
-                    CalculateBlocks(map);
+                    CalculateBlocks(map, _blocks, false);
                 }
                 _gizmoRandom = new System.Random(randomSeed);
                 foreach (Block block in _blocks)
@@ -115,7 +129,7 @@ namespace VoxelSystem
             }
         }
 
-        IEnumerable<Block> VoxelToBlocks(VoxelMap voxelMap, int vXi, int vYi, int vZi) // Voxel Index
+        static IEnumerable<Block> VoxelToBlocks(VoxelMap voxelMap, int vXi, int vYi, int vZi, bool mergeCloseEdges) // Voxel Index
         {
             Voxel voxel = voxelMap.Get(vXi, vYi, vZi);
             bool isFilled = voxel.IsFilled;
@@ -291,7 +305,7 @@ namespace VoxelSystem
             }
         }
 
-        void SeparateVector(Vector3Int vector, out Vector3Int a, out Vector3Int b)
+        static void SeparateVector(Vector3Int vector, out Vector3Int a, out Vector3Int b)
         {
             if(vector.x == 0)
             {
@@ -310,7 +324,7 @@ namespace VoxelSystem
             }
         }
 
-        Axis3D Negate(Vector3 v)
+        static Axis3D Negate(Vector3 v)
         {
             float x = v.x == 0 ? 1 : 0;
             float y = v.y == 0 ? 1 : 0;

@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using JetBrains.Annotations;
 using MUtility;
@@ -6,31 +8,177 @@ using UnityEngine;
 
 namespace VoxelSystem
 {
-    [ExecuteAlways]
-    public class BlockLibrary : MonoBehaviour
+    enum TransformAction
     {
-        public Material material;
+        None,
+        OffsetX,
+        OffsetY,
+        OffsetZ,
+        RotateX,
+        RotateY,
+        RotateZ,
+        MirrorX,
+        MirrorY,
+        MirrorZ,
+    }
+    
+    [Serializable]
+    struct MeshInfoNew
+    {
+        public Mesh mesh;
+        public Vector3 offset;
+        public Vector3 rotation;
+        public Vector3 scale;
+        public SubVoxel enabledSubVoxels;
+        public Axis3D enabledAxis;
 
-        [SerializeField, HideInInspector] BlockSetup[] blockSetups;
+        public TransformAction action1;
+        public TransformAction action2;
+        public TransformAction action3;
+
+    }
+
+    [Serializable]
+    struct BlockSetupNew
+    {
+        public bool useThisSetup;
+        public BlockType blockType;
+        public List<MeshInfoNew> meshInfos;
+    }
+
+    [ExecuteAlways] 
+    public class BlockLibrary : MonoBehaviour, IBlockLibrary
+    {
+        // REFERENCES
+        [SerializeField, HideInInspector] MeshFilter meshFilter;
+        [SerializeField, HideInInspector] MeshRenderer meshRenderer;
+        
+        [SerializeField, HideInInspector] MeshFilter basicsMeshFilter;
+        [SerializeField, HideInInspector] MeshRenderer basicsMeshRenderer;
+        
+        [SerializeField, HideInInspector] MeshFilter selectedMeshFilter;
+        [SerializeField, HideInInspector] MeshRenderer selectedMeshRenderer;
+        
+        [SerializeField, HideInInspector] MeshFilter notSetUpMeshFilter;
+        [SerializeField, HideInInspector] MeshRenderer notSetUpMeshRenderer;
+        
+        
+        
+        [SerializeField] BlockSetup[] blockSetups;  // LEGACY !!!!!
+        
+        // SETTINGS
+        [Header("Settings")]
         [SerializeField] Color libraryColor = Color.white;
- 
+        [SerializeField] internal Material material; 
+        
+        [SerializeField] BlockSetupNew corners;
+        [SerializeField] BlockSetupNew edges;
+        [SerializeField] BlockSetupNew sides;
+        [SerializeField] BlockSetupNew negativeCorners;
+        [SerializeField] BlockSetupNew negativeSides;
+        [SerializeField] BlockSetupNew negativeEdges;
+        [SerializeField] BlockSetupNew cross;
+        [SerializeField] BlockSetupNew sideMeetsEdge;
+        [SerializeField] BlockSetupNew sideMeetsNegativeEdge;
+        [SerializeField] BlockSetupNew sideMeetsCorner;
 
-        [Space]
+        // TESTING
+        [Header("Testing")]
+        [SerializeField] VoxelMapScriptableObject testVoxelMap;
+        [SerializeField] bool mergeCloseEdgesOnTestMesh = true;
+
+        [Header("Generated Data")]
+        // CACHED DATA - GENERATED
         [SerializeField, ReadOnly] List<BlockKey> keys = new();
         [SerializeField, ReadOnly] List<CustomMesh> meshes = new();
-        [SerializeField, UsedImplicitly] 
-        DisplayMember clearLibrary = new(nameof(Clear));
-        [SerializeField, UsedImplicitly]
-        DisplayMember regenerateLibrary = new(nameof(RegenerateLibrary));
 
+        // BUTTONS
+        [Header("Actions")]
+        [SerializeField, UsedImplicitly] DisplayMember clearLibrary = new(nameof(Clear));
+        [SerializeField, UsedImplicitly] DisplayMember regenerateLibrary = new(nameof(RegenerateLibrary));
+        [SerializeField, UsedImplicitly] DisplayMember buildMesh = new(nameof(RebuildMesh));
+        [SerializeField, UsedImplicitly] DisplayMember clearBlockCache = new(nameof(ClearBlockCache));
+
+        // -------------------------------------------------------------------------------------------------------------
+        
         public Color LibraryColor => libraryColor;
+        
+        static readonly List<Block> _blockCache = new();
+        Dictionary<BlockKey, CustomMesh> _meshCache;
 
+        readonly BenchmarkTimer _benchmarkTimer = new("Whole Building Process");
+
+        public BlockType selectedBlockType;
+        public Axis3D selectedAxis;
+        public SubVoxel selectedSubVoxel;
+        
+        
+        bool _onValidate = false;
+        void OnValidate() => _onValidate = true;
+        
+        RenderParams _renderParams;
+        
+        
         void Update()
+        { 
+            SafeOnValidate();
+            _renderParams.material = material;
+
+            /*
+            Mesh mesh = meshFilter.sharedMesh;
+            Matrix4x4 matrix4X4 = transform.localToWorldMatrix;
+            // Graphics.RenderMesh(_renderParams, mesh, 0, matrix4X4); 
+            // Graphics.DrawMeshNow(mesh, matrix4X4);
+            Graphics.DrawMesh(mesh, matrix4X4, material, 0);
+            */
+        }
+        
+        void SafeOnValidate()
         {
-            if (Application.isPlaying) return;
+            if(!_onValidate) return;
+            _benchmarkTimer.StartModule("Setup");
+            blockSetups = GetComponentsInChildren<BlockSetup>();
             foreach (BlockSetup setup in blockSetups)
                 setup.Setup();
+            
+            meshFilter = GetComponent<MeshFilter>();
+            meshRenderer = GetComponent<MeshRenderer>();
+            if (meshFilter == null) meshFilter = gameObject.AddComponent<MeshFilter>();
+            if (meshRenderer == null) meshRenderer = gameObject.AddComponent<MeshRenderer>();
+            
+            meshRenderer.sharedMaterial = material;
+            
+            RebuildMesh();
+            _onValidate = false;
+            
         }
+
+        void RebuildMesh()
+        {
+            if(testVoxelMap == null) return;
+            if(meshFilter == null) return;
+             
+            Mesh mesh = VoxelBuilder.VoxelMapToMesh(testVoxelMap.map, GenerateMesh);
+            meshFilter.sharedMesh = mesh;
+        }
+
+        void GenerateMesh(VoxelMap voxelMap, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles)
+        {
+            _benchmarkTimer.StartModule("Calculating Blocks");
+            if (_blockCache.IsEmpty())
+                BlockVoxelBuilder.CalculateBlocks(voxelMap, _blockCache, mergeCloseEdgesOnTestMesh);
+            
+            _benchmarkTimer.StartModule("Building the Mesh");
+            BlockVoxelBuilder.BuildMeshFromBlocks(this, _blockCache, vertices, normals, uv, triangles); 
+            
+            
+            _benchmarkTimer.Stop();
+            Debug.Log(_benchmarkTimer.ToString());
+            _benchmarkTimer.Clear();
+        }
+        
+        void  ClearBlockCache() => _blockCache.Clear();
+
 
         void RegenerateLibrary()
         {
@@ -81,16 +229,11 @@ namespace VoxelSystem
 #endif
         }
 
-        void OnValidate()
-        {
-            blockSetups = GetComponentsInChildren<BlockSetup>();
-        }
-
-
         void AddBlock(BlockKey key, CustomMesh mesh)
         {
             keys.Add(key);
             meshes.Add(mesh);
+            _meshCache.Add(key, mesh);
         }
 
         void Clear()
@@ -98,29 +241,59 @@ namespace VoxelSystem
             if (ErrorTest()) return;
             keys.Clear();
             meshes.Clear();
+            _meshCache.Clear();
             MakeDirty();
         }
 
-        public bool TryGetMesh(Block block, out CustomMesh mesh)
+        public bool TryGetMesh(Block block, out CustomMesh mesh, BenchmarkTimer benchmarkTimer = null)
         {
             mesh = default;
             BlockType blockType = block.blockType;
             Axis3D axis = block.axis;
             SubVoxel dir = SubVoxelUtility.FromVector(block.inVoxelDirection);
-            int index = keys.IndexOf(new BlockKey(blockType, dir, axis));
-            if (index < 0)
-                return false;
-
-            if (meshes != null && meshes.Count > index)
+            BlockKey blockKey = new(blockType, dir, axis);
+            
+            // int index = keys.IndexOf(blockKey);
+            // if (index != -1)
+            // {
+            //     mesh = meshes[index];
+            //     return true;
+            // }
+            
+            if (_meshCache.IsNullOrEmpty())
             {
-                mesh = meshes[index];
-                return true;
+                benchmarkTimer?.StartModule("Building Mesh Cache");
+                _meshCache = new Dictionary<BlockKey, CustomMesh>();
+                for (int i = 0; i < keys.Count; i++)
+                    _meshCache.Add(keys[i], meshes[i]);
+                benchmarkTimer?.StartModule("Search Mesh"); 
             }
 
-            return false;
+            return _meshCache.TryGetValue(blockKey, out mesh);
         }
 
-        // Warning Message
+        
+        // Gizmo Drawing -----------------------------------------------------------------------------------------------
+
+        void OnDrawGizmos()
+        {
+            if (_blockCache.IsEmpty())
+                BlockVoxelBuilder.CalculateBlocks(testVoxelMap.map, _blockCache, mergeCloseEdgesOnTestMesh);
+
+            var enumerable = _blockCache.Where(block =>
+                block.blockType == selectedBlockType &&
+                block.axis == selectedAxis &&
+                block.inVoxelDirection == selectedSubVoxel.ToVector());
+
+            foreach (Block block in enumerable)
+            {
+                Gizmos.DrawWireSphere(block.position, 0.5f);
+            }
+
+        }
+
+
+        // Warning Message ---------------------------------------------------------------------------------------------
 
         [SerializeField, UsedImplicitly] DisplayMessage warning =
             new(nameof(WarningMessage), true)
@@ -161,5 +334,7 @@ namespace VoxelSystem
                 }
             }
         }
+        
+        // -------------------------------------------------------------------------------------------------------------
     }
 }

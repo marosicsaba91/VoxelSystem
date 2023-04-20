@@ -1,12 +1,13 @@
 #if UNITY_EDITOR
 using UnityEngine;
 using UnityEditor;
+using UnityEditor;
 
 namespace VoxelSystem
 {
     [CustomEditor(typeof(VoxelMapScriptableObject))]
-    public class VoxelMapScriptableObjectEditor : Editor
-    {
+    public class VoxelMapScriptableObjectEditor : UnityEditor.Editor
+   {
         public override void OnInspectorGUI()
         {
             DrawDefaultInspector();

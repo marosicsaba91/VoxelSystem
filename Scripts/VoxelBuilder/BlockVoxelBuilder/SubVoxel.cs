@@ -5,7 +5,6 @@ using UnityEngine;
 
 namespace VoxelSystem
 {
- 
     [Flags]
     public enum SubVoxel
     {

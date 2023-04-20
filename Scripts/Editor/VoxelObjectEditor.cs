@@ -6,7 +6,7 @@ using System.IO;
 namespace VoxelSystem
 {
     [CustomEditor(typeof(VoxelObject))]
-    public class VoxelObjectEditor : Editor
+    public class VoxelObjectEditor : UnityEditor.Editor
     {
         public override void OnInspectorGUI()
         {

@@ -12,6 +12,7 @@ namespace VoxelSystem
     [CreateAssetMenu(fileName = "DefaultBlockInfo", menuName = "VoxelSystem/DefaultBlockInfo")]
     class DefaultBlockInfo : ScriptableObject
     {
+        [SerializeField] VoxelMapScriptableObject standardMap;
         [SerializeField] Material basicMaterial;
         [SerializeField] Material mesNotFoundMaterial;
         [SerializeField] Material materialNotFoundMaterial;

@@ -31,6 +31,6 @@ MonoBehaviour:
       - {r: 1, g: 0, b: 0, a: 1}
     margin: 0
   blockLibraries:
-  - {fileID: 600516466261922535, guid: ffa1274364fac9e4697a58fd5789b1a2, type: 3}
+  - {fileID: 4862660626824890651, guid: 1aeff2bd4ff684047af11302d17f5506, type: 3}
   mergeCloseEdges: 0
   randomSeed: 30

@@ -12,13 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1abf02e155a24e4d968b5f7606e2eb1f, type: 3}
   m_Name: DefaultBlockInfo
   m_EditorClassIdentifier: 
+  standardMap: {fileID: 11400000, guid: 8f35f3e9604d21b49988d0128b3f38b5, type: 2}
   basicMaterial: {fileID: 2100000, guid: 1cfad91e16212b646bd4938a3949b324, type: 2}
-  testMaterial: {fileID: 2100000, guid: 8ff9db01eb61da7498144898bdf76da9, type: 2}
   mesNotFoundMaterial: {fileID: 2100000, guid: 65e17875af0e51e4cbc221b1dca8a799, type: 2}
   materialNotFoundMaterial: {fileID: 2100000, guid: 1f486118fdffbb440a34f70e59c34d44,
     type: 2}
   meshDictionary:
-    keys: 0200000001000000000000000400000003000000050000000600000007000000
+    keys: 020000000100000000000000040000000300000005000000060000000700000008000000
     values:
     - {fileID: 8402140878080393437, guid: 449d71d544f258b4a82cfcfec06ce78f, type: 3}
     - {fileID: 6556747912816897660, guid: 449d71d544f258b4a82cfcfec06ce78f, type: 3}
@@ -28,6 +28,4 @@ MonoBehaviour:
     - {fileID: 6627792379521471354, guid: 449d71d544f258b4a82cfcfec06ce78f, type: 3}
     - {fileID: -1986491506078321789, guid: 449d71d544f258b4a82cfcfec06ce78f, type: 3}
     - {fileID: 1127538327627727121, guid: 449d71d544f258b4a82cfcfec06ce78f, type: 3}
-  transformDictionary:
-    keys: 
-    values: []
+    - {fileID: -1875132851909481965, guid: 449d71d544f258b4a82cfcfec06ce78f, type: 3}
