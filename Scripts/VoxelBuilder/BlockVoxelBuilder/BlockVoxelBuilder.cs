@@ -68,7 +68,7 @@ namespace VoxelSystem
             timer.Stop();
             Debug.Log(timer);
         }
-        
+
         internal static void CalculateBlocks(VoxelMap voxelMap, List<Block> blocks, bool mergeCloseEdges)
         {
             blocks.Clear();

@@ -4219,7 +4219,7 @@ MonoBehaviour:
   - {fileID: 6845622808078044003}
   - {fileID: 4949242836876037687}
   - {fileID: 2253143160999063781}
-  libraryColor: {r: 0.7735849, g: 0.4780171, b: 0.4780171, a: 1}
+  libraryColor: {r: 0.6698113, g: 0.41389284, b: 0.41389284, a: 1}
   material: {fileID: 2533224830711743738, guid: 449d71d544f258b4a82cfcfec06ce78f,
     type: 3}
   corners:
@@ -31858,7 +31858,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2589520984035492325}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1

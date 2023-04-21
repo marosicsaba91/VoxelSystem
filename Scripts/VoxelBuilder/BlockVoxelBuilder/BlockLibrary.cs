@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text;
 using JetBrains.Annotations;
 using MUtility;
+using UnityEditor;
 using UnityEngine;
+using MessageType = MUtility.MessageType;
 
 namespace VoxelSystem
 {
@@ -29,7 +31,7 @@ namespace VoxelSystem
         public Vector3 offset;
         public Vector3 rotation;
         public Vector3 scale;
-        public SubVoxel enabledSubVoxels;
+        public SubVoxelFlags enabledSubVoxels;
         public Axis3D enabledAxis;
 
         public TransformAction action1;
@@ -110,7 +112,7 @@ namespace VoxelSystem
 
         public BlockType selectedBlockType;
         public Axis3D selectedAxis;
-        public SubVoxel selectedSubVoxel;
+        public SubVoxelFlags selectedSubVoxel;
         
         
         bool _onValidate = false;
@@ -122,27 +124,19 @@ namespace VoxelSystem
         void Update()
         { 
             SafeOnValidate();
-            _renderParams.material = material;
-
-            /*
-            Mesh mesh = meshFilter.sharedMesh;
-            Matrix4x4 matrix4X4 = transform.localToWorldMatrix;
-            // Graphics.RenderMesh(_renderParams, mesh, 0, matrix4X4); 
-            // Graphics.DrawMeshNow(mesh, matrix4X4);
-            Graphics.DrawMesh(mesh, matrix4X4, material, 0);
-            */
+            
         }
         
         void SafeOnValidate()
         {
             if(!_onValidate) return;
+            meshFilter = GetComponent<MeshFilter>();
+            meshRenderer = GetComponent<MeshRenderer>();
             _benchmarkTimer.StartModule("Setup");
             blockSetups = GetComponentsInChildren<BlockSetup>();
             foreach (BlockSetup setup in blockSetups)
                 setup.Setup();
             
-            meshFilter = GetComponent<MeshFilter>();
-            meshRenderer = GetComponent<MeshRenderer>();
             if (meshFilter == null) meshFilter = gameObject.AddComponent<MeshFilter>();
             if (meshRenderer == null) meshRenderer = gameObject.AddComponent<MeshRenderer>();
             
@@ -192,7 +186,7 @@ namespace VoxelSystem
                 BlockType blockType = setup.blockType;
                 Axis3D axis = setup.axis;
 
-                foreach (SubVoxel subVoxel in SubVoxelUtility.AllSubVoxel)
+                foreach (SubVoxelFlags subVoxel in SubVoxelUtility.AllSubVoxel)
                 {
                     Mesh mesh = setup.TryFindMesh(subVoxel);
                     
@@ -250,15 +244,8 @@ namespace VoxelSystem
             mesh = default;
             BlockType blockType = block.blockType;
             Axis3D axis = block.axis;
-            SubVoxel dir = SubVoxelUtility.FromVector(block.inVoxelDirection);
+            SubVoxelFlags dir = SubVoxelUtility.FromVector(block.inVoxelDirection);
             BlockKey blockKey = new(blockType, dir, axis);
-            
-            // int index = keys.IndexOf(blockKey);
-            // if (index != -1)
-            // {
-            //     mesh = meshes[index];
-            //     return true;
-            // }
             
             if (_meshCache.IsNullOrEmpty())
             {
@@ -308,7 +295,7 @@ namespace VoxelSystem
                 {
                     if (blockType == BlockType.BreakPoint) continue;
                     
-                    foreach (SubVoxel dir in SubVoxelUtility.AllSubVoxel)
+                    foreach (SubVoxelFlags dir in SubVoxelUtility.AllSubVoxel)
                     {
                         if (blockType.HaveAxis())
                         {
@@ -322,7 +309,7 @@ namespace VoxelSystem
 
                 return stringBuilder.ToString();
 
-                void MissingKey(BlockType blockType, SubVoxel dir, Axis3D axis)
+                void MissingKey(BlockType blockType, SubVoxelFlags dir, Axis3D axis)
                 {
                     BlockKey key = new(blockType, dir, axis);
                     if (!keys.Contains(key))
@@ -334,7 +321,22 @@ namespace VoxelSystem
                 }
             }
         }
-        
+
+        public Mesh Mesh
+        {
+            get
+            {
+                if(meshFilter == null)
+                    meshFilter = GetComponent<MeshFilter>();
+                if(meshFilter == null)
+                    return null;
+                return meshFilter?.sharedMesh;
+            }
+        }
+
+        public Matrix4x4 LocalToWorldMatrix => transform.localToWorldMatrix;
+        public Material Material => material;
+
         // -------------------------------------------------------------------------------------------------------------
     }
 }

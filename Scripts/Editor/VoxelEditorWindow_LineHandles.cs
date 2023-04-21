@@ -44,7 +44,7 @@ namespace VoxelSystem
         }
         
         static readonly Color C = new(r: 1,g: 0,b: 0);
-        static void DrawCursor(VoxelRayCollidingInfo? cursorVoxel)
+        static void DrawCursor(InVoxelPoint? cursorVoxel)
         {
             if (cursorVoxel == null) { return; }
             if (!_cursorTools.Contains(Tool)) { return; }

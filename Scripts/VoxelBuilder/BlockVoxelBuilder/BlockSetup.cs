@@ -10,7 +10,7 @@ namespace VoxelSystem
 {
 
     [Serializable]
-    class TransformDirectory : SerializableDictionary<SubVoxel, Transform>
+    class TransformDirectory : SerializableDictionary<SubVoxelFlags, Transform>
     {
     }
 
@@ -18,7 +18,7 @@ namespace VoxelSystem
     struct MeshInfo
     {
         public List<Mesh> meshes;
-        public SubVoxel subVoxel;
+        public SubVoxelFlags subVoxel;
     }
     
     public class BlockSetup : MonoBehaviour
@@ -62,7 +62,7 @@ namespace VoxelSystem
             // Setup presentationObjects list
             for (var i = 0; i < allDirectionsCount; i++)
             {
-                SubVoxel voxelDirection = SubVoxelUtility.AllSubVoxel[i];
+                SubVoxelFlags voxelDirection = SubVoxelUtility.AllSubVoxel[i];
                 if (!transformDictionary.TryGetValue(voxelDirection, out Transform child) || child == null)
                 {
                     transformDictionary.Remove(voxelDirection);
@@ -78,7 +78,7 @@ namespace VoxelSystem
             // Setup list order
             for (var i = 0; i < allDirectionsCount; i++)
             {
-                SubVoxel voxelDirection =SubVoxelUtility.AllSubVoxel[i];
+                SubVoxelFlags voxelDirection =SubVoxelUtility.AllSubVoxel[i];
                 Transform child = transformDictionary[voxelDirection];
                 child.SetSiblingIndex(i);
             }
@@ -92,7 +92,7 @@ namespace VoxelSystem
             }
         }
 
-        Transform CreateNewChild(SubVoxel d)
+        Transform CreateNewChild(SubVoxelFlags d)
         {
             Transform t = new GameObject(d.ToString()).transform;
             SetupChild(t, d);
@@ -101,9 +101,9 @@ namespace VoxelSystem
             return t;
         }
 
-        Vector3 GetChildLocalPosition(SubVoxel dir) => (Vector3)dir.ToVector() * (0.25f + testDistance);
+        Vector3 GetChildLocalPosition(SubVoxelFlags dir) => (Vector3)dir.ToVector() * (0.25f + testDistance);
 
-        void SetupChild(Transform t, SubVoxel subVoxel)
+        void SetupChild(Transform t, SubVoxelFlags subVoxel)
         {
             t.SetParent(transform);
             t.localPosition = GetChildLocalPosition(subVoxel);
@@ -133,7 +133,7 @@ namespace VoxelSystem
             meshRenderer.sharedMaterial = material;
         }
 
-        public Mesh TryFindMesh(SubVoxel subVoxel)
+        public Mesh TryFindMesh(SubVoxelFlags subVoxel)
         {
             foreach (MeshInfo meshInfo in meshInfos)
             {
@@ -144,7 +144,7 @@ namespace VoxelSystem
             return null;
         }
 
-        public Matrix4x4 GetTransformation(SubVoxel subVoxel)
+        public Matrix4x4 GetTransformation(SubVoxelFlags subVoxel)
         {
             if (!transformDictionary.TryGetValue(subVoxel, out Transform child))
             {

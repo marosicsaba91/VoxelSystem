@@ -10,11 +10,11 @@ namespace VoxelSystem
     public struct BlockKey
     {
         public BlockType blockType;
-        [FormerlySerializedAs("inVoxelDirection")] public SubVoxel subVoxel;
+        [FormerlySerializedAs("inVoxelDirection")] public SubVoxelFlags subVoxel;
         public Axis3D axis;
         public Vector3Int doubleSize;
             
-        public BlockKey(BlockType blockType, SubVoxel subVoxel, Axis3D axis, Vector3Int doubleSize)
+        public BlockKey(BlockType blockType, SubVoxelFlags subVoxel, Axis3D axis, Vector3Int doubleSize)
         {
             this.blockType = blockType;
             this.subVoxel = subVoxel;
@@ -22,7 +22,7 @@ namespace VoxelSystem
             this.axis = axis;
         }
         
-        public BlockKey(BlockType blockType, SubVoxel subVoxel, Axis3D axis)
+        public BlockKey(BlockType blockType, SubVoxelFlags subVoxel, Axis3D axis)
         {
             this.blockType = blockType;
             this.subVoxel = subVoxel;
