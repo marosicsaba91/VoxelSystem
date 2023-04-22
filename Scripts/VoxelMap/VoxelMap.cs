@@ -17,8 +17,10 @@ namespace VoxelSystem
         [SerializeField] Voxel[] voxelData;
         public event Action MapChangedEvent;
 
-        void MapChanged() =>
+        void MapChanged()
+        { 
             MapChangedEvent?.Invoke();
+        }
 
         public void UndoRedoEvenInvokedOnMap() =>
             MapChangedEvent?.Invoke();
@@ -35,12 +37,12 @@ namespace VoxelSystem
             Setup(new Vector3Int(x, y, z));
         }
 
-        public VoxelMap(Vector3Int size)
+        public VoxelMap(Vector3Int size, bool clear = false)
         {
-            Setup(size);
+            Setup(size, clear);
         }
 
-        void Setup(Vector3Int size)
+        void Setup(Vector3Int size, bool clear = false)
         {
             bool isSizeInvalid = size.x <= 0 || size.y <= 0 || size.z <= 0;
             if (isSizeInvalid)
@@ -56,15 +58,19 @@ namespace VoxelSystem
             depth = size.z;
             voxelData = new Voxel[size.x * size.y * size.z];
 
-            for (var i = 0; i < voxelData.Length; i++)
-            {
-                Vector3Int coord = Index(i);
-                bool a = coord.x == 0 || coord.x == size.x - 1;
-                bool b = coord.y == 0 || coord.y == size.y - 1;
-                bool c = coord.z == 0 || coord.z == size.z - 1;
-                bool filled = (a && b) || (b && c) || (c && a);
-                voxelData[i] = new Voxel(filled ? 0 : -1);
-            }
+            if (clear)
+                for (var i = 0; i < voxelData.Length; i++)
+                    voxelData[i] = new Voxel(-1);
+            else
+                for (var i = 0; i < voxelData.Length; i++)
+                {
+                    Vector3Int coord = Index(i);
+                    bool a = coord.x == 0 || coord.x == size.x - 1;
+                    bool b = coord.y == 0 || coord.y == size.y - 1;
+                    bool c = coord.z == 0 || coord.z == size.z - 1;
+                    bool filled = (a && b) || (b && c) || (c && a);
+                    voxelData[i] = new Voxel(filled ? 0 : -1);
+                }
         }
 
 
@@ -171,10 +177,8 @@ namespace VoxelSystem
             }
 
             voxelData[Index(x, y, z)] = v;
-
-            bool changed = (!oldV.Equals(v));
-            if (changed) { MapChanged(); }
-            return changed;
+            
+            return !oldV.Equals(v);
         }
 
         public bool Set(Vector3Int coordinate, VoxelAreaAction action, int materialIndex)
@@ -306,6 +310,8 @@ namespace VoxelSystem
 
         public void CopyFromOtherMap(VoxelMap sourceMap, Vector3Int startCoordinateOfSourceMap, Vector3Int startCoordinateOfDestinationMap, Vector3Int copySize)
         {
+            bool mapChanged = false;
+
             for (var x = 0; x < copySize.x; x++)
             {
                 int destinationX = startCoordinateOfDestinationMap.x + x;
@@ -331,12 +337,14 @@ namespace VoxelSystem
 
                         int val = sourceMap.Get(sourceX, sourceY, sourceZ).value;
                         if (val >= 0)
-                        {
-                            Set(destinationX, destinationY, destinationZ, val);
+                        { 
+                            mapChanged |= Set(destinationX, destinationY, destinationZ, val); 
                         }
                     }
                 }
             }
+            if (mapChanged) 
+                MapChanged();
         }
 
         // Transform --------------------------------------------

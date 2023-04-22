@@ -8,20 +8,22 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 namespace VoxelSystem
 {
-    class OctTreeNode : ISerializationCallbackReceiver
+    public class OctTreeNode : ISerializationCallbackReceiver
     {
         [SerializeField] byte[] data;
 
         public OctTreeNode[] innerChunks;
         public int value = emptyValue;
 
-        public const int emptyValue = int.MinValue;
-        const int mixedValue = int.MaxValue;
+        public const int emptyValue = -1;
+        const int mixedValue = -2;
 
         static BinaryFormatter formatter = new BinaryFormatter();
         static MemoryStream stream = new MemoryStream();
 
-        public bool IsMixed => value == -2;
+        public bool IsMixed => value == mixedValue;
+
+        public bool IsEmpty => value == emptyValue;
 
         public void OnBeforeSerialize()
         {
@@ -84,13 +86,13 @@ namespace VoxelSystem
         {
             if (x > size / 2)
             {
-                x = size / 2;
+                x -= size/2;
                 if (y > size / 2)
-                {
-                    y = size / 2;
+                { 
+                    y -= size/2;
                     if (z > size / 2)
                     {
-                        z = size / 2;
+                        z -= size/2;
                         return (int) SubVoxel.RightUpForward;
                     }
                     return (int)SubVoxel.RightUpBackward;
@@ -98,7 +100,7 @@ namespace VoxelSystem
 
                 if (z > size / 2)
                 {
-                    z = size / 2;
+                    z -= size/2;
                     return (int)SubVoxel.RightDownForward;
                 }
                 return (int)SubVoxel.RightDownBackward;
@@ -106,10 +108,10 @@ namespace VoxelSystem
 
             if (y > size / 2)
             {
-                y = size / 2;
+                y -= size/2;
                 if (z > size / 2)
                 {
-                    z = size / 2;
+                    z -= size/2;
                     return (int)SubVoxel.LeftUpForward;
                 }
                 return (int)SubVoxel.LeftUpBackward;
@@ -117,12 +119,25 @@ namespace VoxelSystem
 
             if (z > size / 2)
             {
-                z = size / 2;
+                z -= size/2;
                 return (int)SubVoxel.LeftDownForward;
             }
             return (int)SubVoxel.LeftDownBackward;
         }
 
+        internal void WriteAll(int level, string id)
+        {
+            string state = IsMixed ? "Mixed" : (IsEmpty ? "Empty" : $"Full: {value}");
+            Debug.Log($"{id} --- {state} ---------------------------------------");
+            if (!IsMixed) return;
+            if (level == 0) return;
+
+            for (int i = 0; i < 8; i++)
+            {
+                string iid = id + $" / ({i / 4},{(i%4)/2},{i % 2})";
+                innerChunks[i].WriteAll(level - 1, iid);
+            }
+        }
 
         public OctTreeNode(int value = emptyValue)
         {
@@ -141,10 +156,9 @@ namespace VoxelSystem
     {
         const int defaultCanvasSize = 8;
 
-
-        [SerializeField] Vector3Int canvasSize;
-        [SerializeField] int levels;
-        [SerializeField] OctTreeNode rootChunk;
+        public Vector3Int canvasSize;
+        public int levels;
+        public OctTreeNode rootChunk;
 
 
         // If the first element is -1, the whole map is empty 

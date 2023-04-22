@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: TestMapA
   m_EditorClassIdentifier: 
   map:
-    width: 12
-    height: 10
-    depth: 11
+    width: 8
+    height: 8
+    depth: 8
     voxelData:
     - value: 0
     - value: 0
@@ -25,26 +25,51 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: 0
+    - value: -1
+    - value: 0
     - value: 0
     - value: 0
     - value: 0
     - value: 0
     - value: 0
+    - value: 0
     - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
     - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
     - value: -1
     - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
     - value: -1
     - value: -1
     - value: -1
     - value: -1
+    - value: 0
+    - value: 0
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
     - value: -1
     - value: -1
     - value: -1
+    - value: 0
+    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -53,21 +78,54 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
     - value: -1
     - value: -1
     - value: -1
     - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
     - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
     - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
     - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
     - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
     - value: -1
     - value: -1
     - value: -1
     - value: 0
-    - value: -1
     - value: -1
+    - value: 0
+    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -77,7 +135,6 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -89,23 +146,58 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
     - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
     - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
     - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
     - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
     - value: -1
     - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
     - value: -1
+    - value: 0
     - value: -1
     - value: -1
     - value: -1
+    - value: 0
+    - value: 0
     - value: -1
     - value: -1
-    - value: 0
     - value: -1
     - value: -1
     - value: -1
     - value: -1
+    - value: 0
+    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -113,22 +205,66 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: 0
     - value: -1
     - value: -1
     - value: -1
     - value: -1
     - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
     - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
     - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
     - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
     - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
     - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
     - value: -1
     - value: 0
     - value: -1
+    - value: 0
     - value: -1
+    - value: 0
     - value: -1
+    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -136,24 +272,63 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
+    - value: 0
     - value: -1
     - value: 0
     - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
     - value: -1
+    - value: 0
     - value: 0
     - value: 0
     - value: 0
     - value: 0
+    - value: 0
+    - value: 0
     - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
     - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
     - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
     - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
     - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -161,941 +336,87 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
+    - value: 0
     - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
     - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
     - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
     - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
     - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
     - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
     - value: -1
     - value: -1
     - value: -1
     - value: -1
     - value: -1
+    - value: 0
     - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
     - value: 0
     - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: 0
-    - value: 0
-    - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: 0
-    - value: 0
-    - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
     - value: 0
     - value: 0
     - value: 0
     - value: 0
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: -1
     - value: 0
     - value: 0
@@ -1104,125 +425,23 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: 0
+    - value: -1
     - value: 0
     - value: 0
     - value: 0
     - value: 0
     - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: 0
     - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: 0
     - value: 0
     - value: 0
     - value: 0
     - value: 0
     - value: 0
+    - value: -1
     - value: 0
     - value: 0
     - value: 0
@@ -1243,93 +462,66 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: 0
     - value: 0
     - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: 0
     - value: 0
     - value: 0
     - value: 0
-    - value: -1
     - value: 0
-    - value: -1
     - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
+    - value: 0
     - value: -1
     - value: 0
     - value: 0
     - value: 0
-    - value: -1
     - value: 0
-    - value: -1
     - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: 0
+    - value: 0
     - value: -1
     - value: 0
     - value: 0
-    - value: -1
     - value: 0
-    - value: -1
     - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: 0
-    - value: -1
-    - value: -1
     - value: 0
     - value: 0
     - value: -1
     - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
     - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
     - value: 0
     - value: 0
-    - value: -1
     - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
+    - value: 0
+    - value: 0
     - value: -1
+    - value: 0
     - value: 0
     - value: 0
     - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
     - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
     - value: -1
+    - value: 0
+    - value: 0
     - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: -1
     - value: 0
     - value: 0
     - value: 0
@@ -1337,3 +529,20 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: 0
+  octMap:
+    canvasSize: {x: 8, y: 8, z: 8}
+    levels: 3
+  copyTo: {fileID: 11400000, guid: 4d6314ee3cfb880408637667881216a5, type: 2}
+  testIndex: {x: 0, y: 0, z: 0}
+  copyToOctMap:
+    functionZoom: 1
+    functionOffset: {x: 0, y: 0}
+  copyOctMapToNormal:
+    functionZoom: 0
+    functionOffset: {x: 0, y: 0}
+  test:
+    functionZoom: 1
+    functionOffset: {x: 0, y: 0}
+  WriteSummary:
+    functionZoom: 1
+    functionOffset: {x: 0, y: 0}

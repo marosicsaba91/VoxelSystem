@@ -66,7 +66,7 @@ namespace VoxelSystem
                 triangles.AddRange(mesh.triangles.Select(t => t + vertices.Count - mesh.vertices.Length));
             }
             timer.Stop();
-            Debug.Log(timer);
+            // Debug.Log(timer);
         }
 
         internal static void CalculateBlocks(VoxelMap voxelMap, List<Block> blocks, bool mergeCloseEdges)
@@ -78,7 +78,7 @@ namespace VoxelSystem
             for (int z = voxelMap.Depth - 1; z >= 0; z--)
                 blocks.AddRange(VoxelToBlocks(voxelMap, x, y, z, mergeCloseEdges));
 
-            Debug.Log($"Block Count: {blocks.Count}");
+            // Debug.Log($"Block Count: {blocks.Count}");
         }
 
         public override IEnumerable<PaletteItem> GetPaletteItems()

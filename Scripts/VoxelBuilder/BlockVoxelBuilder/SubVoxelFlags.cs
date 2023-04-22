@@ -7,14 +7,14 @@ namespace VoxelSystem
 {
     public enum SubVoxel
     {
-        RightUpForward = 0,
-        RightUpBackward = 1,
-        RightDownForward = 2,
-        RightDownBackward = 3,
-        LeftUpForward = 4,
-        LeftUpBackward = 5,
-        LeftDownForward = 6,
-        LeftDownBackward = 7,
+        LeftDownBackward = 0,
+        LeftDownForward = 1,
+        LeftUpBackward = 2,
+        LeftUpForward = 3,
+        RightDownBackward = 4,
+        RightDownForward = 5,
+        RightUpBackward = 6,
+        RightUpForward = 7,
     }
 
 
