@@ -30,57 +30,71 @@ namespace VoxelSystem
         LeftDownForward = 64,
         LeftDownBackward = 128,
     }
-    
+
 
     public static class SubVoxelUtility
-    { 
-        static readonly List <SubVoxelFlags> _allSubVoxel;   
-        public static IReadOnlyList<SubVoxelFlags> AllSubVoxel => _allSubVoxel;       
+    {
+        static readonly List<SubVoxelFlags> _allSubVoxel;
+        public static IReadOnlyList<SubVoxelFlags> AllSubVoxel => _allSubVoxel;
         public static SubVoxelFlags None => 0;
 
         public static SubVoxelFlags All => (SubVoxelFlags)255;
 
         static SubVoxelUtility()
         {
-            _allSubVoxel = Enum.GetValues(typeof(SubVoxelFlags)).Cast<SubVoxelFlags>().ToList(); 
-        }  
-    public static SubVoxelFlags FromVector(Vector3 v)
-    {
-        if (v.x >= 0)
+            _allSubVoxel = Enum.GetValues(typeof(SubVoxelFlags)).Cast<SubVoxelFlags>().ToList();
+        }
+        public static SubVoxelFlags FromVector(Vector3 v)
         {
-            if (v.y >= 0)
+            if (v.x >= 0)
             {
+                if (v.y >= 0)
+                {
+                    if (v.z >= 0)
+                        return SubVoxelFlags.RightUpForward;
+                    return SubVoxelFlags.RightUpBackward;
+                }
+
                 if (v.z >= 0)
-                    return SubVoxelFlags.RightUpForward;
-                return SubVoxelFlags.RightUpBackward;
+                    return SubVoxelFlags.RightDownForward;
+                return SubVoxelFlags.RightDownBackward;
             }
 
+            if (v.y >= 0)
+                if (v.z >= 0)
+                    return SubVoxelFlags.LeftUpForward;
+                else
+                    return SubVoxelFlags.LeftUpBackward;
             if (v.z >= 0)
-                return SubVoxelFlags.RightDownForward;
-            return SubVoxelFlags.RightDownBackward;
+                return SubVoxelFlags.LeftDownForward;
+            return SubVoxelFlags.LeftDownBackward;
         }
 
-        if (v.y >= 0)
-            if (v.z >= 0)
-                return SubVoxelFlags.LeftUpForward;
-            else
-                return SubVoxelFlags.LeftUpBackward;
-        if (v.z >= 0)
-            return SubVoxelFlags.LeftDownForward;
-        return SubVoxelFlags.LeftDownBackward;
+        public static Vector3Int ToVector(this SubVoxelFlags d) => d switch
+        {
+            SubVoxelFlags.RightUpForward => new Vector3Int(1, 1, 1),
+            SubVoxelFlags.RightUpBackward => new Vector3Int(1, 1, -1),
+            SubVoxelFlags.RightDownForward => new Vector3Int(1, -1, 1),
+            SubVoxelFlags.RightDownBackward => new Vector3Int(1, -1, -1),
+            SubVoxelFlags.LeftUpForward => new Vector3Int(-1, 1, 1),
+            SubVoxelFlags.LeftUpBackward => new Vector3Int(-1, 1, -1),
+            SubVoxelFlags.LeftDownForward => new Vector3Int(-1, -1, 1),
+            SubVoxelFlags.LeftDownBackward => new Vector3Int(-1, -1, -1),
+            _ => Vector3Int.zero
+        };
+
+        public static Vector3Int ToVector(this SubVoxel d) => d switch
+        {
+            SubVoxel.RightUpForward => new Vector3Int(1, 1, 1),
+            SubVoxel.RightUpBackward => new Vector3Int(1, 1, -1),
+            SubVoxel.RightDownForward => new Vector3Int(1, -1, 1),
+            SubVoxel.RightDownBackward => new Vector3Int(1, -1, -1),
+            SubVoxel.LeftUpForward => new Vector3Int(-1, 1, 1),
+            SubVoxel.LeftUpBackward => new Vector3Int(-1, 1, -1),
+            SubVoxel.LeftDownForward => new Vector3Int(-1, -1, 1),
+            SubVoxel.LeftDownBackward => new Vector3Int(-1, -1, -1),
+            _ => Vector3Int.zero
+        };
+
     }
-    
-    public static Vector3Int ToVector(this SubVoxelFlags d) => d switch
-    {
-        SubVoxelFlags.RightUpForward => new Vector3Int(1, 1, 1),
-        SubVoxelFlags.RightUpBackward => new Vector3Int(1, 1, -1),
-        SubVoxelFlags.RightDownForward => new Vector3Int(1, -1, 1),
-        SubVoxelFlags.RightDownBackward => new Vector3Int(1, -1, -1),
-        SubVoxelFlags.LeftUpForward => new Vector3Int(-1, 1, 1),
-        SubVoxelFlags.LeftUpBackward => new Vector3Int(-1, 1, -1),
-        SubVoxelFlags.LeftDownForward => new Vector3Int(-1, -1, 1),
-        SubVoxelFlags.LeftDownBackward => new Vector3Int(-1, -1, -1),
-        _ => Vector3Int.zero
-    };
-}
 }
