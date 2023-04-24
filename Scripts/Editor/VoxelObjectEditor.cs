@@ -5,143 +5,144 @@ using System.IO;
 
 namespace VoxelSystem
 {
-    [CustomEditor(typeof(VoxelObject))]
-    public class VoxelObjectEditor : UnityEditor.Editor
-    {
-        public override void OnInspectorGUI()
-        {
-            DrawDefaultInspector();
-            var t = target as VoxelObject;
-            if (t == null) return;
-            
-            GUI.enabled = t.lockRotation && t.lockScale;
-            if (GUILayout.Button("Apply Scale & Rotation"))
-            {
-                VoxelEditorWindow.RecordVoxelObjectForUndo(t, "Rotation Applied to Map");
-                t.ApplyScale();
-                t.ApplyRotation();
-            }
+	[CustomEditor(typeof(VoxelObject))]
+	public class VoxelObjectEditor : UnityEditor.Editor
+	{
+		public override void OnInspectorGUI()
+		{
+			DrawDefaultInspector();
+			var t = target as VoxelObject;
+			if (t == null)
+				return;
 
-            GUI.enabled = true;
+			GUI.enabled = t.lockRotation && t.lockScale;
+			if (GUILayout.Button("Apply Scale & Rotation"))
+			{
+				VoxelEditorWindow.RecordVoxelObjectForUndo(t, "Rotation Applied to Map");
+				t.ApplyScale();
+				t.ApplyRotation();
+			}
 
-            EditorGUILayout.Space();
-            EditorGUILayout.LabelField("Connected Scriptable Objects", EditorStyles.boldLabel);
+			GUI.enabled = true;
 
-            Undo.RecordObject(t, "Connected Map Changed");
-            t.ConnectedMap = (VoxelMapScriptableObject)
-                EditorGUILayout.ObjectField("Connected Map", t.ConnectedMap, typeof(VoxelMapScriptableObject),
-                    allowSceneObjects: false);
+			EditorGUILayout.Space();
+			EditorGUILayout.LabelField("Connected Scriptable Objects", EditorStyles.boldLabel);
 
-            Undo.RecordObject(t, "Connected Builder Changed");
-            t.ConnectedBuilder = (VoxelBuilder)
-                EditorGUILayout.ObjectField("Connected Builder", t.ConnectedBuilder, typeof(VoxelBuilder),
-                    allowSceneObjects: false);
+			Undo.RecordObject(t, "Connected Map Changed");
+			t.ConnectedMap = (VoxelMapScriptableObject)
+				EditorGUILayout.ObjectField("Connected Map", t.ConnectedMap, typeof(VoxelMapScriptableObject),
+					allowSceneObjects: false);
 
-            serializedObject.ApplyModifiedProperties();
+			Undo.RecordObject(t, "Connected Builder Changed");
+			t.ConnectedBuilder = (VoxelBuilder)
+				EditorGUILayout.ObjectField("Connected Builder", t.ConnectedBuilder, typeof(VoxelBuilder),
+					allowSceneObjects: false);
 
-
-            EditorGUILayout.Space();
-            GUI.enabled = !t.HasConnectedMap();
-            if (GUILayout.Button("Export Voxel Map"))
-            {
-                ExportVoxelMap(t.Map);
-            }
-
-            GUI.enabled = true;
-
-            if (t.references.meshFilter != null && t.references.meshFilter.sharedMesh != null)
-            {
-                VoxelMap map = t.Map;
-                if (map != null)
-                {
-                    if (GUILayout.Button("Export Mesh"))
-                    {
-                        ExportMesh(t.references.meshFilter);
-                    }
-                }
-            }
+			serializedObject.ApplyModifiedProperties();
 
 
-            EditorGUILayout.Space();
-            if (GUILayout.Button("Regenerate Meshes"))
-            {
-                Undo.RecordObjects(new Object[] { t.references.meshRenderer, t.references.meshFilter },
-                    "Connected Map Changed");
-                t.RegenerateMesh();
-            }
-        }
+			EditorGUILayout.Space();
+			GUI.enabled = !t.HasConnectedMap();
+			if (GUILayout.Button("Export Voxel Map"))
+			{
+				ExportVoxelMap(t.Map);
+			}
 
-        static void ExportVoxelMap(VoxelMap map)
-        {
-            string path = EditorUtility.SaveFilePanelInProject("Save Voxel Map", "VoxelMap", "asset", "Save Voxel Map");
-            if (path.Length != 0)
-            {
-                VoxelMapScriptableObject newMap =  CreateInstance<VoxelMapScriptableObject>();
-                newMap.map = map.GetCopy();
-                newMap.name = Path.GetFileName(path);
-                AssetDatabase.CreateAsset(newMap, path);
-                AssetDatabase.Refresh();
-            }
-        }
+			GUI.enabled = true;
 
-        public class HandleExample : MonoBehaviour
-        {
-            public float shieldArea = 5.0f;
-        }
+			if (t.references.meshFilter != null && t.references.meshFilter.sharedMesh != null)
+			{
+				VoxelMap map = t.Map;
+				if (map != null)
+				{
+					if (GUILayout.Button("Export Mesh"))
+					{
+						ExportMesh(t.references.meshFilter);
+					}
+				}
+			}
 
-        protected void DrawHandles()
-        {
-            HandleExample handleExample = new();
 
-            if (handleExample == null)
-            {
-                return;
-            }
+			EditorGUILayout.Space();
+			if (GUILayout.Button("Regenerate Meshes"))
+			{
+				Undo.RecordObjects(new Object[] { t.references.meshRenderer, t.references.meshFilter },
+					"Connected Map Changed");
+				t.RegenerateMesh();
+			}
+		}
 
-            Handles.color = Color.yellow;
+		static void ExportVoxelMap(VoxelMap map)
+		{
+			string path = EditorUtility.SaveFilePanelInProject("Save Voxel Map", "VoxelMap", "asset", "Save Voxel Map");
+			if (path.Length != 0)
+			{
+				VoxelMapScriptableObject newMap = CreateInstance<VoxelMapScriptableObject>();
+				newMap.map = map.GetCopy();
+				newMap.name = Path.GetFileName(path);
+				AssetDatabase.CreateAsset(newMap, path);
+				AssetDatabase.Refresh();
+			}
+		}
 
-            GUIStyle style = new();
-            style.normal.textColor = Color.green;
+		public class HandleExample : MonoBehaviour
+		{
+			public float shieldArea = 5.0f;
+		}
 
-            Vector3 position = handleExample.transform.position + Vector3.up * 2f;
-            string posString = position.ToString();
+		protected void DrawHandles()
+		{
+			HandleExample handleExample = new();
 
-            Handles.Label(position,
-                posString + "\nShieldArea: " +
-                handleExample.shieldArea,
-                style
-            );
+			if (handleExample == null)
+			{
+				return;
+			}
 
-            Handles.BeginGUI();
-            if (GUILayout.Button("Reset Area", GUILayout.Width(width: 100)))
-            {
-                handleExample.shieldArea = 5;
-            }
-            Handles.EndGUI();
+			Handles.color = Color.yellow;
 
-            Handles.DrawWireArc(
-                handleExample.transform.position,
-                handleExample.transform.up,
-                -handleExample.transform.right,
-                angle: 180,
-                handleExample.shieldArea);
+			GUIStyle style = new();
+			style.normal.textColor = Color.green;
 
-            handleExample.shieldArea =
-                Handles.ScaleValueHandle(handleExample.shieldArea,
-                    handleExample.transform.position + handleExample.transform.forward * handleExample.shieldArea,
-                    handleExample.transform.rotation,
-                    size: 1, Handles.ConeHandleCap, snap: 1);
-        }
+			Vector3 position = handleExample.transform.position + Vector3.up * 2f;
+			string posString = position.ToString();
 
-        void ExportMesh(MeshFilter meshFilter)
-        {
-            string path = EditorUtility.SaveFilePanelInProject("Export Mesh file", "Mesh", "obj", "Export Mesh file");
-            if (path.Length != 0)
-            {
-                MeshToObjExporter.MeshToFile(meshFilter, path);
-                AssetDatabase.Refresh();
-            }
-        }
-    }
+			Handles.Label(position,
+				posString + "\nShieldArea: " +
+				handleExample.shieldArea,
+				style
+			);
+
+			Handles.BeginGUI();
+			if (GUILayout.Button("Reset Area", GUILayout.Width(width: 100)))
+			{
+				handleExample.shieldArea = 5;
+			}
+			Handles.EndGUI();
+
+			Handles.DrawWireArc(
+				handleExample.transform.position,
+				handleExample.transform.up,
+				-handleExample.transform.right,
+				angle: 180,
+				handleExample.shieldArea);
+
+			handleExample.shieldArea =
+				Handles.ScaleValueHandle(handleExample.shieldArea,
+					handleExample.transform.position + handleExample.transform.forward * handleExample.shieldArea,
+					handleExample.transform.rotation,
+					size: 1, Handles.ConeHandleCap, snap: 1);
+		}
+
+		void ExportMesh(MeshFilter meshFilter)
+		{
+			string path = EditorUtility.SaveFilePanelInProject("Export Mesh file", "Mesh", "obj", "Export Mesh file");
+			if (path.Length != 0)
+			{
+				MeshToObjExporter.MeshToFile(meshFilter, path);
+				AssetDatabase.Refresh();
+			}
+		}
+	}
 }
 #endif

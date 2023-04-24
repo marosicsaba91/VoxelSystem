@@ -4,27 +4,47 @@ using UnityEngine;
 
 namespace VoxelSystem
 {
-    [CreateAssetMenu(fileName = "VoxelMap", menuName = "VoxelSystem/VoxelMap", order = 1)]
-    public class VoxelMapScriptableObject : ScriptableObject
-    {
-        public VoxelMap map;
-        public OctTree octMap;
+	[CreateAssetMenu(fileName = "VoxelMap", menuName = "VoxelSystem/VoxelMap", order = 1)]
+	public class VoxelMapScriptableObject : ScriptableObject
+	{
+		public VoxelMap map; 
+		public OctVoxelMap octMap;
+		[SerializeField] DisplayMember copyToOctMap = new(nameof(CopyToOctMap));
 
-        [SerializeField] DisplayMember copyToOctMap = new DisplayMember(nameof(CopyToOctMap)); 
+		public int size = 0;
+		public int value = -1;
+		public Vector3Int index = Vector3Int.zero;
+		[SerializeField] DisplayMember create = new(nameof(Create));
+		[SerializeField] DisplayMember set = new(nameof(Set));
 
-        void CopyToOctMap()
-        {
-            octMap = new OctTree(map.Size);
-            for (int x = 0; x < map.Width; x++)
-            for (int y = 0; y < map.Height; y++)
-            for (int z = 0; z < map.Depth; z++)
-                octMap.Set(x, y, z, map.Get(x,y,z).value);
+		void CopyToOctMap()
+		{				
+			octMap = new OctVoxelMap(map.Size);
+			for (int x = 0; x < map.Width; x++)
+				for (int y = 0; y < map.Height; y++)
+					for (int z = 0; z < map.Depth; z++)
+					{
+						int value = map.Get(x, y, z).value;
+						octMap.Set(x, y, z, value);
+					}
 
-            // Make ScriptableObject dirty
-            EditorUtility.SetDirty(this);
+			int chunkCount = octMap.rootChunk.ChunkCount;
+			int voxelCount = octMap.CanvasSize.x * octMap.CanvasSize.y * octMap.CanvasSize.z;
+			float chunkPerVoxel = (float)chunkCount / voxelCount;
+			float reductionRate = chunkPerVoxel * 100;
 
-        }
+			Debug.Log($"1: ChunkCount:  {chunkCount}     VoxelCount: {voxelCount}     Reduction rate: {reductionRate}%");
+
+			// Make ScriptableObject dirty
+			EditorUtility.SetDirty(this);
+		}
 
 
-    }
+		void Create()
+		{
+			octMap = new OctVoxelMap(Vector3Int.one * size, value);
+			EditorUtility.SetDirty(this);
+		}
+		void Set() => octMap.Set(index, value);
+	}
 }

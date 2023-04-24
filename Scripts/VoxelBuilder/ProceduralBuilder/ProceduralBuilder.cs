@@ -2,8 +2,8 @@
 
 namespace VoxelSystem.ProceduralBuilder
 {
-    public class ProceduralBuilder : MonoBehaviour
-    {
-        
-    }
+	public class ProceduralBuilder : MonoBehaviour
+	{
+
+	}
 }

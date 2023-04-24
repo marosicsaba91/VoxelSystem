@@ -1,19 +1,19 @@
 ﻿namespace VoxelSystem
 {
-    public enum BlockType
-    {
-        SidePositive,
-        EdgePositive,
-        CornerPositive,
+	public enum BlockType
+	{
+		SidePositive,
+		EdgePositive,
+		CornerPositive,
 
-        EdgeNegative,
-        CornerNegative,
-        SideToPositiveEdge,
-        SideToNegativeEdge,
-        
-        CrossCorner,
-        EdgeToEdge,
-        
-        BreakPoint,
-    }
+		EdgeNegative,
+		CornerNegative,
+		SideToPositiveEdge,
+		SideToNegativeEdge,
+
+		CrossCorner,
+		EdgeToEdge,
+
+		BreakPoint,
+	}
 }
