@@ -268,7 +268,7 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: 0
-    - value: 0
+    - value: -1
     - value: 0
     - value: 0
     - value: 0
@@ -32786,13 +32786,9 @@ MonoBehaviour:
     - value: 0
     - value: 0
   octMap:
-    canvasSize: {x: 32, y: 32, z: 32}
     levels: 5
     data: 
-  octMap2:
     canvasSize: {x: 32, y: 32, z: 32}
-    levels: 5
-    data: 
   copyToOctMap:
     functionZoom: 1
     functionOffset: {x: 0, y: 0}

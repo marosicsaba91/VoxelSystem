@@ -152,10 +152,7 @@ namespace VoxelSystem
 
 		// GET Voxels --------------------------------------------------------        
 
-		public int Get(int x, int y, int z)
-		{
-			return rootChunk.GetLeaf(x, y, z, RealSize);
-		}
+		public int Get(int x, int y, int z) => rootChunk.GetLeaf(x, y, z, RealSize);
 
 		public bool IsFilledSafe(Vector3Int index) => index.x >= 0 && index.x < canvasSize.x &&
 				   index.y >= 0 && index.y < canvasSize.y &&
@@ -166,10 +163,7 @@ namespace VoxelSystem
 
 		public enum VoxelAreaAction { Fill, Clear, Repaint }
 
-		public bool Set(int x, int y, int z, VoxelAreaAction action, int materialIndex)
-		{
-			return rootChunk.SetLeaf(x, y, z, materialIndex, RealSize);
-		}
+		public bool Set(int x, int y, int z, VoxelAreaAction action, int materialIndex) => rootChunk.SetLeaf(x, y, z, materialIndex, RealSize);
 
 		public bool Set(Vector3Int coordinate, VoxelAreaAction action, int materialIndex) => Set(coordinate.x, coordinate.y, coordinate.z, action, materialIndex);
 

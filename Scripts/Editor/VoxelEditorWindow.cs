@@ -24,15 +24,13 @@ namespace VoxelSystem
 		static readonly VoxelTool[] _secondaryTools = { VoxelTool.Face, VoxelTool.FloodFill, VoxelTool.Picker };
 
 		static VoxelMap.VoxelAreaAction ToolToAreaAction() // Need to refactor
-		{
-			return Tool switch
-			{
-				VoxelTool.Recolor => VoxelMap.VoxelAreaAction.Repaint,
-				VoxelTool.Attach => VoxelMap.VoxelAreaAction.Fill,
-				VoxelTool.Erase => VoxelMap.VoxelAreaAction.Clear,
-				_ => VoxelMap.VoxelAreaAction.Repaint
-			};
-		}
+=> Tool switch
+{
+	VoxelTool.Recolor => VoxelMap.VoxelAreaAction.Repaint,
+	VoxelTool.Attach => VoxelMap.VoxelAreaAction.Fill,
+	VoxelTool.Erase => VoxelMap.VoxelAreaAction.Clear,
+	_ => VoxelMap.VoxelAreaAction.Repaint
+};
 
 		static VoxelTool Tool { get; set; } = VoxelTool.Non;
 		public static int SelectedPaletteIndex { get; private set; } = 0;

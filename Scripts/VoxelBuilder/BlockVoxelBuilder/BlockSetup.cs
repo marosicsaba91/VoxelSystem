@@ -61,7 +61,7 @@ namespace VoxelSystem
 			int allDirectionsCount = SubVoxelUtility.AllSubVoxel.Count;
 
 			// Setup presentationObjects list
-			for (var i = 0; i < allDirectionsCount; i++)
+			for (int i = 0; i < allDirectionsCount; i++)
 			{
 				SubVoxelFlags voxelDirection = SubVoxelUtility.AllSubVoxel[i];
 				if (!transformDictionary.TryGetValue(voxelDirection, out Transform child) || child == null)
@@ -77,7 +77,7 @@ namespace VoxelSystem
 			}
 
 			// Setup list order
-			for (var i = 0; i < allDirectionsCount; i++)
+			for (int i = 0; i < allDirectionsCount; i++)
 			{
 				SubVoxelFlags voxelDirection = SubVoxelUtility.AllSubVoxel[i];
 				Transform child = transformDictionary[voxelDirection];
@@ -117,7 +117,7 @@ namespace VoxelSystem
 
 			if (mesh != null)
 			{
-				var meshFilter = t.GetComponent<MeshFilter>();
+				MeshFilter meshFilter = t.GetComponent<MeshFilter>();
 				if (meshFilter == null)
 					meshFilter = t.gameObject.AddComponent<MeshFilter>();
 				meshFilter.sharedMesh = mesh;
@@ -128,7 +128,7 @@ namespace VoxelSystem
 				library == null || library.material == null ? DefaultBlockInfo.Instance.MaterialNotFoundMaterial :
 				library.material;
 
-			var meshRenderer = t.GetComponent<MeshRenderer>();
+			MeshRenderer meshRenderer = t.GetComponent<MeshRenderer>();
 			if (meshRenderer == null)
 				meshRenderer = t.gameObject.AddComponent<MeshRenderer>();
 			meshRenderer.sharedMaterial = material;

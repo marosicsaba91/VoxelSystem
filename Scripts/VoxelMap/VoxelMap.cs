@@ -17,10 +17,7 @@ namespace VoxelSystem
 		[SerializeField] Voxel[] voxelData;
 		public event Action MapChangedEvent;
 
-		void MapChanged()
-		{
-			MapChangedEvent?.Invoke();
-		}
+		void MapChanged() => MapChangedEvent?.Invoke();
 
 		public void UndoRedoEvenInvokedOnMap() =>
 			MapChangedEvent?.Invoke();
@@ -59,15 +56,15 @@ namespace VoxelSystem
 			voxelData = new Voxel[size.x * size.y * size.z];
 
 			if (clear)
-				for (var i = 0; i < voxelData.Length; i++)
+				for (int i = 0; i < voxelData.Length; i++)
 					voxelData[i] = new Voxel(-1);
 			else
-				for (var i = 0; i < voxelData.Length; i++)
+				for (int i = 0; i < voxelData.Length; i++)
 				{
-					Vector3Int coord = Index(i);
-					bool a = coord.x == 0 || coord.x == size.x - 1;
-					bool b = coord.y == 0 || coord.y == size.y - 1;
-					bool c = coord.z == 0 || coord.z == size.z - 1;
+					Vector3Int coordinate = Index(i);
+					bool a = coordinate.x == 0 || coordinate.x == size.x - 1;
+					bool b = coordinate.y == 0 || coordinate.y == size.y - 1;
+					bool c = coordinate.z == 0 || coordinate.z == size.z - 1;
 					bool filled = (a && b) || (b && c) || (c && a);
 					voxelData[i] = new Voxel(filled ? 0 : -1);
 				}
@@ -90,10 +87,10 @@ namespace VoxelSystem
 				voxelData = MakeCopy(original.voxelData);
 			}
 
-			T[] MakeCopy<T>(IReadOnlyList<T> source)
+			static T[] MakeCopy<T>(IReadOnlyList<T> source)
 			{
 				var copy = new T[source.Count];
-				for (var i = 0; i < source.Count; i++)
+				for (int i = 0; i < source.Count; i++)
 				{
 					copy[i] = source[i];
 				}
@@ -101,20 +98,14 @@ namespace VoxelSystem
 			}
 		}
 
-		public VoxelMap GetCopy() => new VoxelMap(this);
+		public VoxelMap GetCopy() => new(this);
 
 
 		// GET Voxels ----------------------------
 
-		public int Index(Vector3Int coordinate)
-		{
-			return Index(coordinate.x, coordinate.y, coordinate.z);
-		}
+		public int Index(Vector3Int coordinate) => Index(coordinate.x, coordinate.y, coordinate.z);
 
-		public int Index(int x, int y, int z)
-		{
-			return x + (y * width) + (z * width * height);
-		}
+		public int Index(int x, int y, int z) => x + (y * width) + (z * width * height);
 
 		Vector3Int Index(int i)
 		{
@@ -129,30 +120,18 @@ namespace VoxelSystem
 			return new Vector3Int(x, y, z);
 		}
 
-		public int GetHightestMaterialIndex() => voxelData.Select(v => v.value).Prepend(-1).Max();
+		public int GetHighestMaterialIndex() => voxelData.Select(v => v.value).Prepend(-1).Max();
 
 		// GET Voxels ----------------------------
 
-		public Voxel Get(Vector3Int coordinate)
-		{
-			return voxelData[Index(coordinate)];
-		}
-		public Voxel Get(int x, int y, int z)
-		{
-			return voxelData[Index(x, y, z)];
-		}
-		public Voxel GetFast(int x, int y, int z, int w, int h)
-		{
-			return voxelData[x + (y * w) + (z * w * h)];
-		}
+		public Voxel Get(Vector3Int coordinate) => voxelData[Index(coordinate)];
+		public Voxel Get(int x, int y, int z) => voxelData[Index(x, y, z)];
+		public Voxel GetFast(int x, int y, int z, int w, int h) => voxelData[x + (y * w) + (z * w * h)];
 
-		public bool IsFilledSafe(Vector3Int index)
-		{
-			return index.x >= 0 && index.x < width &&
+		public bool IsFilledSafe(Vector3Int index) => index.x >= 0 && index.x < width &&
 				   index.y >= 0 && index.y < height &&
 				   index.z >= 0 && index.z < depth &&
 				   Get(index.x, index.y, index.z).IsFilled;
-		}
 
 		// SET Voxels ----------------------------
 
@@ -185,44 +164,23 @@ namespace VoxelSystem
 			return !oldV.Equals(v);
 		}
 
-		public bool Set(Vector3Int coordinate, VoxelAreaAction action, int materialIndex)
-		{
-			return Set(coordinate.x, coordinate.y, coordinate.z, action, materialIndex);
-		}
+		public bool Set(Vector3Int coordinate, VoxelAreaAction action, int materialIndex) => Set(coordinate.x, coordinate.y, coordinate.z, action, materialIndex);
 
-		public bool Set(Vector3Int coordinate, int materialIndex)
-		{
-			return Set(coordinate.x, coordinate.y, coordinate.z, VoxelAreaAction.Fill, materialIndex);
-		}
+		public bool Set(Vector3Int coordinate, int materialIndex) => Set(coordinate.x, coordinate.y, coordinate.z, VoxelAreaAction.Fill, materialIndex);
 
-		public bool Set(int x, int y, int z, int materialIndex)
-		{
-			return Set(x, y, z, VoxelAreaAction.Fill, materialIndex);
-		}
+		public bool Set(int x, int y, int z, int materialIndex) => Set(x, y, z, VoxelAreaAction.Fill, materialIndex);
 
-		public bool SetValueOf(Vector3Int coordinate, int materialIndex)
-		{
-			return Set(coordinate.x, coordinate.y, coordinate.z, VoxelAreaAction.Repaint, materialIndex);
-		}
+		public bool SetValueOf(Vector3Int coordinate, int materialIndex) => Set(coordinate.x, coordinate.y, coordinate.z, VoxelAreaAction.Repaint, materialIndex);
 
-		public bool SetValueOf(int x, int y, int z, int materialIndex)
-		{
-			return Set(x, y, z, VoxelAreaAction.Repaint, materialIndex);
-		}
+		public bool SetValueOf(int x, int y, int z, int materialIndex) => Set(x, y, z, VoxelAreaAction.Repaint, materialIndex);
 
-		public bool ClearVoxel(Vector3Int coordinate)
-		{
-			return ClearVoxel(coordinate.x, coordinate.y, coordinate.z);
-		}
+		public bool ClearVoxel(Vector3Int coordinate) => ClearVoxel(coordinate.x, coordinate.y, coordinate.z);
 
-		public bool ClearVoxel(int x, int y, int z)
-		{
-			return Set(x, y, z, VoxelAreaAction.Clear, materialIndex: 0);
-		}
+		public bool ClearVoxel(int x, int y, int z) => Set(x, y, z, VoxelAreaAction.Clear, materialIndex: 0);
 
 		public void ClearWhole()
 		{
-			for (var i = 0; i < voxelData.Length; i++)
+			for (int i = 0; i < voxelData.Length; i++)
 			{
 				voxelData[i] = new Voxel(materialIndex: -1);
 			}
@@ -231,27 +189,18 @@ namespace VoxelSystem
 
 		public void FillWhole(int materialIndex)
 		{
-			for (var i = 0; i < voxelData.Length; i++)
+			for (int i = 0; i < voxelData.Length; i++)
 			{
 				voxelData[i] = new Voxel(materialIndex);
 			}
 			MapChanged();
 		}
 
-		public void FillRange(Vector3Int startCoordinate, Vector3Int endCoordinate, int value)
-		{
-			SetRange(startCoordinate, endCoordinate, VoxelAreaAction.Fill, value);
-		}
+		public void FillRange(Vector3Int startCoordinate, Vector3Int endCoordinate, int value) => SetRange(startCoordinate, endCoordinate, VoxelAreaAction.Fill, value);
 
-		public void ClearRange(Vector3Int startCoordinate, Vector3Int endCoordinate)
-		{
-			SetRange(startCoordinate, endCoordinate, VoxelAreaAction.Clear, value: 0);
-		}
+		public void ClearRange(Vector3Int startCoordinate, Vector3Int endCoordinate) => SetRange(startCoordinate, endCoordinate, VoxelAreaAction.Clear, value: 0);
 
-		public void SetValueOfRange(Vector3Int startCoordinate, Vector3Int endCoordinate, int value)
-		{
-			SetRange(startCoordinate, endCoordinate, VoxelAreaAction.Repaint, value: 0);
-		}
+		public void SetValueOfRange(Vector3Int startCoordinate, Vector3Int endCoordinate, int value) => SetRange(startCoordinate, endCoordinate, VoxelAreaAction.Repaint, value);
 
 		public void SetRange(Vector3Int startCoordinate, Vector3Int endCoordinate, VoxelAreaAction action, int value)
 		{
@@ -319,7 +268,7 @@ namespace VoxelSystem
 		{
 			bool mapChanged = false;
 
-			for (var x = 0; x < copySize.x; x++)
+			for (int x = 0; x < copySize.x; x++)
 			{
 				int destinationX = startCoordinateOfDestinationMap.x + x;
 				int sourceX = startCoordinateOfSourceMap.x + x;
@@ -328,7 +277,7 @@ namespace VoxelSystem
 				if (sourceX >= sourceMap.width || sourceX < 0)
 				{ continue; }
 
-				for (var y = 0; y < copySize.y; y++)
+				for (int y = 0; y < copySize.y; y++)
 				{
 					int destinationY = startCoordinateOfDestinationMap.y + y;
 					int sourceY = startCoordinateOfSourceMap.y + y;
@@ -337,7 +286,7 @@ namespace VoxelSystem
 					if (sourceY >= sourceMap.height || sourceY < 0)
 					{ continue; }
 
-					for (var z = 0; z < copySize.z; z++)
+					for (int z = 0; z < copySize.z; z++)
 					{
 						int destinationZ = startCoordinateOfDestinationMap.z + z;
 						int sourceZ = startCoordinateOfSourceMap.z + z;
@@ -379,7 +328,7 @@ namespace VoxelSystem
 
 			var newVoxelData = new Voxel[voxelData.Length];
 
-			for (var i = 0; i < voxelData.Length; i++)
+			for (int i = 0; i < voxelData.Length; i++)
 			{
 				Vector3Int original = Index(i);
 				int nx =
@@ -411,7 +360,7 @@ namespace VoxelSystem
 		{
 			var newVoxelData = new Voxel[voxelData.Length];
 
-			for (var i = 0; i < voxelData.Length; i++)
+			for (int i = 0; i < voxelData.Length; i++)
 			{
 				Vector3Int o = Index(i);
 				if (axis == Axis3D.X)
@@ -438,7 +387,7 @@ namespace VoxelSystem
 
 			var newVoxelData = new Voxel[newW * newH * newD];
 
-			for (var i = 0; i < newVoxelData.Length; i++)
+			for (int i = 0; i < newVoxelData.Length; i++)
 			{
 				int oldIndex;
 				if (type == ResizeType.Rescale)
@@ -535,6 +484,6 @@ namespace VoxelSystem
 				z >= 0 && z < depth;
 		}
 
-		public bool IsValidCoord(Vector3Int coord) => IsValidCoord(coord.x, coord.y, coord.z);
+		public bool IsValidCoord(Vector3Int coordinate) => IsValidCoord(coordinate.x, coordinate.y, coordinate.z);
 	}
 }

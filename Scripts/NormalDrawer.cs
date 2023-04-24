@@ -83,7 +83,7 @@ public class NormalDrawer : MonoBehaviour
 			return;
 
 		int endIndex = endAtTriangle < startAtTriangle ? mesh.triangles.Length : Mathf.Min(endAtTriangle * 3, mesh.triangles.Length);
-		for (var i = startAtTriangle * 3; i < endIndex; i += 3 * everyNthTriangle)
+		for (int i = startAtTriangle * 3; i < endIndex; i += 3 * everyNthTriangle)
 		{
 			Vector3 p0 = mesh.vertices[mesh.triangles[i]];
 			Vector3 p1 = mesh.vertices[mesh.triangles[i + 1]];
@@ -144,7 +144,7 @@ public class NormalDrawer : MonoBehaviour
 			return;
 
 		int endIndex = endAtVertex < startAtVertex ? mesh.vertices.Length : Mathf.Min(endAtVertex, mesh.vertices.Length);
-		for (var i = startAtVertex; i < endIndex; i += everyNthVertex)
+		for (int i = startAtVertex; i < endIndex; i += everyNthVertex)
 		{
 			Vector3 vertex = mesh.vertices[i];
 			Vector3 normal = mesh.normals[i];

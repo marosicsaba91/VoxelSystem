@@ -166,7 +166,7 @@ namespace VoxelSystem
 		void DrawAnything(System.Random random)
 		{
 			Vector3 center = Center;
-			var rand = (float)random.NextDouble();
+			float rand = (float)random.NextDouble();
 			rand *= 0.5f;
 			rand += 1;
 			float radius = 0.1f * rand;

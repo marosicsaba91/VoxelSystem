@@ -22,7 +22,7 @@ public class VoxelRendererEditor : Editor
 		if (map == null)
 			return;
 
-		if (map.Raycast(ray, out var hit, renderer.transform))
+		if (map.Raycast(ray, out InVoxelPoint hit, renderer.transform))
 		{
 			Debug.Log("Mesh clicked!");
 		}

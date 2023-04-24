@@ -1,7 +1,6 @@
 using System;
 using UnityEngine;
 using MUtility;
-using Newtonsoft.Json.Linq;
 
 namespace VoxelSystem
 {
@@ -9,7 +8,6 @@ namespace VoxelSystem
 	public abstract class OctTree<TNode, TValue> where TNode : OctNode<TValue, TNode>
 	{
 		public int levels;
-		[SerializeField] byte[] data;
 		[NonSerialized] public TNode rootChunk;
 
 		public Vector3Int canvasSize;
@@ -18,7 +16,7 @@ namespace VoxelSystem
 
 		public event Action MapChangedEvent;
 
-		abstract public TValue DefaultValue { get; }
+		public abstract TValue DefaultValue { get; }
 
 		void MapChanged() =>
 			MapChangedEvent?.Invoke();

@@ -32,6 +32,6 @@ namespace VoxelSystem
 
 			return true;
 		}
-		public static Vector3Int ToVector3Int(Vector3 v) => new Vector3Int(v.x >= 0 ? 1 : -1, v.y >= 0 ? 1 : -1, v.z >= 0 ? 1 : -1);
+		public static Vector3Int ToVector3Int(Vector3 v) => new(v.x >= 0 ? 1 : -1, v.y >= 0 ? 1 : -1, v.z >= 0 ? 1 : -1);
 	}
 }

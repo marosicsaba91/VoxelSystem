@@ -1,6 +1,6 @@
 {
     "name": "VoxelSystem",
-    "rootNamespace": "",
+    "rootNamespace": "VoxelSystem",
     "references": [
         "GUID:8c8c0e118c65fb143abfbcdb8ea42f51",
         "GUID:c186a770956a55740824c42daaf9e9c5"
@@ -9,7 +9,9 @@
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
-    "precompiledReferences": [],
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
     "autoReferenced": true,
     "defineConstraints": [],
     "versionDefines": [],

@@ -75,11 +75,9 @@ namespace VoxelSystem
 			return null;
 		}
 
-		static MVoxChunk Convert(VoxelMap map)
-		{
+		static MVoxChunk Convert(VoxelMap map) =>
 			// TODO
-			return null;
-		}
+			null;
 
 
 		static string StringFromBuffer(byte[] buffer)

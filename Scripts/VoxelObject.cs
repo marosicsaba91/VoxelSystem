@@ -14,7 +14,7 @@ namespace VoxelSystem
 			public MeshFilter meshFilter;
 			public MeshCollider meshCollider;
 		}
-		public References references = new References();
+		public References references = new();
 
 		[Header("Lock Transform")]
 		public bool lockPosition = true;
@@ -30,15 +30,9 @@ namespace VoxelSystem
 		int _meshDirtyCounter = 0;
 		VoxelMapScriptableObject _lastFrameConnectedMap;
 
-		void OnValidate()
-		{
-			MaintainReferences();
-		}
+		void OnValidate() => MaintainReferences();
 
-		public bool HasConnectedMap()
-		{
-			return connectedMap != null;
-		}
+		public bool HasConnectedMap() => connectedMap != null;
 
 		public VoxelMapScriptableObject ConnectedMap
 		{
@@ -306,20 +300,11 @@ namespace VoxelSystem
 				RegenerateMesh();
 		}
 
-		public void FillWholeMap(int paletteIndex)
-		{
-			Map.FillWhole(paletteIndex);
-		}
+		public void FillWholeMap(int paletteIndex) => Map.FillWhole(paletteIndex);
 
-		public void ClearWholeMap()
-		{
-			Map.ClearWhole();
-		}
+		public void ClearWholeMap() => Map.ClearWhole();
 
-		public bool IsValidCoord(Vector3Int coord)
-		{
-			return Map.IsValidCoord(coord);
-		}
+		public bool IsValidCoord(Vector3Int coord) => Map.IsValidCoord(coord);
 
 		void OnDrawGizmosSelected()
 		{

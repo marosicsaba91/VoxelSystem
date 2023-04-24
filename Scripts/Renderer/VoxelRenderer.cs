@@ -33,10 +33,7 @@ public class VoxelRenderer : MonoBehaviour
 	static readonly List<Block> _blockCache = new();
 	Dictionary<BlockKey, CustomMesh> _meshCache;
 
-	void OnValidate()
-	{
-		mesh = null;
-	}
+	void OnValidate() => mesh = null;
 
 	void RebuildMesh()
 	{

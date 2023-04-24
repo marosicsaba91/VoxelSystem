@@ -1,5 +1,8 @@
-﻿namespace VoxelSystem
+﻿//using ProtoBuf;
+
+namespace VoxelSystem
 {
+	//[ProtoContract]
 	public sealed class OctVoxelChunk : OctNode<int, OctVoxelChunk>
 	{
 		public const int defaultValue = -1;

@@ -7,10 +7,7 @@ namespace VoxelSystem.Editor
 	[CustomEditor(typeof(BlockLibrary))]
 	public class BlockLibraryEditor : UnityEditor.Editor
 	{
-		public override void OnInspectorGUI()
-		{
-			base.OnInspectorGUI();
-		}
+		public override void OnInspectorGUI() => base.OnInspectorGUI();
 
 		void OnSceneGUI()
 		{

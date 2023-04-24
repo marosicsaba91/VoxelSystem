@@ -88,10 +88,7 @@ namespace VoxelSystem
 		}
 
 
-		static void DrawVoxel_InWorld(Transform transform, Vector3Int localCoordinate)
-		{
-			DrawWireCube_InWorld(transform, localCoordinate, Vector3.one);
-		}
+		static void DrawVoxel_InWorld(Transform transform, Vector3Int localCoordinate) => DrawWireCube_InWorld(transform, localCoordinate, Vector3.one);
 
 		static void DrawWireCube_InWorld(Transform transform, Vector3 origin, Vector3 size)
 		{

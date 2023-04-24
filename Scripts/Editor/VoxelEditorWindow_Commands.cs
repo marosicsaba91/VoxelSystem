@@ -21,7 +21,7 @@ namespace VoxelSystem
 			if (_targetVoxelObject.references.meshCollider != null)
 				separatedGo.AddComponent<MeshCollider>();
 
-			var separatedVo = separatedGo.AddComponent<VoxelObject>();
+			VoxelObject separatedVo = separatedGo.AddComponent<VoxelObject>();
 			separatedVo.ConnectedBuilder = _targetVoxelObject.ConnectedBuilder;
 			separatedVo.Map = new(_selectionSize);
 			separatedVo.Map.ClearWhole();

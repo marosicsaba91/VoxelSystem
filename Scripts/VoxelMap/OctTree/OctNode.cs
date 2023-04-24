@@ -1,13 +1,18 @@
-﻿using System;
+﻿//using ProtoBuf;
+using System;
 using UnityEngine;
 
 namespace VoxelSystem
 {
 	[Serializable]
+	//[ProtoContract]
 	public abstract class OctNode<TValue, TSelf> where TSelf : OctNode<TValue, TSelf>
 	{
-		public TSelf[] innerChunks;
+		//[ProtoMember(1)]
 		public TValue value;
+
+		//[ProtoMember(2)]
+		public TSelf[] innerChunks;
 
 		public OctNode(TValue value)
 		{
@@ -46,7 +51,7 @@ namespace VoxelSystem
 		public TValue Value => value;
 
 
-		public virtual TSelf TryGetInnerNode(int i) => innerChunks == null ? null : innerChunks[i];
+		public virtual TSelf TryGetInnerNode(int i) => innerChunks?[i];
 
 		// ----------------------------------------------------------
 
@@ -61,7 +66,7 @@ namespace VoxelSystem
 			if (innerChunks == null)
 				return value;
 			int index = GetSubChunkIndex(ref x, ref y, ref z, size);
-			var inner = innerChunks[index];
+			TSelf inner = innerChunks[index];
 			if (inner == null)
 				return value;
 			return inner.GetLeaf(x, y, z, size / 2);

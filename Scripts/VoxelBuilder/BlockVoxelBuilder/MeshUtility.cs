@@ -23,7 +23,7 @@ namespace VoxelSystem
 				normals[triangles[i + 1]] += normal;
 				normals[triangles[i + 2]] += normal;
 			}
-			for (var i = 0; i < normals.Length; i++)
+			for (int i = 0; i < normals.Length; i++)
 			{
 				normals[i].Normalize();
 			}
@@ -31,7 +31,7 @@ namespace VoxelSystem
 
 		public void RecalculateWindings()
 		{
-			for (var i = 0; i < triangles.Length; i += 3)
+			for (int i = 0; i < triangles.Length; i += 3)
 			{
 				int vi = triangles[i];
 				int vj = triangles[i + 1];
@@ -66,14 +66,14 @@ namespace VoxelSystem
 		public static CustomMesh GetTransformedMesh(Mesh mesh, Matrix4x4 transformation)
 		{
 			// Get the mesh vertices
-			var vertices = mesh.vertices;
-			var normals = mesh.normals;
+			Vector3[] vertices = mesh.vertices;
+			Vector3[] normals = mesh.normals;
 
 			// Create a new array to hold the rotated vertices
 			var transformedV = new Vector3[vertices.Length];
 			var transformedN = new Vector3[vertices.Length];
 			// Apply the rotation to each vertex
-			for (var i = 0; i < vertices.Length; i++)
+			for (int i = 0; i < vertices.Length; i++)
 			{
 				transformedV[i] = transformation.MultiplyVector(vertices[i]);
 				transformedN[i] = transformation.MultiplyVector(normals[i]);

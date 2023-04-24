@@ -352,7 +352,7 @@ namespace VoxelSystem
 			float fullHeight = rows * height + (rows - 1) * smallSpacing;
 
 			var r = new Rect(rect.x, rect.y, itemWidth, height);
-			var index = 0;
+			int index = 0;
 			foreach (PaletteItem item in vo.ConnectedBuilder.GetPaletteItems())
 			{
 				GUI.backgroundColor = item.color;

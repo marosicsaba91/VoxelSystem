@@ -7,10 +7,7 @@ namespace VoxelSystem
 	[CreateAssetMenu(fileName = "DefaultVoxelBuilder", menuName = "VoxelSystem/DefaultVoxelBuilder", order = 3)]
 	public class VoxelBuilderDefault : VoxelBuilder
 	{
-		protected override void BuildMesh(VoxelMap map, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles)
-		{
-			BuildTiledMesh(map, vertices, normals, uv, triangles);
-		}
+		protected override void BuildMesh(VoxelMap map, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles) => BuildTiledMesh(map, vertices, normals, uv, triangles);
 
 		public override IEnumerable<PaletteItem> GetPaletteItems()
 		{
@@ -46,7 +43,7 @@ namespace VoxelSystem
 			//   int counting = 0;
 
 
-			for (var dirIndex = 0; dirIndex < directions.Length; dirIndex++)
+			for (int dirIndex = 0; dirIndex < directions.Length; dirIndex++)
 			{
 				dir = directions[dirIndex];
 				normal = dir.ToVector();
@@ -57,9 +54,9 @@ namespace VoxelSystem
 				perp2 = dir.GetPerpendicularRightHand().ToVector() / 2f;
 				dirVecI = dir.ToVectorInt();
 
-				for (var x = 0; x < w; x++)
-					for (var y = 0; y < h; y++)
-						for (var z = 0; z < d; z++)
+				for (int x = 0; x < w; x++)
+					for (int y = 0; y < h; y++)
+						for (int z = 0; z < d; z++)
 						{
 							int colorIndex = map.GetFast(x, y, z, w, h).value;
 							if (colorIndex < 0)

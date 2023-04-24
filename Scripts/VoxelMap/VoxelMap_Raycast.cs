@@ -24,10 +24,7 @@ namespace VoxelSystem
 			return Raycast(ray, out hit, this, matrix, returnOutsideVoxel);
 		}
 
-		public bool Raycast(Ray ray, out InVoxelPoint hit, Matrix4x4 voxelMatrix, bool returnOutsideVoxel = false)
-		{
-			return Raycast(ray, out hit, this, voxelMatrix, returnOutsideVoxel);
-		}
+		public bool Raycast(Ray ray, out InVoxelPoint hit, Matrix4x4 voxelMatrix, bool returnOutsideVoxel = false) => Raycast(ray, out hit, this, voxelMatrix, returnOutsideVoxel);
 
 		static bool Raycast(Ray globalRay, out InVoxelPoint hit, VoxelMap map, Matrix4x4 matrix, bool returnOutsideVoxel)
 		{

@@ -120,11 +120,7 @@ namespace VoxelSystem
 		RenderParams _renderParams;
 
 
-		void Update()
-		{
-			SafeOnValidate();
-
-		}
+		void Update() => SafeOnValidate();
 
 		void SafeOnValidate()
 		{
@@ -227,12 +223,11 @@ namespace VoxelSystem
 
 
 
-		void MakeDirty()
-		{
+		void MakeDirty() =>
 #if UNITY_EDITOR
 			UnityEditor.EditorUtility.SetDirty(this);
 #endif
-		}
+
 
 		void AddBlock(BlockKey key, CustomMesh mesh)
 		{
@@ -253,7 +248,6 @@ namespace VoxelSystem
 
 		public bool TryGetMesh(Block block, out CustomMesh mesh, BenchmarkTimer benchmarkTimer = null)
 		{
-			mesh = default;
 			BlockType blockType = block.blockType;
 			Axis3D axis = block.axis;
 			SubVoxelFlags dir = SubVoxelUtility.FromVector(block.inVoxelDirection);
@@ -279,7 +273,7 @@ namespace VoxelSystem
 			if (_blockCache.IsEmpty())
 				BlockVoxelBuilder.CalculateBlocks(testVoxelMap.map, _blockCache, mergeCloseEdgesOnTestMesh);
 
-			var enumerable = _blockCache.Where(block =>
+			IEnumerable<Block> enumerable = _blockCache.Where(block =>
 				block.blockType == selectedBlockType &&
 				block.axis == selectedAxis &&
 				block.inVoxelDirection == selectedSubVoxel.ToVector());
@@ -340,11 +334,9 @@ namespace VoxelSystem
 		{
 			get
 			{
-				if (meshFilter == null)
-					meshFilter = GetComponent<MeshFilter>();
-				if (meshFilter == null)
+				if (meshFilter == null && !TryGetComponent(out meshFilter))
 					return null;
-				return meshFilter?.sharedMesh;
+				return meshFilter != null ? meshFilter.sharedMesh : null;
 			}
 		}
 

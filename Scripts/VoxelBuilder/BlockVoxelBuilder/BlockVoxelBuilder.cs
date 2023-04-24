@@ -84,7 +84,7 @@ namespace VoxelSystem
 
 		public override IEnumerable<PaletteItem> GetPaletteItems()
 		{
-			for (var index = 0; index < blockLibraries.Count; index++)
+			for (int index = 0; index < blockLibraries.Count; index++)
 			{
 				BlockLibrary blockLibrary = blockLibraries[index];
 				yield return new PaletteItem

@@ -235,12 +235,9 @@ namespace VoxelSystem
 			_targetVoxelObject.Map.Resize(direction, steps, ToolToResizeType(Tool));
 		}
 
-		static VoxelMap.ResizeType ToolToResizeType(VoxelTool tool)
-		{
-			return tool == VoxelTool.Rescale ? VoxelMap.ResizeType.Rescale :
+		static VoxelMap.ResizeType ToolToResizeType(VoxelTool tool) => tool == VoxelTool.Rescale ? VoxelMap.ResizeType.Rescale :
 				tool == VoxelTool.Repeat ? VoxelMap.ResizeType.Repeat :
 				VoxelMap.ResizeType.Resize;
-		}
 
 		static Vector3 GetHandlePos(GeneralDirection3D side, Vector3 size, float arrowSpacing)
 		{
