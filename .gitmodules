@@ -1,0 +1,3 @@
+[submodule "protobuf-net"]
+	path = protobuf-net
+	url = https://github.com/protobuf-net/protobuf-net.git

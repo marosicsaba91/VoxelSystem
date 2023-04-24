@@ -120,7 +120,7 @@ namespace VoxelSystem
 			return new Vector3Int(x, y, z);
 		}
 
-		public int GetHighestMaterialIndex() => voxelData.Select(v => v.value).Prepend(-1).Max();
+		public int GetHighestvalue() => voxelData.Select(v => v.value).Prepend(-1).Max();
 
 		// GET Voxels ----------------------------
 
@@ -137,7 +137,7 @@ namespace VoxelSystem
 
 		public enum VoxelAreaAction { Fill, Clear, Repaint }
 
-		public bool Set(int x, int y, int z, VoxelAreaAction action, int materialIndex)
+		public bool Set(int x, int y, int z, VoxelAreaAction action, int value)
 		{
 			if (!IsValidCoord(x, z, z))
 			{ return false; }
@@ -147,12 +147,12 @@ namespace VoxelSystem
 			if (action == VoxelAreaAction.Repaint)
 			{
 				if (oldV.IsFilled)
-				{ v.value = materialIndex; }
+				{ v.value = value; }
 			}
 			else if (action == VoxelAreaAction.Fill)
 			{
 				if (v.IsEmpty)
-				{ v.value = materialIndex; }
+				{ v.value = value; }
 			}
 			else if (action == VoxelAreaAction.Clear)
 			{
@@ -164,34 +164,34 @@ namespace VoxelSystem
 			return !oldV.Equals(v);
 		}
 
-		public bool Set(Vector3Int coordinate, VoxelAreaAction action, int materialIndex) => Set(coordinate.x, coordinate.y, coordinate.z, action, materialIndex);
+		public bool Set(Vector3Int coordinate, VoxelAreaAction action, int value) => Set(coordinate.x, coordinate.y, coordinate.z, action, value);
 
-		public bool Set(Vector3Int coordinate, int materialIndex) => Set(coordinate.x, coordinate.y, coordinate.z, VoxelAreaAction.Fill, materialIndex);
+		public bool Set(Vector3Int coordinate, int value) => Set(coordinate.x, coordinate.y, coordinate.z, VoxelAreaAction.Fill, value);
 
-		public bool Set(int x, int y, int z, int materialIndex) => Set(x, y, z, VoxelAreaAction.Fill, materialIndex);
+		public bool Set(int x, int y, int z, int value) => Set(x, y, z, VoxelAreaAction.Fill, value);
 
-		public bool SetValueOf(Vector3Int coordinate, int materialIndex) => Set(coordinate.x, coordinate.y, coordinate.z, VoxelAreaAction.Repaint, materialIndex);
+		public bool SetValueOf(Vector3Int coordinate, int value) => Set(coordinate.x, coordinate.y, coordinate.z, VoxelAreaAction.Repaint, value);
 
-		public bool SetValueOf(int x, int y, int z, int materialIndex) => Set(x, y, z, VoxelAreaAction.Repaint, materialIndex);
+		public bool SetValueOf(int x, int y, int z, int value) => Set(x, y, z, VoxelAreaAction.Repaint, value);
 
 		public bool ClearVoxel(Vector3Int coordinate) => ClearVoxel(coordinate.x, coordinate.y, coordinate.z);
 
-		public bool ClearVoxel(int x, int y, int z) => Set(x, y, z, VoxelAreaAction.Clear, materialIndex: 0);
+		public bool ClearVoxel(int x, int y, int z) => Set(x, y, z, VoxelAreaAction.Clear, value: 0);
 
 		public void ClearWhole()
 		{
 			for (int i = 0; i < voxelData.Length; i++)
 			{
-				voxelData[i] = new Voxel(materialIndex: -1);
+				voxelData[i] = new Voxel(value: -1);
 			}
 			MapChanged();
 		}
 
-		public void FillWhole(int materialIndex)
+		public void FillWhole(int value)
 		{
 			for (int i = 0; i < voxelData.Length; i++)
 			{
-				voxelData[i] = new Voxel(materialIndex);
+				voxelData[i] = new Voxel(value);
 			}
 			MapChanged();
 		}
@@ -444,7 +444,7 @@ namespace VoxelSystem
 				}
 
 				if (oldIndex < 0)
-					newVoxelData[i] = new Voxel(materialIndex: -1);
+					newVoxelData[i] = new Voxel(value: -1);
 				else
 					newVoxelData[i] = voxelData[oldIndex];
 			}

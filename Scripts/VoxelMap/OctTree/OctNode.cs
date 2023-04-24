@@ -1,4 +1,4 @@
-﻿//using ProtoBuf;
+﻿// using ProtoBuf;
 using System;
 using UnityEngine;
 
@@ -185,10 +185,7 @@ namespace VoxelSystem
 			string state;
 			if (Equals(value, DefaultValue))
 				state = "Empty";
-			else if (innerChunks == null)
-				state = $"Full: {value}";
-			else
-				state = "Mixed";
+			else state = innerChunks == null ? $"Full: {value}" : "Mixed";
 
 			Debug.Log($"{id} --- {state} ---------------------------------------");
 			if (level == 0)

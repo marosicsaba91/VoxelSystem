@@ -8,7 +8,7 @@ namespace VoxelSystem
 	{
 		/// <summary>
 		/// If -1, the voxel is clear.
-		/// If value >= 0, than MaterialIndex = value;
+		/// If value >= 0, than value = value;
 		/// </summary>
 		[HideInInspector] public int value;
 
@@ -16,7 +16,7 @@ namespace VoxelSystem
 		public bool IsFilled => value >= 0;
 		internal void Clear() => value = -1;
 
-		public Voxel(int materialIndex = -1) =>
-			value = materialIndex;
+		public Voxel(int value = -1) =>
+			this.value = value;
 	}
 }

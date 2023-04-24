@@ -119,7 +119,7 @@ namespace VoxelSystem
 
 		public bool Set(int x, int y, int z, TValue value) => Set(x, y, z, ActionType.All, value);
 
-		public bool ReColor(Vector3Int coordinate, TValue materialIndex) => Set(coordinate.x, coordinate.y, coordinate.z, ActionType.AllExceptDefault, materialIndex);
+		public bool ReColor(Vector3Int coordinate, TValue value) => Set(coordinate.x, coordinate.y, coordinate.z, ActionType.AllExceptDefault, value);
 
 		public bool ReColor(int x, int y, int z, TValue value) => Set(x, y, z, ActionType.AllExceptDefault, value);
 

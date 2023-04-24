@@ -1,4 +1,5 @@
 using MUtility;
+using System;
 using UnityEditor;
 using UnityEngine;
 
@@ -7,8 +8,8 @@ namespace VoxelSystem
 	[CreateAssetMenu(fileName = "VoxelMap", menuName = "VoxelSystem/VoxelMap", order = 1)]
 	public class VoxelMapScriptableObject : ScriptableObject
 	{
-		public VoxelMap map; 
-		public OctVoxelMap octMap;
+		public VoxelMap map;
+		[HideInInspector] public OctVoxelMap octMap;
 		[SerializeField] DisplayMember copyToOctMap = new(nameof(CopyToOctMap));
 
 		public int size = 0;
@@ -16,6 +17,12 @@ namespace VoxelSystem
 		public Vector3Int index = Vector3Int.zero;
 		[SerializeField] DisplayMember create = new(nameof(Create));
 		[SerializeField] DisplayMember set = new(nameof(Set));
+
+		[SerializeField] DisplayMember deserialize = new(nameof(Deserialize));
+		[SerializeField] DisplayMember serialize = new(nameof(Serialize));
+
+		void Deserialize() => octMap.Deserialize();
+		void Serialize() => octMap.Serialize();
 
 		void CopyToOctMap()
 		{				
@@ -28,7 +35,7 @@ namespace VoxelSystem
 						octMap.Set(x, y, z, value);
 					}
 
-			int chunkCount = octMap.rootChunk.ChunkCount;
+			int chunkCount = octMap.RootChunk.ChunkCount;
 			int voxelCount = octMap.CanvasSize.x * octMap.CanvasSize.y * octMap.CanvasSize.z;
 			float chunkPerVoxel = (float)chunkCount / voxelCount;
 			float reductionRate = chunkPerVoxel * 100;

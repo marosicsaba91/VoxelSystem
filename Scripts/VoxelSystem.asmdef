@@ -1,6 +1,6 @@
 {
     "name": "VoxelSystem",
-    "rootNamespace": "VoxelSystem",
+    "rootNamespace": "",
     "references": [
         "GUID:8c8c0e118c65fb143abfbcdb8ea42f51",
         "GUID:c186a770956a55740824c42daaf9e9c5"
@@ -8,9 +8,9 @@
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
-    "overrideReferences": false,
+    "overrideReferences": true,
     "precompiledReferences": [
-        "nunit.framework.dll"
+        "protobuf-net.dll"
     ],
     "autoReferenced": true,
     "defineConstraints": [],
