@@ -1,4 +1,5 @@
-﻿using ProtoBuf; 
+﻿using ProtoBuf;
+using System.Text;
 using UnityEngine;
 
 namespace VoxelSystem
@@ -6,21 +7,12 @@ namespace VoxelSystem
 	// This version of OctTreeNode is not used anymore, because it's inefficient  
 
 	[ProtoContract]
-	public class OctVoxelChunk
+	public struct OctVoxelChunk
 	{
 		[ProtoMember(1)] 
 		public int value;
 		[ProtoMember(2)]
 		public OctVoxelChunk[] innerChunks;
-		
-		public OctVoxelChunk(int value)
-		{
-			this.value = value;
-		}
-
-
-		public OctVoxelChunk() { } // ONLY FOR ProtoBuffer - LEAVE IT LIKE THIS
-
 
 		public const int defaultValue = -1;
 
@@ -41,7 +33,16 @@ namespace VoxelSystem
 		}
 		public int Value => value;
 
-		public OctVoxelChunk TryGetInnerNode(int i) => innerChunks == null ? null : innerChunks[i];
+		public bool TryGetInnerChunk(int i, out OctVoxelChunk chunk)
+		{
+			if (innerChunks == null) 
+			{
+				chunk = default;
+				return false;
+			}
+			chunk = innerChunks[i];
+			return true;
+		}
 
 		// ----------------------------------------------------------
 
@@ -53,7 +54,7 @@ namespace VoxelSystem
 
 		internal int GetLeaf(int x, int y, int z, int size)
 		{
-			if (innerChunks == null)
+			if (innerChunks == null) // IsHomogenous
 				return value;
 			int index = GetSubChunkIndex(ref x, ref y, ref z, size);
 			OctVoxelChunk inner = innerChunks[index];
@@ -63,7 +64,7 @@ namespace VoxelSystem
 
 		public bool SetLeaf(int x, int y, int z, int newValue, int chunkSize)
 		{
-			if (innerChunks == null)  // It was NOT mixed before
+			if (innerChunks == null)  // IsHomogenous
 			{
 				if (value == newValue)
 					return false;
@@ -77,7 +78,10 @@ namespace VoxelSystem
 				{
 					innerChunks = new OctVoxelChunk[8];
 					for (int i = 0; i < 8; i++)
-						innerChunks[i] = new OctVoxelChunk(value);
+					{
+						innerChunks[i] = new OctVoxelChunk();
+						innerChunks[i].Fill(value);
+					}
 				}
 			}
 
@@ -111,25 +115,37 @@ namespace VoxelSystem
 			return true;
 		}
 
-		internal void GetString(int level, string id)
-		{
-			string state;
-			if (value == defaultValue)
-				state = "Empty";
-			else if (innerChunks == null)
-				state = $"Full: {value}";
-			else
-				state = "Mixed";
+		static readonly StringBuilder sb = new();
 
-			Debug.Log($"{id} --- {state} ---------------------------------------");
+		public string GetString(int level, string id = "Root") => GetString(level, level, id);
+
+		string GetString(int level, int maxLevel, string id)
+		{
+			sb.Clear();
+
+			for (int i = 0; i < maxLevel - level; i++)
+				sb.Append("   ");
+
+			sb.AppendLine(id);
+			sb.Append(": ");
+
+			if (innerChunks == null)
+			{
+				sb.AppendLine(value == defaultValue ? "Empty" : $"Full: {value}");
+				return sb.ToString();
+			}
+			else
+				sb.AppendLine("Mixed");
+
 			if (level == 0)
-				return;
+				return sb.ToString();
 
 			for (int i = 0; i < 8; i++)
 			{
 				string iid = id + $" / ({i / 4},{(i % 4) / 2},{i % 2})";
-				innerChunks[i].GetString(level - 1, iid);
+				sb.AppendLine(innerChunks[i].GetString(level - 1, maxLevel, iid));
 			}
+			return sb.ToString();
 		}
 
 		public static int GetSubChunkIndex(ref int x, ref int y, ref int z, int size)

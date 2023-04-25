@@ -22,14 +22,15 @@ public class VoxelRendererEditor : Editor
 		if (map == null)
 			return;
 
-		if (map.Raycast(ray, out InVoxelPoint hit, renderer.transform))
-		{
-			Debug.Log("Mesh clicked!");
-		}
-		else
-		{
-			Debug.Log("Missed");
-		}
+		// RAYCAST
+		//if (map.Raycast(ray, out InVoxelPoint hit, renderer.transform))
+		//{
+		//	Debug.Log("Mesh clicked!");
+		//}
+		//else
+		//{
+		//	Debug.Log("Missed");
+		//}
 	}
 
 

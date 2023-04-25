@@ -4,9 +4,10 @@ using UnityEngine;
 using VoxelSystem;
 
 [ExecuteAlways]
+[RequireComponent(typeof(VoxelFilter))]
 public class VoxelRenderer : MonoBehaviour
 {
-	[SerializeField] VoxelMapScriptableObject map;
+	[SerializeField, HideInInspector] VoxelFilter voxelFilter;
 	[SerializeField] BlockLibrary blockLibrary;
 	[SerializeField] Material material;
 
@@ -20,29 +21,43 @@ public class VoxelRenderer : MonoBehaviour
 	{
 		get
 		{
-
-			if (mesh == null)
-				mesh = VoxelBuilder.VoxelMapToMesh(map.map, GenerateMesh);
-
+			RebuildMesh();
 			return mesh;
 		}
 	}
 
-	public VoxelMap Map => map == null ? null : map.map;
+	public VoxelMap Map => voxelFilter == null ? null : voxelFilter.GetMap();
 
 	static readonly List<Block> _blockCache = new();
-	Dictionary<BlockKey, CustomMesh> _meshCache;
 
-	void OnValidate() => mesh = null;
-
-	void RebuildMesh()
+	void OnValidate()
 	{
-		if (map == null)
-			return;
-		if (blockLibrary == null)
-			return;
+		voxelFilter = GetComponent<VoxelFilter>();
+		mesh = null;
+	}
 
-		mesh = VoxelBuilder.VoxelMapToMesh(map.map, GenerateMesh);
+	void Update()
+	{
+		VoxelMap map = Map; 
+		if (map == null) return;
+		if (blockLibrary == null) return;
+		mesh = VoxelBuilder.VoxelMapToMesh(map, GenerateMesh);
+		Graphics.DrawMesh(mesh, transform.localToWorldMatrix, material, gameObject.layer);
+	}
+
+
+	public void RebuildMesh()
+	{
+		VoxelMap map = Map;
+		// ?????
+
+		if (map == null) return;
+		if (blockLibrary == null) return;
+
+		Debug.Log("Regenerate: " + map.Size);
+	
+		mesh = VoxelBuilder.VoxelMapToMesh(map, GenerateMesh);
+		Debug.Log("Regenerated: " + map.Size);
 	}
 
 	void GenerateMesh(VoxelMap voxelMap, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles)

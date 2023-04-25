@@ -34,15 +34,7 @@ namespace VoxelSystem
 
 		// Getters --------------------------------------------
 
-		public OctVoxelChunk RootChunk
-		{
-			get
-			{
-				if (rootChunk == null)
-					Deserialize();
-				return rootChunk;
-			}
-		}
+		public OctVoxelChunk RootChunk => rootChunk;
 
 		public int RealSize
 		{
@@ -76,8 +68,6 @@ namespace VoxelSystem
 
 		public bool IsValidCoord(int x, int y, int z)
 		{
-			if (rootChunk == null) return false;
-
 			return
 				x >= 0 && x < canvasSize.x &&
 				y >= 0 && y < canvasSize.y &&
@@ -105,7 +95,8 @@ namespace VoxelSystem
 			float log = Mathf.Log(longestCanvasSize, 2);
 			levelCount = Mathf.CeilToInt(log);
 			this.canvasSize = canvasSize;
-			rootChunk = new OctVoxelChunk(value);
+			rootChunk = new OctVoxelChunk();
+			rootChunk.Fill(value);
 		}
 
 		// GET Voxels --------------------------------------------------------        

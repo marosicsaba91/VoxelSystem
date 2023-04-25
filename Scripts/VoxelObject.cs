@@ -235,7 +235,6 @@ namespace VoxelSystem
 
 		}
 
-
 		public void ApplyScale()
 		{
 			if (!lockScale)
@@ -291,7 +290,6 @@ namespace VoxelSystem
 			return move;
 		}
 
-
 		void SetMeshDirty()
 		{
 			if (Application.isPlaying)
@@ -304,7 +302,7 @@ namespace VoxelSystem
 
 		public void ClearWholeMap() => Map.ClearWhole();
 
-		public bool IsValidCoord(Vector3Int coord) => Map.IsValidCoord(coord);
+		public bool IsValidCoord(Vector3Int coordinate) => Map.IsValidCoord(coordinate);
 
 		void OnDrawGizmosSelected()
 		{
