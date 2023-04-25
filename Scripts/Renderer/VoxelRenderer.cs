@@ -14,6 +14,8 @@ public class VoxelRenderer : MonoBehaviour
 	[SerializeField] Mesh mesh;
 	[SerializeField] bool mergeCloseEdgesOnTestMesh;
 
+	[SerializeField] DisplayMember regenerateMesh = new (nameof(RegenerateMesh));
+
 	public Matrix4x4 LocalToWorldMatrix => transform.localToWorldMatrix;
 	public Material Material => material;
 
@@ -21,14 +23,14 @@ public class VoxelRenderer : MonoBehaviour
 	{
 		get
 		{
-			RebuildMesh();
+			if(mesh == null)
+				RegenerateMesh();
 			return mesh;
 		}
 	}
 
 	public VoxelMap Map => voxelFilter == null ? null : voxelFilter.GetMap();
 
-	static readonly List<Block> _blockCache = new();
 
 	void OnValidate()
 	{
@@ -38,33 +40,33 @@ public class VoxelRenderer : MonoBehaviour
 
 	void Update()
 	{
-		VoxelMap map = Map; 
-		if (map == null) return;
-		if (blockLibrary == null) return;
-		mesh = VoxelBuilder.VoxelMapToMesh(map, GenerateMesh);
+		mesh = Mesh;
+		if (mesh == null) return;
 		Graphics.DrawMesh(mesh, transform.localToWorldMatrix, material, gameObject.layer);
 	}
 
 
-	public void RebuildMesh()
+	void RegenerateMesh()
 	{
-		VoxelMap map = Map;
-		// ?????
-
+		VoxelMap map = Map; 
 		if (map == null) return;
 		if (blockLibrary == null) return;
 
-		Debug.Log("Regenerate: " + map.Size);
-	
-		mesh = VoxelBuilder.VoxelMapToMesh(map, GenerateMesh);
-		Debug.Log("Regenerated: " + map.Size);
+		mesh = VoxelBuilder.VoxelMapToMesh(map, GenerateMesh); 
 	}
 
+	// Mesh Generation
+
+	static readonly List<Block> _blockCache = new();
 	void GenerateMesh(VoxelMap voxelMap, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles)
 	{
-		if (_blockCache.IsEmpty())
-			BlockVoxelBuilder.CalculateBlocks(voxelMap, _blockCache, mergeCloseEdgesOnTestMesh);
+		if (blockLibrary == null) return;
+		VoxelMap map = Map;
+		if (map == null) return; 
+
+		BlockVoxelBuilder.CalculateBlocks(voxelMap, _blockCache, mergeCloseEdgesOnTestMesh);
 
 		BlockVoxelBuilder.BuildMeshFromBlocks(blockLibrary, _blockCache, vertices, normals, uv, triangles);
+		Debug.Log("Mesh Regenerated");
 	}
 }

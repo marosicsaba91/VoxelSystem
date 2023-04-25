@@ -24,7 +24,6 @@ namespace VoxelSystem
 		// Map, Palette, Builder
 		[SerializeField, HideInInspector] internal VoxelMapScriptableObject connectedMap = null;
 		[SerializeField, HideInInspector] internal VoxelBuilder connectedBuilder = null;
-
 		[SerializeField, HideInInspector] internal VoxelMap innerMap = null;
 
 		int _meshDirtyCounter = 0;

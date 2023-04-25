@@ -12,9 +12,8 @@ namespace VoxelSystem
 		[SerializeField] internal VoxelMapScriptableObject connectedMap = null;
 
 		void OnValidate() 
-		{			
-			if (TryGetComponent(out voxelRenderer))
-				voxelRenderer.RebuildMesh(); 
+		{
+			voxelRenderer = GetComponent<VoxelRenderer>();
 		}
 
 		public bool HasConnectedMap() => connectedMap != null;
@@ -33,21 +32,5 @@ namespace VoxelSystem
 			else
 				return connectedMap.octMap;
 		}
-
-		public VoxelMapScriptableObject ConnectedMap
-		{
-			get => connectedMap;
-			set
-			{
-				if (connectedMap == value)
-					return;
-				if (value == null)
-					innerMap = connectedMap.map.GetCopy();
-				else if (voxelRenderer != null)
-					voxelRenderer.RebuildMesh();
-				connectedMap = value;
-			}
-		}
-
 	}
 }

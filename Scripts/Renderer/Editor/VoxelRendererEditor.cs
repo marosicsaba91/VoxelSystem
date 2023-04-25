@@ -10,8 +10,8 @@ public class VoxelRendererEditor : Editor
 		VoxelRenderer renderer = (VoxelRenderer)target;
 
 		// Subscribe to repaint event
-		SceneView.duringSceneGui -= Repaint;
-		SceneView.duringSceneGui += Repaint;
+		// SceneView.duringSceneGui -= Repaint;
+		// SceneView.duringSceneGui += Repaint;
 
 		Event e = Event.current;
 		// if (e.type != EventType.MouseDown) return;
@@ -23,14 +23,14 @@ public class VoxelRendererEditor : Editor
 			return;
 
 		// RAYCAST
-		//if (map.Raycast(ray, out InVoxelPoint hit, renderer.transform))
-		//{
-		//	Debug.Log("Mesh clicked!");
-		//}
-		//else
-		//{
-		//	Debug.Log("Missed");
-		//}
+		if (map.Raycast(ray, out InVoxelPoint hit, renderer.transform))
+		{
+			Debug.Log("Mesh clicked!");
+		}
+		else
+		{
+			Debug.Log("Missed");
+		}
 	}
 
 
