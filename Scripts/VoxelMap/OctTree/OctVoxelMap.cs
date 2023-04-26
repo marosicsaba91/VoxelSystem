@@ -9,7 +9,7 @@ namespace VoxelSystem
 	// This version of OctTree is not used anymore, because it's inefficient 
 
 	[Serializable]
-	public class OctVoxelMap : ISerializationCallbackReceiver
+	public partial class OctVoxelMap : ISerializationCallbackReceiver
 	{
 		[SerializeField] Vector3Int canvasSize;
 		[SerializeField] int levelCount;
@@ -101,7 +101,7 @@ namespace VoxelSystem
 
 		// GET Voxels --------------------------------------------------------        
 
-		public int Get(int x, int y, int z) => rootChunk.GetLeaf(x, y, z, RealSize);
+		public int Get(int x, int y, int z) => rootChunk.GetLeaf(x, y, z, RealSize); 
 
 		public bool IsFilledSafe(Vector3Int index) => index.x >= 0 && index.x < canvasSize.x &&
 				   index.y >= 0 && index.y < canvasSize.y &&

@@ -20,6 +20,8 @@ namespace VoxelSystem
 
 		public bool IsHomogenous => innerChunks == null;
 
+		public bool IsDefault => value == defaultValue;
+
 		public int ChunkCount
 		{
 			get
@@ -31,6 +33,7 @@ namespace VoxelSystem
 				return chunkCount;
 			}
 		}
+
 		public int Value => value;
 
 		public bool TryGetInnerChunk(int i, out OctVoxelChunk chunk)
@@ -191,4 +194,10 @@ namespace VoxelSystem
 			return (int)SubVoxel.LeftDownBackward;
 		}
 	}
+
+	static class OctVoxelUtility
+	{
+		internal static bool IsFilled(this int i) => i != OctVoxelChunk.defaultValue;
+	}
+
 }

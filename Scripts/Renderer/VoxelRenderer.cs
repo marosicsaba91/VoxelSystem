@@ -14,6 +14,9 @@ public class VoxelRenderer : MonoBehaviour
 	[SerializeField] Mesh mesh;
 	[SerializeField] bool mergeCloseEdgesOnTestMesh;
 
+	public Mesh cursorMesh;
+	public Material cursorMaterial;
+
 	[SerializeField] DisplayMember regenerateMesh = new (nameof(RegenerateMesh));
 
 	public Matrix4x4 LocalToWorldMatrix => transform.localToWorldMatrix;
@@ -29,7 +32,7 @@ public class VoxelRenderer : MonoBehaviour
 		}
 	}
 
-	public VoxelMap Map => voxelFilter == null ? null : voxelFilter.GetMap();
+	public OctVoxelMap Map => voxelFilter == null ? null : voxelFilter.GetOctMap();
 
 
 	void OnValidate()
@@ -40,15 +43,19 @@ public class VoxelRenderer : MonoBehaviour
 
 	void Update()
 	{
+		RenderMesh(); 
+	}
+
+	void RenderMesh()
+	{
 		mesh = Mesh;
 		if (mesh == null) return;
 		Graphics.DrawMesh(mesh, transform.localToWorldMatrix, material, gameObject.layer);
 	}
 
-
 	void RegenerateMesh()
 	{
-		VoxelMap map = Map; 
+		OctVoxelMap map = Map; 
 		if (map == null) return;
 		if (blockLibrary == null) return;
 
@@ -58,11 +65,9 @@ public class VoxelRenderer : MonoBehaviour
 	// Mesh Generation
 
 	static readonly List<Block> _blockCache = new();
-	void GenerateMesh(VoxelMap voxelMap, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles)
-	{
-		if (blockLibrary == null) return;
-		VoxelMap map = Map;
-		if (map == null) return; 
+	void GenerateMesh(OctVoxelMap voxelMap, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles)
+	{ 
+		if (voxelMap == null) return; 
 
 		BlockVoxelBuilder.CalculateBlocks(voxelMap, _blockCache, mergeCloseEdgesOnTestMesh);
 
