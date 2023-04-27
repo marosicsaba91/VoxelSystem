@@ -10,7 +10,7 @@ namespace VoxelSystem
 	public static class MagicaVoxelConverter
 	{
 
-		public static VoxelMap Load(string filePath)
+		public static ArrayVoxelMap Load(string filePath)
 		{
 			FileStream fs = File.Open(filePath, FileMode.Open);
 
@@ -29,7 +29,7 @@ namespace VoxelSystem
 			return Convert(main);
 		}
 
-		static VoxelMap Convert(MVoxChunk main)
+		static ArrayVoxelMap Convert(MVoxChunk main)
 		{
 			// Get the SIZE chunk
 			MVoxChunk size = main.Children.SingleOrDefault(c => c.ID.Contains("SIZE"));
@@ -46,7 +46,7 @@ namespace VoxelSystem
 
 				if (x > 0 && y > 0 && z > 0)
 				{
-					VoxelMap model = new VoxelMap((int)x, (int)y, (int)z);
+					ArrayVoxelMap model = new ArrayVoxelMap((int)x, (int)y, (int)z);
 
 					// Read Number of voxels
 					UInt32 numVoxels = ConvertToUInt32(voxels.Contents.SubArray(index: 0, length: 4), offset: 0);
@@ -75,7 +75,7 @@ namespace VoxelSystem
 			return null;
 		}
 
-		static MVoxChunk Convert(VoxelMap map) =>
+		static MVoxChunk Convert(ArrayVoxelMap map) =>
 			// TODO
 			null;
 

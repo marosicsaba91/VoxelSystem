@@ -36,7 +36,7 @@ namespace VoxelSystem
 
 		static readonly List<Block> _blocks = new();
 
-		protected override void BuildMesh(VoxelMap voxelMap, List<Vector3> vertices, List<Vector3> normals,
+		protected override void BuildMesh(ArrayVoxelMap voxelMap, List<Vector3> vertices, List<Vector3> normals,
 			List<Vector2> uv, List<int> triangles)
 		{
 			CalculateBlocks(voxelMap, _blocks, mergeCloseEdges);
@@ -82,7 +82,7 @@ namespace VoxelSystem
 			// Debug.Log(timer);
 		}
 
-		internal static void CalculateBlocks(VoxelMap voxelMap, List<Block> blocks, bool mergeCloseEdges)
+		internal static void CalculateBlocks(ArrayVoxelMap voxelMap, List<Block> blocks, bool mergeCloseEdges)
 		{
 			blocks.Clear();
 
@@ -97,9 +97,9 @@ namespace VoxelSystem
 		{
 			blocks.Clear();
 
-			for (int x = voxelMap.Width - 1; x >= 0; x--)
-				for (int y = voxelMap.Height - 1; y >= 0; y--)
-					for (int z = voxelMap.Depth - 1; z >= 0; z--)
+			for (int x = voxelMap.CanvasSize.x - 1; x >= 0; x--)
+				for (int y = voxelMap.CanvasSize.y - 1; y >= 0; y--)
+					for (int z = voxelMap.CanvasSize.z - 1; z >= 0; z--)
 						blocks.AddRange(VoxelToBlocks(voxelMap, x, y, z, mergeCloseEdges));
 
 			// Debug.Log($"Block Count: {blocks.Count}");
@@ -121,7 +121,7 @@ namespace VoxelSystem
 
 		// Methods
 		static System.Random _gizmoRandom;
-		public override void DrawGizmos(VoxelMap map)
+		public override void DrawGizmos(ArrayVoxelMap map)
 		{
 			// Draw whole voxel map
 			if (drawingSettings.drawVoxels)
@@ -131,7 +131,7 @@ namespace VoxelSystem
 					for (int y = map.Height - 1; y >= 0; y--)
 						for (int z = map.Depth - 1; z >= 0; z--)
 						{
-							if (map.Get(x, y, z).IsFilled)
+							if (map.GetVoxel(x, y, z).IsFilled)
 								Gizmos.DrawWireCube(new Vector3(x + 0.5f, y + 0.5f, z + 0.5f), Vector3.one);
 						}
 			}
@@ -154,9 +154,9 @@ namespace VoxelSystem
 			}
 		}
 
-		static IEnumerable<Block> VoxelToBlocks(VoxelMap voxelMap, int vXi, int vYi, int vZi, bool mergeCloseEdges) // Voxel Index
+		static IEnumerable<Block> VoxelToBlocks(ArrayVoxelMap voxelMap, int vXi, int vYi, int vZi, bool mergeCloseEdges) // Voxel Index
 		{
-			Voxel voxel = voxelMap.Get(vXi, vYi, vZi);
+			Voxel voxel = voxelMap.GetVoxel(vXi, vYi, vZi);
 			bool isFilled = voxel.IsFilled;
 			var voxelIndex = new Vector3Int(vXi, vYi, vZi);
 
@@ -180,15 +180,15 @@ namespace VoxelSystem
 						bool nYe = nYi >= 0 && nYi < voxelMap.Height;
 						bool nZe = nZi >= 0 && nZi < voxelMap.Depth;
 
-						bool nXf = nXe && voxelMap.Get(nXi, vYi, vZi).IsFilled; // Is Neighbour Filled
-						bool nYf = nYe && voxelMap.Get(vXi, nYi, vZi).IsFilled;
-						bool nZf = nZe && voxelMap.Get(vXi, vYi, nZi).IsFilled;
+						bool nXf = nXe && voxelMap.GetVoxel(nXi, vYi, vZi).IsFilled; // Is Neighbour Filled
+						bool nYf = nYe && voxelMap.GetVoxel(vXi, nYi, vZi).IsFilled;
+						bool nZf = nZe && voxelMap.GetVoxel(vXi, vYi, nZi).IsFilled;
 
-						bool nXYf = nXe && nYe && voxelMap.Get(nXi, nYi, vZi).IsFilled; // Is Cross Neighbour Filled
-						bool nYZf = nYe && nZe && voxelMap.Get(vXi, nYi, nZi).IsFilled;
-						bool nZXf = nZe && nXe && voxelMap.Get(nXi, vYi, nZi).IsFilled;
+						bool nXYf = nXe && nYe && voxelMap.GetVoxel(nXi, nYi, vZi).IsFilled; // Is Cross Neighbour Filled
+						bool nYZf = nYe && nZe && voxelMap.GetVoxel(vXi, nYi, nZi).IsFilled;
+						bool nZXf = nZe && nXe && voxelMap.GetVoxel(nXi, vYi, nZi).IsFilled;
 
-						bool nXYZf = nZe && nXe && nYe && voxelMap.Get(nXi, nYi, nZi).IsFilled; // Is Corner Neighbour Filled
+						bool nXYZf = nZe && nXe && nYe && voxelMap.GetVoxel(nXi, nYi, nZi).IsFilled; // Is Corner Neighbour Filled
 
 						// ---------------------------------------------------------------------------------------------
 
@@ -336,7 +336,7 @@ namespace VoxelSystem
 
 		static IEnumerable<Block> VoxelToBlocks(OctVoxelMap voxelMap, int vXi, int vYi, int vZi, bool mergeCloseEdges) // Voxel Index
 		{
-			int voxel = voxelMap.Get(vXi, vYi, vZi);
+			int voxel = voxelMap.GetVoxel(vXi, vYi, vZi);
 			bool isFilled = voxel.IsFilled();
 			var voxelIndex = new Vector3Int(vXi, vYi, vZi);
 
@@ -356,19 +356,19 @@ namespace VoxelSystem
 							vYi + (dY + 1) * 0.25f,
 							vZi + (dZ + 1) * 0.25f);
 
-						bool nXe = nXi >= 0 && nXi < voxelMap.Width; // Do Neighbour Row Exist
-						bool nYe = nYi >= 0 && nYi < voxelMap.Height;
-						bool nZe = nZi >= 0 && nZi < voxelMap.Depth;
+						bool nXe = nXi >= 0 && nXi < voxelMap.CanvasSize.x; // Do Neighbour Row Exist
+						bool nYe = nYi >= 0 && nYi < voxelMap.CanvasSize.y;
+						bool nZe = nZi >= 0 && nZi < voxelMap.CanvasSize.z;
 
-						bool nXf = nXe && voxelMap.Get(nXi, vYi, vZi).IsFilled(); // Is Neighbour Filled
-						bool nYf = nYe && voxelMap.Get(vXi, nYi, vZi).IsFilled();
-						bool nZf = nZe && voxelMap.Get(vXi, vYi, nZi).IsFilled();
+						bool nXf = nXe && voxelMap.GetVoxel(nXi, vYi, vZi).IsFilled(); // Is Neighbour Filled
+						bool nYf = nYe && voxelMap.GetVoxel(vXi, nYi, vZi).IsFilled();
+						bool nZf = nZe && voxelMap.GetVoxel(vXi, vYi, nZi).IsFilled();
 
-						bool nXYf = nXe && nYe && voxelMap.Get(nXi, nYi, vZi).IsFilled(); // Is Cross Neighbour Filled
-						bool nYZf = nYe && nZe && voxelMap.Get(vXi, nYi, nZi).IsFilled();
-						bool nZXf = nZe && nXe && voxelMap.Get(nXi, vYi, nZi).IsFilled();
+						bool nXYf = nXe && nYe && voxelMap.GetVoxel(nXi, nYi, vZi).IsFilled(); // Is Cross Neighbour Filled
+						bool nYZf = nYe && nZe && voxelMap.GetVoxel(vXi, nYi, nZi).IsFilled();
+						bool nZXf = nZe && nXe && voxelMap.GetVoxel(nXi, vYi, nZi).IsFilled();
 
-						bool nXYZf = nZe && nXe && nYe && voxelMap.Get(nXi, nYi, nZi).IsFilled(); // Is Corner Neighbour Filled
+						bool nXYZf = nZe && nXe && nYe && voxelMap.GetVoxel(nXi, nYi, nZi).IsFilled(); // Is Corner Neighbour Filled
 
 						// ---------------------------------------------------------------------------------------------
 

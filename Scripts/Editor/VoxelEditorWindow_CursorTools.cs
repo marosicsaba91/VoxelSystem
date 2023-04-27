@@ -8,12 +8,12 @@ namespace VoxelSystem
 {
 	public partial class VoxelEditorWindow
 	{
-		static VoxelMap _originalMap = null; // Target Voxel Map before Mouse Down
+		static ArrayVoxelMap _originalMap = null; // Target Voxel Map before Mouse Down
 
 		static Vector3Int? _mouseDownCursorVoxel;
 		static Vector3Int? _lastValidMouseDragCursorVoxel;
 
-		static InVoxelPoint? _cursorVoxel;
+		static VoxelHitPoint? _cursorVoxel;
 
 		// --------------------- SELECTION ---------------------------
 		static Vector3Int _selectionStart;
@@ -43,7 +43,6 @@ namespace VoxelSystem
 			}
 
 			bool editingIsDisabled =
-				_targetVoxelObject.Map == null ||
 				_targetVoxelObject == null ||
 				_targetVoxelObject.Map == null ||
 				Tool == VoxelTool.Non;
@@ -52,87 +51,81 @@ namespace VoxelSystem
 			Tools.hidden = !editingIsDisabled;
 
 			// Return if editing is Not Active
-			if (editingIsDisabled)
-			{ return; }
+			if (editingIsDisabled) return;
 
-			// Handling the right Mouse Events, and make shure to handle nothing else
+			// Handling the right Mouse Events, and make sure to handle nothing else
 			Event e = Event.current;
 			HandleUtility.AddDefaultControl(GUIUtility.GetControlID(FocusType.Passive));
 			const int leftMouseButtonIndex = 0;
-			if (e.button != leftMouseButtonIndex)
-			{ return; }
-			if (e.type != EventType.MouseDown && e.type != EventType.MouseUp && e.type != EventType.MouseDrag && e.type != EventType.MouseMove)
-			{ return; }
+
+			if (e.button != leftMouseButtonIndex) return;
+			if (e.type is not EventType.MouseDown and not EventType.MouseUp and not EventType.MouseDrag and not EventType.MouseMove) return;
 
 			if (_cursorTools.Contains(Tool))
 			{
 				// Calculate Ray from Mouse Position
+				ArrayVoxelMap usedMap = _originalMap == null || _originalMap.Size == Vector3Int.zero 
+					? _targetVoxelObject.Map
+					: _originalMap;
 
-				/* OLD */
-				// Vector3 screenPosition = Event.current.mousePosition;
-				// screenPosition.y = 2 + Camera.current.pixelHeight - screenPosition.y;
-				// Ray ray = Camera.current.ScreenPointToRay(screenPosition);
-
-				/* NEW */
-				Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
-
-
-				// Get The Selected Voxel Coordinate;
-				VoxelMap usedMap = _originalMap == null || _originalMap.Size == Vector3Int.zero ? _targetVoxelObject.Map : _originalMap;
-				if (usedMap != null && usedMap.Raycast(ray, out InVoxelPoint hit, _targetGameObject.transform, Tool == VoxelTool.Attach))
+				if (usedMap != null)
 				{
-					_cursorVoxel = hit;
+					Transform transform = _targetGameObject.transform;
+					bool raycastOutside = Tool == VoxelTool.Attach;
+					Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
+					_cursorVoxel = usedMap.Raycast(ray, out VoxelHitPoint hit, transform, raycastOutside) ? hit : null;
 				}
 				else
-				{
 					_cursorVoxel = null;
-				}
 
 				// Check Mouse Event
-				Vector3Int? showedCursorVoxel = _cursorVoxel.HasValue ? (Vector3Int?)_cursorVoxel.Value.voxel : null;
-
-				if (e.type == EventType.MouseDown && _cursorVoxel != null)
-				{ HandleMouseDown(showedCursorVoxel); }
-				else if (e.type == EventType.MouseDrag)
-				{ HandleMouseMove(showedCursorVoxel); }
-				else if (e.type == EventType.MouseUp)
-				{ HandleMouseUp(showedCursorVoxel); }
+				switch (e.type)
+				{
+					case EventType.MouseDown:
+						if (_cursorVoxel.HasValue)
+							HandleMouseDown(_cursorVoxel.Value.voxel);
+						break;
+					case EventType.MouseDrag:
+						if (_cursorVoxel.HasValue)
+							HandleMouseMove(_cursorVoxel.Value.voxel);
+						break;
+					case EventType.MouseUp:
+						Vector3Int val = _cursorVoxel.HasValue? _cursorVoxel.Value.voxel : Vector3Int.zero;
+						HandleMouseUp(val, _cursorVoxel.HasValue);
+						break;
+				}
 			}
 
-			// Avoid to change gameobject
+			// Avoid to change GameObject
 			Selection.activeGameObject = _targetGameObject;
 
 			// Avoid to use the event by other code
 			e.Use();
 		}
 
-		void HandleMouseDown(Vector3Int? voxel)
+		void HandleMouseDown(Vector3Int voxel )
 		{
-			if (voxel == null)
-			{ return; }
 			if (_basicEditTools.Contains(Tool))
 			{
 				_mouseDownCursorVoxel = voxel;
 				_lastValidMouseDragCursorVoxel = voxel;
-				_originalMap = _targetVoxelObject.Map.GetCopy();
+				_originalMap = (ArrayVoxelMap)_targetVoxelObject.Map.GetCopy();
 				_targetVoxelObject.Map.Set(_mouseDownCursorVoxel.Value, ToolToAreaAction(), SelectedPaletteIndex);
 				//targetVO.RegenerateMesh();
 			}
 			else if (Tool == VoxelTool.Select)
 			{
-				_selectionStart = voxel.Value;
-				_selectionEnd = voxel.Value;
+				_selectionStart = voxel;
+				_selectionEnd = voxel;
 				FreshSelection();
 			}
 		}
 
-		void HandleMouseMove(Vector3Int? voxel)
-		{
-			if (!voxel.HasValue)
-			{ return; }
+		void HandleMouseMove(Vector3Int voxel)
+		{ 
 			if (Tool == VoxelTool.Select)
 			{
-				_selectionEnd = voxel.Value;
+				_selectionEnd = voxel;
 				FreshSelection();
 			}
 			else if (_mouseDownCursorVoxel.HasValue && _originalMap != null)
@@ -140,30 +133,31 @@ namespace VoxelSystem
 				bool changed = voxel != _lastValidMouseDragCursorVoxel;
 				if (changed)
 				{
-					_targetVoxelObject.Map = _originalMap.GetCopy();
+					_targetVoxelObject.Map = (ArrayVoxelMap)_originalMap.GetCopy();
 					_lastValidMouseDragCursorVoxel = voxel;
-					_targetVoxelObject.Map.SetRange(_mouseDownCursorVoxel.Value, voxel.Value, ToolToAreaAction(), SelectedPaletteIndex);
+					_targetVoxelObject.Map.SetRange(_mouseDownCursorVoxel.Value, voxel, ToolToAreaAction(), SelectedPaletteIndex);
 				}
 			}
 		}
 
-		void HandleMouseUp(Vector3Int? voxel)
+		void HandleMouseUp(Vector3Int voxel, bool validValue)
 		{
 			if (Tool == VoxelTool.Select)
 			{
-				if (voxel.HasValue)
+				if (validValue)
 				{
-					_selectionEnd = voxel.Value;
+					_selectionEnd = voxel;
 					FreshSelection();
 				}
 			}
 			else if (_mouseDownCursorVoxel.HasValue && _originalMap != null)
 			{
-				if (voxel.HasValue && _targetVoxelObject.IsValidCoord(voxel.Value))
-				{ _lastValidMouseDragCursorVoxel = voxel; }
+				if (validValue && _targetVoxelObject.IsValidCoord(voxel))
+					_lastValidMouseDragCursorVoxel = voxel; 
+
 				if (_lastValidMouseDragCursorVoxel.HasValue)
 				{
-					_targetVoxelObject.Map = _originalMap.GetCopy();
+					_targetVoxelObject.Map = (ArrayVoxelMap)_originalMap.GetCopy();
 					RecordVoxelObjectForUndo(_targetVoxelObject, "VoxelMapChanged");
 					_targetVoxelObject.Map.SetRange(_mouseDownCursorVoxel.Value, _lastValidMouseDragCursorVoxel.Value, ToolToAreaAction(), SelectedPaletteIndex);
 				}

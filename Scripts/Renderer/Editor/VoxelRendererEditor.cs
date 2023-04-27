@@ -2,51 +2,47 @@
 using UnityEditor;
 using VoxelSystem;
 using MUtility;
+using UnityEngine.UI;
 
 [CustomEditor(typeof(VoxelRenderer))]
 public class VoxelRendererEditor : Editor
 {
+	//Static constructor
+	static VoxelRendererEditor()
+	{
+		SceneView.duringSceneGui -= DuringSceneGUIEvent;
+		SceneView.duringSceneGui += DuringSceneGUIEvent;
+		Debug.Log("Static Constructor");
+	}
+
 	void OnSceneGUI()
 	{
 		VoxelRenderer renderer = (VoxelRenderer)target;
 
 		// Subscribe to repaint event
-		SceneView.duringSceneGui -= DuringSceneGUIEvent;
-		SceneView.duringSceneGui += DuringSceneGUIEvent;
+		//SceneView.duringSceneGui -= DuringSceneGUIEvent;
+		//SceneView.duringSceneGui += DuringSceneGUIEvent;
 
-		// SceneView sceneView = SceneView.currentDrawingSceneView;
-
+		// SceneView sceneView = SceneView.currentDrawingSceneView; 
 	}
 
 
-	void DuringSceneGUIEvent(SceneView sceneView)
+	static void DuringSceneGUIEvent(SceneView sceneView)
 	{
-		if (Event.current.type != EventType.Repaint)
-			return;
-
-		VoxelRenderer renderer = (VoxelRenderer)target;
-		if (renderer == null || !renderer.isActiveAndEnabled)
-		{
-			SceneView.duringSceneGui -= DuringSceneGUIEvent;
-			return;
-		}
-
-		// bool test if we are in prefab mode:
+		//if (Event.current.type != EventType.Repaint)
+		//	return;
 		/*
-		bool isPrefab = SceneView.currentDrawingSceneView != null;
-
-		if (!isPrefab)
+		EventType evetType = Event.current.type;
+		VoxelRenderer[] voxelRenderers = FindObjectsByType<VoxelRenderer>(FindObjectsSortMode.None);
+		foreach (VoxelRenderer renderer in voxelRenderers)
 		{
-			SceneView.duringSceneGui -= DuringSceneGUIEvent;
-			return;
+			RenderCursor(renderer, sceneView.camera, evetType);
 		}
 		*/
 
-		// RenderMesh(sceneView, renderer);
-		RenderCursor(renderer);
 	}
 
-	static void RenderMesh(SceneView sceneView, VoxelRenderer renderer)
+	static void RenderMesh(VoxelRenderer renderer, Camera camera)
 	{
 		Mesh mesh = renderer.Mesh;
 		if (mesh == null)
@@ -56,27 +52,29 @@ public class VoxelRendererEditor : Editor
 			return;
 
 		Matrix4x4 matrix4X4 = renderer.LocalToWorldMatrix;
-		Graphics.DrawMesh(mesh, matrix4X4, material, 0, sceneView.camera);
+		Graphics.DrawMesh(mesh, matrix4X4, material, 0, camera);
 	}
 
 	public Ray ray;
 
-	void RenderCursor(VoxelRenderer renderer)
-	{
-		if (renderer.cursorMaterial == null) return;
-		if (renderer.cursorMesh == null) return;
+	static void RenderCursor(VoxelRenderer renderer, Camera camera, EventType evetType)
+	{ 
 		OctVoxelMap map = renderer.Map;
 		if (map == null) return;
 		// RAYCAST
 
 		Event e = Event.current;
 		Ray ray = HandleUtility.GUIPointToWorldRay(e.mousePosition);
-		 
-		if (map.Raycast(ray, out InVoxelPoint hit, renderer.transform))
-		{ 
-			Matrix4x4 matrix4X4 = renderer.LocalToWorldMatrix;
-			matrix4X4 *= Matrix4x4.Translate(hit.point);
-			Graphics.DrawMesh(renderer.cursorMesh, matrix4X4, renderer.cursorMaterial, 0);
+
+		if (map.Raycast(ray, out VoxelHitPoint hit, renderer.transform))
+		{
+			Matrix4x4 transformMatrix = renderer.LocalToWorldMatrix;
+			
+			if (evetType is EventType.MouseDown or EventType.MouseUp or EventType.MouseDrag)
+			{
+				// selection.activeObject = renderer.gameObject;
+				// Debug.Log(evetType);
+			}
 		}
-	}
+	} 
 }

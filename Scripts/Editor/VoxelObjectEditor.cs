@@ -52,7 +52,7 @@ namespace VoxelSystem
 
 			if (t.references.meshFilter != null && t.references.meshFilter.sharedMesh != null)
 			{
-				VoxelMap map = t.Map;
+				ArrayVoxelMap map = t.Map;
 				if (map != null)
 				{
 					if (GUILayout.Button("Export Mesh"))
@@ -72,13 +72,13 @@ namespace VoxelSystem
 			}
 		}
 
-		static void ExportVoxelMap(VoxelMap map)
+		static void ExportVoxelMap(ArrayVoxelMap map)
 		{
 			string path = EditorUtility.SaveFilePanelInProject("Save Voxel Map", "VoxelMap", "asset", "Save Voxel Map");
 			if (path.Length != 0)
 			{
 				VoxelMapScriptableObject newMap = CreateInstance<VoxelMapScriptableObject>();
-				newMap.map = map.GetCopy();
+				newMap.map = (ArrayVoxelMap)map.GetCopy();
 				newMap.name = Path.GetFileName(path);
 				AssetDatabase.CreateAsset(newMap, path);
 				AssetDatabase.Refresh();

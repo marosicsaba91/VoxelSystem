@@ -13,8 +13,7 @@ namespace VoxelSystem
 
 			var separatedGo = new GameObject(_targetGameObject.name + " Separated");
 			separatedGo.transform.parent = _targetGameObject.transform;
-			separatedGo.transform.localPosition = _selectionMin;
-			separatedGo.transform.localRotation = Quaternion.identity;
+			separatedGo.transform.SetLocalPositionAndRotation(_selectionMin, Quaternion.identity);
 			separatedGo.transform.localScale = Vector3.one;
 			Undo.RegisterCreatedObjectUndo(separatedGo, "Create object");
 
@@ -30,7 +29,7 @@ namespace VoxelSystem
 			// TODO: SET NEW MAP
 			separatedVo.Map.CopyFromOtherMap(_targetVoxelObject.Map, _selectionMin, Vector3Int.zero, _selectionSize);
 
-			_targetVoxelObject.Map.SetRange(_selectionMin, _selectionMax, VoxelMap.VoxelAreaAction.Clear, SelectedPaletteIndex);
+			_targetVoxelObject.Map.SetRange(_selectionMin, _selectionMax, VoxelMap.SetAction.Clear, SelectedPaletteIndex);
 			_targetVoxelObject.RegenerateMesh();
 
 			Selection.activeGameObject = separatedGo;

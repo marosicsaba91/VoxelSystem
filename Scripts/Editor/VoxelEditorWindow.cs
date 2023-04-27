@@ -6,7 +6,7 @@ using MUtility;
 
 namespace VoxelSystem
 {
-	enum VoxelTool { Non, Attach, Erase, Recolor, Face, Select, Move, Turn, Mirror, Resize, Repeat, Rescale, FloodFill, Picker }
+	enum VoxelTool { Non, Attach, Erase, Repaint, Face, Select, Move, Turn, Mirror, Resize, Repeat, Rescale, FloodFill, Picker }
 	enum VoxelAction { Clear, Fill, Separate, CopyUp }
 
 	public partial class VoxelEditorWindow : EditorWindow
@@ -14,22 +14,22 @@ namespace VoxelSystem
 		// ----------------------- STATE ------------------------
 
 		static readonly VoxelTool[] _handleTools = { VoxelTool.Move, VoxelTool.Turn, VoxelTool.Mirror, VoxelTool.Resize, VoxelTool.Repeat, VoxelTool.Rescale };
-		static readonly VoxelTool[] _cursorTools = { VoxelTool.Select, VoxelTool.Attach, VoxelTool.Erase, VoxelTool.Recolor, VoxelTool.Face, VoxelTool.FloodFill, VoxelTool.Picker };
-		static readonly VoxelTool[] _paletteUsingTools = { VoxelTool.Attach, VoxelTool.Recolor, VoxelTool.Face, VoxelTool.FloodFill };
+		static readonly VoxelTool[] _cursorTools = { VoxelTool.Select, VoxelTool.Attach, VoxelTool.Erase, VoxelTool.Repaint, VoxelTool.Face, VoxelTool.FloodFill, VoxelTool.Picker };
+		static readonly VoxelTool[] _paletteUsingTools = { VoxelTool.Attach, VoxelTool.Repaint, VoxelTool.Face, VoxelTool.FloodFill };
 
 		static readonly VoxelTool[] _transformTools = { VoxelTool.Move, VoxelTool.Turn, VoxelTool.Mirror };
 		static readonly VoxelTool[] _sizeTools = { VoxelTool.Resize, VoxelTool.Repeat, VoxelTool.Rescale };
 
-		static readonly VoxelTool[] _basicEditTools = { VoxelTool.Attach, VoxelTool.Erase, VoxelTool.Recolor };
+		static readonly VoxelTool[] _basicEditTools = { VoxelTool.Attach, VoxelTool.Erase, VoxelTool.Repaint };
 		static readonly VoxelTool[] _secondaryTools = { VoxelTool.Face, VoxelTool.FloodFill, VoxelTool.Picker };
 
-		static VoxelMap.VoxelAreaAction ToolToAreaAction() // Need to refactor
+		static VoxelMap.SetAction ToolToAreaAction() // Need to refactor
 => Tool switch
 {
-	VoxelTool.Recolor => VoxelMap.VoxelAreaAction.Repaint,
-	VoxelTool.Attach => VoxelMap.VoxelAreaAction.Fill,
-	VoxelTool.Erase => VoxelMap.VoxelAreaAction.Clear,
-	_ => VoxelMap.VoxelAreaAction.Repaint
+	VoxelTool.Repaint => VoxelMap.SetAction.Repaint,
+	VoxelTool.Attach => VoxelMap.SetAction.Fill,
+	VoxelTool.Erase => VoxelMap.SetAction.Clear,
+	_ => VoxelMap.SetAction.Repaint
 };
 
 		static VoxelTool Tool { get; set; } = VoxelTool.Non;

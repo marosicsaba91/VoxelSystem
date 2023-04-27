@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEditor;
 using MUtility;
+using System;
 
 namespace VoxelSystem
 {
@@ -18,7 +19,7 @@ namespace VoxelSystem
 
 			if (_targetVoxelObject == null)
 			{ return; }
-			VoxelMap map = _targetVoxelObject.Map;
+			ArrayVoxelMap map = _targetVoxelObject.Map;
 			if (map == null)
 			{ return; }
 			Vector3Int size = map.Size;
@@ -30,7 +31,7 @@ namespace VoxelSystem
 				/ 10;
 			float arrowSpacing = 2 * arrowSize;
 
-			GeneralDirection3D focusedDir = (GeneralDirection3D)(HandleUtility.nearestControl - 100);
+			// GeneralDirection3D focusedDir = (GeneralDirection3D)(HandleUtility.nearestControl - 100);
 
 			for (int i = 0; i < DirectionUtility.generalDirection3DValues.Length; i++)
 			{
@@ -51,15 +52,15 @@ namespace VoxelSystem
 						Axis3D a2 = side2.GetAxis();
 						Vector3 pos = worldPos + (arrowSpacing * _targetGameObject.transform.TransformVector(d.ToVector()));
 
-						HandleOneArrowHandle(arrowSize, a2, d, pos, side);
+						HandleOneArrowHandle(arrowSize, a2, d, pos, side, Tool);
 					}
 				}
 				else
-				{ HandleOneArrowHandle(arrowSize, side.GetAxis(), side, worldPos, side); }
+				{ HandleOneArrowHandle(arrowSize, side.GetAxis(), side, worldPos, side, Tool); }
 			}
 		}
 
-		void HandleOneArrowHandle(float arrowSize, Axis3D axis, GeneralDirection3D dir, Vector3 worldPos, GeneralDirection3D side)
+		void HandleOneArrowHandle(float arrowSize, Axis3D axis, GeneralDirection3D dir, Vector3 worldPos, GeneralDirection3D side, VoxelTool tool)
 		{
 			Quaternion worldRotation = GetHandleDir(dir);
 
@@ -74,7 +75,6 @@ namespace VoxelSystem
 				style.normal.textColor = (color + Color.black) / 2;
 				style.fontSize = 15;
 
-				//handlePos += targetGameObject.transform.TransformVector(handleVector);
 				string label = (_handleSteps >= 0 ? "+" : "") + _handleSteps.ToString();
 
 				if (_sizeTools.Contains(Tool))
@@ -90,12 +90,12 @@ namespace VoxelSystem
 			switch (handleResult.handleEvent)
 			{
 				case HandleEvent.LmbPress:
-					if (Tool == VoxelTool.Turn)
+					if (tool == VoxelTool.Turn)
 					{
 						Turn(axis, dir, side);
 					}
 					else
-					if (Tool == VoxelTool.Mirror)
+					if (tool == VoxelTool.Mirror)
 					{
 						Mirror(axis);
 					}
@@ -107,7 +107,7 @@ namespace VoxelSystem
 					}
 					break;
 				case HandleEvent.LmbDrag:
-					if (Tool == VoxelTool.Turn || Tool == VoxelTool.Mirror)
+					if (tool == VoxelTool.Turn || Tool == VoxelTool.Mirror)
 					{ break; }
 
 					_handleSteps = (int)Vector3.Dot(_targetGameObject.transform.InverseTransformVector(handleResult.IsDragged), dir.ToVector());
@@ -122,7 +122,7 @@ namespace VoxelSystem
 				case HandleEvent.LmbRelease:
 				case HandleEvent.LmbClick:
 				case HandleEvent.LmbDoubleClick:
-					if (Tool == VoxelTool.Turn || Tool == VoxelTool.Mirror)
+					if (tool == VoxelTool.Turn || Tool == VoxelTool.Mirror)
 					{ break; }
 
 					_handleSteps = (int)Vector3.Dot(_targetGameObject.transform.InverseTransformVector(handleResult.IsDragged), dir.ToVector());
@@ -134,6 +134,8 @@ namespace VoxelSystem
 					_handleVector = Vector3Int.zero;
 
 					break;
+				default:
+					throw new ArgumentException("Invalid handle event: " + handleResult.handleEvent);
 			}
 		}
 
@@ -146,22 +148,22 @@ namespace VoxelSystem
 		void Turn(Axis3D axis, GeneralDirection3D dir, GeneralDirection3D side)
 		{
 			GeneralDirection3D d = side.IsPositive() ? dir : dir.Opposite();
-			bool lefthandPositive = d.IsPositive();
+			bool leftHandPositive = d.IsPositive();
 
 			if ((axis == Axis3D.Z && d.GetAxis() == Axis3D.Y) ||
 				(axis == Axis3D.X && d.GetAxis() == Axis3D.Z) ||
 				(axis == Axis3D.Y && d.GetAxis() == Axis3D.X))
-				lefthandPositive = !lefthandPositive;
+				leftHandPositive = !leftHandPositive;
 
 			RecordVoxelObjectForUndo(_targetVoxelObject, "VoxelMapTurned");
-			_targetVoxelObject.Map.Turn(axis, lefthandPositive);
+			_targetVoxelObject.Map.Turn(axis, leftHandPositive);
 		}
 
 		Vector3 _originalPos;
 		void StartArrowHandleAction(GeneralDirection3D direction)
 		{
 			_originalPos = _targetGameObject.transform.localPosition;
-			_originalMap = _targetVoxelObject.Map.GetCopy();
+			_originalMap = (ArrayVoxelMap)_targetVoxelObject.Map.GetCopy();
 		}
 
 		void ReleaseArrowHandleAction(GeneralDirection3D direction, int steps)
@@ -183,7 +185,7 @@ namespace VoxelSystem
 			if (_originalMap != null)
 			{
 				steps = Mathf.Max(-_originalMap.GetSize(direction.GetAxis()) + 1, steps);
-				_targetVoxelObject.Map = _originalMap.GetCopy();
+				_targetVoxelObject.Map = (ArrayVoxelMap)_originalMap.GetCopy();
 				RecordVoxelObjectForUndo(_targetVoxelObject, "VoxelMapResized");
 
 				_targetVoxelObject.Map.Resize(direction, steps, ToolToResizeType(Tool));
@@ -231,7 +233,7 @@ namespace VoxelSystem
 			{
 				Translate(direction, steps);
 			}
-			_targetVoxelObject.Map = _originalMap.GetCopy();
+			_targetVoxelObject.Map = (ArrayVoxelMap)_originalMap.GetCopy();
 			_targetVoxelObject.Map.Resize(direction, steps, ToolToResizeType(Tool));
 		}
 
@@ -251,7 +253,7 @@ namespace VoxelSystem
 				side == GeneralDirection3D.Back ? new(size.x / 2f, size.y / 2f, z: 0) :
 				Vector3.zero;
 
-			return _targetGameObject.transform.TransformPoint(position) + _targetGameObject.transform.TransformDirection(dir) * arrowSpacing;
+			return _targetGameObject.transform.TransformPoint(position) + (_targetGameObject.transform.TransformDirection(dir) * arrowSpacing);
 		}
 
 		static Quaternion GetHandleDir(GeneralDirection3D side)

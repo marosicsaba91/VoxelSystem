@@ -292,7 +292,7 @@ namespace VoxelSystem
 					else
 					{
 						RecordVoxelObjectForUndo(_targetVoxelObject, "Selection Cleared");
-						_targetVoxelObject.Map.SetRange(_selectionMin, _selectionMax, VoxelMap.VoxelAreaAction.Clear,
+						_targetVoxelObject.Map.SetRange(_selectionMin, _selectionMax, VoxelMap.SetAction.Clear,
 							SelectedPaletteIndex);
 					}
 
@@ -306,7 +306,7 @@ namespace VoxelSystem
 					else
 					{
 						RecordVoxelObjectForUndo(_targetVoxelObject, "Selection Filled");
-						_targetVoxelObject.Map.SetRange(_selectionMin, _selectionMax, VoxelMap.VoxelAreaAction.Fill,
+						_targetVoxelObject.Map.SetRange(_selectionMin, _selectionMax, VoxelMap.SetAction.Fill,
 							SelectedPaletteIndex);
 					}
 

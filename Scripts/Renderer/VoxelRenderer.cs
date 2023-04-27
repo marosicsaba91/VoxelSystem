@@ -10,12 +10,11 @@ public class VoxelRenderer : MonoBehaviour
 	[SerializeField, HideInInspector] VoxelFilter voxelFilter;
 	[SerializeField] BlockLibrary blockLibrary;
 	[SerializeField] Material material;
-
-	[SerializeField] Mesh mesh;
 	[SerializeField] bool mergeCloseEdgesOnTestMesh;
 
-	public Mesh cursorMesh;
-	public Material cursorMaterial;
+	[SerializeField] Mesh mesh;
+
+	public float cursorScale;
 
 	[SerializeField] DisplayMember regenerateMesh = new (nameof(RegenerateMesh));
 
@@ -41,19 +40,19 @@ public class VoxelRenderer : MonoBehaviour
 		mesh = null;
 	}
 
-	void Update()
+	void LateUpdate()
 	{
 		RenderMesh(); 
 	}
 
 	void RenderMesh()
 	{
-		mesh = Mesh;
+		mesh = Mesh; 
 		if (mesh == null) return;
 		Graphics.DrawMesh(mesh, transform.localToWorldMatrix, material, gameObject.layer);
 	}
 
-	void RegenerateMesh()
+	internal void RegenerateMesh()
 	{
 		OctVoxelMap map = Map; 
 		if (map == null) return;
@@ -67,8 +66,7 @@ public class VoxelRenderer : MonoBehaviour
 	static readonly List<Block> _blockCache = new();
 	void GenerateMesh(OctVoxelMap voxelMap, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles)
 	{ 
-		if (voxelMap == null) return; 
-
+		if (voxelMap == null) return;
 		BlockVoxelBuilder.CalculateBlocks(voxelMap, _blockCache, mergeCloseEdgesOnTestMesh);
 
 		BlockVoxelBuilder.BuildMeshFromBlocks(blockLibrary, _blockCache, vertices, normals, uv, triangles);

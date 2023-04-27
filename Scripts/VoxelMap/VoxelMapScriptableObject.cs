@@ -8,7 +8,7 @@ namespace VoxelSystem
 	[CreateAssetMenu(fileName = "VoxelMap", menuName = "VoxelSystem/VoxelMap", order = 1)]
 	public class VoxelMapScriptableObject : ScriptableObject
 	{
-		public VoxelMap map;
+		public ArrayVoxelMap map;
 		[HideInInspector] public OctVoxelMap octMap;
 		[SerializeField] DisplayMember copyToOctMap = new(nameof(CopyToOctMap));
 
@@ -21,8 +21,8 @@ namespace VoxelSystem
 		[SerializeField] DisplayMember deserialize = new(nameof(Deserialize));
 		[SerializeField] DisplayMember serialize = new(nameof(Serialize));
 
-		void Deserialize() => octMap.Deserialize();
-		void Serialize() => octMap.Serialize();
+		void Deserialize() => octMap.DeserializeFromByteArray();
+		void Serialize() => octMap.SerializeToByeArray();
 
 		void CopyToOctMap()
 		{				
@@ -31,7 +31,7 @@ namespace VoxelSystem
 				for (int y = 0; y < map.Height; y++)
 					for (int z = 0; z < map.Depth; z++)
 					{
-						int value = map.Get(x, y, z).value;
+						int value = map.GetVoxel(x, y, z).value;
 						octMap.Set(x, y, z, value);
 					}
 

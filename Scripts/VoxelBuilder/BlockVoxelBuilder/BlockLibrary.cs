@@ -156,7 +156,7 @@ namespace VoxelSystem
 			meshFilter.sharedMesh = mesh;
 		}
 
-		void GenerateMesh(VoxelMap voxelMap, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles)
+		void GenerateMesh(ArrayVoxelMap voxelMap, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles)
 		{
 			if (voxelMap is null) throw new ArgumentNullException(nameof(voxelMap));
 			if (vertices is null) throw new ArgumentNullException(nameof(vertices));

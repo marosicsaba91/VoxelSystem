@@ -44,12 +44,12 @@ class VoxelChunkVisualizer : MonoBehaviour
 		if (levels.IsNullOrEmpty())
 			return;
 
-		var offset = Matrix4x4.TRS(octMap.RealSize / 2 * Vector3.one , Quaternion.identity, Vector3.one);
+		var offset = Matrix4x4.TRS(octMap.ChunkSize / 2 * Vector3.one , Quaternion.identity, Vector3.one);
 		matrix = offset * transform.localToWorldMatrix;
 
 		Gizmos.color = Color.yellow;
 
-		Vector3 size = octMap.RealSize * Vector3Int.one;
+		Vector3 size = octMap.ChunkSize * Vector3Int.one;
 		OctVoxelChunk root = octMap.RootChunk;
 		int level = octMap.LevelCount;
 		transform.localScale = Vector3.one;

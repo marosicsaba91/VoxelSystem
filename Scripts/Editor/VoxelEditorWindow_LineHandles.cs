@@ -16,7 +16,7 @@ namespace VoxelSystem
 			if (_targetVoxelObject == null || _targetGameObject == null)
 			{ return; }
 
-			VoxelMap map = _targetVoxelObject.Map;
+			ArrayVoxelMap map = _targetVoxelObject.Map;
 			if (map == null)
 			{ return; }
 			Vector3 size = map.Size;
@@ -46,7 +46,7 @@ namespace VoxelSystem
 		}
 
 		static readonly Color C = new(r: 1, g: 0, b: 0);
-		static void DrawCursor(InVoxelPoint? cursorVoxel)
+		static void DrawCursor(VoxelHitPoint? cursorVoxel)
 		{
 			if (cursorVoxel == null)
 			{ return; }

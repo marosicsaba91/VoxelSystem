@@ -11,7 +11,7 @@ namespace VoxelSystem
 		static readonly List<int> _triangles = new();
 
 		internal delegate void BuilderFunction(
-			VoxelMap voxelMap,
+			ArrayVoxelMap voxelMap,
 			List<Vector3> vertices,
 			List<Vector3> normals,
 			List<Vector2> uv,
@@ -24,10 +24,10 @@ namespace VoxelSystem
 			List<Vector2> uv,
 			List<int> triangles);
 
-		public Mesh VoxelMapToMesh(VoxelMap map) => VoxelMapToMesh(map, BuildMesh);
+		public Mesh VoxelMapToMesh(ArrayVoxelMap map) => VoxelMapToMesh(map, BuildMesh);
 		public Mesh VoxelMapToMesh(OctVoxelMap map) => VoxelMapToMesh(map, BuildMesh);
 
-		internal static Mesh VoxelMapToMesh(VoxelMap map, BuilderFunction builderFunction)
+		internal static Mesh VoxelMapToMesh(ArrayVoxelMap map, BuilderFunction builderFunction)
 		{
 			_vertices.Clear();
 			_normals.Clear();
@@ -67,13 +67,13 @@ namespace VoxelSystem
 			return mesh;
 		}
 
-		protected abstract void BuildMesh(VoxelMap voxelMap, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles);
+		protected abstract void BuildMesh(ArrayVoxelMap voxelMap, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles);
 		protected abstract void BuildMesh(OctVoxelMap voxelMap, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles);
 
 		public abstract IEnumerable<PaletteItem> GetPaletteItems();
 
 		public abstract int PaletteLength { get; }
 
-		public virtual void DrawGizmos(VoxelMap map) { }
+		public virtual void DrawGizmos(ArrayVoxelMap map) { }
 	}
 }

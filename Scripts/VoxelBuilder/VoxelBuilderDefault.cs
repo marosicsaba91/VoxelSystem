@@ -7,7 +7,7 @@ namespace VoxelSystem
 	[CreateAssetMenu(fileName = "DefaultVoxelBuilder", menuName = "VoxelSystem/DefaultVoxelBuilder", order = 3)]
 	public class VoxelBuilderDefault : VoxelBuilder
 	{
-		protected override void BuildMesh(VoxelMap map, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles) => BuildTiledMesh(map, vertices, normals, uv, triangles);
+		protected override void BuildMesh(ArrayVoxelMap map, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles) => BuildTiledMesh(map, vertices, normals, uv, triangles);
 		protected override void BuildMesh(OctVoxelMap map, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles) => BuildTiledMesh(map, vertices, normals, uv, triangles);
 
 		public override IEnumerable<PaletteItem> GetPaletteItems()
@@ -18,7 +18,7 @@ namespace VoxelSystem
 
 		public override int PaletteLength => 0;
 
-		public static void BuildTiledMesh(VoxelMap map, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles)
+		public static void BuildTiledMesh(ArrayVoxelMap map, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles)
 		{
 			int w = map.Size.x;
 			int h = map.Size.y;
@@ -150,7 +150,7 @@ namespace VoxelSystem
 					for (int y = 0; y < h; y++)
 						for (int z = 0; z < d; z++)
 						{
-							int colorIndex = map.Get(x, y, z);
+							int colorIndex = map.GetVoxel(x, y, z);
 							if (colorIndex < 0)
 							{
 								continue;
@@ -166,7 +166,7 @@ namespace VoxelSystem
 
 
 							if (!neighBourOutOfBounds)
-								if (map.Get(neighbourX, neighbourY, neighbourZ).IsFilled())
+								if (map.GetVoxel(neighbourX, neighbourY, neighbourZ).IsFilled())
 									continue;
 
 							uvQuad = quadArray[colorIndex];

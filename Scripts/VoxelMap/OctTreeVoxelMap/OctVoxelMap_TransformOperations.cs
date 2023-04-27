@@ -1,0 +1,80 @@
+﻿using MUtility;
+using System;
+using UnityEngine;
+using static VoxelSystem.ArrayVoxelMap;
+
+namespace VoxelSystem
+{
+	partial class OctVoxelMap
+	{
+		public void Turn(Axis3D axis, bool leftHandPositive)
+		{
+			Vector3Int size = canvasSize;
+			int newW =
+				axis == Axis3D.X ? size.x :
+				axis == Axis3D.Y ? size.z :
+				axis == Axis3D.Z ? size.y : 0;
+			int newH =
+				axis == Axis3D.X ? size.z :
+				axis == Axis3D.Y ? size.y :
+				axis == Axis3D.Z ? size.x : 0;
+			int newD =
+				axis == Axis3D.X ? size.y :
+				axis == Axis3D.Y ? size.x :
+				axis == Axis3D.Z ? size.z : 0;
+
+			// TODO: The turning
+
+			canvasSize = new Vector3Int(newW, newH, newD);
+			MapChanged();
+		}
+
+		public void Mirror(Axis3D axis)
+		{
+			// TODO: The mirroring
+			MapChanged();
+		}
+
+		public Vector3 ApplyScaleOnAxis(Axis3D axis, float scale)
+		{
+			int scaleInt = Mathf.RoundToInt(scale);
+			int size =
+				axis == Axis3D.X ? Width :
+				axis == Axis3D.Y ? Height :
+				Depth;
+			GeneralDirection3D positiveDir =
+				axis == Axis3D.X ? GeneralDirection3D.Right :
+				axis == Axis3D.Y ? GeneralDirection3D.Up :
+				GeneralDirection3D.Forward;
+
+			Vector3 move = Vector3.zero;
+			if (scaleInt < 0)
+			{
+				move =
+				axis == Axis3D.X ? new Vector3(scaleInt * size, y: 0, z: 0) :
+				axis == Axis3D.Y ? new Vector3(x: 0, scaleInt * size, z: 0) :
+				new Vector3(x: 0, y: 0, scaleInt * size);
+
+				scaleInt *= -1;
+				Mirror(axis);
+			}
+			if (scaleInt != 1 && scaleInt != 0)
+			{
+				Resize(positiveDir, (scaleInt - 1) * size, ResizeType.Rescale);
+			}
+			return move;
+		}
+
+		public void Resize(GeneralDirection3D direction, int steps, ResizeType type)
+		{
+			Vector3Int size = canvasSize;
+			Axis3D axis = direction.GetAxis();
+			int newW = (axis == Axis3D.X) ? Math.Max(val1: 1, size.x + steps) : size.x;
+			int newH = (axis == Axis3D.Y) ? Math.Max(val1: 1, size.y + steps) : size.y;
+			int newD = (axis == Axis3D.Z) ? Math.Max(val1: 1, size.z + steps) : size.z;
+			// TODO: The mirroring
+
+			MapChanged();
+		}
+	}
+}

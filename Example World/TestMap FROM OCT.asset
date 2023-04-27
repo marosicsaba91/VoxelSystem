@@ -16,6 +16,7 @@ MonoBehaviour:
     width: 8
     height: 8
     depth: 8
+    size: {x: 8, y: 8, z: 8}
     voxelData:
     - value: 0
     - value: 0
@@ -62,69 +63,6 @@ MonoBehaviour:
     - value: -1
     - value: 0
     - value: 0
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: -1
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: -1
-    - value: -1
-    - value: 0
-    - value: 0
-    - value: -1
-    - value: 0
     - value: 0
     - value: -1
     - value: -1
@@ -144,7 +82,12 @@ MonoBehaviour:
     - value: -1
     - value: -1
     - value: -1
-    - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
     - value: 0
     - value: 0
     - value: 0
@@ -181,6 +124,64 @@ MonoBehaviour:
     - value: -1
     - value: 0
     - value: 0
+    - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: 0
+    - value: -1
+    - value: -1
+    - value: 0
+    - value: 0
     - value: 0
     - value: 0
     - value: -1
@@ -190,7 +191,7 @@ MonoBehaviour:
     - value: -1
     - value: 0
     - value: 0
-    - value: -1
+    - value: 0
     - value: -1
     - value: -1
     - value: -1
@@ -531,18 +532,23 @@ MonoBehaviour:
     - value: 0
   octMap:
     canvasSize: {x: 8, y: 8, z: 8}
-    levels: 3
-  copyTo: {fileID: 11400000, guid: d12759ac4b004674ba97305868154411, type: 2}
-  testIndex: {x: 0, y: 0, z: 0}
+    levelCount: 3
+    data: 08ffffffffffffffffff011200120012890308ffffffffffffffffff011200124708ffffffffffffffffff01120b08ffffffffffffffffff011200120b08ffffffffffffffffff011200120b08ffffffffffffffffff011200120b08ffffffffffffffffff011200120b08ffffffffffffffffff01125d08ffffffffffffffffff01120b08ffffffffffffffffff011200120b08ffffffffffffffffff01120b08ffffffffffffffffff01120b08ffffffffffffffffff011200120b08ffffffffffffffffff01120b08ffffffffffffffffff01123108ffffffffffffffffff0112001200120b08ffffffffffffffffff01120b08ffffffffffffffffff011200120012001200122608ffffffffffffffffff0112001200120b08ffffffffffffffffff0112001200120012001200120b08ffffffffffffffffff01125d08ffffffffffffffffff01120b08ffffffffffffffffff01120b08ffffffffffffffffff01120b08ffffffffffffffffff01120b08ffffffffffffffffff0112001200120b08ffffffffffffffffff01120b08ffffffffffffffffff0112930108ffffffffffffffffff0112001200123108ffffffffffffffffff0112001200120b08ffffffffffffffffff01120012001200120b08ffffffffffffffffff011200120012001200124708ffffffffffffffffff0112001200120b08ffffffffffffffffff01120b08ffffffffffffffffff0112001200120b08ffffffffffffffffff01120b08ffffffffffffffffff0112001200120012890308ffffffffffffffffff01123108ffffffffffffffffff01120012001200120012001200120b08ffffffffffffffffff01120b08ffffffffffffffffff01122608ffffffffffffffffff01120012001200120012001200120b08ffffffffffffffffff011200120b08ffffffffffffffffff01125d08ffffffffffffffffff011200120b08ffffffffffffffffff01120b08ffffffffffffffffff01120b08ffffffffffffffffff01120b08ffffffffffffffffff011200120b08ffffffffffffffffff01120b08ffffffffffffffffff01120b08ffffffffffffffffff01123c08ffffffffffffffffff01120b08ffffffffffffffffff011200120b08ffffffffffffffffff01120012001200120b08ffffffffffffffffff011200120b08ffffffffffffffffff01125d08ffffffffffffffffff01120b08ffffffffffffffffff01120b08ffffffffffffffffff01120b08ffffffffffffffffff01120b08ffffffffffffffffff01120b08ffffffffffffffffff011200120b08ffffffffffffffffff01120012930108ffffffffffffffffff0112001200124708ffffffffffffffffff0112001200120b08ffffffffffffffffff01120b08ffffffffffffffffff0112001200120b08ffffffffffffffffff01120b08ffffffffffffffffff01120012001200123108ffffffffffffffffff0112001200120b08ffffffffffffffffff01120b08ffffffffffffffffff0112001200120012001200
   copyToOctMap:
     functionZoom: 1
     functionOffset: {x: 0, y: 0}
-  copyOctMapToNormal:
-    functionZoom: 0
-    functionOffset: {x: 0, y: 0}
-  test:
+  size: 0
+  value: -1
+  index: {x: 0, y: 0, z: 0}
+  create:
     functionZoom: 1
     functionOffset: {x: 0, y: 0}
-  WriteSummary:
+  set:
+    functionZoom: 1
+    functionOffset: {x: 0, y: 0}
+  deserialize:
+    functionZoom: 1
+    functionOffset: {x: 0, y: 0}
+  serialize:
     functionZoom: 1
     functionOffset: {x: 0, y: 0}

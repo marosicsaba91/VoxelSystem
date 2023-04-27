@@ -24,7 +24,7 @@ namespace VoxelSystem
 		// Map, Palette, Builder
 		[SerializeField, HideInInspector] internal VoxelMapScriptableObject connectedMap = null;
 		[SerializeField, HideInInspector] internal VoxelBuilder connectedBuilder = null;
-		[SerializeField, HideInInspector] internal VoxelMap innerMap = null;
+		[SerializeField, HideInInspector] internal ArrayVoxelMap innerMap = null;
 
 		int _meshDirtyCounter = 0;
 		VoxelMapScriptableObject _lastFrameConnectedMap;
@@ -42,7 +42,7 @@ namespace VoxelSystem
 					return;
 				if (value == null)
 				{
-					innerMap = connectedMap.map.GetCopy();
+					innerMap = (ArrayVoxelMap)connectedMap.map.GetCopy();
 				}
 				else
 				{
@@ -64,7 +64,7 @@ namespace VoxelSystem
 			}
 		}
 
-		public VoxelMap Map
+		public ArrayVoxelMap Map
 		{
 			get => connectedMap != null ? connectedMap.map : innerMap;
 			set
@@ -84,14 +84,14 @@ namespace VoxelSystem
 				innerMap = new();
 				SetMeshDirty();
 			}
-			VoxelMap map = Map;
+			ArrayVoxelMap map = Map;
 			if (map != null)
 				map.MapChangedEvent += SetMeshDirty;
 		}
 
 		void OnDisable()
 		{
-			VoxelMap map = Map;
+			ArrayVoxelMap map = Map;
 			if (map != null)
 				map.MapChangedEvent -= SetMeshDirty;
 		}
@@ -151,7 +151,7 @@ namespace VoxelSystem
 
 		public void RegenerateMesh()
 		{
-			VoxelMap map = Map;
+			ArrayVoxelMap map = Map;
 			VoxelBuilder builder = connectedBuilder;
 
 			if (map == null || builder == null)
@@ -182,7 +182,7 @@ namespace VoxelSystem
 		{
 			if (!lockRotation)
 			{ return; }
-			VoxelMap map = Map;
+			ArrayVoxelMap map = Map;
 			if (map == null)
 			{ return; }
 			if (transform.localRotation == Quaternion.identity)
@@ -238,7 +238,7 @@ namespace VoxelSystem
 		{
 			if (!lockScale)
 			{ return; }
-			VoxelMap map = Map;
+			ArrayVoxelMap map = Map;
 			if (map == null)
 			{ return; }
 			if (transform.localScale == Vector3.one)
@@ -252,7 +252,7 @@ namespace VoxelSystem
 			transform.position += transform.TransformVector(move);
 		}
 
-		Vector3 ApplyScaleOnAxis(VoxelMap map, Axis3D axis)
+		Vector3 ApplyScaleOnAxis(ArrayVoxelMap map, Axis3D axis)
 		{
 			Transform trans = transform;
 			Vector3 localScale = trans.localScale;

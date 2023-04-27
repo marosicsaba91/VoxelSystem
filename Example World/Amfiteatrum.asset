@@ -16,6 +16,7 @@ MonoBehaviour:
     width: 19
     height: 19
     depth: 19
+    size: {x: 19, y: 19, z: 19}
     voxelData:
     - value: 0
     - value: 0
@@ -24,16 +25,11 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
-    - value: 0
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
     - value: 0
     - value: 0
     - value: 0
@@ -48,6 +44,11 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: 0
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
+    - value: -1
     - value: 0
     - value: 0
     - value: 0
@@ -6876,3 +6877,25 @@ MonoBehaviour:
     - value: 0
     - value: 0
     - value: 0
+  octMap:
+    canvasSize: {x: 8, y: 8, z: 8}
+    levelCount: 3
+    data: 08ffffffffffffffffff01
+  copyToOctMap:
+    functionZoom: 1
+    functionOffset: {x: 0, y: 0}
+  size: 0
+  value: -1
+  index: {x: 0, y: 0, z: 0}
+  create:
+    functionZoom: 1
+    functionOffset: {x: 0, y: 0}
+  set:
+    functionZoom: 1
+    functionOffset: {x: 0, y: 0}
+  deserialize:
+    functionZoom: 1
+    functionOffset: {x: 0, y: 0}
+  serialize:
+    functionZoom: 1
+    functionOffset: {x: 0, y: 0}
