@@ -1,5 +1,5 @@
 ﻿using MUtility;
-using System;
+using System.IO; 
 using UnityEngine;
 
 namespace VoxelSystem
@@ -7,48 +7,50 @@ namespace VoxelSystem
 	[ExecuteAlways]
 	class VoxelFilter : MonoBehaviour
 	{
-		 
-		[SerializeField, HideInInspector] internal OctVoxelMap innerOctMap = null;
+		[SerializeField] internal ArrayVoxelMap innerMap = null;
 		[SerializeField, HideInInspector] VoxelRenderer voxelRenderer;
-		[SerializeField, HideInInspector] internal VoxelMapScriptableObject connectedSOMap = null;
+		[SerializeField, HideInInspector] internal SharedVoxelMap connectedMapHolder = null;
 
-		[SerializeField] DisplayMember connectedMap = new(nameof(ConnectedVoxelMap));
-		[SerializeField, HideInInspector] VoxelMapScriptableObject _lastFrameConnectedMap = null;
+		[SerializeField] DisplayMember sharedMap = new(nameof(ConnectedVoxelMap));
+		[SerializeField, HideInInspector] SharedVoxelMap _lastFrameConnectedMap = null;
+		[SerializeField, HideIf(nameof(HaveConnectedMap))] DisplayMember exportVoxelMap = new(nameof(ExportVoxelMap));
 
 		void OnValidate() 
 		{
 			voxelRenderer = GetComponent<VoxelRenderer>();
 		}
 
-		public bool HasConnectedMap() => connectedSOMap != null;
+		bool HaveConnectedMap => connectedMapHolder != null;
 
-		public VoxelMapScriptableObject ConnectedVoxelMap
+		public bool HasConnectedMap() => connectedMapHolder != null;
+
+		public SharedVoxelMap ConnectedVoxelMap
 		{
-			get => connectedSOMap;
+			get => connectedMapHolder;
 			set
 			{
-				if (connectedSOMap == value)
+				if (connectedMapHolder == value)
 					return;
-				if (value == null)
-				{
-					innerOctMap = (OctVoxelMap)connectedSOMap.octMap.GetCopy();
-					innerOctMap.DeserializeFromByteArray();
-					connectedSOMap = null;
+				if (value == null && connectedMapHolder != null)
+				{ 
+					innerMap = new();
+					innerMap.SetupFrom(connectedMapHolder.Map);
+					connectedMapHolder = null; 
 				}
 				else
 				{
-					connectedSOMap = value;
+					connectedMapHolder = value;
 					SetMeshDirty();
 				} 
 			}
 		}
 
-		public OctVoxelMap GetOctMap()
+		public VoxelMap GetVoxelMap()
 		{
-			if (connectedSOMap == null)
-				return innerOctMap;
+			if (connectedMapHolder == null)
+				return innerMap;
 			else
-				return connectedSOMap.octMap;
+				return connectedMapHolder.Map;
 		}
 
 		void Update() // ExecuteAlways
@@ -58,44 +60,62 @@ namespace VoxelSystem
 
 		void OnEnable()
 		{ 
-			if (innerOctMap == null)
+			if (innerMap == null)
 			{
-				innerOctMap = new();
+				innerMap = new();
+				innerMap.Setup();
 				SetMeshDirty();
 			}
-			OctVoxelMap map = GetOctMap();
+			VoxelMap map = GetVoxelMap();
 			if (map != null)
 				map.MapChangedEvent += SetMeshDirty;
 		}
 
 		void OnDisable()
 		{
-			OctVoxelMap map = GetOctMap();
+			VoxelMap map = GetVoxelMap();
 			if (map != null)
 				map.MapChangedEvent -= SetMeshDirty;
 		}
 
 		void SubscribeToChange()
 		{
-			if (_lastFrameConnectedMap == connectedSOMap)
+			if (_lastFrameConnectedMap == connectedMapHolder)
 				return;
 
 			if (_lastFrameConnectedMap != null)
-				_lastFrameConnectedMap.map.MapChangedEvent -= SetMeshDirty;
-			else if (innerOctMap != null)
-				innerOctMap.MapChangedEvent -= SetMeshDirty;
+				_lastFrameConnectedMap.Map.MapChangedEvent -= SetMeshDirty;
+			else if (innerMap != null)
+				innerMap.MapChangedEvent -= SetMeshDirty;
 
-			if (connectedSOMap != null)
-				connectedSOMap.map.MapChangedEvent += SetMeshDirty;
-			else if (innerOctMap != null)
-				innerOctMap.MapChangedEvent += SetMeshDirty;
-			_lastFrameConnectedMap = connectedSOMap;
+			if (connectedMapHolder != null)
+				connectedMapHolder.Map.MapChangedEvent += SetMeshDirty;
+			else if (innerMap != null)
+				innerMap.MapChangedEvent += SetMeshDirty;
+			_lastFrameConnectedMap = connectedMapHolder;
 		}
 
 		void SetMeshDirty() 
 		{
-			voxelRenderer.RegenerateMesh();
+			if(voxelRenderer != null)
+				voxelRenderer.RegenerateMesh();
 		}
 
+
+		void ExportVoxelMap()
+		{
+#if UNITY_EDITOR
+
+			string path = UnityEditor.EditorUtility.SaveFilePanelInProject("Save Voxel Map", "VoxelMap", "asset", "Save Voxel Map");
+			if (path.Length != 0)
+			{
+				SharedArrayVoxel newMap = ScriptableObject.CreateInstance<SharedArrayVoxel>();
+				newMap.map = innerMap.GetCopy();
+				newMap.name = Path.GetFileName(path);
+				UnityEditor.AssetDatabase.CreateAsset(newMap, path);
+				UnityEditor.AssetDatabase.Refresh();
+			}
+#endif
+		}
 	}
 }

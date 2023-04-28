@@ -14,19 +14,16 @@ namespace VoxelSystem
 
 		void HandleArrowHandles()
 		{
-			if (!_handleTools.Contains(Tool))
-			{ return; }
+			if (!_handleTools.Contains(Tool)) return;
+			if (_targetVoxelObject == null) return;
+			VoxelMap map = _targetVoxelObject.Map;
+			if (map == null) return;
 
-			if (_targetVoxelObject == null)
-			{ return; }
-			ArrayVoxelMap map = _targetVoxelObject.Map;
-			if (map == null)
-			{ return; }
-			Vector3Int size = map.Size;
+			Vector3Int size = map.FullSize;
 
 			Vector3 lossyScale = _targetVoxelObject.transform.lossyScale;
 			float arrowSize =
-				(new float[] { map.Width, map.Height, map.Depth }).Average() *
+				(new float[] { size.x, size.y, size.z }).Average() *
 				MathHelper.Average(lossyScale.x, lossyScale.y, lossyScale.z)
 				/ 10;
 			float arrowSpacing = 2 * arrowSize;
@@ -134,8 +131,8 @@ namespace VoxelSystem
 					_handleVector = Vector3Int.zero;
 
 					break;
-				default:
-					throw new ArgumentException("Invalid handle event: " + handleResult.handleEvent);
+				//default:					
+				//		throw new ArgumentException("Invalid handle event: " + handleResult.handleEvent);
 			}
 		}
 
@@ -163,7 +160,8 @@ namespace VoxelSystem
 		void StartArrowHandleAction(GeneralDirection3D direction)
 		{
 			_originalPos = _targetGameObject.transform.localPosition;
-			_originalMap = (ArrayVoxelMap)_targetVoxelObject.Map.GetCopy();
+			_originalMap ??= new ArrayVoxelMap();
+			_originalMap.SetupFrom(_targetVoxelObject.Map);
 		}
 
 		void ReleaseArrowHandleAction(GeneralDirection3D direction, int steps)
@@ -185,7 +183,7 @@ namespace VoxelSystem
 			if (_originalMap != null)
 			{
 				steps = Mathf.Max(-_originalMap.GetSize(direction.GetAxis()) + 1, steps);
-				_targetVoxelObject.Map = (ArrayVoxelMap)_originalMap.GetCopy();
+				_targetVoxelObject.CopyMapFrom(_originalMap);
 				RecordVoxelObjectForUndo(_targetVoxelObject, "VoxelMapResized");
 
 				_targetVoxelObject.Map.Resize(direction, steps, ToolToResizeType(Tool));
@@ -233,7 +231,7 @@ namespace VoxelSystem
 			{
 				Translate(direction, steps);
 			}
-			_targetVoxelObject.Map = (ArrayVoxelMap)_originalMap.GetCopy();
+			_targetVoxelObject.Map.SetupFrom(_originalMap);
 			_targetVoxelObject.Map.Resize(direction, steps, ToolToResizeType(Tool));
 		}
 

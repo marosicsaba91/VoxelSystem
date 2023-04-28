@@ -16,10 +16,10 @@ namespace VoxelSystem
 			if (_targetVoxelObject == null || _targetGameObject == null)
 			{ return; }
 
-			ArrayVoxelMap map = _targetVoxelObject.Map;
+			VoxelMap map = _targetVoxelObject.Map;
 			if (map == null)
 			{ return; }
-			Vector3 size = map.Size;
+			Vector3 size = map.FullSize;
 
 
 			DrawInSceneWindowGUI();
@@ -46,7 +46,7 @@ namespace VoxelSystem
 		}
 
 		static readonly Color C = new(r: 1, g: 0, b: 0);
-		static void DrawCursor(VoxelHitPoint? cursorVoxel)
+		static void DrawCursor(VoxelHit? cursorVoxel)
 		{
 			if (cursorVoxel == null)
 			{ return; }
@@ -59,15 +59,16 @@ namespace VoxelSystem
 			Color softCursorColor = new(cursorColor.r, cursorColor.g, cursorColor.b, cursorColor.a / 4f);
 
 			Handles.color = cursorColor;
-			DrawVoxelSide_InWorld(transform, cursorVoxel.Value.voxel, cursorVoxel.Value.side, size: 1f);
-			DrawVoxelSide_InWorld(transform, cursorVoxel.Value.voxel, cursorVoxel.Value.side, size: 0.75f);
-			DrawVoxelSide_InWorld(transform, cursorVoxel.Value.voxel, cursorVoxel.Value.side, size: 0.5f);
-			DrawVoxelSide_InWorld(transform, cursorVoxel.Value.voxel, cursorVoxel.Value.side, size: 0.25f);
+			DrawVoxelSide_InWorld(transform, cursorVoxel.Value.voxelIndex, cursorVoxel.Value.side, size: 1f);
+			DrawVoxelSide_InWorld(transform, cursorVoxel.Value.voxelIndex, cursorVoxel.Value.side, size: 0.75f);
+			DrawVoxelSide_InWorld(transform, cursorVoxel.Value.voxelIndex, cursorVoxel.Value.side, size: 0.5f);
+			DrawVoxelSide_InWorld(transform, cursorVoxel.Value.voxelIndex, cursorVoxel.Value.side, size: 0.25f);
 
 
 			Handles.color = softCursorColor;
-			Vector3Int voxel = cursorVoxel.Value.voxel;
-			if (_targetVoxelObject.IsValidCoord(voxel))
+			Vector3Int voxel = cursorVoxel.Value.voxelIndex;
+			VoxelMap map = _targetVoxelObject.Map;
+			if (map!= null && map.IsValidCoord(voxel))
 			{
 				DrawVoxel_InWorld(transform, voxel);
 			}

@@ -6,9 +6,18 @@ namespace VoxelSystem
 {
 	public partial class VoxelEditorWindow
 	{
+		// TODO: RECOVER THIS
 
-		void Separate()
+		// DON'T DELETE
+		// DON'T DELETE
+		// DON'T DELETE
+		// DON'T DELETE
+		// DON'T DELETE
+		// DON'T DELETE
+		
+		void Separate()		
 		{
+			/*
 			RecordVoxelObjectForUndo(_targetVoxelObject, "Separate");
 
 			var separatedGo = new GameObject(_targetGameObject.name + " Separated");
@@ -21,13 +30,13 @@ namespace VoxelSystem
 				separatedGo.AddComponent<MeshCollider>();
 
 			VoxelObject separatedVo = separatedGo.AddComponent<VoxelObject>();
-			separatedVo.ConnectedBuilder = _targetVoxelObject.ConnectedBuilder;
-			separatedVo.Map = new(_selectionSize);
-			separatedVo.Map.ClearWhole();
+			separatedVo.ConnectedBuilder = _targetVoxelObject.Builder;
+			separatedVo.ArrayMap = new(_selectionSize);
+			separatedVo.ArrayMap.ClearWhole();
 			separatedVo.RegenerateMesh();
 
 			// TODO: SET NEW MAP
-			separatedVo.Map.CopyFromOtherMap(_targetVoxelObject.Map, _selectionMin, Vector3Int.zero, _selectionSize);
+			separatedVo.ArrayMap.CopyFromOtherMap(_targetVoxelObject.Map, _selectionMin, Vector3Int.zero, _selectionSize);
 
 			_targetVoxelObject.Map.SetRange(_selectionMin, _selectionMax, VoxelMap.SetAction.Clear, SelectedPaletteIndex);
 			_targetVoxelObject.RegenerateMesh();
@@ -39,43 +48,22 @@ namespace VoxelSystem
 
 			Tool = VoxelTool.Non;
 			separatedVo.RegenerateMesh();
+		*/
 		}
 
 		void CopyUp()
 		{
 
-			VoxelObject parent = _targetGameObject.transform.parent.GetComponentInParent<VoxelObject>();
+			IVoxelEditable parent = _targetGameObject.transform.parent.GetComponentInParent<IVoxelEditable>();
 			RecordVoxelObjectForUndo(parent, "CopyUp");
 
 			_targetVoxelObject.ApplyScale();
 			_targetVoxelObject.ApplyRotation();
 
-			//Vector3Int parentMax = parent.Map.Size;
 			Vector3 childPos = _targetGameObject.transform.localPosition;
 			Vector3Int childMin = new(Mathf.RoundToInt(childPos.x), Mathf.RoundToInt(childPos.y), Mathf.RoundToInt(childPos.z));
-			//Vector3 childMax = childMin + targetVoxelObject.Map.Size;
-			/*
-            if (childMin.x < 0 || childMin.y < 0 || childMin.x < 0 ||
-                childMax.x > parentMax.x || childMax.y > parentMax.y || childMax.z > parentMax.z)
-            {
-                Debug.LogWarning("OUT OF BOUNDS" + "  " + childMin + "  " + childMax+"  " + parentMax);
-                return;
-            }
-            */
 
-			parent.Map.CopyFromOtherMap(_targetVoxelObject.Map, Vector3Int.zero, childMin, _targetVoxelObject.Map.Size);
-
-			// targetGameObject.SetActive(false);
-
-			/*
-            Selection.activeGameObject = parent.gameObject;
-            ChangeTarget();
-            targetGameObject = parent.gameObject;
-            targetVoxelObject = parent;
-
-            tool = VoxelTool.NON;
-            */
-
+			parent.Map.CopyFrom(_targetVoxelObject.Map, Vector3Int.zero, childMin, _targetVoxelObject.Map.FullSize);
 			parent.RegenerateMesh();
 		}
 

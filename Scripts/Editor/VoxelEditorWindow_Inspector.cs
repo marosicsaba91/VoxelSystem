@@ -45,7 +45,7 @@ namespace VoxelSystem
 
 			DrawMapTools(mapRect);
 
-			if (_targetVoxelObject.ConnectedBuilder == null)
+			if (_targetVoxelObject.Builder == null)
 				return;
 
 			DrawTransform(transformRect);
@@ -103,16 +103,16 @@ namespace VoxelSystem
 			string label = "Map";
 			if (_targetVoxelObject.HasConnectedMap())
 			{
-				label += ": " + _targetVoxelObject.ConnectedMap.name;
+				label += ": " + _targetVoxelObject.SharedMap.name;
 			}
 
 			GUI.Label(rect, label, _boldMiddleTextStyle);
-			Vector3Int s = _targetVoxelObject.Map.Size;
+			Vector3Int s = _targetVoxelObject.Map.FullSize;
 			GUIStyle small = new(EditorStyles.centeredGreyMiniLabel);
 			rect.y += lineHeight + smallSpacing;
 			GUI.Label(rect, " (" + s.x + "x" + s.y + "x" + s.z + ")", small);
 
-			if (_targetVoxelObject.ConnectedBuilder == null)
+			if (_targetVoxelObject.Builder == null)
 			{
 				EditorGUILayout.Space();
 				GUILayout.Label("VoxelObject Has No Builder!", _boldMiddleTextStyle);
@@ -123,9 +123,9 @@ namespace VoxelSystem
 			rect.y += lineHeight + smallSpacing;
 			DrawToolLine(rect, new[] { VoxelTool.Select });
 			rect.y += lineHeight + smallSpacing;
-			DrawCommandLine(rect, new[] { VoxelAction.Clear, VoxelAction.Fill });
+			DrawCommandLine(rect, new[] { VoxelCommand.Clear, VoxelCommand.Fill });
 			rect.y += lineHeight + smallSpacing;
-			DrawCommandLine(rect, new[] { VoxelAction.Separate, VoxelAction.CopyUp });
+			DrawCommandLine(rect, new[] { VoxelCommand.Separate, VoxelCommand.CopyUp });
 		}
 
 		void DrawTransform(Rect rect)
@@ -152,13 +152,13 @@ namespace VoxelSystem
 			float buttonWidth = (rect.width - labelWidth - (smallSpacing * 2)) / 3f;
 			rect.x += labelWidth;
 			rect.width = buttonWidth;
-			ToggleButton(rect, "Position", ref _targetVoxelObject.lockPosition);
+			_targetVoxelObject.LockPosition = ToggleButton(rect, "Position", _targetVoxelObject.LockPosition);
 			rect.x += buttonWidth + smallSpacing;
-			ToggleButton(rect, "Rotation", ref _targetVoxelObject.lockRotation);
+			_targetVoxelObject.LockRotation = ToggleButton(rect, "Rotation", _targetVoxelObject.LockRotation);
 			rect.x += buttonWidth + smallSpacing;
-			ToggleButton(rect, "Scale", ref _targetVoxelObject.lockScale);
+			_targetVoxelObject.LockScale = ToggleButton(rect, "Scale", _targetVoxelObject.LockScale);
 
-			void ToggleButton(Rect r, string label, ref bool value)
+			bool ToggleButton(Rect r, string label, bool value)
 			{
 				int textLength = _normalFont.GetTextLength(label);
 				if (textLength > r.width - 12)
@@ -171,12 +171,13 @@ namespace VoxelSystem
 				if (GUI.Button(rect, label))
 					value = !value;
 				GUI.backgroundColor = Color.white;
+				return value;
 			}
 		}
 
 		void DrawTransformApplyButtons(Rect rect)
 		{
-			GUI.enabled = _targetVoxelObject.lockRotation && _targetVoxelObject.lockScale;
+			GUI.enabled = _targetVoxelObject.LockRotation && _targetVoxelObject.LockScale;
 			if (GUI.Button(rect, "Apply Scale & Rotation"))
 			{
 				RecordVoxelObjectForUndo(_targetVoxelObject, "Rotation Applied to Map");
@@ -238,7 +239,7 @@ namespace VoxelSystem
 		}
 
 
-		void DrawCommandLine(Rect rect, VoxelAction[] actions)
+		void DrawCommandLine(Rect rect, VoxelCommand[] actions)
 		{
 
 			if (actions == null || actions.Length == 0)
@@ -246,7 +247,7 @@ namespace VoxelSystem
 
 			float buttonWidth = (rect.width - (actions.Length - 1) * smallSpacing) / actions.Length;
 			rect.width = buttonWidth;
-			foreach (VoxelAction t in actions)
+			foreach (VoxelCommand t in actions)
 			{
 				GUI.enabled = IsActionEnabled(t);
 				if (GUI.Button(rect, t.ToString()))
@@ -263,58 +264,58 @@ namespace VoxelSystem
 		{
 			switch (action)
 			{
-				case VoxelAction.Fill:
-				case VoxelAction.Clear:
+				case VoxelCommand.Fill:
+				case VoxelCommand.Clear:
 					return true;
-				case VoxelAction.CopyUp:
+				case VoxelCommand.CopyUp:
 					return _targetGameObject.transform.parent != null &&
 						   _targetGameObject.transform.parent.GetComponentInParent<VoxelObject>() != null &&
-						   _targetVoxelObject.lockPosition &&
-						   _targetVoxelObject.lockRotation &&
-						   _targetVoxelObject.lockScale;
-				case VoxelAction.Separate:
+						   _targetVoxelObject.LockPosition &&
+						   _targetVoxelObject.LockRotation &&
+						   _targetVoxelObject.LockScale;
+				case VoxelCommand.Separate:
 					return Tool == VoxelTool.Select;
 			}
 
 			return false;
 		}
 
-		void DoVoxelAction(VoxelAction action)
+		void DoVoxelAction(VoxelCommand action)
 		{
 			switch (action)
 			{
-				case VoxelAction.Clear:
+				case VoxelCommand.Clear:
 					if (Tool != VoxelTool.Select)
 					{
 						RecordVoxelObjectForUndo(_targetVoxelObject, "Map Cleared");
-						_targetVoxelObject.ClearWholeMap();
+						_targetVoxelObject.Map?.ClearWhole();
 					}
 					else
 					{
 						RecordVoxelObjectForUndo(_targetVoxelObject, "Selection Cleared");
-						_targetVoxelObject.Map.SetRange(_selectionMin, _selectionMax, VoxelMap.SetAction.Clear,
+						_targetVoxelObject.Map?.SetRange(_selectionMin, _selectionMax, VoxelMap.SetAction.Clear,
 							SelectedPaletteIndex);
 					}
 
 					break;
-				case VoxelAction.Fill:
+				case VoxelCommand.Fill:
 					if (Tool != VoxelTool.Select)
 					{
 						RecordVoxelObjectForUndo(_targetVoxelObject, "Map Filled");
-						_targetVoxelObject.FillWholeMap(SelectedPaletteIndex);
+						_targetVoxelObject.Map?.SetWhole(SelectedPaletteIndex);
 					}
 					else
 					{
 						RecordVoxelObjectForUndo(_targetVoxelObject, "Selection Filled");
-						_targetVoxelObject.Map.SetRange(_selectionMin, _selectionMax, VoxelMap.SetAction.Fill,
+						_targetVoxelObject.Map?.SetRange(_selectionMin, _selectionMax, VoxelMap.SetAction.Fill,
 							SelectedPaletteIndex);
 					}
 
 					break;
-				case VoxelAction.CopyUp:
+				case VoxelCommand.CopyUp:
 					CopyUp();
 					break;
-				case VoxelAction.Separate:
+				case VoxelCommand.Separate:
 					Separate();
 					break;
 			}
@@ -334,14 +335,14 @@ namespace VoxelSystem
 			}
 		}
 
-		void DrawPalette(Rect rect, VoxelObject vo)
+		void DrawPalette(Rect rect, IVoxelEditable vo)
 		{
 			GUI.enabled = _paletteUsingTools.Contains(Tool);
 
 			const float minWidth = 50;
 			const float height = 40;
 
-			int allItemCount = vo.ConnectedBuilder.PaletteLength;
+			int allItemCount = vo.Builder.PaletteLength;
 
 			int columns = 1;
 			while (rect.width >= columns * minWidth + (columns - 1) * smallSpacing)
@@ -353,7 +354,7 @@ namespace VoxelSystem
 
 			var r = new Rect(rect.x, rect.y, itemWidth, height);
 			int index = 0;
-			foreach (PaletteItem item in vo.ConnectedBuilder.GetPaletteItems())
+			foreach (PaletteItem item in vo.Builder.GetPaletteItems())
 			{
 				GUI.backgroundColor = item.color;
 				if (GUI.Button(r, SelectedPaletteIndex == item.value ? "X" : ""))

@@ -7,7 +7,7 @@ using System.IO;
 namespace VoxelSystem
 {
 	[Serializable]
-	public partial class OctVoxelMap : VoxelMap<int>, ISerializationCallbackReceiver
+	public partial class OctVoxelMap : VoxelMap<OctVoxelMap>, ISerializationCallbackReceiver
 	{
 		[SerializeField] Vector3Int canvasSize;
 		[SerializeField] int levelCount;
@@ -16,15 +16,37 @@ namespace VoxelSystem
 		OctVoxelChunk rootChunk;
 		bool _serialized = false;
 
-		public override IntBounds VoxelBoundaries => new(Vector3Int.zero, canvasSize);
+		public sealed override IntBounds VoxelBoundaries
+		{
+			get => new(Vector3Int.zero, canvasSize);
+			protected set => Setup(value.Size); // RESET WHOLE MAP
+		}
+		public override Vector3Int FullSize
+		{
+			get
+			{
+				return Vector3Int.one * ChunkSizeLength;
+			}
+			protected set // RESET WHOLE MAP
+			{
+				Vector3Int full = value;
+				if (value.x <= 0 || value.y <= 0 || value.z <= 0)
+					full = Vector3Int.one * defaultCanvasSize;
 
-		public override bool IsVoxelFilled(int v) => v.IsFilled();
+				int longestCanvasSize = Mathf.Max(value.x, value.y, value.z);
+				float log = Mathf.Log(longestCanvasSize, 2);
+				levelCount = Mathf.CeilToInt(log); 
+				canvasSize = value;
+				rootChunk = new OctVoxelChunk();
+				rootChunk.value = defaultValue;
+			}
+		}
 
 		// Getters --------------------------------------------
 
 		public OctVoxelChunk RootChunk => rootChunk;
 
-		public int ChunkSize
+		public int ChunkSizeLength
 		{
 			get
 			{
@@ -50,21 +72,20 @@ namespace VoxelSystem
 		const int defaultValue = OctVoxelChunk.defaultValue;
 		const int defaultCanvasSize = 8;
 
-		public OctVoxelMap() : this(Vector3Int.one * defaultCanvasSize) { }
+		public OctVoxelMap() { }
 
 		public OctVoxelMap(int x, int y, int z) : this (new Vector3Int(x, y, z), defaultValue) { }
 
 		public OctVoxelMap(Vector3Int canvasSize, int value = defaultValue)
 		{
+			Setup(canvasSize, value);
+		}
 
-			if (canvasSize.x <= 0 || canvasSize.y <= 0 || canvasSize.z <= 0)
-				canvasSize = Vector3Int.one * defaultCanvasSize;
+		public sealed override void Setup() => Setup(defaultCanvasSize * Vector3Int.one);
 
-			int longestCanvasSize = Mathf.Max(canvasSize.x, canvasSize.y, canvasSize.z);
-			float log = Mathf.Log(longestCanvasSize, 2);
-			levelCount = Mathf.CeilToInt(log);
-			this.canvasSize = canvasSize;
-			rootChunk = new OctVoxelChunk();
+		public sealed override void Setup(Vector3Int size, int value = defaultValue)
+		{
+			FullSize = size;			
 			rootChunk.Fill(value);
 		}
 
@@ -78,57 +99,61 @@ namespace VoxelSystem
 			_serialized = false;
 		}
 
-		internal override VoxelMap GetCopy() => new OctVoxelMap(this);
+		internal sealed override OctVoxelMap GetCopy() => new OctVoxelMap(this);
 
 		// GET Voxels --------------------------------------------------------        
 
-		public override int GetVoxel(int x, int y, int z) => rootChunk.GetVoxel(x, y, z, ChunkSize); 
+		public sealed override int GetVoxel(int x, int y, int z) => rootChunk.GetVoxel(x, y, z, ChunkSizeLength);
 
 		// SET Voxels --------------------------------------------------------
 
+		public override bool SetVoxel(int x, int y, int z, int value) => rootChunk.SetLeaf(x, y, z, value, ChunkSizeLength);
 
-		public bool Set(int x, int y, int z, SetAction action, int value)
-		{
-			if (action == SetAction.Repaint)
-			{
-				int v = rootChunk.GetVoxel(x, y, z, ChunkSize);
-				if (v == defaultValue )
-					return false;
-			}
-
-			bool changed = rootChunk.SetLeaf(x, y, z, value, ChunkSize);
-
-			if(changed)
-				MapChanged();
-
-			return changed;
-		}
-
-		public bool Set(Vector3Int coordinate, SetAction action, int value) => Set(coordinate.x, coordinate.y, coordinate.z, action, value);
-
-		public bool Set(Vector3Int coordinate, int value) => Set(coordinate.x, coordinate.y, coordinate.z, SetAction.Fill, value);
-
-		public bool Set(int x, int y, int z, int value) => Set(x, y, z, SetAction.Fill, value);
-
-		public bool Repaint(Vector3Int coordinate, int value) => Set(coordinate.x, coordinate.y, coordinate.z, SetAction.Repaint, value);
-
-		public bool Repaint(int x, int y, int z, int value) => Set(x, y, z, SetAction.Repaint, value);
-
-
-		public void ClearWhole(Vector3Int canvasSize)
-		{
-			this.canvasSize = canvasSize;
-			rootChunk.Fill(defaultValue);
-			MapChanged();
-		}
-
-		public void FillWhole(int value)
+		public sealed override void SetWhole(int value)
 		{
 			rootChunk.Fill(value);
 			MapChanged();
 		}
 
+		public sealed override void SetRange(Vector3Int startCoordinate, Vector3Int endCoordinate, SetAction action, int value)
+		{
+			// TODO: Very much not optimized
+
+			IntBounds bounds = new(startCoordinate, endCoordinate + Vector3Int.one);
+			bounds.Clamp(Vector3Int.zero, CanvasSize);
+
+			if (action == SetAction.Set)
+			{
+				foreach (Vector3Int coordinate in bounds.WalkThrough())
+					SetVoxel(coordinate, value);
+			}
+			if (action == SetAction.Repaint)
+			{
+				foreach (Vector3Int coordinate in bounds.WalkThrough())
+					if (GetVoxel(coordinate).IsFilled())
+						SetVoxel(coordinate, action, value);
+			}
+			else if (action == SetAction.Fill)
+			{
+
+				foreach (Vector3Int coordinate in bounds.WalkThrough())
+					if (GetVoxel(coordinate).IsEmpty())
+						SetVoxel(coordinate, action, value);
+			}
+			else if (action == SetAction.Clear)
+			{
+				foreach (Vector3Int coordinate in bounds.WalkThrough())
+					SetVoxel(coordinate, action, IntVoxelUtility.emptyValue);
+			}
+		}
+
 		// Serialization ----------------------------------------------------------
+
+		protected override void OnMapChanged()
+		{
+			_serialized = false;
+			SerializeToByeArray();
+		}
 
 		public void OnBeforeSerialize() => SerializeToByeArray();
 		public void OnAfterDeserialize() => DeserializeFromByteArray();

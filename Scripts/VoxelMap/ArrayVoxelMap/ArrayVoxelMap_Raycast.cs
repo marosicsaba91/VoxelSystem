@@ -4,41 +4,19 @@ using UnityEngine;
 
 namespace VoxelSystem
 {
-	public struct VoxelHitPoint
-	{
-		public Vector3Int voxel;
-		public GeneralDirection3D side;
-		public Vector3 point;
-	}
-
 	partial class ArrayVoxelMap
 	{
-		public bool Raycast(Ray ray, out VoxelHitPoint hit, Transform voxelTransform, bool returnOutsideVoxel = false)
+		protected sealed override bool Raycast(Ray localRay, out VoxelHit hit, bool returnOutsideVoxel = false)
 		{
-			if (voxelTransform == null)
-			{
-				hit = new VoxelHitPoint();
-				return false;
-			}
-			Matrix4x4 matrix = voxelTransform.worldToLocalMatrix;
-			return Raycast(ray, out hit, this, matrix, returnOutsideVoxel);
-		}
-
-		public bool Raycast(Ray ray, out VoxelHitPoint hit, Matrix4x4 voxelMatrix, bool returnOutsideVoxel = false) => Raycast(ray, out hit, this, voxelMatrix, returnOutsideVoxel);
-
-		static bool Raycast(Ray globalRay, out VoxelHitPoint hit, ArrayVoxelMap map, Matrix4x4 matrix, bool returnOutsideVoxel)
-		{
-			Ray localRay = globalRay.Transform(matrix);
-
 			// Try Find the entry point
-			if (FindEntryPointToVoxelMap(localRay, out VoxelHitPoint voxelMapEntry, map.Size))
-				return RaycastInside(voxelMapEntry, out hit, localRay.direction, map, returnOutsideVoxel);
+			if (FindEntryPointToVoxelMap(localRay, out VoxelHit voxelMapEntry, FullSize))
+				return RaycastInside(voxelMapEntry, out hit, localRay.direction, this, returnOutsideVoxel);
 
 			hit = default;
 			return false;
 		}
 
-		static bool FindEntryPointToVoxelMap(Ray ray, out VoxelHitPoint hit, Vector3Int mapSize)
+		static bool FindEntryPointToVoxelMap(Ray ray, out VoxelHit hit, Vector3Int mapSize)
 		{
 			GeneralDirection3D[] sides = DirectionUtility.generalDirection3DValues;
 
@@ -85,10 +63,10 @@ namespace VoxelSystem
 				if (entryPoint.z <= -epsilon || entryPoint.z >= mapSize.z + epsilon)
 					continue;
 
-				hit = new VoxelHitPoint()
+				hit = new VoxelHit()
 				{
-					voxel = firstFoundVoxel,
-					point = entryPoint,
+					voxelIndex = firstFoundVoxel,
+					hitWorldPosition = entryPoint,
 					side = entrySide.Opposite()
 				};
 				return true;
@@ -98,15 +76,15 @@ namespace VoxelSystem
 			return false;
 		}
 
-		static bool RaycastInside(VoxelHitPoint entry, out VoxelHitPoint hit, Vector3 rayDirection, ArrayVoxelMap map, bool returnOutsideVoxel)
+		static bool RaycastInside(VoxelHit entry, out VoxelHit hit, Vector3 rayDirection, ArrayVoxelMap map, bool returnOutsideVoxel)
 		{			 
-			if (map.GetVoxel(entry.voxel).IsFilled)
+			if (map.GetVoxel(entry.voxelIndex).IsFilled())
 			{
 				hit = entry;
 				return true;
 			}
 
-			VoxelHitPoint cursor = new();
+			VoxelHit cursor = new();
 			// In the Cube
 			bool xIsPositive = rayDirection.x > 0;
 			bool yIsPositive = rayDirection.y > 0;
@@ -114,13 +92,13 @@ namespace VoxelSystem
 
 			Vector3Int dirSign = new (rayDirection.x > 0 ? 1 : -1, rayDirection.y > 0 ? 1 : -1, rayDirection.z > 0 ? 1 : -1);
 
-			Vector3Int lastFoundVoxel = entry.voxel;
-			Vector3 lastIntersect = entry.point;
+			Vector3Int lastFoundVoxel = entry.voxelIndex;
+			Vector3 lastIntersect = entry.hitWorldPosition;
 
 			while (true)
 			{
-				cursor.point = lastIntersect;
-				cursor.voxel = lastFoundVoxel;
+				cursor.hitWorldPosition = lastIntersect;
+				cursor.voxelIndex = lastFoundVoxel;
 
 				//cursorPathVoxels.Add(lastFoundVoxel);
 
@@ -155,25 +133,21 @@ namespace VoxelSystem
 
 				if (!map.IsValidCoord(lastFoundVoxel))
 				{
-					cursor.voxel = returnOutsideVoxel ? cursor.voxel : cursor.voxel + cursor.side.ToVectorInt();
-					//cursor.voxel.x = Mathf.Max(cursor.voxel.x, 0);
-					//cursor.voxel.y = Mathf.Max(cursor.voxel.y, 0);
-					//cursor.voxel.z = Mathf.Max(cursor.voxel.z, 0);
+					cursor.voxelIndex = returnOutsideVoxel ? cursor.voxelIndex : cursor.voxelIndex + cursor.side.ToVectorInt();
 					cursor.side = returnOutsideVoxel ? cursor.side : cursor.side.Opposite();
 					hit = cursor;
 					return true;
 				}
 
-				if (map.GetVoxel(lastFoundVoxel.x, lastFoundVoxel.y, lastFoundVoxel.z).IsFilled)
+				if (map.GetVoxel(lastFoundVoxel.x, lastFoundVoxel.y, lastFoundVoxel.z).IsFilled())
 				{
-					cursor.voxel = returnOutsideVoxel ? cursor.voxel : cursor.voxel + cursor.side.ToVectorInt();
+					cursor.voxelIndex = returnOutsideVoxel ? cursor.voxelIndex : cursor.voxelIndex + cursor.side.ToVectorInt();
 					cursor.side = returnOutsideVoxel ? cursor.side : cursor.side.Opposite();
 					hit = cursor;
 					return true;
 				}
 			}
 		}
-
 
 		static int Ceil(float f)
 		{

@@ -63,7 +63,7 @@ namespace VoxelSystem
 						Vector3Int index = new Vector3Int(vX, vY, vZ);
 						if (x > index.x && y > index.y && z > index.z)
 						{
-							model.Set(index, vI);
+							model.FillVoxel(index, vI);
 						}
 					}
 					return model;
@@ -175,7 +175,7 @@ namespace VoxelSystem
 				}
 			}
 			else
-				return (UInt32)0;
+				return 0;
 		}
 
 		private class MVoxChunk

@@ -1,13 +1,12 @@
 ﻿using MUtility;
 using System;
 using UnityEngine;
-using static VoxelSystem.ArrayVoxelMap;
 
 namespace VoxelSystem
 {
 	partial class OctVoxelMap
 	{
-		public void Turn(Axis3D axis, bool leftHandPositive)
+		public sealed override void Turn(Axis3D axis, bool leftHandPositive)
 		{
 			Vector3Int size = canvasSize;
 			int newW =
@@ -29,7 +28,7 @@ namespace VoxelSystem
 			MapChanged();
 		}
 
-		public void Mirror(Axis3D axis)
+		public sealed override void Mirror(Axis3D axis)
 		{
 			// TODO: The mirroring
 			MapChanged();
@@ -58,21 +57,21 @@ namespace VoxelSystem
 				scaleInt *= -1;
 				Mirror(axis);
 			}
-			if (scaleInt != 1 && scaleInt != 0)
+			if (scaleInt is not 0 and not 1)
 			{
 				Resize(positiveDir, (scaleInt - 1) * size, ResizeType.Rescale);
 			}
 			return move;
 		}
 
-		public void Resize(GeneralDirection3D direction, int steps, ResizeType type)
+		public sealed override void Resize(GeneralDirection3D direction, int steps, ResizeType type)
 		{
 			Vector3Int size = canvasSize;
 			Axis3D axis = direction.GetAxis();
 			int newW = (axis == Axis3D.X) ? Math.Max(val1: 1, size.x + steps) : size.x;
 			int newH = (axis == Axis3D.Y) ? Math.Max(val1: 1, size.y + steps) : size.y;
 			int newD = (axis == Axis3D.Z) ? Math.Max(val1: 1, size.z + steps) : size.z;
-			// TODO: The mirroring
+			// TODO: Resize
 
 			MapChanged();
 		}

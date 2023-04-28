@@ -1,85 +1,84 @@
 ﻿using MUtility;
 using System;
+using Unity.Collections;
 using UnityEngine;
 
 namespace VoxelSystem
 {
 	public partial class ArrayVoxelMap
 	{
-
-		public void Turn(Axis3D axis, bool leftHandPositive)
+		public sealed override void Turn(Axis3D axis, bool leftHandPositive)
 		{
 			int newW =
-				axis == Axis3D.X ? Width :
-				axis == Axis3D.Y ? Depth :
-				axis == Axis3D.Z ? Height : 0;
+				axis == Axis3D.X ? size.x :
+				axis == Axis3D.Y ? size.z :
+				axis == Axis3D.Z ? size.y : 0;
 			int newH =
-				axis == Axis3D.X ? Depth :
-				axis == Axis3D.Y ? Height :
-				axis == Axis3D.Z ? Width : 0;
+				axis == Axis3D.X ? size.z :
+				axis == Axis3D.Y ? size.y :
+				axis == Axis3D.Z ? size.x : 0;
 			int newD =
-				axis == Axis3D.X ? Height :
-				axis == Axis3D.Y ? Width :
-				axis == Axis3D.Z ? Depth : 0;
+				axis == Axis3D.X ? size.y :
+				axis == Axis3D.Y ? size.x :
+				axis == Axis3D.Z ? size.z : 0;
 
-			var newVoxelData = new Voxel[voxelData.Length];
+			int[] newVoxelData = new int[intVoxelData.Length];
 
-			for (int i = 0; i < voxelData.Length; i++)
+			for (int i = 0; i < intVoxelData.Length; i++)
 			{
 				Vector3Int original = Index(i);
 				int nx =
 					axis == Axis3D.X ? original.x :
-					axis == Axis3D.Y ? (leftHandPositive ? depth - original.z - 1 : original.z) :
-					axis == Axis3D.Z ? (leftHandPositive ? original.y : height - original.y - 1) : 0;
+					axis == Axis3D.Y ? (leftHandPositive ? size.z - original.z - 1 : original.z) :
+					axis == Axis3D.Z ? (leftHandPositive ? original.y : size.y - original.y - 1) : 0;
 				int ny =
-					axis == Axis3D.X ? (leftHandPositive ? original.z : depth - original.z - 1) :
+					axis == Axis3D.X ? (leftHandPositive ? original.z : size.z - original.z - 1) :
 					axis == Axis3D.Y ? original.y :
-					axis == Axis3D.Z ? (leftHandPositive ? width - original.x - 1 : original.x) : 0;
+					axis == Axis3D.Z ? (leftHandPositive ? size.x - original.x - 1 : original.x) : 0;
 				int nz =
-					axis == Axis3D.X ? (leftHandPositive ? height - original.y - 1 : original.y) :
-					axis == Axis3D.Y ? (leftHandPositive ? original.x : width - original.x - 1) :
+					axis == Axis3D.X ? (leftHandPositive ? size.y - original.y - 1 : original.y) :
+					axis == Axis3D.Y ? (leftHandPositive ? original.x : size.x - original.x - 1) :
 					axis == Axis3D.Z ? original.z : 0;
 
 				//Debug.Log(original+"  "+new Vector3Int(nx,ny,nz));
 				int ni = nx + (ny * newW) + (nz * newW * newH);
-				newVoxelData[ni] = voxelData[i];
+				newVoxelData[ni] = intVoxelData[i];
 			}
 
-			width = newW;
-			height = newH;
-			depth = newD;
-			voxelData = newVoxelData;
+			size = new Vector3Int(newW, newH, newD);
+			intVoxelData = newVoxelData;
 			MapChanged();
 		}
 
-		public void Mirror(Axis3D axis)
+		public sealed override void Mirror(Axis3D axis)
 		{
-			var newVoxelData = new Voxel[voxelData.Length];
+			int[] newVoxelData = new int[intVoxelData.Length];
 
-			for (int i = 0; i < voxelData.Length; i++)
+			for (int i = 0; i < intVoxelData.Length; i++)
 			{
 				Vector3Int o = Index(i);
 				if (axis == Axis3D.X)
-					o.x = width - o.x - 1;
+					o.x = size.x - o.x - 1;
 				if (axis == Axis3D.Y)
-					o.y = height - o.y - 1;
+					o.y = size.y - o.y - 1;
 				if (axis == Axis3D.Z)
-					o.z = depth - o.z - 1;
-				int ni = o.x + (o.y * width) + (o.z * width * height);
+					o.z = size.z - o.z - 1;
+				int ni = o.x + (o.y * size.x) + (o.z * size.x * size.y);
 
-				newVoxelData[ni] = voxelData[i];
+				newVoxelData[ni] = intVoxelData[i];
 			}
-			voxelData = newVoxelData;
+			intVoxelData = newVoxelData;
 			MapChanged();
 		}
-		public void Resize(GeneralDirection3D direction, int steps, ResizeType type)
+
+		public sealed override void Resize(GeneralDirection3D direction, int steps, ResizeType type)
 		{
 			Axis3D axis = direction.GetAxis();
-			int newW = (axis == Axis3D.X) ? Math.Max(val1: 1, width + steps) : width;
-			int newH = (axis == Axis3D.Y) ? Math.Max(val1: 1, height + steps) : height;
-			int newD = (axis == Axis3D.Z) ? Math.Max(val1: 1, depth + steps) : depth;
+			int newW = (axis == Axis3D.X) ? Math.Max(val1: 1, size.x + steps) : size.x;
+			int newH = (axis == Axis3D.Y) ? Math.Max(val1: 1, size.y + steps) : size.y;
+			int newD = (axis == Axis3D.Z) ? Math.Max(val1: 1, size.z + steps) : size.z;
 
-			var newVoxelData = new Voxel[newW * newH * newD];
+			int[] newVoxelData = new int[newW * newH * newD];
 
 			for (int i = 0; i < newVoxelData.Length; i++)
 			{
@@ -91,19 +90,21 @@ namespace VoxelSystem
 					nx -= nz * (newW * newH);
 					int ny = nx / newW;
 					nx -= ny * (newW);
-					int ox = Mathf.Clamp((int)((float)nx / newW * width), min: 0, width - 1);
-					int oy = Mathf.Clamp((int)((float)ny / newH * height), min: 0, height - 1);
-					int oz = Mathf.Clamp((int)((float)nz / newD * depth), min: 0, depth - 1);
+
+					int ox = Mathf.Clamp((int)((float)nx / newW * size.x), 0, size.x - 1);
+					int oy = Mathf.Clamp((int)((float)ny / newH * size.y), 0, size.y - 1);
+					int oz = Mathf.Clamp((int)((float)nz / newD * size.z), 0, size.z - 1);
 					oldIndex = Index(ox, oy, oz);
-					if (oldIndex < 0 || oldIndex >= voxelData.Length)
+
+					if (oldIndex < 0 || oldIndex >= intVoxelData.Length)
 					{
-						Debug.Log("W: " + width + " -> " + newW);
+						Debug.Log("W: " + size.x + " -> " + newW);
 						Debug.Log("X: " + ox + " -> " + nx);
 
-						Debug.Log("H: " + height + " -> " + newH);
+						Debug.Log("H: " + size.y + " -> " + newH);
 						Debug.Log("Y: " + oy + " -> " + ny);
 
-						Debug.Log("D: " + depth + " -> " + newD);
+						Debug.Log("D: " + size.z + " -> " + newD);
 						Debug.Log("Z: " + oz + " -> " + nz);
 					}
 				}
@@ -116,17 +117,20 @@ namespace VoxelSystem
 					ox -= oy * (newW);
 
 					if (direction == GeneralDirection3D.Left)
-					{ ox -= (newW - width); }
+					{ ox -= (newW - size.x); }
 					if (direction == GeneralDirection3D.Down)
-					{ oy -= (newH - height); }
+					{ oy -= (newH - size.y); }
 					if (direction == GeneralDirection3D.Back)
-					{ oz -= (newD - depth); }
+					{ oz -= (newD - size.z); }
 
-					if (ox >= width || oy >= height || oz >= depth || ox < 0 || oy < 0 || oz < 0)
+					if (ox >= size.x || oy >= size.y || oz >= size.z || ox < 0 || oy < 0 || oz < 0)
 					{
 						if (type == ResizeType.Repeat)
-						{
-							oldIndex = Index(MathHelper.Mod(ox, width), MathHelper.Mod(oy, height), MathHelper.Mod(oz, depth));
+						{ 
+							oldIndex = Index(
+								MathHelper.Mod(ox, size.x),
+								MathHelper.Mod(oy, size.y),
+								MathHelper.Mod(oz, size.z));
 						}
 						else
 						{ oldIndex = -1; }
@@ -138,18 +142,14 @@ namespace VoxelSystem
 				}
 
 				if (oldIndex < 0)
-					newVoxelData[i] = new Voxel(value: -1);
+					newVoxelData[i] = IntVoxelUtility.emptyValue;
 				else
-					newVoxelData[i] = voxelData[oldIndex];
+					newVoxelData[i] = intVoxelData[oldIndex];
 			}
 
-			width = newW;
-			height = newH;
-			depth = newD;
-			voxelData = newVoxelData;
+			size = new Vector3Int(newW, newH, newD);
+			intVoxelData = newVoxelData;
 			MapChanged();
 		}
-
-
 	}
 }

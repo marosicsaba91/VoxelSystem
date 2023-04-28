@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace VoxelSystem
 {
-	public abstract class VoxelBuilder : ScriptableObject
+	public abstract class VoxelBuilder : ScriptableObject, IVoxelBuilder
 	{
 		static readonly List<Vector3> _vertices = new();
 		static readonly List<Vector3> _normals = new();
@@ -18,14 +18,14 @@ namespace VoxelSystem
 			List<int> triangles);
 
 		internal delegate void OctBuilderFunction(
-			OctVoxelMap voxelMap,
+			VoxelMap voxelMap,
 			List<Vector3> vertices,
 			List<Vector3> normals,
 			List<Vector2> uv,
 			List<int> triangles);
 
 		public Mesh VoxelMapToMesh(ArrayVoxelMap map) => VoxelMapToMesh(map, BuildMesh);
-		public Mesh VoxelMapToMesh(OctVoxelMap map) => VoxelMapToMesh(map, BuildMesh);
+		public Mesh VoxelMapToMesh(VoxelMap map) => VoxelMapToMesh(map, BuildMesh);
 
 		internal static Mesh VoxelMapToMesh(ArrayVoxelMap map, BuilderFunction builderFunction)
 		{
@@ -47,7 +47,7 @@ namespace VoxelSystem
 			return mesh;
 		}
 
-		internal static Mesh VoxelMapToMesh(OctVoxelMap map, OctBuilderFunction builderFunction)
+		internal static Mesh VoxelMapToMesh(VoxelMap map, OctBuilderFunction builderFunction)
 		{
 			_vertices.Clear();
 			_normals.Clear();
@@ -68,7 +68,7 @@ namespace VoxelSystem
 		}
 
 		protected abstract void BuildMesh(ArrayVoxelMap voxelMap, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles);
-		protected abstract void BuildMesh(OctVoxelMap voxelMap, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles);
+		protected abstract void BuildMesh(VoxelMap voxelMap, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles);
 
 		public abstract IEnumerable<PaletteItem> GetPaletteItems();
 

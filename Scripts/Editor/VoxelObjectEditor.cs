@@ -45,14 +45,14 @@ namespace VoxelSystem
 			GUI.enabled = !t.HasConnectedMap();
 			if (GUILayout.Button("Export Voxel Map"))
 			{
-				ExportVoxelMap(t.Map);
+				ExportVoxelMap(t.ArrayMap);
 			}
 
 			GUI.enabled = true;
 
 			if (t.references.meshFilter != null && t.references.meshFilter.sharedMesh != null)
 			{
-				ArrayVoxelMap map = t.Map;
+				ArrayVoxelMap map = t.ArrayMap;
 				if (map != null)
 				{
 					if (GUILayout.Button("Export Mesh"))
@@ -78,7 +78,7 @@ namespace VoxelSystem
 			if (path.Length != 0)
 			{
 				VoxelMapScriptableObject newMap = CreateInstance<VoxelMapScriptableObject>();
-				newMap.map = (ArrayVoxelMap)map.GetCopy();
+				newMap.map = map.GetCopy();
 				newMap.name = Path.GetFileName(path);
 				AssetDatabase.CreateAsset(newMap, path);
 				AssetDatabase.Refresh();

@@ -6,41 +6,47 @@ using MUtility;
 
 namespace VoxelSystem
 {
-	enum VoxelTool { Non, Attach, Erase, Repaint, Face, Select, Move, Turn, Mirror, Resize, Repeat, Rescale, FloodFill, Picker }
-	enum VoxelAction { Clear, Fill, Separate, CopyUp }
+	// Need Refactor
+
+	// VoxelEditor.Action: { Set, Fill, Clear, Repaint, Select}
+	// VoxelEditor.Tool: { Move, Turn, Mirror, Resize, Repeat, Rescale, FloodFill, Picker }
+	// VoxelEditor.Command: { Clear, Fill, Separate, CopyUp }
+
+	enum VoxelTool { Non, Fill, Clear, Repaint, Face, Select, Move, Turn, Mirror, Resize, Repeat, Rescale, FloodFill, Picker }
+
+	enum VoxelCommand { Clear, Fill, Separate, CopyUp }
 
 	public partial class VoxelEditorWindow : EditorWindow
 	{
 		// ----------------------- STATE ------------------------
 
 		static readonly VoxelTool[] _handleTools = { VoxelTool.Move, VoxelTool.Turn, VoxelTool.Mirror, VoxelTool.Resize, VoxelTool.Repeat, VoxelTool.Rescale };
-		static readonly VoxelTool[] _cursorTools = { VoxelTool.Select, VoxelTool.Attach, VoxelTool.Erase, VoxelTool.Repaint, VoxelTool.Face, VoxelTool.FloodFill, VoxelTool.Picker };
-		static readonly VoxelTool[] _paletteUsingTools = { VoxelTool.Attach, VoxelTool.Repaint, VoxelTool.Face, VoxelTool.FloodFill };
+		static readonly VoxelTool[] _cursorTools = { VoxelTool.Select, VoxelTool.Fill, VoxelTool.Clear, VoxelTool.Repaint, VoxelTool.Face, VoxelTool.FloodFill, VoxelTool.Picker };
+		static readonly VoxelTool[] _paletteUsingTools = { VoxelTool.Fill, VoxelTool.Repaint, VoxelTool.Face, VoxelTool.FloodFill };
 
 		static readonly VoxelTool[] _transformTools = { VoxelTool.Move, VoxelTool.Turn, VoxelTool.Mirror };
 		static readonly VoxelTool[] _sizeTools = { VoxelTool.Resize, VoxelTool.Repeat, VoxelTool.Rescale };
 
-		static readonly VoxelTool[] _basicEditTools = { VoxelTool.Attach, VoxelTool.Erase, VoxelTool.Repaint };
+		static readonly VoxelTool[] _basicEditTools = { VoxelTool.Fill, VoxelTool.Clear, VoxelTool.Repaint };
 		static readonly VoxelTool[] _secondaryTools = { VoxelTool.Face, VoxelTool.FloodFill, VoxelTool.Picker };
 
-		static VoxelMap.SetAction ToolToAreaAction() // Need to refactor
-=> Tool switch
-{
-	VoxelTool.Repaint => VoxelMap.SetAction.Repaint,
-	VoxelTool.Attach => VoxelMap.SetAction.Fill,
-	VoxelTool.Erase => VoxelMap.SetAction.Clear,
-	_ => VoxelMap.SetAction.Repaint
-};
+		static VoxelMap.SetAction ToolToAreaAction() => Tool switch
+		{
+			VoxelTool.Repaint => VoxelMap.SetAction.Repaint,
+			VoxelTool.Fill => VoxelMap.SetAction.Fill,
+			VoxelTool.Clear => VoxelMap.SetAction.Clear,
+			_ => VoxelMap.SetAction.Repaint
+		};
 
 		static VoxelTool Tool { get; set; } = VoxelTool.Non;
 		public static int SelectedPaletteIndex { get; private set; } = 0;
 
 		static GameObject _targetGameObject;
-		static VoxelObject _targetVoxelObject;
+		static IVoxelEditable _targetVoxelObject;
 
 		void OnEnable()
 		{
-			titleContent = new("Voxel Exitor");
+			titleContent = new("Voxel Editor");
 			Undo.undoRedoPerformed += UndoRedoCalled;
 			Selection.selectionChanged += ChangeTarget;
 			SceneView.duringSceneGui += OnSceneGUI;
@@ -78,22 +84,22 @@ namespace VoxelSystem
 			if (_targetGameObject == null)
 				return;
 			ResetSelection();
-			_targetVoxelObject = _targetGameObject.GetComponent<VoxelObject>();
+			_targetVoxelObject = _targetGameObject.GetComponent<IVoxelEditable>();
 		}
 
-		public static void RecordVoxelObjectForUndo(VoxelObject vo, string message, params Object[] otherObjects)
+		public static void RecordVoxelObjectForUndo(IVoxelEditable vo, string message, params Object[] otherObjects)
 		{
 			if (vo.HasConnectedMap())
 			{
-				Object[] objects = new Object[] { vo.ConnectedMap, vo.transform };
+				Object[] objects = new Object[] { vo.SharedMap, vo.transform };
 				if (!otherObjects.IsNullOrEmpty())
 					objects.Concat(otherObjects);
 				Undo.RecordObjects(objects, message);
-				EditorUtility.SetDirty(vo.ConnectedMap);
+				EditorUtility.SetDirty(vo.SharedMap);
 			}
 			else
 			{
-				Object[] objects = new Object[] { vo, vo.transform };
+				Object[] objects = new Object[] { vo.Object, vo.transform };
 				if (!otherObjects.IsNullOrEmpty())
 					objects.Concat(otherObjects);
 				Undo.RecordObjects(objects, message);
@@ -109,7 +115,7 @@ namespace VoxelSystem
 			if (_targetVoxelObject != null &&
 				_targetVoxelObject.transform != null &&
 				_targetVoxelObject.transform.parent != null &&
-				_targetVoxelObject.transform.parent.TryGetComponent(out VoxelObject parent))
+				_targetVoxelObject.transform.parent.TryGetComponent(out IVoxelEditable parent))
 			{
 				parent.Map?.UndoRedoEvenInvokedOnMap();
 			}
@@ -121,7 +127,7 @@ namespace VoxelSystem
 			{ return false; }
 
 			Vector3 sideNormal = side.ToVectorInt();
-			Vector3Int size = _targetVoxelObject.Map.Size;
+			Vector3Int size = _targetVoxelObject.Map.FullSize;
 			Vector3 halfSize = new(size.x / 2f, size.y / 2f, size.z / 2f);
 			Vector3 halfNormalInSize = new(halfSize.x * sideNormal.x, halfSize.y * sideNormal.y, halfSize.z * sideNormal.z);
 			Vector3 planeOrigin = halfSize + halfNormalInSize;

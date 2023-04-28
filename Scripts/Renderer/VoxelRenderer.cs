@@ -5,7 +5,7 @@ using VoxelSystem;
 
 [ExecuteAlways]
 [RequireComponent(typeof(VoxelFilter))]
-public class VoxelRenderer : MonoBehaviour
+public class VoxelRenderer : MonoBehaviour, IVoxelBuilder
 {
 	[SerializeField, HideInInspector] VoxelFilter voxelFilter;
 	[SerializeField] BlockLibrary blockLibrary;
@@ -31,8 +31,7 @@ public class VoxelRenderer : MonoBehaviour
 		}
 	}
 
-	public OctVoxelMap Map => voxelFilter == null ? null : voxelFilter.GetOctMap();
-
+	public VoxelMap Map => voxelFilter == null ? null : voxelFilter.GetVoxelMap();
 
 	void OnValidate()
 	{
@@ -54,7 +53,7 @@ public class VoxelRenderer : MonoBehaviour
 
 	internal void RegenerateMesh()
 	{
-		OctVoxelMap map = Map; 
+		VoxelMap map = Map; 
 		if (map == null) return;
 		if (blockLibrary == null) return;
 
@@ -64,7 +63,7 @@ public class VoxelRenderer : MonoBehaviour
 	// Mesh Generation
 
 	static readonly List<Block> _blockCache = new();
-	void GenerateMesh(OctVoxelMap voxelMap, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles)
+	void GenerateMesh(VoxelMap voxelMap, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles)
 	{ 
 		if (voxelMap == null) return;
 		BlockVoxelBuilder.CalculateBlocks(voxelMap, _blockCache, mergeCloseEdgesOnTestMesh);
@@ -72,4 +71,13 @@ public class VoxelRenderer : MonoBehaviour
 		BlockVoxelBuilder.BuildMeshFromBlocks(blockLibrary, _blockCache, vertices, normals, uv, triangles);
 		Debug.Log("Mesh Regenerated");
 	}
+
+	public IEnumerable<PaletteItem> GetPaletteItems() 
+	{ yield break; }
+
+	public int PaletteLength => 0;
+
+
+
+
 }

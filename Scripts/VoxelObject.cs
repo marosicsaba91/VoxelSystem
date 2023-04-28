@@ -5,7 +5,7 @@ using MUtility;
 namespace VoxelSystem
 {
 	[ExecuteAlways]
-	public class VoxelObject : MonoBehaviour
+	public class VoxelObject : MonoBehaviour, IVoxelEditable
 	{
 		[Serializable]
 		public struct References
@@ -20,6 +20,12 @@ namespace VoxelSystem
 		public bool lockPosition = true;
 		public bool lockRotation = true;
 		public bool lockScale = true;
+
+		bool IVoxelEditable.LockPosition { get => lockPosition; set => lockPosition = value; }
+
+		bool IVoxelEditable.LockRotation { get => lockRotation; set => lockRotation = value; }
+
+		bool IVoxelEditable.LockScale { get => lockScale; set => lockScale = value; }
 
 		// Map, Palette, Builder
 		[SerializeField, HideInInspector] internal VoxelMapScriptableObject connectedMap = null;
@@ -42,7 +48,7 @@ namespace VoxelSystem
 					return;
 				if (value == null)
 				{
-					innerMap = (ArrayVoxelMap)connectedMap.map.GetCopy();
+					innerMap = connectedMap.map.GetCopy();
 				}
 				else
 				{
@@ -55,6 +61,7 @@ namespace VoxelSystem
 		public VoxelBuilder ConnectedBuilder
 		{
 			get => connectedBuilder;
+			
 			set
 			{
 				if (connectedBuilder == value)
@@ -62,9 +69,12 @@ namespace VoxelSystem
 				connectedBuilder = value;
 				SetMeshDirty();
 			}
+			
 		}
 
-		public ArrayVoxelMap Map
+		public IVoxelBuilder Builder => connectedBuilder;
+
+		public ArrayVoxelMap ArrayMap
 		{
 			get => connectedMap != null ? connectedMap.map : innerMap;
 			set
@@ -76,29 +86,44 @@ namespace VoxelSystem
 			}
 		}
 
+
+		public void CopyMapFrom(VoxelMap source) => Map?.SetupFrom(source);
+
+		public VoxelMap Map => ArrayMap;
+
+		public ScriptableObject SharedMap => ConnectedMap;
+
+		public UnityEngine.Object Object => HasConnectedMap() ? ConnectedMap : this;
+
+		IVoxelBuilder IVoxelEditable.Builder
+		{
+			get => connectedBuilder;			
+		}
+
 		void OnEnable()
 		{
 			MaintainReferences();
 			if (innerMap == null)
 			{
 				innerMap = new();
+				innerMap.Setup();
 				SetMeshDirty();
 			}
-			ArrayVoxelMap map = Map;
+			ArrayVoxelMap map = ArrayMap;
 			if (map != null)
 				map.MapChangedEvent += SetMeshDirty;
 		}
 
 		void OnDisable()
 		{
-			ArrayVoxelMap map = Map;
+			ArrayVoxelMap map = ArrayMap;
 			if (map != null)
 				map.MapChangedEvent -= SetMeshDirty;
 		}
 
 		// Update is called once per frame
 		void Update()
-		{
+		{ 
 			SubscribeToChange();
 			DoLockTransform();
 		}
@@ -151,7 +176,7 @@ namespace VoxelSystem
 
 		public void RegenerateMesh()
 		{
-			ArrayVoxelMap map = Map;
+			ArrayVoxelMap map = ArrayMap;
 			VoxelBuilder builder = connectedBuilder;
 
 			if (map == null || builder == null)
@@ -182,7 +207,7 @@ namespace VoxelSystem
 		{
 			if (!lockRotation)
 			{ return; }
-			ArrayVoxelMap map = Map;
+			ArrayVoxelMap map = ArrayMap;
 			if (map == null)
 			{ return; }
 			if (transform.localRotation == Quaternion.identity)
@@ -191,9 +216,9 @@ namespace VoxelSystem
 
 			Vector3 transformedOne = transform.TransformDirection(Vector3.one);
 			Vector3 transformedSize =
-				transform.TransformDirection(Vector3.right).normalized * map.Size.x +
-				transform.TransformDirection(Vector3.up).normalized * map.Size.y +
-				transform.TransformDirection(Vector3.forward).normalized * map.Size.z;
+				transform.TransformDirection(Vector3.right).normalized * map.FullSize.x +
+				transform.TransformDirection(Vector3.up).normalized * map.FullSize.y +
+				transform.TransformDirection(Vector3.forward).normalized * map.FullSize.z;
 			Vector3 step = (Vector3.one - transformedOne) / 2f;
 			Vector3 move = step.MultiplyAllAxis(transformedSize);
 			transform.localPosition += move;
@@ -238,7 +263,7 @@ namespace VoxelSystem
 		{
 			if (!lockScale)
 			{ return; }
-			ArrayVoxelMap map = Map;
+			ArrayVoxelMap map = ArrayMap;
 			if (map == null)
 			{ return; }
 			if (transform.localScale == Vector3.one)
@@ -262,10 +287,11 @@ namespace VoxelSystem
 				localScale.z;
 
 			int scale = Mathf.RoundToInt(saleFloat);
+			Vector3Int originalSize = map.FullSize;
 			int size =
-				axis == Axis3D.X ? map.Width :
-				axis == Axis3D.Y ? map.Height :
-				map.Depth;
+				axis == Axis3D.X ? originalSize.x :
+				axis == Axis3D.Y ? originalSize.y :
+				originalSize.z;
 			GeneralDirection3D positiveDir =
 				axis == Axis3D.X ? GeneralDirection3D.Right :
 				axis == Axis3D.Y ? GeneralDirection3D.Up :
@@ -297,22 +323,22 @@ namespace VoxelSystem
 				RegenerateMesh();
 		}
 
-		public void FillWholeMap(int paletteIndex) => Map.FillWhole(paletteIndex);
+		public void FillWholeMap(int paletteIndex) => ArrayMap.SetWhole(paletteIndex);
 
-		public void ClearWholeMap() => Map.ClearWhole();
+		public void ClearWholeMap() => ArrayMap.ClearWhole();
 
-		public bool IsValidCoord(Vector3Int coordinate) => Map.IsValidCoord(coordinate);
+		public bool IsValidCoord(Vector3Int coordinate) => ArrayMap.IsValidCoord(coordinate);
 
 		void OnDrawGizmosSelected()
 		{
 			if (connectedBuilder == null)
 			{ return; }
-			if (Map == null)
+			if (ArrayMap == null)
 			{ return; }
 
 			Matrix4x4 oldMatrix = Gizmos.matrix;
 			Gizmos.matrix = transform.localToWorldMatrix;
-			connectedBuilder.DrawGizmos(Map);
+			connectedBuilder.DrawGizmos(ArrayMap);
 
 			Gizmos.matrix = oldMatrix;
 		}

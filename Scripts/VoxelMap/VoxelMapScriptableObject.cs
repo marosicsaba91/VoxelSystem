@@ -1,5 +1,4 @@
 using MUtility;
-using System;
 using UnityEditor;
 using UnityEngine;
 
@@ -24,15 +23,19 @@ namespace VoxelSystem
 		void Deserialize() => octMap.DeserializeFromByteArray();
 		void Serialize() => octMap.SerializeToByeArray();
 
+
 		void CopyToOctMap()
 		{				
-			octMap = new OctVoxelMap(map.Size);
-			for (int x = 0; x < map.Width; x++)
-				for (int y = 0; y < map.Height; y++)
-					for (int z = 0; z < map.Depth; z++)
+			Vector3Int size = map.FullSize;
+			octMap = new OctVoxelMap(size);
+
+
+			for (int x = 0; x < size.x; x++)
+				for (int y = 0; y < size.y; y++)
+					for (int z = 0; z < size.z; z++)
 					{
-						int value = map.GetVoxel(x, y, z).value;
-						octMap.Set(x, y, z, value);
+						int value = map.GetVoxel(x, y, z);
+						octMap.SetVoxel(x, y, z, value);
 					}
 
 			int chunkCount = octMap.RootChunk.ChunkCount;
@@ -52,6 +55,6 @@ namespace VoxelSystem
 			octMap = new OctVoxelMap(Vector3Int.one * size, value);
 			EditorUtility.SetDirty(this);
 		}
-		void Set() => octMap.Set(index, value);
+		void Set() => octMap.SetVoxel(index, value);
 	}
 }

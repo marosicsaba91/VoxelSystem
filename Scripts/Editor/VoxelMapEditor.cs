@@ -16,7 +16,7 @@ namespace VoxelSystem
 
 		public static void DrawVoxelMapInspector(VoxelMapScriptableObject t)
 		{
-			Vector3Int size = t.map.Size;
+			Vector3Int size = t.map.FullSize;
 			GUILayout.Label("Size:   x:" + size.x + "   y:" + size.y + "   z:" + size.z);
 		}
 	}

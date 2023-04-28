@@ -59,14 +59,14 @@ public class VoxelRendererEditor : Editor
 
 	static void RenderCursor(VoxelRenderer renderer, Camera camera, EventType evetType)
 	{ 
-		OctVoxelMap map = renderer.Map;
+		VoxelMap map = renderer.Map;
 		if (map == null) return;
 		// RAYCAST
 
 		Event e = Event.current;
 		Ray ray = HandleUtility.GUIPointToWorldRay(e.mousePosition);
 
-		if (map.Raycast(ray, out VoxelHitPoint hit, renderer.transform))
+		if (map.Raycast(ray, out VoxelHit hit, renderer.transform))
 		{
 			Matrix4x4 transformMatrix = renderer.LocalToWorldMatrix;
 			

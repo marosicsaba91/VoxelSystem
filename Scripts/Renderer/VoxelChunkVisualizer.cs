@@ -14,9 +14,9 @@ class VoxelChunkVisualizer : MonoBehaviour
 		public Material material;
 	}
 
-	[SerializeField] VoxelFilter voxelFilter; 
+	[SerializeField] VoxelFilter voxelFilter;
 
-	[SerializeField] LevelSetup[] levels; 
+	[SerializeField] LevelSetup[] levels;
 
 	[SerializeField, Range(0, 0.5f)] float gap = 0.1f;
 
@@ -25,11 +25,6 @@ class VoxelChunkVisualizer : MonoBehaviour
 	void OnValidate()
 	{
 		voxelFilter = GetComponent<VoxelFilter>();
-		if (levels.IsNullOrEmpty()) 
-		{
-			// TODO:  AddDefault Values
-		} 
-
 	}
 
 	void Update()
@@ -37,19 +32,18 @@ class VoxelChunkVisualizer : MonoBehaviour
 		if (voxelFilter == null)
 			return;
 
-		OctVoxelMap octMap = voxelFilter.GetOctMap();
-		if (octMap == null)
-			return;
+		VoxelMap map = voxelFilter.GetVoxelMap();
 
-		if (levels.IsNullOrEmpty())
-			return;
+		if (map == null) return;
+		if (map is not OctVoxelMap octMap) return;
+		if (levels.IsNullOrEmpty()) return;
 
-		var offset = Matrix4x4.TRS(octMap.ChunkSize / 2 * Vector3.one , Quaternion.identity, Vector3.one);
+		var offset = Matrix4x4.TRS(octMap.ChunkSizeLength / 2 * Vector3.one, Quaternion.identity, Vector3.one);
 		matrix = offset * transform.localToWorldMatrix;
 
 		Gizmos.color = Color.yellow;
 
-		Vector3 size = octMap.ChunkSize * Vector3Int.one;
+		Vector3 size = octMap.ChunkSizeLength * Vector3Int.one;
 		OctVoxelChunk root = octMap.RootChunk;
 		int level = octMap.LevelCount;
 		transform.localScale = Vector3.one;

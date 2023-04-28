@@ -8,7 +8,7 @@ namespace VoxelSystem
 	public class VoxelBuilderDefault : VoxelBuilder
 	{
 		protected override void BuildMesh(ArrayVoxelMap map, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles) => BuildTiledMesh(map, vertices, normals, uv, triangles);
-		protected override void BuildMesh(OctVoxelMap map, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles) => BuildTiledMesh(map, vertices, normals, uv, triangles);
+		protected override void BuildMesh(VoxelMap map, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles) => BuildTiledMesh(map, vertices, normals, uv, triangles);
 
 		public override IEnumerable<PaletteItem> GetPaletteItems()
 		{
@@ -20,9 +20,9 @@ namespace VoxelSystem
 
 		public static void BuildTiledMesh(ArrayVoxelMap map, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles)
 		{
-			int w = map.Size.x;
-			int h = map.Size.y;
-			int d = map.Size.z;
+			int w = map.FullSize.x;
+			int h = map.FullSize.y;
+			int d = map.FullSize.z;
 			GeneralDirection3D[] directions = DirectionUtility.generalDirection3DValues;
 			TextureQuad[] quadArray = GenerateTextureCoordinateArray(textureSize: 4);
 
@@ -40,8 +40,6 @@ namespace VoxelSystem
 			Vector3 center;
 			TextureQuad uvQuad;
 			int vertexCount = 0;
-			//   int counting = 0;
-
 
 			for (int dirIndex = 0; dirIndex < directions.Length; dirIndex++)
 			{
@@ -58,7 +56,7 @@ namespace VoxelSystem
 					for (int y = 0; y < h; y++)
 						for (int z = 0; z < d; z++)
 						{
-							int colorIndex = map.GetFast(x, y, z, w, h).value;
+							int colorIndex = map.GetFast(x, y, z, w, h);
 							if (colorIndex < 0)
 							{
 								continue;
@@ -74,7 +72,7 @@ namespace VoxelSystem
 
 
 							if (!neighBourOutOfBounds)
-								if (map.GetFast(neighbourX, neighbourY, neighbourZ, w, h).IsFilled)
+								if (map.GetFast(neighbourX, neighbourY, neighbourZ, w, h).IsFilled())
 									continue;
 
 							uvQuad = quadArray[colorIndex];
@@ -110,11 +108,11 @@ namespace VoxelSystem
 
 		}
 
-		public static void BuildTiledMesh(OctVoxelMap map, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles)
+		public static void BuildTiledMesh(VoxelMap map, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles)
 		{
-			int w = map.CanvasSize.x;
-			int h = map.CanvasSize.y;
-			int d = map.CanvasSize.z;
+			int w = map.FullSize.x;
+			int h = map.FullSize.y;
+			int d = map.FullSize.z;
 			GeneralDirection3D[] directions = DirectionUtility.generalDirection3DValues;
 			TextureQuad[] quadArray = GenerateTextureCoordinateArray(textureSize: 4);
 

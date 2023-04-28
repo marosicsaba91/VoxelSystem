@@ -13,7 +13,7 @@ namespace VoxelSystem
 		static Vector3Int? _mouseDownCursorVoxel;
 		static Vector3Int? _lastValidMouseDragCursorVoxel;
 
-		static VoxelHitPoint? _cursorVoxel;
+		static VoxelHit? _cursorVoxel;
 
 		// --------------------- SELECTION ---------------------------
 		static Vector3Int _selectionStart;
@@ -63,34 +63,40 @@ namespace VoxelSystem
 
 			if (_cursorTools.Contains(Tool))
 			{
-				// Calculate Ray from Mouse Position
-				ArrayVoxelMap usedMap = _originalMap == null || _originalMap.Size == Vector3Int.zero 
-					? _targetVoxelObject.Map
-					: _originalMap;
+				// Calculate Ray from Mouse Position 
+				if (_originalMap == null || _originalMap.FullSize == Vector3Int.zero) 
+				{
+					_originalMap = new ArrayVoxelMap();
+					_originalMap.SetupFrom(_targetVoxelObject.Map); 
+				}
 
-				if (usedMap != null)
+				if (_originalMap != null)
 				{
 					Transform transform = _targetGameObject.transform;
-					bool raycastOutside = Tool == VoxelTool.Attach;
+					bool raycastOutside = Tool == VoxelTool.Fill;
 					Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
-					_cursorVoxel = usedMap.Raycast(ray, out VoxelHitPoint hit, transform, raycastOutside) ? hit : null;
+					_cursorVoxel = _originalMap.Raycast(ray, out VoxelHit hit, transform, raycastOutside) ? hit : null;
 				}
 				else
+				{
 					_cursorVoxel = null;
+					return;
+				}
 
 				// Check Mouse Event
 				switch (e.type)
 				{
 					case EventType.MouseDown:
 						if (_cursorVoxel.HasValue)
-							HandleMouseDown(_cursorVoxel.Value.voxel);
+							// _originalMap = usedMap;
+							HandleMouseDown(_cursorVoxel.Value.voxelIndex);
 						break;
 					case EventType.MouseDrag:
 						if (_cursorVoxel.HasValue)
-							HandleMouseMove(_cursorVoxel.Value.voxel);
+							HandleMouseMove(_cursorVoxel.Value.voxelIndex);
 						break;
 					case EventType.MouseUp:
-						Vector3Int val = _cursorVoxel.HasValue? _cursorVoxel.Value.voxel : Vector3Int.zero;
+						Vector3Int val = _cursorVoxel.HasValue? _cursorVoxel.Value.voxelIndex : Vector3Int.zero;
 						HandleMouseUp(val, _cursorVoxel.HasValue);
 						break;
 				}
@@ -109,8 +115,8 @@ namespace VoxelSystem
 			{
 				_mouseDownCursorVoxel = voxel;
 				_lastValidMouseDragCursorVoxel = voxel;
-				_originalMap = (ArrayVoxelMap)_targetVoxelObject.Map.GetCopy();
-				_targetVoxelObject.Map.Set(_mouseDownCursorVoxel.Value, ToolToAreaAction(), SelectedPaletteIndex);
+				_originalMap.SetupFrom(_targetVoxelObject.Map);
+				_targetVoxelObject.Map.SetVoxel(_mouseDownCursorVoxel.Value, ToolToAreaAction(), SelectedPaletteIndex);
 				//targetVO.RegenerateMesh();
 			}
 			else if (Tool == VoxelTool.Select)
@@ -133,7 +139,7 @@ namespace VoxelSystem
 				bool changed = voxel != _lastValidMouseDragCursorVoxel;
 				if (changed)
 				{
-					_targetVoxelObject.Map = (ArrayVoxelMap)_originalMap.GetCopy();
+					_targetVoxelObject.Map.SetupFrom(_originalMap);
 					_lastValidMouseDragCursorVoxel = voxel;
 					_targetVoxelObject.Map.SetRange(_mouseDownCursorVoxel.Value, voxel, ToolToAreaAction(), SelectedPaletteIndex);
 				}
@@ -152,12 +158,12 @@ namespace VoxelSystem
 			}
 			else if (_mouseDownCursorVoxel.HasValue && _originalMap != null)
 			{
-				if (validValue && _targetVoxelObject.IsValidCoord(voxel))
+				if (validValue && _targetVoxelObject.Map.IsValidCoord(voxel))
 					_lastValidMouseDragCursorVoxel = voxel; 
 
 				if (_lastValidMouseDragCursorVoxel.HasValue)
 				{
-					_targetVoxelObject.Map = (ArrayVoxelMap)_originalMap.GetCopy();
+					_targetVoxelObject.Map.SetupFrom(_originalMap);
 					RecordVoxelObjectForUndo(_targetVoxelObject, "VoxelMapChanged");
 					_targetVoxelObject.Map.SetRange(_mouseDownCursorVoxel.Value, _lastValidMouseDragCursorVoxel.Value, ToolToAreaAction(), SelectedPaletteIndex);
 				}
@@ -169,7 +175,7 @@ namespace VoxelSystem
 
 		void FreshSelection()
 		{
-			Vector3Int size = _targetVoxelObject.Map.Size;
+			Vector3Int size = _targetVoxelObject.Map.FullSize;
 			_selectionMin = new(
 				   Mathf.Clamp(Mathf.Min(_selectionStart.x, _selectionEnd.x), min: 0, size.x - 1),
 				   Mathf.Clamp(Mathf.Min(_selectionStart.y, _selectionEnd.y), min: 0, size.y - 1),
