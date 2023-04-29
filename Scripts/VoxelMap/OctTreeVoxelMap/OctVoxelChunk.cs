@@ -49,10 +49,13 @@ namespace VoxelSystem
 
 		// ----------------------------------------------------------
 
-		internal void Fill(int newValue)
+		internal bool Fill(int newValue)
 		{
+			if (IsHomogenous && value == newValue) return false;
+
 			innerChunks = null;
 			value = newValue;
+			return true;
 		}
 
 		internal int GetVoxel(int x, int y, int z, int size)

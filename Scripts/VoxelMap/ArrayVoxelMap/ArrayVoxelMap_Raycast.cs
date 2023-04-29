@@ -102,15 +102,15 @@ namespace VoxelSystem
 
 				//cursorPathVoxels.Add(lastFoundVoxel);
 
-				var distanceToDo = new Vector3(
+				var stepDistance = new Vector3(
 					xIsPositive ? Ceil(lastIntersect.x) - lastIntersect.x : Floor(lastIntersect.x) - lastIntersect.x,
 					yIsPositive ? Ceil(lastIntersect.y) - lastIntersect.y : Floor(lastIntersect.y) - lastIntersect.y,
 					zIsPositive ? Ceil(lastIntersect.z) - lastIntersect.z : Floor(lastIntersect.z) - lastIntersect.z
 				);
 				var distanceToIntersect = new Vector3(
-					distanceToDo.x / rayDirection.x,
-					distanceToDo.y / rayDirection.y,
-					distanceToDo.z / rayDirection.z);
+					stepDistance.x / rayDirection.x,
+					stepDistance.y / rayDirection.y,
+					stepDistance.z / rayDirection.z);
 
 				float minDistance = Mathf.Min(distanceToIntersect.x, distanceToIntersect.y, distanceToIntersect.z);
 				if (Math.Abs(minDistance - distanceToIntersect.x) < epsilon)

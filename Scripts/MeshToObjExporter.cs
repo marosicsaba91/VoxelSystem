@@ -6,13 +6,14 @@ namespace VoxelSystem
 {
 	public class MeshToObjExporter
 	{
+		// TODO: Something is wrong
 		public static string MeshToString(MeshFilter mf)
 		{
 			Mesh m = mf.sharedMesh;
 			MeshRenderer mr = mf.GetComponent<MeshRenderer>();
 			Material[] mats = mr.sharedMaterials;
 
-			StringBuilder sb = new StringBuilder();
+			StringBuilder sb = new();
 
 			sb.Append("g ").Append(mf.name).Append("\n");
 			foreach (Vector3 v in m.vertices)
@@ -47,7 +48,7 @@ namespace VoxelSystem
 
 		public static void MeshToFile(MeshFilter mf, string filename)
 		{
-			using (StreamWriter sw = new StreamWriter(filename))
+			using (StreamWriter sw = new (filename))
 			{
 				sw.Write(MeshToString(mf));
 			}

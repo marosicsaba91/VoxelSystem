@@ -7,7 +7,7 @@ using System.IO;
 namespace VoxelSystem
 {
 	[Serializable]
-	public partial class OctVoxelMap : VoxelMap<OctVoxelMap>, ISerializationCallbackReceiver
+	public partial class OctVoxelMap : VoxelMap, ISerializationCallbackReceiver
 	{
 		[SerializeField] Vector3Int canvasSize;
 		[SerializeField] int levelCount;
@@ -89,18 +89,6 @@ namespace VoxelSystem
 			rootChunk.Fill(value);
 		}
 
-		public OctVoxelMap(OctVoxelMap original) // Copy constructor
-		{
-			canvasSize = original.canvasSize;
-			levelCount = original.levelCount;
-			data = new byte[data.Length];
-			data.CopyTo(original.data, 0);
-
-			_serialized = false;
-		}
-
-		internal sealed override OctVoxelMap GetCopy() => new OctVoxelMap(this);
-
 		// GET Voxels --------------------------------------------------------        
 
 		public sealed override int GetVoxel(int x, int y, int z) => rootChunk.GetVoxel(x, y, z, ChunkSizeLength);
@@ -109,42 +97,40 @@ namespace VoxelSystem
 
 		public override bool SetVoxel(int x, int y, int z, int value) => rootChunk.SetLeaf(x, y, z, value, ChunkSizeLength);
 
-		public sealed override void SetWhole(int value)
-		{
-			rootChunk.Fill(value);
-			MapChanged();
-		}
+		public sealed override bool SetWhole(int value) => rootChunk.Fill(value); 
 
-		public sealed override void SetRange(Vector3Int startCoordinate, Vector3Int endCoordinate, SetAction action, int value)
+		public sealed override bool SetRange(Vector3Int startCoordinate, Vector3Int endCoordinate, VoxelAction action, int value)
 		{
 			// TODO: Very much not optimized
 
 			IntBounds bounds = new(startCoordinate, endCoordinate + Vector3Int.one);
 			bounds.Clamp(Vector3Int.zero, CanvasSize);
+			bool changed = false;
 
-			if (action == SetAction.Set)
+			if (action == VoxelAction.Override)
 			{
 				foreach (Vector3Int coordinate in bounds.WalkThrough())
-					SetVoxel(coordinate, value);
+					changed |= SetVoxel(coordinate, value);
 			}
-			if (action == SetAction.Repaint)
+			if (action == VoxelAction.Repaint)
 			{
 				foreach (Vector3Int coordinate in bounds.WalkThrough())
 					if (GetVoxel(coordinate).IsFilled())
-						SetVoxel(coordinate, action, value);
+						changed |= SetVoxel(coordinate, action, value);
 			}
-			else if (action == SetAction.Fill)
+			else if (action == VoxelAction.Attach)
 			{
 
 				foreach (Vector3Int coordinate in bounds.WalkThrough())
 					if (GetVoxel(coordinate).IsEmpty())
-						SetVoxel(coordinate, action, value);
+						changed |= SetVoxel(coordinate, action, value);
 			}
-			else if (action == SetAction.Clear)
+			else if (action == VoxelAction.Erase)
 			{
 				foreach (Vector3Int coordinate in bounds.WalkThrough())
-					SetVoxel(coordinate, action, IntVoxelUtility.emptyValue);
+					changed |= SetVoxel(coordinate, action, IntVoxelUtility.emptyValue);
 			}
+			return changed;
 		}
 
 		// Serialization ----------------------------------------------------------

@@ -91,17 +91,16 @@ namespace VoxelSystem
 					return;
 				}
 
-				else // Inner Nodes needs to be created     TODO NO else
-				{
-					innerChunks = new TSelf[8];
-					int index_ = GetSubChunkIndex(ref x, ref y, ref z, chunkSize);
-					TSelf newNode = CreateNew(value);
-					innerChunks[index_] = newNode;
-					newNode.SetLeaf(x, y, z, newValue, chunkSize / 2, out _, out _); // ITTTTTTTTT
-					changed = true;
-					homogenous = false;
-					return;
-				}
+				//Inner Nodes needs to be created
+
+				innerChunks = new TSelf[8];
+				int index_ = GetSubChunkIndex(ref x, ref y, ref z, chunkSize);
+				TSelf newNode = CreateNew(value);
+				innerChunks[index_] = newNode;
+				newNode.SetLeaf(x, y, z, newValue, chunkSize / 2, out _, out _);
+				changed = true;
+				homogenous = false;
+				return;
 			}
 
 			// It was mixed before
@@ -129,7 +128,7 @@ namespace VoxelSystem
 				innerChunk.SetLeaf(x, y, z, newValue, chunkSize / 2, out changed, out innerHomogenous);
 			}
 
-			if (innerHomogenous) // Inner chunk became homogeneous   // TODO: innerChanged &&
+			if (innerHomogenous && changed) // Inner chunk became homogeneous
 			{
 				if (Equals(innerChunk.value, value))
 				{

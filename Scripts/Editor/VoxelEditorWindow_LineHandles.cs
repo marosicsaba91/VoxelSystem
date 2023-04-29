@@ -13,10 +13,10 @@ namespace VoxelSystem
 
 		void DrawHandles()
 		{
-			if (_targetVoxelObject == null || _targetGameObject == null)
+			if (_editorComponent == null || _targetGameObject == null)
 			{ return; }
 
-			VoxelMap map = _targetVoxelObject.Map;
+			VoxelMap map = _editorComponent.Map;
 			if (map == null)
 			{ return; }
 			Vector3 size = map.FullSize;
@@ -30,7 +30,7 @@ namespace VoxelSystem
 
 		static void DrawBounds(Vector3 size)
 		{
-			if (Tool == VoxelTool.Select)
+			if (SelectedVoxelAction == VoxelAction.Select )
 			{
 				Handles.color = BorderColor;
 				DrawWireCube_InWorld(_targetGameObject.transform, _selectionMin, _selectionSize);
@@ -48,10 +48,8 @@ namespace VoxelSystem
 		static readonly Color C = new(r: 1, g: 0, b: 0);
 		static void DrawCursor(VoxelHit? cursorVoxel)
 		{
-			if (cursorVoxel == null)
-			{ return; }
-			if (!_cursorTools.Contains(Tool))
-			{ return; }
+			if (cursorVoxel == null) return;
+			if (!SelectedTool.IsCursorTool()) return;
 
 			Transform transform = _targetGameObject.transform;
 
@@ -67,7 +65,7 @@ namespace VoxelSystem
 
 			Handles.color = softCursorColor;
 			Vector3Int voxel = cursorVoxel.Value.voxelIndex;
-			VoxelMap map = _targetVoxelObject.Map;
+			VoxelMap map = _editorComponent.Map;
 			if (map!= null && map.IsValidCoord(voxel))
 			{
 				DrawVoxel_InWorld(transform, voxel);

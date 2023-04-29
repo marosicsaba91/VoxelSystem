@@ -36,16 +36,16 @@ namespace VoxelSystem
 			DrawHandles();
 
 			// Check if We have a map to work On
-			if (_targetVoxelObject == null || _targetGameObject == null)
+			if (_editorComponent == null || _targetGameObject == null)
 			{
 				Tools.hidden = false;
 				return;
 			}
 
 			bool editingIsDisabled =
-				_targetVoxelObject == null ||
-				_targetVoxelObject.Map == null ||
-				Tool == VoxelTool.Non;
+				_editorComponent == null ||
+				_editorComponent.Map == null ||
+				SelectedTool == VoxelTool.None;
 
 			// Enable / Disable default Unity handlers;
 			Tools.hidden = !editingIsDisabled;
@@ -61,19 +61,19 @@ namespace VoxelSystem
 			if (e.button != leftMouseButtonIndex) return;
 			if (e.type is not EventType.MouseDown and not EventType.MouseUp and not EventType.MouseDrag and not EventType.MouseMove) return;
 
-			if (_cursorTools.Contains(Tool))
+			if (SelectedTool.IsCursorTool())
 			{
-				// Calculate Ray from Mouse Position 
 				if (_originalMap == null || _originalMap.FullSize == Vector3Int.zero) 
 				{
 					_originalMap = new ArrayVoxelMap();
-					_originalMap.SetupFrom(_targetVoxelObject.Map); 
+					_originalMap.SetupFrom(_editorComponent.Map); 
 				}
 
+				// Calculate Ray from Mouse Position 
 				if (_originalMap != null)
 				{
 					Transform transform = _targetGameObject.transform;
-					bool raycastOutside = Tool == VoxelTool.Fill;
+					bool raycastOutside = SelectedVoxelAction.IsAdditive();
 					Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
 					_cursorVoxel = _originalMap.Raycast(ray, out VoxelHit hit, transform, raycastOutside) ? hit : null;
 				}
@@ -111,25 +111,29 @@ namespace VoxelSystem
 
 		void HandleMouseDown(Vector3Int voxel )
 		{
-			if (_basicEditTools.Contains(Tool))
-			{
-				_mouseDownCursorVoxel = voxel;
-				_lastValidMouseDragCursorVoxel = voxel;
-				_originalMap.SetupFrom(_targetVoxelObject.Map);
-				_targetVoxelObject.Map.SetVoxel(_mouseDownCursorVoxel.Value, ToolToAreaAction(), SelectedPaletteIndex);
-				//targetVO.RegenerateMesh();
-			}
-			else if (Tool == VoxelTool.Select)
+			if (SelectedTool != VoxelTool.Box) return;
+
+			if (SelectedVoxelAction == VoxelAction.Select)
 			{
 				_selectionStart = voxel;
 				_selectionEnd = voxel;
 				FreshSelection();
 			}
+			else
+			{
+				VoxelMap map = _editorComponent.Map;
+				_mouseDownCursorVoxel = voxel;
+				_lastValidMouseDragCursorVoxel = voxel;
+				_originalMap.SetupFrom(map);
+				bool changed = map.SetVoxel(_mouseDownCursorVoxel.Value, SelectedVoxelAction, SelectedPaletteIndex);
+				if(changed)
+					map.MapChanged();
+			} 
 		}
 
 		void HandleMouseMove(Vector3Int voxel)
-		{ 
-			if (Tool == VoxelTool.Select)
+		{
+			if (SelectedVoxelAction == VoxelAction.Select)
 			{
 				_selectionEnd = voxel;
 				FreshSelection();
@@ -139,16 +143,19 @@ namespace VoxelSystem
 				bool changed = voxel != _lastValidMouseDragCursorVoxel;
 				if (changed)
 				{
-					_targetVoxelObject.Map.SetupFrom(_originalMap);
+					VoxelMap map = _editorComponent.Map;
+					map.SetupFrom(_originalMap);
 					_lastValidMouseDragCursorVoxel = voxel;
-					_targetVoxelObject.Map.SetRange(_mouseDownCursorVoxel.Value, voxel, ToolToAreaAction(), SelectedPaletteIndex);
+					bool change = map.SetRange(_mouseDownCursorVoxel.Value, voxel, SelectedVoxelAction, SelectedPaletteIndex);
+					if(change)
+						map.MapChanged();
 				}
 			}
 		}
 
 		void HandleMouseUp(Vector3Int voxel, bool validValue)
 		{
-			if (Tool == VoxelTool.Select)
+			if (SelectedVoxelAction == VoxelAction.Select)
 			{
 				if (validValue)
 				{
@@ -158,14 +165,17 @@ namespace VoxelSystem
 			}
 			else if (_mouseDownCursorVoxel.HasValue && _originalMap != null)
 			{
-				if (validValue && _targetVoxelObject.Map.IsValidCoord(voxel))
+				if (validValue && _editorComponent.Map.IsValidCoord(voxel))
 					_lastValidMouseDragCursorVoxel = voxel; 
 
 				if (_lastValidMouseDragCursorVoxel.HasValue)
 				{
-					_targetVoxelObject.Map.SetupFrom(_originalMap);
-					RecordVoxelObjectForUndo(_targetVoxelObject, "VoxelMapChanged");
-					_targetVoxelObject.Map.SetRange(_mouseDownCursorVoxel.Value, _lastValidMouseDragCursorVoxel.Value, ToolToAreaAction(), SelectedPaletteIndex);
+					VoxelMap map = _editorComponent.Map;
+					map.SetupFrom(_originalMap);
+					RecordVoxelObjectForUndo(_editorComponent, "VoxelMapChanged");
+					bool change = map.SetRange(_mouseDownCursorVoxel.Value, _lastValidMouseDragCursorVoxel.Value, SelectedVoxelAction, SelectedPaletteIndex);
+					if (change)
+						map.MapChanged();
 				}
 				_lastValidMouseDragCursorVoxel = null;
 				_mouseDownCursorVoxel = null;
@@ -175,7 +185,7 @@ namespace VoxelSystem
 
 		void FreshSelection()
 		{
-			Vector3Int size = _targetVoxelObject.Map.FullSize;
+			Vector3Int size = _editorComponent.Map.FullSize;
 			_selectionMin = new(
 				   Mathf.Clamp(Mathf.Min(_selectionStart.x, _selectionEnd.x), min: 0, size.x - 1),
 				   Mathf.Clamp(Mathf.Min(_selectionStart.y, _selectionEnd.y), min: 0, size.y - 1),

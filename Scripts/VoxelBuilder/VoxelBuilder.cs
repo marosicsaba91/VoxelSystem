@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace VoxelSystem
 {
-	public abstract class VoxelBuilder : ScriptableObject, IVoxelBuilder
+	public abstract class VoxelBuilder : ScriptableObject
 	{
 		static readonly List<Vector3> _vertices = new();
 		static readonly List<Vector3> _normals = new();

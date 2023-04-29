@@ -79,15 +79,8 @@ namespace VoxelSystem
 
 		static bool RaycastInside(VoxelHit entry, out VoxelHit hit, Vector3 rayDirection, OctVoxelMap map, bool returnOutsideVoxel)
 		{
-			// TODO: POSSIBLE OPTIMISATIONS
+			// TODO: Very much not optimized
 
-			//if (!map.IsValidCoord(entry.voxel))  // NEM KELLENE
-			//{
-			//	hit = default;
-			//	return false;
-			//}
-
-			// var cursorPathVoxels = new List<Vector3Int>();
 			Vector3Int e = entry.voxelIndex;
 			if (map.GetVoxel(e.x, e.y, e.z).IsFilled())
 			{
@@ -110,8 +103,6 @@ namespace VoxelSystem
 			{
 				cursor.hitWorldPosition = lastIntersect;
 				cursor.voxelIndex = lastFoundVoxel;
-
-				//cursorPathVoxels.Add(lastFoundVoxel);
 
 				var distanceToDo = new Vector3(
 					xIsPositive ? Ceil(lastIntersect.x) - lastIntersect.x : Floor(lastIntersect.x) - lastIntersect.x,

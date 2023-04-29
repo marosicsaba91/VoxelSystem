@@ -11,16 +11,21 @@ namespace VoxelSystem
 		public override void OnInspectorGUI()
 		{
 			DrawDefaultInspector();
-			var t = target as VoxelObject;
-			if (t == null)
+			var voxelObject = target as VoxelObject;
+			if (voxelObject == null)
 				return;
 
-			GUI.enabled = t.lockRotation && t.lockScale;
+			TransformLock tLock = voxelObject.TransformLock;
+			Transform transform = voxelObject.transform;
+			VoxelMap voxelMap = voxelObject.Map;
+
+			GUI.enabled = tLock.rotation && tLock.scale;
 			if (GUILayout.Button("Apply Scale & Rotation"))
 			{
-				VoxelEditorWindow.RecordVoxelObjectForUndo(t, "Rotation Applied to Map");
-				t.ApplyScale();
-				t.ApplyRotation();
+				VoxelEditorWindow.RecordVoxelObjectForUndo(voxelObject, "Rotation Applied to Map");
+
+				voxelMap.ApplyScale(transform);
+				voxelMap.ApplyRotation(transform);
 			}
 
 			GUI.enabled = true;
@@ -28,36 +33,36 @@ namespace VoxelSystem
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Connected Scriptable Objects", EditorStyles.boldLabel);
 
-			Undo.RecordObject(t, "Connected Map Changed");
-			t.ConnectedMap = (VoxelMapScriptableObject)
-				EditorGUILayout.ObjectField("Connected Map", t.ConnectedMap, typeof(VoxelMapScriptableObject),
+			Undo.RecordObject(voxelObject.RecordableUnityObject, "Connected Map Changed");
+			voxelObject.ConnectedMap = (VoxelMapScriptableObject)
+				EditorGUILayout.ObjectField("Connected Map", voxelObject.ConnectedMap, typeof(VoxelMapScriptableObject),
 					allowSceneObjects: false);
 
-			Undo.RecordObject(t, "Connected Builder Changed");
-			t.ConnectedBuilder = (VoxelBuilder)
-				EditorGUILayout.ObjectField("Connected Builder", t.ConnectedBuilder, typeof(VoxelBuilder),
+			Undo.RecordObject(voxelObject, "Connected Builder Changed");
+			voxelObject.ConnectedBuilder = (VoxelBuilder)
+				EditorGUILayout.ObjectField("Connected Builder", voxelObject.ConnectedBuilder, typeof(VoxelBuilder),
 					allowSceneObjects: false);
 
 			serializedObject.ApplyModifiedProperties();
 
 
 			EditorGUILayout.Space();
-			GUI.enabled = !t.HasConnectedMap();
+			GUI.enabled = !voxelObject.HasConnectedMap();
 			if (GUILayout.Button("Export Voxel Map"))
 			{
-				ExportVoxelMap(t.ArrayMap);
+				ExportVoxelMap(voxelObject.ArrayMap);
 			}
 
 			GUI.enabled = true;
 
-			if (t.references.meshFilter != null && t.references.meshFilter.sharedMesh != null)
+			if (voxelObject.references.meshFilter != null && voxelObject.references.meshFilter.sharedMesh != null)
 			{
-				ArrayVoxelMap map = t.ArrayMap;
+				ArrayVoxelMap map = voxelObject.ArrayMap;
 				if (map != null)
 				{
 					if (GUILayout.Button("Export Mesh"))
 					{
-						ExportMesh(t.references.meshFilter);
+						ExportMesh(voxelObject.references.meshFilter);
 					}
 				}
 			}
@@ -66,9 +71,9 @@ namespace VoxelSystem
 			EditorGUILayout.Space();
 			if (GUILayout.Button("Regenerate Meshes"))
 			{
-				Undo.RecordObjects(new Object[] { t.references.meshRenderer, t.references.meshFilter },
+				Undo.RecordObjects(new Object[] 
+				{ voxelObject.RecordableUnityObject, voxelObject.references.meshFilter },
 					"Connected Map Changed");
-				t.RegenerateMesh();
 			}
 		}
 
@@ -78,7 +83,8 @@ namespace VoxelSystem
 			if (path.Length != 0)
 			{
 				VoxelMapScriptableObject newMap = CreateInstance<VoxelMapScriptableObject>();
-				newMap.map = map.GetCopy();
+				newMap.map = new ArrayVoxelMap();
+				newMap.map.SetupFrom(map);
 				newMap.name = Path.GetFileName(path);
 				AssetDatabase.CreateAsset(newMap, path);
 				AssetDatabase.Refresh();

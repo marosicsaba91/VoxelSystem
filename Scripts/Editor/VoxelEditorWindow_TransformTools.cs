@@ -14,14 +14,15 @@ namespace VoxelSystem
 
 		void HandleArrowHandles()
 		{
-			if (!_handleTools.Contains(Tool)) return;
-			if (_targetVoxelObject == null) return;
-			VoxelMap map = _targetVoxelObject.Map;
+			if (_editorComponent == null) return;
+			if (!SelectedTool.IsTransformTool()) return;
+
+			VoxelMap map = _editorComponent.Map;
 			if (map == null) return;
 
 			Vector3Int size = map.FullSize;
 
-			Vector3 lossyScale = _targetVoxelObject.transform.lossyScale;
+			Vector3 lossyScale = _editorComponent.transform.lossyScale;
 			float arrowSize =
 				(new float[] { size.x, size.y, size.z }).Average() *
 				MathHelper.Average(lossyScale.x, lossyScale.y, lossyScale.z)
@@ -33,11 +34,11 @@ namespace VoxelSystem
 			for (int i = 0; i < DirectionUtility.generalDirection3DValues.Length; i++)
 			{
 				GeneralDirection3D side = DirectionUtility.generalDirection3DValues[i];
-				if ((Tool == VoxelTool.Turn || Tool == VoxelTool.Mirror) && !IsMapSideSeen(side))
+				if ((SelectedTool == VoxelTool.Turn || SelectedTool == VoxelTool.Mirror) && !IsMapSideSeen(side))
 				{ continue; }
 				Vector3 worldPos = GetHandlePos(side, size, arrowSpacing);
 
-				if (Tool == VoxelTool.Turn)
+				if (SelectedTool == VoxelTool.Turn)
 				{
 					for (int j = 0; j < DirectionUtility.generalDirection3DValues.Length; j++)
 					{
@@ -49,11 +50,11 @@ namespace VoxelSystem
 						Axis3D a2 = side2.GetAxis();
 						Vector3 pos = worldPos + (arrowSpacing * _targetGameObject.transform.TransformVector(d.ToVector()));
 
-						HandleOneArrowHandle(arrowSize, a2, d, pos, side, Tool);
+						HandleOneArrowHandle(arrowSize, a2, d, pos, side, SelectedTool);
 					}
 				}
 				else
-				{ HandleOneArrowHandle(arrowSize, side.GetAxis(), side, worldPos, side, Tool); }
+				{ HandleOneArrowHandle(arrowSize, side.GetAxis(), side, worldPos, side, SelectedTool); }
 			}
 		}
 
@@ -74,9 +75,9 @@ namespace VoxelSystem
 
 				string label = (_handleSteps >= 0 ? "+" : "") + _handleSteps.ToString();
 
-				if (_sizeTools.Contains(Tool))
+				if (SelectedTool.IsSizeTool())
 				{
-					label += " : " + _targetVoxelObject.Map.GetSize(axis);
+					label += " : " + _editorComponent.Map.GetSize(axis);
 				}
 
 				Handles.Label(handlePos + new Vector3(x: 0, y: 5, z: 0), label, style);
@@ -104,7 +105,7 @@ namespace VoxelSystem
 					}
 					break;
 				case HandleEvent.LmbDrag:
-					if (tool == VoxelTool.Turn || Tool == VoxelTool.Mirror)
+					if (tool == VoxelTool.Turn || SelectedTool == VoxelTool.Mirror)
 					{ break; }
 
 					_handleSteps = (int)Vector3.Dot(_targetGameObject.transform.InverseTransformVector(handleResult.IsDragged), dir.ToVector());
@@ -119,7 +120,7 @@ namespace VoxelSystem
 				case HandleEvent.LmbRelease:
 				case HandleEvent.LmbClick:
 				case HandleEvent.LmbDoubleClick:
-					if (tool == VoxelTool.Turn || Tool == VoxelTool.Mirror)
+					if (tool == VoxelTool.Turn || SelectedTool == VoxelTool.Mirror)
 					{ break; }
 
 					_handleSteps = (int)Vector3.Dot(_targetGameObject.transform.InverseTransformVector(handleResult.IsDragged), dir.ToVector());
@@ -131,15 +132,15 @@ namespace VoxelSystem
 					_handleVector = Vector3Int.zero;
 
 					break;
-				//default:					
-				//		throw new ArgumentException("Invalid handle event: " + handleResult.handleEvent);
+					//default:					
+					//		throw new ArgumentException("Invalid handle event: " + handleResult.handleEvent);
 			}
 		}
 
 		void Mirror(Axis3D axis)
 		{
-			RecordVoxelObjectForUndo(_targetVoxelObject, "VoxelMapMirrored");
-			_targetVoxelObject.Map.Mirror(axis);
+			RecordVoxelObjectForUndo(_editorComponent, "VoxelMapMirrored");
+			_editorComponent.Map.Mirror(axis);
 		}
 
 		void Turn(Axis3D axis, GeneralDirection3D dir, GeneralDirection3D side)
@@ -152,8 +153,8 @@ namespace VoxelSystem
 				(axis == Axis3D.Y && d.GetAxis() == Axis3D.X))
 				leftHandPositive = !leftHandPositive;
 
-			RecordVoxelObjectForUndo(_targetVoxelObject, "VoxelMapTurned");
-			_targetVoxelObject.Map.Turn(axis, leftHandPositive);
+			RecordVoxelObjectForUndo(_editorComponent, "VoxelMapTurned");
+			_editorComponent.Map.Turn(axis, leftHandPositive);
 		}
 
 		Vector3 _originalPos;
@@ -161,17 +162,17 @@ namespace VoxelSystem
 		{
 			_originalPos = _targetGameObject.transform.localPosition;
 			_originalMap ??= new ArrayVoxelMap();
-			_originalMap.SetupFrom(_targetVoxelObject.Map);
+			_originalMap.SetupFrom(_editorComponent.Map);
 		}
 
 		void ReleaseArrowHandleAction(GeneralDirection3D direction, int steps)
 		{
-			if (Tool == VoxelTool.Move)
+			if (SelectedTool == VoxelTool.Move)
 			{
 				Undo.RecordObject(_targetGameObject.transform, "VoxelMapMoved");
 				Translate(direction, steps);
 			}
-			else if (_sizeTools.Contains(Tool))
+			else if (SelectedTool.IsSizeTool())
 			{
 				ResizeMapRelease(direction, steps);
 			}
@@ -183,10 +184,12 @@ namespace VoxelSystem
 			if (_originalMap != null)
 			{
 				steps = Mathf.Max(-_originalMap.GetSize(direction.GetAxis()) + 1, steps);
-				_targetVoxelObject.CopyMapFrom(_originalMap);
-				RecordVoxelObjectForUndo(_targetVoxelObject, "VoxelMapResized");
 
-				_targetVoxelObject.Map.Resize(direction, steps, ToolToResizeType(Tool));
+				_editorComponent?.Map?.SetupFrom(_originalMap);
+
+				RecordVoxelObjectForUndo(_editorComponent, "VoxelMapResized");
+
+				_editorComponent.Map.Resize(direction, steps, ToolToResizeType(SelectedTool));
 
 				if (!direction.IsPositive())
 				{
@@ -200,12 +203,12 @@ namespace VoxelSystem
 
 		void DragArrowHandleAction(GeneralDirection3D direction, int steps)
 		{
-			if (Tool == VoxelTool.Move)
+			if (SelectedTool == VoxelTool.Move)
 			{
 				Undo.RecordObject(_targetGameObject.transform, "VoxelMapMoved");
 				Translate(direction, steps);
 			}
-			else if (_sizeTools.Contains(Tool))
+			else if (SelectedTool.IsSizeTool())
 			{
 				ResizeMapDrag(direction, steps);
 			}
@@ -231,8 +234,8 @@ namespace VoxelSystem
 			{
 				Translate(direction, steps);
 			}
-			_targetVoxelObject.Map.SetupFrom(_originalMap);
-			_targetVoxelObject.Map.Resize(direction, steps, ToolToResizeType(Tool));
+			_editorComponent.Map.SetupFrom(_originalMap);
+			_editorComponent.Map.Resize(direction, steps, ToolToResizeType(SelectedTool));
 		}
 
 		static VoxelMap.ResizeType ToolToResizeType(VoxelTool tool) => tool == VoxelTool.Rescale ? VoxelMap.ResizeType.Rescale :

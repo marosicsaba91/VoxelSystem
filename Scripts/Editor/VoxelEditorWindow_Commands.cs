@@ -17,8 +17,13 @@ namespace VoxelSystem
 		
 		void Separate()		
 		{
-			/*
-			RecordVoxelObjectForUndo(_targetVoxelObject, "Separate");
+			RecordVoxelObjectForUndo(_editorComponent, "Separate");
+			var voxelObject = _editorComponent as VoxelObject;
+			if (voxelObject == null) 
+			{
+				Debug.LogError("Separate is only available for VoxelObject");
+				return;
+			}
 
 			var separatedGo = new GameObject(_targetGameObject.name + " Separated");
 			separatedGo.transform.parent = _targetGameObject.transform;
@@ -26,47 +31,52 @@ namespace VoxelSystem
 			separatedGo.transform.localScale = Vector3.one;
 			Undo.RegisterCreatedObjectUndo(separatedGo, "Create object");
 
-			if (_targetVoxelObject.references.meshCollider != null)
+			if (voxelObject.references.meshCollider != null)
 				separatedGo.AddComponent<MeshCollider>();
 
 			VoxelObject separatedVo = separatedGo.AddComponent<VoxelObject>();
-			separatedVo.ConnectedBuilder = _targetVoxelObject.Builder;
+			separatedVo.ConnectedBuilder = voxelObject.ConnectedBuilder;
 			separatedVo.ArrayMap = new(_selectionSize);
 			separatedVo.ArrayMap.ClearWhole();
-			separatedVo.RegenerateMesh();
 
 			// TODO: SET NEW MAP
-			separatedVo.ArrayMap.CopyFromOtherMap(_targetVoxelObject.Map, _selectionMin, Vector3Int.zero, _selectionSize);
+			separatedVo.ArrayMap.CopyFrom(_editorComponent.Map, _selectionMin, Vector3Int.zero, _selectionSize);
 
-			_targetVoxelObject.Map.SetRange(_selectionMin, _selectionMax, VoxelMap.SetAction.Clear, SelectedPaletteIndex);
-			_targetVoxelObject.RegenerateMesh();
+			_editorComponent.Map.SetRange(_selectionMin, _selectionMax, VoxelAction.Erase, SelectedPaletteIndex);
 
 			Selection.activeGameObject = separatedGo;
 			_targetGameObject = separatedGo;
-			_targetVoxelObject = separatedVo;
+			_editorComponent = separatedVo;
 			ChangeTarget();
 
-			Tool = VoxelTool.Non;
-			separatedVo.RegenerateMesh();
-		*/
+			SelectedTool = VoxelTool.None;
+		
 		}
 
 		void CopyUp()
 		{
+			var voxelObject = _editorComponent as VoxelObject;
+			if (voxelObject == null)
+			{
+				Debug.LogError("CopyUp is only available for VoxelObject");
+				return;
+			}
 
 			IVoxelEditable parent = _targetGameObject.transform.parent.GetComponentInParent<IVoxelEditable>();
 			RecordVoxelObjectForUndo(parent, "CopyUp");
 
-			_targetVoxelObject.ApplyScale();
-			_targetVoxelObject.ApplyRotation();
+			VoxelMap map = _editorComponent.Map;
+			Transform transform = _targetGameObject.transform;
+
+			map.ApplyScale(transform);
+			map.ApplyRotation(transform);
 
 			Vector3 childPos = _targetGameObject.transform.localPosition;
 			Vector3Int childMin = new(Mathf.RoundToInt(childPos.x), Mathf.RoundToInt(childPos.y), Mathf.RoundToInt(childPos.z));
 
-			parent.Map.CopyFrom(_targetVoxelObject.Map, Vector3Int.zero, childMin, _targetVoxelObject.Map.FullSize);
-			parent.RegenerateMesh();
+			parent.Map.CopyFrom(map, Vector3Int.zero, childMin, map.FullSize);
+			voxelObject.RegenerateMesh();
 		}
-
 	}
 }
 #endif
