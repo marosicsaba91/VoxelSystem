@@ -1,16 +1,18 @@
 using System;
-using UnityEngine; 
+using UnityEngine;
 using System.Collections.Generic;
+using Object = UnityEngine.Object;
 
 namespace VoxelSystem
 {
 	[ExecuteAlways]
-	public class VoxelObject : MonoBehaviour, IVoxelEditable
+	public class VoxelObject : MonoBehaviour, IVoxelEditor
 	{
-		// Map, Palette, Builder
-		[SerializeField, HideInInspector] internal VoxelMapScriptableObject connectedMap = null;
-		[SerializeField, HideInInspector] internal VoxelBuilder connectedBuilder = null;
-		[SerializeField, HideInInspector] internal ArrayVoxelMap innerMap = null;
+		[SerializeField, HideInInspector] internal VoxelMapScriptableObject connectedMap;
+		[SerializeField, HideInInspector] internal ArrayVoxelMap innerMap;
+		[SerializeField, HideInInspector] internal BoundsInt selection = new();
+		[SerializeField] BlockLibrary blockLibrary;
+		[SerializeField] VoxelPalette voxelPalette;
 
 		[Serializable]
 		public struct References
@@ -24,9 +26,13 @@ namespace VoxelSystem
 
 		public TransformLock TransformLock { get => transformLock; set => transformLock = value; }
 
+		[SerializeField] bool mergeCloseEdgesOnTestMesh = true;
+
 		[SerializeField] VoxelAction selectedAction = VoxelAction.Attach;
 		[SerializeField] VoxelTool selectedTool = VoxelTool.None;
 		[SerializeField] int selectedPaletteIndex = 0;
+
+		public BoundsInt Selection { get => selection; set => selection = value; }
 
 
 		int _meshDirtyCounter = 0;
@@ -38,6 +44,9 @@ namespace VoxelSystem
 		public VoxelTool SelectedTool { get => selectedTool; set => selectedTool = value; }
 		public VoxelAction SelectedAction { get => selectedAction; set => selectedAction = value; }
 		public int SelectedPaletteIndex { get => selectedPaletteIndex; set => selectedPaletteIndex = value; }
+
+		public VoxelPalette VoxelPalette { get => voxelPalette; }
+		internal void SetPalette(VoxelPalette value) => voxelPalette = value;
 
 		public VoxelMapScriptableObject ConnectedMap
 		{
@@ -59,20 +68,6 @@ namespace VoxelSystem
 			}
 		}
 
-		public VoxelBuilder ConnectedBuilder
-		{
-			get => connectedBuilder;
-
-			set
-			{
-				if (connectedBuilder == value)
-					return;
-				connectedBuilder = value;
-				SetMeshDirty();
-			}
-
-		}
-		 
 		public ArrayVoxelMap ArrayMap
 		{
 			get => connectedMap != null ? connectedMap.map : innerMap;
@@ -87,21 +82,16 @@ namespace VoxelSystem
 
 		public VoxelMap Map => ArrayMap;
 
-		public UnityEngine.Object RecordableUnityObject => HasConnectedMap() ? ConnectedMap : this;
+		public Object MapContainer => HasConnectedMap() ? connectedMap : this;
+		public Object EditorObject => HasConnectedMap() ? connectedMap : this;
 
 		public bool EnableEdit => enabled;
 
-		public int PaletteLength => ConnectedBuilder == null ? 0 : ConnectedBuilder.PaletteLength;
-
 		public string MapName => HasConnectedMap() ? ConnectedMap.name : name;
 
-		public IEnumerable<PaletteItem> GetPaletteItems()
-		{
-			if(ConnectedBuilder == null)
-				yield break;
-			foreach (PaletteItem item in ConnectedBuilder.GetPaletteItems())
-				yield return item;
-		}
+		public IEnumerable<PaletteItem> PaletteItems() => voxelPalette.Items;
+		public int PaletteLength => voxelPalette == null ? 0 : voxelPalette.Length;
+
 
 		void OnEnable()
 		{
@@ -179,20 +169,30 @@ namespace VoxelSystem
 
 		public void RegenerateMesh()
 		{
-			ArrayVoxelMap map = ArrayMap;
-			VoxelBuilder builder = connectedBuilder;
+			VoxelMap map = ArrayMap;
+			if (map == null) return;
+			if (blockLibrary == null) return;
 
-			if (map == null || builder == null)
-			{ return; }
-			Mesh mesh = builder.VoxelMapToMesh(map);
-
-			if (mesh == null)
-			{ return; }
 			MaintainReferences();
 
-			references.meshFilter.mesh = mesh;
+			Mesh mesh = references.meshFilter.sharedMesh;
+			if (mesh == null) return;
+			mesh = VoxelBuilder.VoxelMapToMesh(map, GenerateMesh);
+			references.meshFilter.sharedMesh = mesh;
+
 			if (references.meshCollider != null)
-			{ references.meshCollider.sharedMesh = mesh; }
+				references.meshCollider.sharedMesh = mesh;
+		}
+
+
+		static readonly List<Block> _blockCache = new();
+		void GenerateMesh(VoxelMap voxelMap, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles)
+		{
+			if (voxelMap == null) return;
+			BlockVoxelBuilder.CalculateBlocks(voxelMap, _blockCache, mergeCloseEdgesOnTestMesh);
+
+			BlockVoxelBuilder.BuildMeshFromBlocks(blockLibrary, _blockCache, vertices, normals, uv, triangles);
+			Debug.Log("Mesh Regenerated");
 		}
 
 		void MaintainReferences()
@@ -216,14 +216,12 @@ namespace VoxelSystem
 
 		void OnDrawGizmosSelected()
 		{
-			if (connectedBuilder == null)
-			{ return; }
 			if (ArrayMap == null)
 			{ return; }
 
 			Matrix4x4 oldMatrix = Gizmos.matrix;
 			Gizmos.matrix = transform.localToWorldMatrix;
-			connectedBuilder.DrawGizmos(ArrayMap);
+			// connectedBuilder.DrawGizmos(ArrayMap);
 
 			Gizmos.matrix = oldMatrix;
 		}

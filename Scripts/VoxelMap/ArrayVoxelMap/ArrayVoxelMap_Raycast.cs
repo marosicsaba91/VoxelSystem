@@ -78,7 +78,15 @@ namespace VoxelSystem
 
 		static bool RaycastInside(VoxelHit entry, out VoxelHit hit, Vector3 rayDirection, ArrayVoxelMap map, bool returnOutsideVoxel)
 		{			 
-			if (map.GetVoxel(entry.voxelIndex).IsFilled())
+			Vector3Int voxelIndex = entry.voxelIndex;
+			
+			if (!map.IsValidCoord(voxelIndex))
+			{
+				hit = entry;
+				return false;
+			}
+
+			if (map.GetVoxel(voxelIndex).IsFilled())
 			{
 				hit = entry;
 				return true;

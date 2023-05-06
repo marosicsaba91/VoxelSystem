@@ -1,0 +1,66 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 55db6a56753b0574ab5480daaf23eb32, type: 3}
+  m_Name: VoxelIcons
+  m_EditorClassIdentifier: 
+  attachVoxelActionIcon: {fileID: 2800000, guid: d672e610f7257d846bbb1222aee7d6ec,
+    type: 3}
+  eraseVoxelActionIcon: {fileID: 2800000, guid: 59a703b33dfe80644a58de6c9b78077b,
+    type: 3}
+  recolorVoxelActionIcon: {fileID: 2800000, guid: 1a6f7b9cf19259241bfd87055b3cb2de,
+    type: 3}
+  overWriteVoxelActionIcon: {fileID: 2800000, guid: a8a44c866ec37954ea6c56179b08a415,
+    type: 3}
+  attachBoxVoxelToolIcon: {fileID: 2800000, guid: d48e9294464907f4a96b83f1ceeef2c5,
+    type: 3}
+  eraseBoxVoxelToolIcon: {fileID: 2800000, guid: 608d386a4ae23c64d860b5b0828717f0,
+    type: 3}
+  recolorBox_VoxelToolIcon: {fileID: 2800000, guid: cc431c3b8a7b9274e860436ac4e9fb74,
+    type: 3}
+  overWriteBoxVoxelToolIcon: {fileID: 2800000, guid: 9452cae564ef70b43908b829199c3b80,
+    type: 3}
+  attachFaceVoxelToolIcon: {fileID: 2800000, guid: a0ff7f8b46c46634ea08541501b3edb6,
+    type: 3}
+  eraseFaceVoxelToolIcon: {fileID: 2800000, guid: 0b0f20baa78f08b4196fd0b867e32419,
+    type: 3}
+  recolorFaceVoxelToolIcon: {fileID: 2800000, guid: 4212dda3ab33de2469c816a864348bc6,
+    type: 3}
+  overWriteFaceVoxelToolIcon: {fileID: 2800000, guid: 8f99b16190fb0bc41b09c7355fc2a847,
+    type: 3}
+  attachPaintBucketVoxelToolIcon: {fileID: 2800000, guid: 86be3edde604ebe47bf9a893384ac3dc,
+    type: 3}
+  erasePaintBucketVoxelToolIcon: {fileID: 2800000, guid: 5b689dcb954a06648ab40bacd67ec47f,
+    type: 3}
+  recolorPaintBucketVoxelToolIcon: {fileID: 2800000, guid: 4f1c3505699dde34d95820fc5f37cb86,
+    type: 3}
+  overWritePaintBucketVoxelToolIcon: {fileID: 2800000, guid: 74f5acc9e5aaefd4a9aec914399d3385,
+    type: 3}
+  addSelectVoxelToolIcon: {fileID: 2800000, guid: ef72658e42001294791c0c48e4174b11,
+    type: 3}
+  removeSelectVoxelToolIcon: {fileID: 2800000, guid: 5d5f00d139ebffb41a52f4473a29203e,
+    type: 3}
+  colorSelectVoxelToolIcon: {fileID: 2800000, guid: 249c7d64914d57140865af221ad4b8e5,
+    type: 3}
+  overWriteSelectVoxelToolIcon: {fileID: 2800000, guid: affd44284aa6db14baa0c1b6a87d8136,
+    type: 3}
+  selectVoxelToolIcon: {fileID: 2800000, guid: cf7fb01d597567a48b647d9ca3443185, type: 3}
+  moveVoxelToolIcon: {fileID: 2800000, guid: 7b65347155c705a41894b990b11822bb, type: 3}
+  rotateVoxelToolIcon: {fileID: 2800000, guid: b703a7343aa470341b0d0891ffa329f1, type: 3}
+  mirrorVoxelToolIcon: {fileID: 2800000, guid: b0c6e7d47073dc741a79e370e333fd43, type: 3}
+  resizeCanvasVoxelToolIcon: {fileID: 2800000, guid: dcae509e741b1f94c9c303a3e693d32f,
+    type: 3}
+  resizeVoxelToolIcon: {fileID: 2800000, guid: 5cf2501a976454c43a8d2902a6d23473, type: 3}
+  repeatVoxelToolIcon: {fileID: 2800000, guid: 90b17d74b8db9a148b74aa3e087ff55f, type: 3}
+  colorPickerVoxelToolIcon: {fileID: 2800000, guid: a707cc8b10ea5a94384bf57345cf239e,
+    type: 3}
+  lockOffIcon: {fileID: 2800000, guid: 3379c7673910ea64a831fcc17aa0ffc6, type: 3}
+  lockOnIcon: {fileID: 2800000, guid: cbf2434c170896d42a9cfb867195c364, type: 3}

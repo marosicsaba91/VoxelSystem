@@ -6,8 +6,6 @@ namespace VoxelSystem
 	partial class VoxelMap
 	{
 		// ------------- Transform Operations -------------
-		public enum ResizeType { Resize, Repeat, Rescale }
-
 		public void ApplyRotation(Transform transform)
 		{
 			if (transform.localRotation == Quaternion.identity) return;
@@ -102,13 +100,14 @@ namespace VoxelSystem
 			}
 			if (scale != 1 && scale != 0)
 			{
-				Resize(positiveDir, (scale - 1) * size, VoxelMap.ResizeType.Rescale);
+				Resize(positiveDir, (scale - 1) * size);
 			}
 			return move;
 		}
 
 		public abstract void Turn(Axis3D axis, bool leftHandPositive);
 		public abstract void Mirror(Axis3D axis);
-		public abstract void Resize(GeneralDirection3D direction, int steps, ResizeType type);
+		public abstract void Resize(GeneralDirection3D direction, int steps);
+		public abstract void ResizeCanvas(GeneralDirection3D direction, int steps, bool repeat);
 	}
 }

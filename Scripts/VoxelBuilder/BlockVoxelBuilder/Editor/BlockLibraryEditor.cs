@@ -1,8 +1,9 @@
 ﻿#if UNITY_EDITOR
 using UnityEngine;
 using UnityEditor;
+using VoxelSystem;
 
-namespace VoxelSystem.Editor
+namespace VoxelSystemEditor
 {
 	[CustomEditor(typeof(BlockLibrary))]
 	public class BlockLibraryEditor : UnityEditor.Editor

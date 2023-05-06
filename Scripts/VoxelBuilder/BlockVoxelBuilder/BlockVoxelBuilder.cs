@@ -8,9 +8,7 @@ using Utility.SerializableCollection;
 namespace VoxelSystem
 {
 	[Serializable]
-	class BlockColorDictionary : SerializableDictionary<BlockType, Color>
-	{
-	}
+	class BlockColorDictionary : SerializableDictionary<BlockType, Color>	{	}
 
 	[Serializable]
 	class BlockDrawingSettings
@@ -23,39 +21,26 @@ namespace VoxelSystem
 	}
 
 
-
-
 	[CreateAssetMenu(fileName = "BlockVoxelBuilder", menuName = "VoxelSystem/BlockVoxelBuilder", order = 4)]
 	public class BlockVoxelBuilder : VoxelBuilder
 	{
 		[SerializeField] BlockDrawingSettings drawingSettings = new();
 		[SerializeField] List<BlockLibrary> blockLibraries;
+		[SerializeField] BlockLibrary blockLibrary = null;
 
 		[SerializeField] bool mergeCloseEdges = true;
 		[SerializeField] int randomSeed = 0;
 
 		static readonly List<Block> _blocks = new();
 
-		protected override void BuildMesh(ArrayVoxelMap voxelMap, List<Vector3> vertices, List<Vector3> normals,
+
+		protected override void BuildMesh( VoxelMap voxelMap, List<Vector3> vertices, List<Vector3> normals,
 			List<Vector2> uv, List<int> triangles)
 		{
 			CalculateBlocks(voxelMap, _blocks, mergeCloseEdges);
 
-			int selected = VoxelEditorWindow.SelectedPaletteIndex;
-			selected = Mathf.Clamp(selected, 0, blockLibraries.Count - 1);
-			BlockLibrary blockLibrary = blockLibraries[selected];
-
-			BuildMeshFromBlocks(blockLibrary, _blocks, vertices, normals, uv, triangles);
-		}
-
-		protected override void BuildMesh(VoxelMap voxelMap, List<Vector3> vertices, List<Vector3> normals,
-			List<Vector2> uv, List<int> triangles)
-		{
-			CalculateBlocks(voxelMap, _blocks, mergeCloseEdges);
-
-			int selected = VoxelEditorWindow.SelectedPaletteIndex;
-			selected = Mathf.Clamp(selected, 0, blockLibraries.Count - 1);
-			BlockLibrary blockLibrary = blockLibraries[selected];
+			if (blockLibrary == null)
+				blockLibrary = blockLibraries.FirstOrDefault();
 
 			BuildMeshFromBlocks(blockLibrary, _blocks, vertices, normals, uv, triangles);
 		}
@@ -105,21 +90,7 @@ namespace VoxelSystem
 
 			// Debug.Log($"Block Count: {blocks.Count}");
 		}
-
-
-		public override IEnumerable<PaletteItem> GetPaletteItems()
-		{
-			for (int index = 0; index < blockLibraries.Count; index++)
-			{
-				BlockLibrary blockLibrary = blockLibraries[index];
-				yield return new PaletteItem
-				{ value = index, name = blockLibrary.name, color = blockLibrary.LibraryColor };
-			}
-		}
-
-		public override int PaletteLength => blockLibraries.Count;
-
-
+			
 		// Methods
 		static System.Random _gizmoRandom;
 		public override void DrawGizmos(ArrayVoxelMap map)

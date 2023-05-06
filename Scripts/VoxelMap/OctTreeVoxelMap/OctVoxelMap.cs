@@ -16,11 +16,12 @@ namespace VoxelSystem
 		OctVoxelChunk rootChunk;
 		bool _serialized = false;
 
-		public sealed override IntBounds VoxelBoundaries
+		public sealed override BoundsInt VoxelBoundaries
 		{
 			get => new(Vector3Int.zero, canvasSize);
-			protected set => Setup(value.Size); // RESET WHOLE MAP
+			protected set => Setup(value.size); // RESET WHOLE MAP
 		}
+
 		public override Vector3Int FullSize
 		{
 			get
@@ -102,12 +103,11 @@ namespace VoxelSystem
 		public sealed override bool SetRange(Vector3Int startCoordinate, Vector3Int endCoordinate, VoxelAction action, int value)
 		{
 			// TODO: Very much not optimized
-
-			IntBounds bounds = new(startCoordinate, endCoordinate + Vector3Int.one);
+			BoundsInt bounds = new(startCoordinate, endCoordinate);
 			bounds.Clamp(Vector3Int.zero, CanvasSize);
 			bool changed = false;
 
-			if (action == VoxelAction.Override)
+			if (action == VoxelAction.Overwrite)
 			{
 				foreach (Vector3Int coordinate in bounds.WalkThrough())
 					changed |= SetVoxel(coordinate, value);

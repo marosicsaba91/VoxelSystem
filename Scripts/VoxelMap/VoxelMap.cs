@@ -1,5 +1,5 @@
 using MUtility;
-using System; 
+using System;
 using UnityEngine;
 
 namespace VoxelSystem
@@ -21,10 +21,10 @@ namespace VoxelSystem
 		public bool IsVoxelFilled(int v) => v != emptyValue;
 		public bool IsVoxelEmpty(int v) => v == emptyValue;
 
-		public abstract IntBounds VoxelBoundaries { get; protected set; }
+		public abstract BoundsInt VoxelBoundaries { get; protected set; }
 		public abstract Vector3Int FullSize { get; protected set; }
 
-		public bool IsValidCoord(int x, int y, int z) => VoxelBoundaries.Contains(x, y, z);
+		public bool IsValidCoord(int x, int y, int z) => VoxelBoundaries.Contains(new Vector3Int(x,y,z));
 
 		public bool IsValidCoord(Vector3Int coordinate) => IsValidCoord(coordinate.x, coordinate.y, coordinate.z);
 
@@ -44,6 +44,7 @@ namespace VoxelSystem
 		// ------------- Changed Event -------------
 
 		public event Action MapChangedEvent;
+
 		internal void MapChanged()
 		{ 
 			OnMapChanged();
@@ -87,7 +88,7 @@ namespace VoxelSystem
 
 			switch (action)
 			{
-				case VoxelAction.Override:
+				case VoxelAction.Overwrite:
 					v = value;
 					break;
 				case VoxelAction.Repaint:
@@ -112,7 +113,7 @@ namespace VoxelSystem
 		public bool RepaintVoxel(int x, int y, int z, int value) => SetVoxel(x, y, z, VoxelAction.Repaint, value);
 		public bool RepaintVoxel(Vector3Int coordinate, int value) => SetVoxel(coordinate.x, coordinate.y, coordinate.z, VoxelAction.Attach, value);
 		public bool ClearVoxel(Vector3Int coordinate) => ClearVoxel(coordinate.x, coordinate.y, coordinate.z);
-		public bool ClearVoxel(int x, int y, int z) => SetVoxel(x, y, z, VoxelAction.Override, emptyValue);
+		public bool ClearVoxel(int x, int y, int z) => SetVoxel(x, y, z, VoxelAction.Overwrite, emptyValue);
 
 		// ------------- Batch SET Operation -------------
 
@@ -122,13 +123,22 @@ namespace VoxelSystem
 
 		public abstract bool SetRange(Vector3Int startCoordinate, Vector3Int endCoordinate, VoxelAction action, int value);
 
-		public bool SetRange(Vector3Int startCoordinate, Vector3Int endCoordinate, int value) => SetRange(startCoordinate, endCoordinate, VoxelAction.Override, value);
+		public bool SetRange(Vector3Int startCoordinate, Vector3Int endCoordinate, int value) => SetRange(startCoordinate, endCoordinate, VoxelAction.Overwrite, value);
 
 		public bool FillRange(Vector3Int startCoordinate, Vector3Int endCoordinate, int value) => SetRange(startCoordinate, endCoordinate, VoxelAction.Attach, value);
 
 		public bool RepaintRange(Vector3Int startCoordinate, Vector3Int endCoordinate, int value) => SetRange(startCoordinate, endCoordinate, VoxelAction.Repaint, value);
 
 		public bool ClearRange(Vector3Int startCoordinate, Vector3Int endCoordinate) => SetRange(startCoordinate, endCoordinate, VoxelAction.Erase, emptyValue);
+
+		internal bool SetSelection(BoundsInt selection, int paletteIndex) 
+		{
+			bool changed = false;
+			foreach (Vector3Int c in selection.WalkThrough())
+				changed |= SetVoxel(c, paletteIndex);
+			return changed;
+		}
+		internal bool ClearSelection(BoundsInt selection) => SetSelection(selection, emptyValue);
 
 		// ------------- RayCast -------------
 

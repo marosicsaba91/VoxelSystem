@@ -1,4 +1,6 @@
 ﻿
+using MUtility;
+using System.Drawing;
 using UnityEngine;
 
 namespace VoxelSystem
@@ -7,8 +9,9 @@ namespace VoxelSystem
 	{
 		public virtual void SetupFrom(VoxelMap map)
 		{
-			FullSize = map.FullSize;
-			foreach (Vector3Int index in map.VoxelBoundaries.WalkThrough())
+			BoundsInt bounds = map.VoxelBoundaries;
+			Setup(map.FullSize);
+			foreach (Vector3Int index in bounds.WalkThrough())
 				SetVoxel(index, map.GetVoxel(index));
 		}
 
@@ -49,10 +52,6 @@ namespace VoxelSystem
 					}
 				}
 			}
-			if (mapChanged)
-				MapChanged();
 		}
-
-
 	}
 }

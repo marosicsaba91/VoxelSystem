@@ -44,10 +44,10 @@ namespace VoxelSystem
 			SetWhole(value); 
 		}
 
-		public sealed override IntBounds VoxelBoundaries
+		public sealed override BoundsInt VoxelBoundaries
 		{
 			get => new(Vector3Int.zero, size);
-			protected set => Setup(value.Size);
+			protected set => Setup(value.size);
 		}
 
 		// GET Voxels ----------------------------
@@ -95,7 +95,7 @@ namespace VoxelSystem
 			int oldVal = v;
 			switch (action)
 			{
-				case VoxelAction.Override:
+				case VoxelAction.Overwrite:
 					v = value;
 					break;
 				case VoxelAction.Repaint:
@@ -103,7 +103,7 @@ namespace VoxelSystem
 						v = value;
 					break;
 				case VoxelAction.Attach:
-					if (v != IntVoxelUtility.emptyValue)
+					if (v == IntVoxelUtility.emptyValue)
 						v = value;
 					break;
 				case VoxelAction.Erase:
@@ -127,6 +127,7 @@ namespace VoxelSystem
 			}
 			return true;  // Faster to say, it is always changed.
 		}
+
 		public sealed override bool SetRange(Vector3Int startCoordinate, Vector3Int endCoordinate, VoxelAction action, int value)
 		{
 			Vector3Int size = FullSize;
@@ -138,7 +139,7 @@ namespace VoxelSystem
 			int maxZ = Mathf.Min(size.z - 1, Mathf.Max(startCoordinate.z, endCoordinate.z, 0));
 
 			bool changed = false;
-			if (action == VoxelAction.Override)
+			if (action == VoxelAction.Overwrite)
 			{
 				for (int x = minX; x <= maxX; x++)
 					for (int y = minY; y <= maxY; y++)
@@ -198,9 +199,6 @@ namespace VoxelSystem
 							} 
 						}
 			}
-
-			//if (changed)
-			//	MapChanged();
 
 			return changed;
 		}

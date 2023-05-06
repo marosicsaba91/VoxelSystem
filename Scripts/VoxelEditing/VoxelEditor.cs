@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using MUtility;
 using System;
-using System.Collections.Generic;
+using Object = UnityEngine.Object;
 
 namespace VoxelSystem
 {
@@ -13,94 +13,116 @@ namespace VoxelSystem
 		public bool scale;
 	}
 
-	[RequireComponent(typeof(VoxelFilter))]
+	[RequireComponent(typeof(VoxelFilter), typeof(VoxelRenderer))]
 	[ExecuteAlways]
-	class VoxelEditor : MonoBehaviour, IVoxelEditable
+	class VoxelEditor : MonoBehaviour, IVoxelEditor
 	{
-		[SerializeField] VoxelFilter voxelFilter; 
-		[SerializeField] TransformLock transformLock = new() { position = true, rotation = true, scale = true };
+		[SerializeField, HideInInspector] VoxelFilter voxelFilter;
+		[SerializeField, HideInInspector] VoxelRenderer voxelRenderer;
 
-		[SerializeField] VoxelAction selectedAction = VoxelAction.Attach;
-		[SerializeField] VoxelTool selectedTool = VoxelTool.None;
-		[SerializeField] int selectedPaletteIndex = 0;
-
-		public DebugReferences debugReferences;
-		[Serializable]
-		public struct DebugReferences
-		{
-			public Mesh cursorMesh;
-			public Material cursorMaterial;
-			public Mesh cursorVoxelMesh;
-			public Material cursorVoxelMaterial;
-			public bool outsideRaycast;
-			public float cursorScale;
-		}
+		[SerializeField, HideInInspector] internal TransformLock transformLock = new() { position = true, rotation = true, scale = true };
+		[SerializeField, HideInInspector] internal VoxelAction selectedAction = VoxelAction.Attach;
+		[SerializeField, HideInInspector] internal VoxelTool selectedTool = VoxelTool.None;
+		[SerializeField, HideInInspector] internal int selectedPaletteIndex = 0;
+		[SerializeField, HideInInspector] internal BoundsInt selection = new(Vector3Int.zero, Vector3Int.zero);
 
 		public TransformLock TransformLock { get => transformLock; set => transformLock = value; }
 
 		public VoxelMap Map => voxelFilter == null ? null : voxelFilter.GetVoxelMap();
-		bool HasConnectedMap() => voxelFilter != null && voxelFilter.HasConnectedMap(); 
+		bool HasConnectedMap() => voxelFilter != null && voxelFilter.HasConnectedMap();
 
-		public UnityEngine.Object RecordableUnityObject =>
-			voxelFilter == null ? null :
-			voxelFilter.HasConnectedMap() ? voxelFilter.ConnectedVoxelMap :
-			voxelFilter;
+		public BoundsInt Selection { get => selection; set => selection = value; }
+
+		public Object MapContainer => voxelFilter == null ? null :
+			voxelFilter.HasConnectedMap() ? voxelFilter.ConnectedVoxelMap : voxelFilter;
+
+		public Object EditorObject => this;
 
 		public bool EnableEdit => enabled;
 
 		private void OnValidate()
 		{
 			voxelFilter = GetComponent<VoxelFilter>();
-			selectedPaletteIndex = Mathf.Max(Mathf.Min(selectedPaletteIndex, PaletteLength - 1), 0);
+			voxelRenderer = GetComponent<VoxelRenderer>();
+			VoxelPalette palette = VoxelPalette;
+			if (palette == null)
+				selectedPaletteIndex = 0;
+			else
+				selectedPaletteIndex = Mathf.Max(Mathf.Min(selectedPaletteIndex, palette.Length - 1), 0);
 		}
 
-		private void Update()
+		private static void DrawVoxel(Mesh mesh, Material mat, VoxelHit hit, Matrix4x4 transformMatrix)
 		{
-			VoxelMap map = voxelFilter.GetVoxelMap();
-			if (map == null) return;
-
-			// RAYCAST 
-			var ray = new Ray(); // TODO: get ray from mouse position
-
-			if (map.Raycast(ray, out VoxelHit hit, transform, debugReferences.outsideRaycast))
-			{
-				Matrix4x4 transformMatrix = transform.localToWorldMatrix;
-
-				DrawVoxel(debugReferences, hit, transformMatrix);
-				DrawCursor(debugReferences, hit, transformMatrix);
-
-				// selection.activeObject = renderer.gameObject;
-				// Debug.Log(evetType);
-			}
-		}
-
-
-		private static void DrawVoxel(DebugReferences setup, VoxelHit hit, Matrix4x4 transformMatrix)
-		{
-			Mesh mesh = setup.cursorMesh;
-			Material mat = setup.cursorVoxelMaterial;
-			if (mesh == null) return;
-			if (mat == null) return;
 			var voxelMatrix = Matrix4x4.Translate(hit.voxelIndex + Vector3.one * 0.5f);
 			Graphics.DrawMesh(mesh, transformMatrix * voxelMatrix, mat, 0);
 		}
 
-		private static void DrawCursor(DebugReferences setup, VoxelHit hit, Matrix4x4 transformMatrix)
+		private static void DrawCursor(Mesh mesh, Material mat, float scale, VoxelHit hit, Matrix4x4 transformMatrix)
 		{
-			Mesh mesh = setup.cursorMesh;
-			Material mat = setup.cursorMaterial;
-			if (mesh == null) return;
-			if (mat == null) return;
 			var cursorRotation = Quaternion.LookRotation(hit.side.ToVector());
-			var cursorMatrix = Matrix4x4.TRS(hit.hitWorldPosition, cursorRotation, Vector3.one * setup.cursorScale);
+			var cursorMatrix = Matrix4x4.TRS(hit.hitWorldPosition, cursorRotation, Vector3.one * scale);
 			Graphics.DrawMesh(mesh, transformMatrix * cursorMatrix, mat, 0);
 		}
 
 		public string MapName => HasConnectedMap() ? voxelFilter.ConnectedVoxelMap.name : voxelFilter.name;
 		public VoxelTool SelectedTool { get => selectedTool; set => selectedTool = value; }
 		public VoxelAction SelectedAction { get => selectedAction; set => selectedAction = value; }
-		public int SelectedPaletteIndex { get => selectedPaletteIndex; set => selectedPaletteIndex = value; }
-		public int PaletteLength => 0;
-		public IEnumerable<PaletteItem> GetPaletteItems() { yield break; }
-}
+
+		// --- Palette ---
+		public int SelectedPaletteIndex
+		{
+			get => selectedPaletteIndex;
+			set => selectedPaletteIndex = value;
+		}
+		public VoxelPalette VoxelPalette => voxelRenderer == null ? null : voxelRenderer.VoxelPalette;
+
+		// --------------------------------------
+		void Update()
+		{
+			DoLockTransform();
+		}
+
+		void DoLockTransform()
+		{
+			if (TransformLock.position)
+			{
+				Vector3 lp = transform.localPosition;
+				transform.localPosition = new Vector3(Mathf.RoundToInt(lp.x), Mathf.RoundToInt(lp.y), Mathf.RoundToInt(lp.z));
+			}
+			if (TransformLock.rotation)
+			{
+				Vector3 lr = transform.localRotation.eulerAngles;
+				transform.localRotation = Quaternion.Euler(new Vector3(Mathf.RoundToInt(lr.x / 90f) * 90, Mathf.RoundToInt(lr.y / 90f) * 90, Mathf.RoundToInt(lr.z / 90f) * 90));
+			}
+			if (TransformLock.scale)
+			{
+				Vector3 ls = transform.localScale;
+				transform.localScale = new Vector3(Mathf.RoundToInt(ls.x), Mathf.RoundToInt(ls.y), Mathf.RoundToInt(ls.z));
+			}
+		}
+
+		void OnDrawGizmos()
+		{
+			if (Map == null)
+				return;
+
+			Gizmos.matrix = transform.localToWorldMatrix;
+			 
+			Vector3Int mapSize = Map.FullSize;
+			Color c = Color.white;
+
+			if (this.HasSelection()) // Draw Selection
+			{
+				Gizmos.color = c;
+				Vector3Int selectionSize = selection.size;
+				Gizmos.DrawWireCube((Vector3)selection.min + (Vector3)selectionSize / 2f, selectionSize);
+
+				c.a /= 4f;
+			}
+			Gizmos.color = c;
+			Gizmos.DrawWireCube((Vector3)mapSize / 2f, mapSize);
+
+			Gizmos.matrix = Matrix4x4.identity;
+		}
+	}
 }

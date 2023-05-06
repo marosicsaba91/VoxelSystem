@@ -25,13 +25,11 @@ namespace VoxelSystem
 			// TODO: The turning
 
 			canvasSize = new Vector3Int(newW, newH, newD);
-			MapChanged();
 		}
 
 		public sealed override void Mirror(Axis3D axis)
 		{
 			// TODO: The mirroring
-			MapChanged();
 		}
 
 		public Vector3 ApplyScaleOnAxis(Axis3D axis, float scale)
@@ -59,21 +57,19 @@ namespace VoxelSystem
 			}
 			if (scaleInt is not 0 and not 1)
 			{
-				Resize(positiveDir, (scaleInt - 1) * size, ResizeType.Rescale);
+				Resize(positiveDir, (scaleInt - 1) * size);
 			}
 			return move;
 		}
 
-		public sealed override void Resize(GeneralDirection3D direction, int steps, ResizeType type)
+		public sealed override void Resize(GeneralDirection3D direction, int steps)
 		{
-			Vector3Int size = canvasSize;
-			Axis3D axis = direction.GetAxis();
-			int newW = (axis == Axis3D.X) ? Math.Max(val1: 1, size.x + steps) : size.x;
-			int newH = (axis == Axis3D.Y) ? Math.Max(val1: 1, size.y + steps) : size.y;
-			int newD = (axis == Axis3D.Z) ? Math.Max(val1: 1, size.z + steps) : size.z;
 			// TODO: Resize
+		}
 
-			MapChanged();
+		public override void ResizeCanvas(GeneralDirection3D direction, int steps, bool repeat)
+		{
+			// TODO: ResizeCanvas
 		}
 	}
 }
