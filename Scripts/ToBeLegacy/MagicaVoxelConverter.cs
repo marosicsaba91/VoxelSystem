@@ -46,7 +46,7 @@ namespace VoxelSystem
 
 				if (x > 0 && y > 0 && z > 0)
 				{
-					ArrayVoxelMap model = new ArrayVoxelMap((int)x, (int)y, (int)z);
+					ArrayVoxelMap model = new ArrayVoxelMap(new Vector3Int((int)x, (int)y, (int)z));
 
 					// Read Number of voxels
 					UInt32 numVoxels = ConvertToUInt32(voxels.Contents.SubArray(index: 0, length: 4), offset: 0);

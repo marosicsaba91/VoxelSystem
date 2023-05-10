@@ -105,9 +105,9 @@ namespace VoxelSystem
 			return move;
 		}
 
-		public abstract void Turn(Axis3D axis, bool leftHandPositive);
-		public abstract void Mirror(Axis3D axis);
-		public abstract void Resize(GeneralDirection3D direction, int steps);
-		public abstract void ResizeCanvas(GeneralDirection3D direction, int steps, bool repeat);
+		 public abstract void Turn(Axis3D axis, bool leftHandPositive); 
+		public abstract void Mirror(Axis3D axis); 
+		public abstract void Resize(GeneralDirection3D direction, int steps); 
+		public abstract void ResizeCanvas(GeneralDirection3D direction, int steps, bool repeat); 
 	}
 }

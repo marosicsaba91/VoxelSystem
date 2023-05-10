@@ -30,11 +30,13 @@ namespace VoxelSystem
 
 		// Constructor -----------------------------------------------------------------------------
 
-		public ArrayVoxelMap() { }
+		public ArrayVoxelMap() { SetupUniqueID(); }
 
-		public ArrayVoxelMap(int x, int y, int z) => Setup(new Vector3Int(x, y, z));
-
-		public ArrayVoxelMap(Vector3Int size, int value = IntVoxelUtility.emptyValue) => Setup(size, value);
+		public ArrayVoxelMap(Vector3Int size, int value = IntVoxelUtility.emptyValue)
+		{
+			SetupUniqueID();
+			Setup(size, value);
+		}
 
 		public sealed override void Setup() => Setup(defaultMapSize * Vector3Int.one);
 
@@ -99,11 +101,11 @@ namespace VoxelSystem
 					v = value;
 					break;
 				case VoxelAction.Repaint:
-					if (v != IntVoxelUtility.emptyValue)
+					if (oldVal != IntVoxelUtility.emptyValue)
 						v = value;
 					break;
 				case VoxelAction.Attach:
-					if (v == IntVoxelUtility.emptyValue)
+					if (oldVal == IntVoxelUtility.emptyValue)
 						v = value;
 					break;
 				case VoxelAction.Erase:
@@ -116,9 +118,7 @@ namespace VoxelSystem
 			intVoxelData[index] = v;
 			return true;
 		}
-
-
-		// ---------------------
+		
 		public sealed override bool SetWhole(int value)
 		{
 			for (int i = 0; i < intVoxelData.Length; i++)

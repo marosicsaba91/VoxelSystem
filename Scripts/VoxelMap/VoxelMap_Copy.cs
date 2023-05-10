@@ -1,6 +1,6 @@
 ﻿
 using MUtility;
-using System.Drawing;
+using System;
 using UnityEngine;
 
 namespace VoxelSystem
@@ -15,7 +15,12 @@ namespace VoxelSystem
 				SetVoxel(index, map.GetVoxel(index));
 		}
 
-		public virtual void CopyFrom(VoxelMap sourceMap, Vector3Int startCoordinateOfSourceMap, Vector3Int startCoordinateOfDestinationMap, Vector3Int copySize)
+		public virtual void CopyFrom(
+			VoxelMap sourceMap, 
+			Vector3Int startCoordinateOfSourceMap,
+			Vector3Int startCoordinateOfDestinationMap,
+			Vector3Int copySize,
+			VoxelAction action = VoxelAction.Attach)
 		{
 			bool mapChanged = false;
 
@@ -45,10 +50,7 @@ namespace VoxelSystem
 
 						// Copy Voxel
 						int val = sourceMap.GetVoxel(sourceX, sourceY, sourceZ);
-						if (val != IntVoxelUtility.emptyValue)
-						{
-							mapChanged |= SetVoxel(destinationX, destinationY, destinationZ, val);
-						}
+						mapChanged |= SetVoxel(destinationX, destinationY, destinationZ, action, val);
 					}
 				}
 			}

@@ -80,6 +80,8 @@ namespace VoxelSystem
 
 		void SubscribeToChange()
 		{
+			// Debug.Log("Subscribe");
+
 			if (_lastFrameConnectedMap == connectedMapHolder)
 				return;
 

@@ -3,9 +3,12 @@ using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace VoxelSystem
 {
+	public enum MouseEventType { None, Down, Drag, Up }
+
 	public struct VoxelHandelInfo
 	{
 		public Vector3 position;
@@ -16,8 +19,14 @@ namespace VoxelSystem
 
 	public abstract class VoxelToolHandler
 	{
-		// Raycast Helper Variables
 		protected static ArrayVoxelMap _originalMap = null; // Target Voxel Map before Mouse Down
+		protected static Vector3 _originalTransformPosition = Vector3.zero;
+		protected static BoundsInt _originalSelection;
+		protected static Vector3Int _originalMapSize;
+		protected static MouseEventType _currentEventType;
+		protected static float _standardSpacing = 1;
+
+		// Raycast Helper Variables
 		protected static bool _isLastRayHit;
 		protected static bool _isMouseDown;
 		protected static VoxelHit _lastValidHit;
@@ -25,12 +34,10 @@ namespace VoxelSystem
 		protected static VoxelHit _lastHandledHit;
 
 		// Handle Helper Variables
-		protected static Vector3 _originalTransformPosition = Vector3.zero;
 		protected static Vector3 _lastHandleVector;
-		protected static bool _isDragged = false;
-		protected static GeneralDirection3D _dragDirection;
+		protected static GeneralDirection3D _handleDragDirection;
 		protected static int _handleSteps = 0;
-		protected static float _standardSpacing = 1;
+
 		protected static GUIStyle textStyle = new GUIStyle()
 		{
 			alignment = TextAnchor.MiddleCenter,
@@ -45,8 +52,19 @@ namespace VoxelSystem
 			Matrix4x4 matrix4X4 = Handles.matrix;
 			Handles.matrix = voxelEditor.transform.localToWorldMatrix;
 
-			TryExecuteRaycast(voxelEditor, guiEvent, ray);
-			ExecutedHandles(voxelEditor, guiEvent);
+
+			if (_currentEventType == MouseEventType.None)
+			{
+				_originalSelection = voxelEditor.Selection;
+				_originalMapSize = voxelEditor.Map.FullSize;
+			}
+
+			ExecutedHandles(voxelEditor, guiEvent, out bool useEvent);
+			if (!useEvent)
+				TryExecuteRaycast(voxelEditor, guiEvent, ray);
+
+			if (useEvent)
+				UseMouseEvent(guiEvent);
 
 			Handles.matrix = matrix4X4;
 		}
@@ -67,18 +85,25 @@ namespace VoxelSystem
 				if (_isLastRayHit)
 				{
 					// DRAW VOXEL CURSOR
-					Color color = Color.red;
+					Color color = GetCursorColor(voxelEditor.SelectedAction);
 					Handles.color = new(color.r, color.g, color.b, color.a / 4f);
-					Handles.DrawWireCube((Vector3)_lastValidHit.voxelIndex + Vector3.one * 0.5f, Vector3.one);
+					Handles.DrawWireCube((Vector3)_lastValidHit.voxelIndex + Vector3.one * 0.5f, Vector3.one); 
+					Handles.DrawWireCube(_lastValidHit.hitWorldPosition, Vector3.one * 0.2f);
 
 					Handles.color = color;
 					Drawable drawable = GetDrawableVoxelSide(_lastValidHit);
 					drawable.DrawHandle();
-
-
 				}
 			}
 		}
+		Color GetCursorColor(VoxelAction selectedAction) => selectedAction switch
+		{
+			VoxelAction.Attach => new Color(0.4f,1,0.3f),
+			VoxelAction.Erase => new Color(1, 0.2f, 0.1f),
+			VoxelAction.Overwrite => new Color(0.2f, 0.7f, 1),
+			VoxelAction.Repaint => new Color(1, 1, 1),
+			_ => Color.white,
+		};
 
 		void HandleRaycast(IVoxelEditor voxelEditor, Ray ray, Event guiEvent, bool raycastOutside)
 		{
@@ -92,7 +117,11 @@ namespace VoxelSystem
 				_lastValidHit = hit;
 
 			if (guiEvent.type == EventType.MouseDown)
+			{
+				_originalSelection = voxelEditor.Selection;
+				_currentEventType = MouseEventType.Down;
 				HandleCursorDown(voxelEditor, _isLastRayHit, hit);
+			}
 			else if (!_isMouseDown)
 			{
 				guiEvent.Use();
@@ -100,15 +129,21 @@ namespace VoxelSystem
 			}
 
 			if (guiEvent.type == EventType.MouseDrag)
+			{
+				_currentEventType = MouseEventType.Drag;
 				HandleCursorDrag(voxelEditor, _isLastRayHit, hit);
+			}
 			else if (guiEvent.type == EventType.MouseUp)
 			{
+				_currentEventType = MouseEventType.Up;
 				if (OnVoxelCursorUp(voxelEditor, _lastValidHit))
 					voxelEditor.Map.MapChanged();
 				_isMouseDown = false;
+				_currentEventType = MouseEventType.None;
+				_originalSelection = voxelEditor.Selection;
 			}
 
-			guiEvent.Use();
+			UseMouseEvent(guiEvent);
 		}
 
 		void HandleCursorDown(IVoxelEditor voxelEditor, bool isHit, VoxelHit hit)
@@ -142,23 +177,27 @@ namespace VoxelSystem
 
 		// --------------------- Handles ---------------------------
 
-		void ExecutedHandles(IVoxelEditor voxelEditor, Event guiEvent)
+		void ExecutedHandles(IVoxelEditor voxelEditor, Event guiEvent, out bool useEvent)
 		{
+			useEvent = false;
 			foreach (VoxelHandelInfo handleInfo in GetHandeles(voxelEditor))
-				ExecuteOneHandle(voxelEditor, handleInfo);
-
-			if (guiEvent.isMouse && guiEvent.button == 0) // Left Mouse
-				guiEvent.Use();
+			{
+				ExecuteOneHandle(voxelEditor, handleInfo, guiEvent, out bool useE);
+				useEvent |= useE;
+			}
 		}
-		void ExecuteOneHandle(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo)
+
+		void ExecuteOneHandle(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo, Event guiEvent, out bool useEvent)
 		{
 			VoxelMap map = voxelEditor.Map;
 			VoxelTool _tool = voxelEditor.SelectedTool;
 			GeneralDirection3D direction = handleInfo.direction;
 			Axis3D axis = direction.GetAxis();
 			Vector3 handlePos = handleInfo.position;
-			float sizeMultiplier = map.FullSize.AbsMean() / 20f;  // 20 looks good
+			Vector3Int editingSpace = voxelEditor.HasSelection() ? voxelEditor.Selection.size : map.FullSize;
+			float sizeMultiplier = Mathf.Sqrt(editingSpace.AbsMean() / 20f);  // 20 looks good
 			_standardSpacing = sizeMultiplier * 2;
+			useEvent = false;
 
 			Color color = axis.GetAxisColor();
 			Color focused = (color + Color.white) / 2f;
@@ -166,12 +205,12 @@ namespace VoxelSystem
 
 			Vector3 directionVector = direction.ToVector();
 			var rotation = Quaternion.LookRotation(directionVector);
-			
+
 			Handles.CapFunction capFunction = handleInfo.coneType == HandeleConeType.Arrow
 				? Handles.ConeHandleCap
 				: Handles.CubeHandleCap;
 
-			if(handleInfo.coneType == HandeleConeType.Box)
+			if (handleInfo.coneType == HandeleConeType.Box)
 				sizeMultiplier *= 0.7f;
 
 			AdvancedHandles.HandleResult handleResult =
@@ -179,11 +218,12 @@ namespace VoxelSystem
 
 
 			// Handle Click
-			if (handleResult.handleEvent is HandleEvent.LmbClick or HandleEvent.LmbDoubleClick) 
+			if (handleResult.handleEvent is HandleEvent.LmbClick or HandleEvent.LmbDoubleClick)
 			{
 				if (OnHandleClick(voxelEditor, handleInfo))
 				{
 					voxelEditor.Map.MapChanged();
+					useEvent = true;
 					return;
 				}
 			}
@@ -192,21 +232,23 @@ namespace VoxelSystem
 			switch (handleResult.handleEvent)
 			{
 				case HandleEvent.LmbPress: // START DRAG 
-					_isDragged = true;
-					_dragDirection = direction;
+					_originalSelection = voxelEditor.Selection;
+					_currentEventType = MouseEventType.Down;
 					_lastHandleVector = Vector3Int.zero;
 					_originalMap ??= new ArrayVoxelMap();
 					_originalMap.SetupFrom(map);
+					_originalMapSize = map.FullSize;
 					_originalTransformPosition = voxelEditor.transform.position;
 					if (OnHandleDown(voxelEditor, handleInfo))
 						voxelEditor.Map.MapChanged();
 					break;
 
 				case HandleEvent.LmbDrag: // DRAG 
-					_isDragged = true;
+					_currentEventType = MouseEventType.Drag;
 					_handleSteps = (int)Vector3.Dot(handleResult.IsDragged, directionVector);
 					Vector3Int vec = direction.ToVectorInt() * _handleSteps;
 					bool changed = _lastHandleVector != vec;
+					_handleDragDirection = direction;
 					_lastHandleVector = vec;
 					if (changed)
 						if (OnHandleDrag(voxelEditor, handleInfo, _handleSteps))
@@ -214,15 +256,20 @@ namespace VoxelSystem
 					break;
 
 				case HandleEvent.LmbRelease: // RELEASE 
+					_currentEventType = MouseEventType.Up;
 					_handleSteps = (int)Vector3.Dot(handleResult.IsDragged, directionVector);
 					if (OnHandleUp(voxelEditor, handleInfo, _handleSteps))
 						voxelEditor.Map.MapChanged();
 					_handleSteps = 0;
 					_lastHandleVector = Vector3Int.zero;
-					_isDragged = false;
+					_currentEventType = MouseEventType.None;
+					_originalSelection = voxelEditor.Selection;
 
 					break;
 			}
+
+			if (handleResult.handleEvent is HandleEvent.LmbPress or HandleEvent.LmbDrag or HandleEvent.LmbRelease)
+				useEvent = true;
 
 			if (!handleInfo.text.IsNullOrEmpty())
 			{
@@ -230,14 +277,20 @@ namespace VoxelSystem
 				Handles.Label(handlePos + Vector3.up * _standardSpacing, handleInfo.text, textStyle);
 			}
 		}
-
-		protected void Reset(IVoxelEditor voxelEditor) 
+		protected void Reset(IVoxelEditor voxelEditor)
 		{
 			voxelEditor.Map.SetupFrom(_originalMap);
 			voxelEditor.transform.position = _originalTransformPosition;
+			voxelEditor.Selection = _originalSelection;
 		}
 
 		// ------------------ Static Methods -----------------------------
+
+		static void UseMouseEvent(Event guiEvent)
+		{
+			if (guiEvent.type is EventType.MouseDown or EventType.MouseDrag or EventType.MouseUp && guiEvent.button == 0) // Left Mouse
+				guiEvent.Use();
+		}
 
 		protected static bool IsMapSideVisible(IVoxelEditor voxelEditor, Vector3 size, GeneralDirection3D side)
 		{
@@ -270,11 +323,24 @@ namespace VoxelSystem
 			voxelEditor.transform.position = _originalTransformPosition + globalShift;
 		}
 
-		protected static Vector3 GetMapSidePosition(Vector3 mapSize, GeneralDirection3D direction)
+		protected static Vector3 GetMapSidePosition(IVoxelEditor voxelEditor, GeneralDirection3D direction)
 		{
+			Vector3 size;
+			Vector3 center;
+			if (voxelEditor.HasSelection())
+			{
+				size = voxelEditor.Selection.size;
+				center = voxelEditor.Selection.center;
+
+			}
+			else
+			{
+				size = voxelEditor.Map.FullSize;
+				center = size / 2f;
+			}
+
 			Vector3 dir = direction.ToVector();
-			Vector3 center = mapSize / 2f;
-			return center + (dir.MultiplyAllAxis(mapSize) / 2f) + dir * _standardSpacing;
+			return center + (dir.MultiplyAllAxis(size) / 2f) + dir * _standardSpacing;
 		}
 
 		static Drawable GetDrawableVoxelSide(VoxelHit hit)
@@ -322,7 +388,10 @@ namespace VoxelSystem
 
 		protected static readonly VoxelAction[] noVoxelAction = new VoxelAction[0];
 		protected static readonly VoxelAction[] allVoxelActions = VoxelEditor_EnumHelper._allVoxelActions;
-		public virtual VoxelAction[] SupportedActions => noVoxelAction;
+		public virtual VoxelAction[] GetSupportedActions(IVoxelEditor voxelEditor) => noVoxelAction;
+
+		protected static VoxelAction[] GetTransformActions(IVoxelEditor voxelEditor) => 
+			voxelEditor.HasSelection() ? VoxelEditor_EnumHelper._transformActions : noVoxelAction;
 
 		// ------------------ Virtual Methods: Cursor Voxel -----------------------------
 

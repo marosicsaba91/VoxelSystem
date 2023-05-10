@@ -64,3 +64,11 @@ MonoBehaviour:
     type: 3}
   lockOffIcon: {fileID: 2800000, guid: 3379c7673910ea64a831fcc17aa0ffc6, type: 3}
   lockOnIcon: {fileID: 2800000, guid: cbf2434c170896d42a9cfb867195c364, type: 3}
+  selectedButton: {fileID: 2800000, guid: 527ef63281248354e888d65c5eba3688, type: 3}
+  selectedButtonAttach: {fileID: 2800000, guid: f51a5e57ac36d384182081947f7da794,
+    type: 3}
+  selectedButtonErase: {fileID: 2800000, guid: 156449a03661bb04eaebd1109c4ef3e2, type: 3}
+  selectedButtonOverWrite: {fileID: 2800000, guid: 527ef63281248354e888d65c5eba3688,
+    type: 3}
+  selectedButtonRecolor: {fileID: 2800000, guid: a7418f57f4f43254ea1640b0a1c7e5bd,
+    type: 3}

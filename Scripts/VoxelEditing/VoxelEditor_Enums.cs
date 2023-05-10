@@ -6,9 +6,9 @@ namespace VoxelSystem
 {
 	public enum VoxelAction
 	{
+		Overwrite, // Set all voxels to fix value
 		Attach,    // Set all EMPTY voxels to fix Value
 		Erase,     // Set all voxels to EMPTY
-		Overwrite, // Set all voxels to fix value
 		Repaint,   // Set all NON-EMPTY voxels to fix Value
 	}
 
@@ -18,6 +18,8 @@ namespace VoxelSystem
 	{
 		public static readonly VoxelAction[] _allVoxelActions = Enum.GetValues(typeof(VoxelAction)).Cast<VoxelAction>().ToArray();
 		public static readonly VoxelTool[] _allVoxelTools = Enum.GetValues(typeof(VoxelTool)).Cast<VoxelTool>().ToArray();
+
+		public static readonly VoxelAction[] _transformActions = new VoxelAction[] {  VoxelAction.Overwrite, VoxelAction.Attach };
 
 		public static bool IsTransformTool(this VoxelTool tool) => tool is
 			VoxelTool.Move or VoxelTool.Turn or VoxelTool.Mirror or
@@ -40,6 +42,9 @@ namespace VoxelSystem
 
 		public static VoxelToolHandler GetHandler(this VoxelTool tool) 
 		{
+			if (tool == VoxelTool.None)
+				return null;
+
 			if (handlers.TryGetValue(tool, out VoxelToolHandler handler))
 				return handler;
 
@@ -64,5 +69,14 @@ namespace VoxelSystem
 			handlers.Add(tool, instance);
 			return instance;
 		}
+
+		public static VoxelAction ToTransformAction(this VoxelAction voxelAction) => voxelAction == VoxelAction.Overwrite ? VoxelAction.Overwrite : VoxelAction.Attach;
+		public static string GetTooltip(this VoxelAction voxelAction) => voxelAction switch { 
+			VoxelAction.Overwrite => "Overwrite all voxels with the selected value",
+			VoxelAction.Attach => "Attach just to empty space",
+			VoxelAction.Erase => "Erase all non-empty voxels",
+			VoxelAction.Repaint => "Repaint all non-empty voxels",
+			_ => throw new ArgumentOutOfRangeException(nameof(voxelAction), voxelAction, null)
+		};
 	}
 }

@@ -21,7 +21,6 @@ namespace VoxelSystem
 			Selection.selectionChanged += ChangeTarget;
 			SceneView.duringSceneGui += OnSceneGUI;
 			ChangeTarget();
-
 		}
 
 		void OnDisable()
@@ -60,12 +59,12 @@ namespace VoxelSystem
 		void OnSceneGUI(SceneView scene)
 		{
 			Event guiEvent = Event.current;
-			EventType eventType = guiEvent.type;
 
 			bool enableEdit =
+				!Equals(_editorComponent, null) &&
 				_editorComponent != null &&
 				_editorComponent.EnableEdit &&
-				_editorComponent.Map != null &&
+				!Equals(_editorComponent.Map, null) &&
 				Tool != VoxelTool.None;
 
 			Tools.hidden = enableEdit;

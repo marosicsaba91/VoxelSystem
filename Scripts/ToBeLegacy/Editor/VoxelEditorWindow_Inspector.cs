@@ -280,7 +280,7 @@ namespace VoxelSystem
 			if (GUI.Button(rect, text))
 			{
 				_editorComponent.RecordForUndo("Selection Cleared", RecordType.Map);
-				change = _editorComponent.ClearSelection();
+				change = _editorComponent.ClearInsideSelection();
 			}
 			rect.x += buttonWidth + smallSpacing;
 
@@ -288,7 +288,7 @@ namespace VoxelSystem
 			if (GUI.Button(rect, text))
 			{
 				_editorComponent.RecordForUndo("Selection Filled", RecordType.Map);
-				change = _editorComponent.FillSelection();
+				change = _editorComponent.FillInsideSelection();
 			}
 
 			if (change)

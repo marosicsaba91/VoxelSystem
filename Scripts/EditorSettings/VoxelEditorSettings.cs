@@ -59,6 +59,13 @@ internal class VoxelEditorSettings : ScriptableObject
 	public Texture lockOffIcon;
 	public Texture lockOnIcon;
 
+	[Space]
+	public Texture2D selectedButton;
+	public Texture2D selectedButtonAttach;
+	public Texture2D selectedButtonErase;
+	public Texture2D selectedButtonOverWrite;
+	public Texture2D selectedButtonRecolor;
+
 	internal Texture GetActionIcon(VoxelAction action) => action switch
 	{
 		VoxelAction.Attach => attachVoxelActionIcon,

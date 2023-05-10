@@ -2,7 +2,7 @@
 {
 	public class VoxelToolHandler_FloodFill : VoxelToolHandler
 	{
-		public sealed override VoxelAction[] SupportedActions => allVoxelActions;
+		public sealed override VoxelAction[] GetSupportedActions(IVoxelEditor voxelEditor) => allVoxelActions;
 
 		protected override bool DoRaycastVoxelCursor(IVoxelEditor voxelEditor, out bool raycastOutside)
 		{

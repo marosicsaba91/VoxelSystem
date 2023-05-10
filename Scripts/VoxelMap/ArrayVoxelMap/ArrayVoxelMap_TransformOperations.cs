@@ -71,7 +71,7 @@ namespace VoxelSystem
 		public sealed override void Resize(GeneralDirection3D direction, int steps)
 		{
 			Axis3D axis = direction.GetAxis();
-			Vector3Int newSize = (size + direction.ToVectorInt() * steps).Abs();
+			Vector3Int newSize = (size + direction.ToVectorInt().Abs() * steps).Abs();
 			int[] newVoxelData = new int[newSize.x * newSize.y * newSize.z];
 
 			for (int i = 0; i < newVoxelData.Length; i++)
@@ -112,7 +112,7 @@ namespace VoxelSystem
 
 		public sealed override void ResizeCanvas(GeneralDirection3D direction, int steps, bool repeat)
 		{
-			Vector3Int newSize = (size + direction.ToVectorInt() * steps).Abs();
+			Vector3Int newSize = (size + direction.ToVectorInt().Abs() * steps).Abs();
 			int[] newVoxelData = new int[newSize.x * newSize.y * newSize.z];
 
 			for (int i = 0; i < newVoxelData.Length; i++)

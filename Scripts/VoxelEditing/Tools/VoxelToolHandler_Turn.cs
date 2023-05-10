@@ -6,6 +6,8 @@ namespace VoxelSystem
 {
 	public class VoxelToolHandler_Turn : VoxelToolHandler
 	{
+		public override VoxelAction[] GetSupportedActions(IVoxelEditor voxelEditor) => GetTransformActions(voxelEditor);
+
 		protected override IEnumerable<VoxelHandelInfo> GetHandeles(IVoxelEditor voxelEditor)
 		{  
 			Vector3Int mapSize = voxelEditor.Map.FullSize;
@@ -13,7 +15,7 @@ namespace VoxelSystem
 			{
 				GeneralDirection3D side = DirectionUtility.generalDirection3DValues[i];
 				if (!IsMapSideVisible(voxelEditor, mapSize, side)) continue;
-				Vector3 position = GetMapSidePosition(mapSize, side);
+				Vector3 position = GetMapSidePosition(voxelEditor, side);
 
 				GeneralDirection3D dir1 = side.Next();
 				 
@@ -52,10 +54,31 @@ namespace VoxelSystem
 				Axis3D.Z;
 
 
-			voxelEditor.Turn(axis, side.IsPositive() ^ dir.IsPositive());  // TODO:  NEM TRUE FELTÉTLEN
-			return true;
-		}
+			if (voxelEditor.HasSelection())
+			{
+				voxelEditor.RecordForUndo("Voxel Selection Turned", RecordType.Map | RecordType.Editor);
+				TurnSelection(voxelEditor, axis, side.IsPositive() ^ dir.IsPositive()); 
+			}
+			else
+			{
+				voxelEditor.RecordForUndo("VoxelMap Turned", RecordType.Map | RecordType.Transform);
+				voxelEditor.Turn(axis, side.IsPositive() ^ dir.IsPositive());
+			}
 
+			return true;  // TODO:  NEM TRUE FELTÉTLEN
+		}
+		static void TurnSelection(IVoxelEditor editor, Axis3D axis, bool leftHandPositive)
+		{
+			BoundsInt selection = editor.Selection;
+			VoxelMap map = editor.Map;
+			ArrayVoxelMap selMap = new(selection.size);
+			selMap.CopyFrom(map, selection.min, Vector3Int.zero, selection.size);
+			selMap.Turn(axis, leftHandPositive);
+			map.ClearRange(selection);
+			selection = new BoundsInt(selection.position, selMap.FullSize);
+			map.CopyFrom(selMap, Vector3Int.zero, selection.position, selection.size, VoxelAction.Overwrite);
+			editor.Selection = selection;
+		}
 
 	}
 }

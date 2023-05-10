@@ -1,6 +1,8 @@
 using MUtility;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace VoxelSystem
 {
@@ -15,6 +17,34 @@ namespace VoxelSystem
 	[Serializable]
 	public abstract partial class VoxelMap
 	{
+		public const string undoGuidString = " - VoxelGUID: ";
+
+		static Dictionary<string, VoxelMap> mapDictionary = new();
+		public static bool TryGetMapByGuid(string guid, out VoxelMap map)
+		{
+			map = null;
+			foreach (KeyValuePair<string, VoxelMap> item in mapDictionary)
+			{
+				if (item.Key == guid)
+				{
+					map = item.Value;
+					return true;
+				}
+			}
+
+			VoxelFilter[] filters = Object.FindObjectsByType<VoxelFilter>( FindObjectsSortMode.None );
+			foreach (VoxelFilter filter in filters)
+			{
+				VoxelMap vMap = filter.GetVoxelMap(); 
+				mapDictionary.TryAdd(vMap.UniqueID, vMap);
+				if(vMap.UniqueID.Equals(guid))
+					map = vMap;
+			}
+
+			return map != null;
+		}
+
+
 		// ------------- GET Information -------------
 
 		protected const int emptyValue = IntVoxelUtility.emptyValue;
@@ -23,6 +53,8 @@ namespace VoxelSystem
 
 		public abstract BoundsInt VoxelBoundaries { get; protected set; }
 		public abstract Vector3Int FullSize { get; protected set; }
+		[SerializeField] string uniqueID;
+		public string UniqueID => uniqueID; 
 
 		public bool IsValidCoord(int x, int y, int z) => VoxelBoundaries.Contains(new Vector3Int(x,y,z));
 
@@ -38,6 +70,12 @@ namespace VoxelSystem
 		}
 		// ------------- Constructing -------------
 
+		protected void SetupUniqueID() 
+		{
+			uniqueID = Guid.NewGuid().ToString();
+			mapDictionary.TryAdd(UniqueID, this);
+		}
+
 		public abstract void Setup();
 		public abstract void Setup(Vector3Int size, int value = emptyValue);
 
@@ -46,7 +84,7 @@ namespace VoxelSystem
 		public event Action MapChangedEvent;
 
 		internal void MapChanged()
-		{ 
+		{
 			OnMapChanged();
 			MapChangedEvent?.Invoke();
 		}
@@ -131,14 +169,15 @@ namespace VoxelSystem
 
 		public bool ClearRange(Vector3Int startCoordinate, Vector3Int endCoordinate) => SetRange(startCoordinate, endCoordinate, VoxelAction.Erase, emptyValue);
 
-		internal bool SetSelection(BoundsInt selection, int paletteIndex) 
+		internal bool SetRange(BoundsInt bound, int paletteIndex) 
 		{
 			bool changed = false;
-			foreach (Vector3Int c in selection.WalkThrough())
+			foreach (Vector3Int c in bound.WalkThrough())
 				changed |= SetVoxel(c, paletteIndex);
 			return changed;
 		}
-		internal bool ClearSelection(BoundsInt selection) => SetSelection(selection, emptyValue);
+
+		internal bool ClearRange(BoundsInt bound) => SetRange(bound, emptyValue);
 
 		// ------------- RayCast -------------
 

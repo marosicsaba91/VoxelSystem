@@ -16,6 +16,30 @@ namespace VoxelSystem
 
 	public static class VoxelEditor_Utility
 	{
+		public static void RecordForUndo(this IVoxelEditor editor, string message, RecordType record)
+		{
+#if UNITY_EDITOR
+			Object[] objects = editor.Objects(record);
+
+			// Debug.Log($"RecordForUndo: {string.Join(", ", objects.Select(o => o.name + o.GetType().ToString()))}");	
+			if (record.HasFlag(RecordType.Map))
+			{
+				string guid = editor.Map.UniqueID;
+				message += VoxelMap.undoGuidString + guid;
+			}
+
+			UnityEditor.Undo.RecordObjects(objects, message);
+
+			foreach (Object obj in objects)
+			{
+				if (editor.MapContainer is ScriptableObject so)
+					UnityEditor.EditorUtility.SetDirty(obj);
+			}
+
+#endif
+		}
+
+
 
 		static Object[] Objects(this IVoxelEditor editor, RecordType record)
 		{
@@ -37,24 +61,6 @@ namespace VoxelSystem
 			return objects;
 		}
 
-		public static void RecordForUndo(this IVoxelEditor editor, string message, RecordType record)
-		{
-#if UNITY_EDITOR
-			Object[] objects = editor.Objects(record);
-
-			// Debug.Log($"RecordForUndo: {string.Join(", ", objects.Select(o => o.name + o.GetType().ToString()))}");			
-			UnityEditor.Undo.RecordObjects(objects, message);
-
-			foreach (Object obj in objects)
-			{
-				if (editor.MapContainer is ScriptableObject so)
-					UnityEditor.EditorUtility.SetDirty(obj);
-			}
-
-#endif
-		}
-
-
 
 
 		public static void Turn(this IVoxelEditor editor, Axis3D axis, bool leftHandPositive)
@@ -72,12 +78,12 @@ namespace VoxelSystem
 
 		// Selection
 
-		public static bool ClearSelection(this IVoxelEditor editor) => FillSelection(editor, IntVoxelUtility.emptyValue);
+		public static bool ClearInsideSelection(this IVoxelEditor editor) => FillInsideSelection(editor, IntVoxelUtility.emptyValue);
 
-		public static bool FillSelection(this IVoxelEditor editor) => FillSelection(editor, editor.SelectedPaletteIndex);
+		public static bool FillInsideSelection(this IVoxelEditor editor) => FillInsideSelection(editor, editor.SelectedPaletteIndex);
 
-		public static bool FillSelection(this IVoxelEditor editor, int paletteIndex)
-		{ 
+		public static bool FillInsideSelection(this IVoxelEditor editor, int paletteIndex)
+		{
 			VoxelMap map = editor.Map;
 			if (!editor.HasSelection())
 				return map.SetWhole(paletteIndex);
@@ -89,18 +95,16 @@ namespace VoxelSystem
 			return change;
 		}
 
-		public static VoxelMap SeparateSelection(this IVoxelEditor editor)
+		public static ArrayVoxelMap SeparateSelection(this IVoxelEditor voxelEditor)
 		{
-			if (!editor.HasSelection())
+			if (!voxelEditor.HasSelection())
 				return null;
 
-			VoxelMap newMap = new ArrayVoxelMap();
-			newMap.Setup(editor.Selection.size);
-			Vector3Int minPos = editor.Selection.min;
-			foreach (Vector3Int coordinate in editor.Selection.WalkThrough())
-				newMap.SetVoxel(coordinate - minPos, editor.Map.GetVoxel(coordinate));
+			BoundsInt selection = voxelEditor.Selection;
+			var separated = new ArrayVoxelMap(selection.size);
+			separated.CopyFrom(voxelEditor.Map, selection.min, Vector3Int.zero, selection.size);
 
-			return newMap;
+			return separated;
 		}
 
 		public static bool HasSelection(this IVoxelEditor editor)
@@ -108,9 +112,8 @@ namespace VoxelSystem
 			Vector3Int size = editor.Selection.size;
 			return size.x >= 0 && size.y >= 0 && size.z >= 0;
 		}
-		public static void Deselect(this IVoxelEditor editor)
-		{
+
+		public static void Deselect(this IVoxelEditor editor) =>
 			editor.Selection = new BoundsInt(Vector3Int.zero, Vector3Int.one * -1);
-		}
 	}
 }

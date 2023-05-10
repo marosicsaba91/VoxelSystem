@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace VoxelSystem
 {
-	partial class ArrayVoxelMap
+	public partial class ArrayVoxelMap
 	{
 		protected sealed override bool Raycast(Ray localRay, out VoxelHit hit, bool returnOutsideVoxel = false)
 		{
@@ -76,7 +76,10 @@ namespace VoxelSystem
 			return false;
 		}
 
-		static bool RaycastInside(VoxelHit entry, out VoxelHit hit, Vector3 rayDirection, ArrayVoxelMap map, bool returnOutsideVoxel)
+		static bool RaycastInside(
+			VoxelHit entry, out VoxelHit hit,
+			Vector3 rayDirection, ArrayVoxelMap map,
+			bool returnOutsideVoxel)
 		{			 
 			Vector3Int voxelIndex = entry.voxelIndex;
 			
@@ -110,12 +113,11 @@ namespace VoxelSystem
 
 				//cursorPathVoxels.Add(lastFoundVoxel);
 
-				var stepDistance = new Vector3(
+				Vector3 stepDistance = new (
 					xIsPositive ? Ceil(lastIntersect.x) - lastIntersect.x : Floor(lastIntersect.x) - lastIntersect.x,
 					yIsPositive ? Ceil(lastIntersect.y) - lastIntersect.y : Floor(lastIntersect.y) - lastIntersect.y,
-					zIsPositive ? Ceil(lastIntersect.z) - lastIntersect.z : Floor(lastIntersect.z) - lastIntersect.z
-				);
-				var distanceToIntersect = new Vector3(
+					zIsPositive ? Ceil(lastIntersect.z) - lastIntersect.z : Floor(lastIntersect.z) - lastIntersect.z);
+				Vector3 distanceToIntersect = new (
 					stepDistance.x / rayDirection.x,
 					stepDistance.y / rayDirection.y,
 					stepDistance.z / rayDirection.z);
@@ -141,8 +143,7 @@ namespace VoxelSystem
 
 				if (!map.IsValidCoord(lastFoundVoxel))
 				{
-					cursor.voxelIndex = returnOutsideVoxel ? cursor.voxelIndex : cursor.voxelIndex + cursor.side.ToVectorInt();
-					cursor.side = returnOutsideVoxel ? cursor.side : cursor.side.Opposite();
+					cursor.hitWorldPosition = lastIntersect;
 					hit = cursor;
 					return true;
 				}
@@ -151,6 +152,7 @@ namespace VoxelSystem
 				{
 					cursor.voxelIndex = returnOutsideVoxel ? cursor.voxelIndex : cursor.voxelIndex + cursor.side.ToVectorInt();
 					cursor.side = returnOutsideVoxel ? cursor.side : cursor.side.Opposite();
+					cursor.hitWorldPosition = lastIntersect;
 					hit = cursor;
 					return true;
 				}

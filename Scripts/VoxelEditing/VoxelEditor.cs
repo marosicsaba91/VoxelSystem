@@ -51,19 +51,6 @@ namespace VoxelSystem
 				selectedPaletteIndex = Mathf.Max(Mathf.Min(selectedPaletteIndex, palette.Length - 1), 0);
 		}
 
-		private static void DrawVoxel(Mesh mesh, Material mat, VoxelHit hit, Matrix4x4 transformMatrix)
-		{
-			var voxelMatrix = Matrix4x4.Translate(hit.voxelIndex + Vector3.one * 0.5f);
-			Graphics.DrawMesh(mesh, transformMatrix * voxelMatrix, mat, 0);
-		}
-
-		private static void DrawCursor(Mesh mesh, Material mat, float scale, VoxelHit hit, Matrix4x4 transformMatrix)
-		{
-			var cursorRotation = Quaternion.LookRotation(hit.side.ToVector());
-			var cursorMatrix = Matrix4x4.TRS(hit.hitWorldPosition, cursorRotation, Vector3.one * scale);
-			Graphics.DrawMesh(mesh, transformMatrix * cursorMatrix, mat, 0);
-		}
-
 		public string MapName => HasConnectedMap() ? voxelFilter.ConnectedVoxelMap.name : voxelFilter.name;
 		public VoxelTool SelectedTool { get => selectedTool; set => selectedTool = value; }
 		public VoxelAction SelectedAction { get => selectedAction; set => selectedAction = value; }
@@ -101,26 +88,30 @@ namespace VoxelSystem
 			}
 		}
 
-		void OnDrawGizmos()
+		void OnDrawGizmosSelected()
 		{
 			if (Map == null)
 				return;
 
 			Gizmos.matrix = transform.localToWorldMatrix;
-			 
+
 			Vector3Int mapSize = Map.FullSize;
-			Color c = Color.white;
+
+			Gizmos.color = this.HasSelection() ? new Color(1f, 1f, 1f, 0.25f) : Color.white;
+			Gizmos.DrawWireCube((Vector3)mapSize / 2f, mapSize);
+
 
 			if (this.HasSelection()) // Draw Selection
 			{
-				Gizmos.color = c;
-				Vector3Int selectionSize = selection.size;
-				Gizmos.DrawWireCube((Vector3)selection.min + (Vector3)selectionSize / 2f, selectionSize);
+				Gizmos.color = Color.yellow;
+				const float offset = 0.05f;
+				Vector3 selectionSize = selection.size + (2 * offset * Vector3.one);
+				Gizmos.DrawWireCube((Vector3)selection.min - offset * Vector3.one + selectionSize / 2f, selectionSize);
 
-				c.a /= 4f;
-			}
-			Gizmos.color = c;
-			Gizmos.DrawWireCube((Vector3)mapSize / 2f, mapSize);
+				// const float offset2 = -0.025f;
+				// selectionSize = selection.size + (2 * offset2 * Vector3.one);
+				// Gizmos.DrawWireCube((Vector3)selection.min - offset2 * Vector3.one + selectionSize / 2f, selectionSize); 
+			} 
 
 			Gizmos.matrix = Matrix4x4.identity;
 		}

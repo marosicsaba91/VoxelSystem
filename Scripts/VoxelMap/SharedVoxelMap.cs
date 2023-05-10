@@ -13,6 +13,8 @@ namespace VoxelSystem
 	{
 		[SerializeField] internal TVoxelMap map;
 		internal sealed override VoxelMap Map => map;
+
+		/*
 		[Space]
 		[SerializeField] List<SharedVoxelMap> copyDestinations;
 		[SerializeField] DisplayMember copyToDestinations = new(nameof(CopyMaps));
@@ -56,5 +58,6 @@ namespace VoxelSystem
 			UnityEditor.EditorUtility.SetDirty(this);
 #endif
 		}
+		*/
 	}
 }
