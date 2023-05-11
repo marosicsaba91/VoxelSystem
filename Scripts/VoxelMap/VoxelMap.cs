@@ -17,7 +17,6 @@ namespace VoxelSystem
 	[Serializable]
 	public abstract partial class VoxelMap
 	{
-		public const string undoGuidString = " - VoxelGUID: ";
 
 		static Dictionary<string, VoxelMap> mapDictionary = new();
 		public static bool TryGetMapByGuid(string guid, out VoxelMap map)

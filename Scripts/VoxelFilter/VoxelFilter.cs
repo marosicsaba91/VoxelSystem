@@ -1,6 +1,7 @@
 ﻿using MUtility;
 using System.IO; 
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace VoxelSystem
 {
@@ -9,37 +10,36 @@ namespace VoxelSystem
 	{
 		[SerializeField, HideInInspector] ArrayVoxelMap innerMap = null;
 		[SerializeField, HideInInspector] VoxelRenderer voxelRenderer;
-		[SerializeField, HideInInspector] SharedVoxelMap connectedMapHolder = null;
+		[SerializeField, HideInInspector, FormerlySerializedAs("connectedMapHolder")] SharedVoxelMap sharedVoxelMap = null;
 
-		[SerializeField] DisplayMember sharedMap = new(nameof(ConnectedVoxelMap));
-		[SerializeField, HideInInspector] SharedVoxelMap _lastFrameConnectedMap = null;
-		[SerializeField, DisableIf(nameof(HaveConnectedMap))] DisplayMember exportVoxelMap = new(nameof(ExportVoxelMap));
+		[SerializeField] DisplayMember sharedMap = new(nameof(SharedVoxelMap));
+		[SerializeField, DisableIf(nameof(HasSharedMap))] DisplayMember exportVoxelMap = new(nameof(ExportVoxelMap));
 
-		void OnValidate() 
+		[SerializeField, HideInInspector] SharedVoxelMap _lastFrameSharedMap = null;
+
+		internal void OnValidate() 
 		{
 			voxelRenderer = GetComponent<VoxelRenderer>();
 		}
 
-		bool HaveConnectedMap => connectedMapHolder != null;
+		public bool HasSharedMap => sharedVoxelMap != null; 
 
-		public bool HasConnectedMap() => connectedMapHolder != null;
-
-		public SharedVoxelMap ConnectedVoxelMap
+		public SharedVoxelMap SharedVoxelMap
 		{
-			get => connectedMapHolder;
+			get => sharedVoxelMap;
 			set
 			{
-				if (connectedMapHolder == value)
+				if (sharedVoxelMap == value)
 					return;
-				if (value == null && connectedMapHolder != null)
+				if (value == null && sharedVoxelMap != null)
 				{
 					innerMap ??= new();
-					innerMap.SetupFrom(connectedMapHolder.Map);
-					connectedMapHolder = null; 
+					innerMap.SetupFrom(sharedVoxelMap.Map);
+					sharedVoxelMap = null; 
 				}
 				else
 				{
-					connectedMapHolder = value;
+					sharedVoxelMap = value;
 					MapChanged();
 				} 
 			}
@@ -47,10 +47,18 @@ namespace VoxelSystem
 
 		public VoxelMap GetVoxelMap()
 		{
-			if (connectedMapHolder == null)
+			if (sharedVoxelMap == null)
 				return innerMap;
 			else
-				return connectedMapHolder.Map;
+				return sharedVoxelMap.Map;
+		}
+
+		internal void SetVoxelMap(ArrayVoxelMap map)
+		{
+			voxelRenderer = GetComponent<VoxelRenderer>();
+			innerMap = map;
+			sharedVoxelMap = null;
+			innerMap.MapChangedEvent += MapChanged;
 		}
 
 		void Update() // ExecuteAlways
@@ -80,27 +88,32 @@ namespace VoxelSystem
 
 		void SubscribeToChange()
 		{
-			// Debug.Log("Subscribe");
+			if (_lastFrameSharedMap == null && sharedVoxelMap == null)
+			{
+				innerMap.MapChangedEvent -= MapChanged;
+				innerMap.MapChangedEvent += MapChanged;
+			}
 
-			if (_lastFrameConnectedMap == connectedMapHolder)
+			if (_lastFrameSharedMap == sharedVoxelMap)
 				return;
 
-			if (_lastFrameConnectedMap != null)
-				_lastFrameConnectedMap.Map.MapChangedEvent -= MapChanged;
+			if (_lastFrameSharedMap != null)
+				_lastFrameSharedMap.Map.MapChangedEvent -= MapChanged;
 			else if (innerMap != null)
 				innerMap.MapChangedEvent -= MapChanged;
 
-			if (connectedMapHolder != null)
-				connectedMapHolder.Map.MapChangedEvent += MapChanged;
+			if (sharedVoxelMap != null)
+				sharedVoxelMap.Map.MapChangedEvent += MapChanged;
 			else if (innerMap != null)
 				innerMap.MapChangedEvent += MapChanged;
-			_lastFrameConnectedMap = connectedMapHolder;
+
+			_lastFrameSharedMap = sharedVoxelMap;
 		}
 
 
 		void MapChanged()
 		{
-			if (voxelRenderer != null)
+			if (voxelRenderer != null || TryGetComponent(out voxelRenderer))
 				voxelRenderer.RegenerateMesh();
 		}
 

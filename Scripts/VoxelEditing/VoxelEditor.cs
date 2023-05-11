@@ -20,21 +20,21 @@ namespace VoxelSystem
 		[SerializeField, HideInInspector] VoxelFilter voxelFilter;
 		[SerializeField, HideInInspector] VoxelRenderer voxelRenderer;
 
-		[SerializeField, HideInInspector] internal TransformLock transformLock = new() { position = true, rotation = true, scale = true };
+		[SerializeField, HideInInspector] internal TransformLock transformLock = new();
 		[SerializeField, HideInInspector] internal VoxelAction selectedAction = VoxelAction.Attach;
 		[SerializeField, HideInInspector] internal VoxelTool selectedTool = VoxelTool.None;
 		[SerializeField, HideInInspector] internal int selectedPaletteIndex = 0;
-		[SerializeField, HideInInspector] internal BoundsInt selection = new(Vector3Int.zero, Vector3Int.zero);
+		[SerializeField, HideInInspector] internal BoundsInt selection = new(Vector3Int.zero, Vector3Int.one * -1);
 
 		public TransformLock TransformLock { get => transformLock; set => transformLock = value; }
 
 		public VoxelMap Map => voxelFilter == null ? null : voxelFilter.GetVoxelMap();
-		bool HasConnectedMap() => voxelFilter != null && voxelFilter.HasConnectedMap();
+		bool HasConnectedMap() => voxelFilter != null && voxelFilter.HasSharedMap;
 
 		public BoundsInt Selection { get => selection; set => selection = value; }
 
 		public Object MapContainer => voxelFilter == null ? null :
-			voxelFilter.HasConnectedMap() ? voxelFilter.ConnectedVoxelMap : voxelFilter;
+			voxelFilter.HasSharedMap ? voxelFilter.SharedVoxelMap : voxelFilter;
 
 		public Object EditorObject => this;
 
@@ -51,7 +51,7 @@ namespace VoxelSystem
 				selectedPaletteIndex = Mathf.Max(Mathf.Min(selectedPaletteIndex, palette.Length - 1), 0);
 		}
 
-		public string MapName => HasConnectedMap() ? voxelFilter.ConnectedVoxelMap.name : voxelFilter.name;
+		public string MapName => HasConnectedMap() ? voxelFilter.SharedVoxelMap.name : voxelFilter.name;
 		public VoxelTool SelectedTool { get => selectedTool; set => selectedTool = value; }
 		public VoxelAction SelectedAction { get => selectedAction; set => selectedAction = value; }
 
@@ -90,6 +90,9 @@ namespace VoxelSystem
 
 		void OnDrawGizmosSelected()
 		{
+			if(voxelFilter == null)
+				voxelFilter = GetComponent<VoxelFilter>();
+
 			if (Map == null)
 				return;
 
@@ -115,5 +118,6 @@ namespace VoxelSystem
 
 			Gizmos.matrix = Matrix4x4.identity;
 		}
+
 	}
 }

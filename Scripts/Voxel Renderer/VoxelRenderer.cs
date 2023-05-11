@@ -9,15 +9,13 @@ public class VoxelRenderer : MonoBehaviour
 {
 	[SerializeField, HideInInspector] VoxelFilter voxelFilter;
 
-	[SerializeField] BlockLibrary blockLibrary;
-	[SerializeField] Material material;
-	[SerializeField] VoxelPalette voxelPalette;
-	[SerializeField] bool mergeCloseEdgesOnTestMesh;
+	[SerializeField] internal BlockLibrary blockLibrary;
+	[SerializeField] internal Material material;
+	[SerializeField] internal VoxelPalette voxelPalette;
+	[SerializeField] internal bool mergeCloseEdgesOnTestMesh;
 
 	[SerializeField] Mesh mesh;
-
-	public float cursorScale;
-
+	
 	[SerializeField] DisplayMember regenerateMesh = new(nameof(RegenerateMesh));
 
 	public Matrix4x4 LocalToWorldMatrix => transform.localToWorldMatrix;
@@ -71,7 +69,7 @@ public class VoxelRenderer : MonoBehaviour
 		BlockVoxelBuilder.CalculateBlocks(voxelMap, _blockCache, mergeCloseEdgesOnTestMesh);
 
 		BlockVoxelBuilder.BuildMeshFromBlocks(blockLibrary, _blockCache, vertices, normals, uv, triangles);
-		Debug.Log("Mesh Regenerated: " + name);
+		// Debug.Log("Mesh Regenerated: " + name);
 	}
 
 	public IEnumerable<PaletteItem> GetPaletteItems() => voxelPalette.Items;

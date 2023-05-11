@@ -1,9 +1,7 @@
-﻿using MUtility;
-using System;
+﻿using MUtility; 
 using System.Collections.Generic;
 using UnityEditor;
-using UnityEngine;
-using UnityEngine.UIElements;
+using UnityEngine; 
 
 namespace VoxelSystem
 {
@@ -34,6 +32,7 @@ namespace VoxelSystem
 		protected static VoxelHit _lastHandledHit;
 
 		// Handle Helper Variables
+		public static Vector3 _clickPositionGlobal;
 		protected static Vector3 _lastHandleVector;
 		protected static GeneralDirection3D _handleDragDirection;
 		protected static int _handleSteps = 0;
@@ -59,7 +58,7 @@ namespace VoxelSystem
 				_originalMapSize = voxelEditor.Map.FullSize;
 			}
 
-			ExecutedHandles(voxelEditor, guiEvent, out bool useEvent);
+			ExecutedHandles(voxelEditor, ray, out bool useEvent);
 			if (!useEvent)
 				TryExecuteRaycast(voxelEditor, guiEvent, ray);
 
@@ -177,17 +176,17 @@ namespace VoxelSystem
 
 		// --------------------- Handles ---------------------------
 
-		void ExecutedHandles(IVoxelEditor voxelEditor, Event guiEvent, out bool useEvent)
+		void ExecutedHandles(IVoxelEditor voxelEditor, Ray ray, out bool useEvent)
 		{
 			useEvent = false;
 			foreach (VoxelHandelInfo handleInfo in GetHandeles(voxelEditor))
 			{
-				ExecuteOneHandle(voxelEditor, handleInfo, guiEvent, out bool useE);
+				ExecuteOneHandle(voxelEditor, handleInfo, ray, out bool useE);
 				useEvent |= useE;
 			}
 		}
 
-		void ExecuteOneHandle(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo, Event guiEvent, out bool useEvent)
+		void ExecuteOneHandle(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo, Ray ray, out bool useEvent)
 		{
 			VoxelMap map = voxelEditor.Map;
 			VoxelTool _tool = voxelEditor.SelectedTool;
@@ -216,7 +215,6 @@ namespace VoxelSystem
 			AdvancedHandles.HandleResult handleResult =
 				AdvancedHandles.Handle(handlePos, rotation, sizeMultiplier, capFunction, color, focused, color);
 
-
 			// Handle Click
 			if (handleResult.handleEvent is HandleEvent.LmbClick or HandleEvent.LmbDoubleClick)
 			{
@@ -235,6 +233,7 @@ namespace VoxelSystem
 					_originalSelection = voxelEditor.Selection;
 					_currentEventType = MouseEventType.Down;
 					_lastHandleVector = Vector3Int.zero;
+					_clickPositionGlobal = voxelEditor.transform.TransformPoint(handleResult.clickPosition);
 					_originalMap ??= new ArrayVoxelMap();
 					_originalMap.SetupFrom(map);
 					_originalMapSize = map.FullSize;
@@ -243,9 +242,11 @@ namespace VoxelSystem
 						voxelEditor.Map.MapChanged();
 					break;
 
-				case HandleEvent.LmbDrag: // DRAG 
+				case HandleEvent.LmbDrag: // DRAG
+
+					_handleSteps = GetDistance(_clickPositionGlobal, ray, directionVector); 
+
 					_currentEventType = MouseEventType.Drag;
-					_handleSteps = (int)Vector3.Dot(handleResult.IsDragged, directionVector);
 					Vector3Int vec = direction.ToVectorInt() * _handleSteps;
 					bool changed = _lastHandleVector != vec;
 					_handleDragDirection = direction;
@@ -257,7 +258,7 @@ namespace VoxelSystem
 
 				case HandleEvent.LmbRelease: // RELEASE 
 					_currentEventType = MouseEventType.Up;
-					_handleSteps = (int)Vector3.Dot(handleResult.IsDragged, directionVector);
+					_handleSteps = GetDistance(_clickPositionGlobal, ray, directionVector);
 					if (OnHandleUp(voxelEditor, handleInfo, _handleSteps))
 						voxelEditor.Map.MapChanged();
 					_handleSteps = 0;
@@ -277,6 +278,18 @@ namespace VoxelSystem
 				Handles.Label(handlePos + Vector3.up * _standardSpacing, handleInfo.text, textStyle);
 			}
 		}
+
+		static int GetDistance(Vector3 startPoint, Ray ray, Vector3 directionVector)
+		{
+			Vector3 planeNormal = directionVector.GetPerpendicular(); 
+			Plane plane = new(planeNormal, startPoint);
+			plane.Raycast(ray, out float enter);
+			Vector3 intersect = ray.GetPoint(enter);
+			Vector3 cursorMovement = intersect - startPoint;
+			float distance = Vector3.Dot(cursorMovement, directionVector); 
+			return Mathf.RoundToInt(distance);
+		}
+
 		protected void Reset(IVoxelEditor voxelEditor)
 		{
 			voxelEditor.Map.SetupFrom(_originalMap);

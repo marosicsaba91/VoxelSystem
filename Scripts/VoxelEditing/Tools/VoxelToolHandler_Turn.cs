@@ -65,7 +65,7 @@ namespace VoxelSystem
 				voxelEditor.Turn(axis, side.IsPositive() ^ dir.IsPositive());
 			}
 
-			return true;  // TODO:  NEM TRUE FELTÉTLEN
+			return true;
 		}
 		static void TurnSelection(IVoxelEditor editor, Axis3D axis, bool leftHandPositive)
 		{
@@ -77,6 +77,7 @@ namespace VoxelSystem
 			map.ClearRange(selection);
 			selection = new BoundsInt(selection.position, selMap.FullSize);
 			map.CopyFrom(selMap, Vector3Int.zero, selection.position, selection.size, VoxelAction.Overwrite);
+			selection.Clamp(Vector3Int.zero, map.FullSize);
 			editor.Selection = selection;
 		}
 

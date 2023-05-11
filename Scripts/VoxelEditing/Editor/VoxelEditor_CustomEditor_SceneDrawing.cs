@@ -1,49 +1,38 @@
 #if UNITY_EDITOR
 using UnityEditor;
-using UnityEditorInternal.VR;
 using UnityEngine;
 
 namespace VoxelSystem
 {
 	partial class VoxelEditor_CustomEditor : Editor
 	{
-		static string _lastUndoGroupName = string.Empty;
 		static VoxelEditor_CustomEditor()
 		{
 			Undo.undoRedoPerformed += UndoRedoCalled;
-			Undo.postprocessModifications += PostProcessModifications;
 		}
-
-		private static UndoPropertyModification[] PostProcessModifications(UndoPropertyModification[] modifications)
-		{
-			_lastUndoGroupName = Undo.GetCurrentGroupName();
-			return modifications;
-		}
-
 
 		static void UndoRedoCalled()
 		{
-			string groupName = _lastUndoGroupName;
-			_lastUndoGroupName = Undo.GetCurrentGroupName();
+			foreach (Object obj in Selection.objects)
+			{
+				if (obj is not GameObject go) continue;
+				if (!go.TryGetComponent(out VoxelEditor editor)) continue;
+				if (editor.MapContainer == null) continue;
+				editor.Map?.UndoRedoEvenInvokedOnMap();
+				return;
+			}
 
-			Debug.Log($"UndoRedoCalled: {groupName}");
-			int index = groupName.IndexOf(VoxelMap.undoGuidString);
-			if (index < 0) return;
-
-			string guidString = groupName[(index + VoxelMap.undoGuidString.Length)..];
-			if (VoxelMap.TryGetMapByGuid(guidString, out VoxelMap map))
-				map.UndoRedoEvenInvokedOnMap();
 		}
 
 		// ------------------------------------------------------
 
-		VoxelEditor GetTarget() 
+		VoxelEditor GetTarget()
 		{
 			// Normal target getter not working properly
 
 			if (Selection.objects.Length != 1)
 				return null;
-			 
+
 			if (Selection.objects[0] is GameObject selectedGameObj)
 			{
 				return selectedGameObj.GetComponent<VoxelEditor>();
@@ -52,22 +41,24 @@ namespace VoxelSystem
 
 		}
 
+		bool _enableEdit;
+
+		void OnDisable()
+		{
+			Tools.hidden = false;
+		}
+
 		void OnSceneGUI()
 		{
 			Event guiEvent = Event.current;
 
 			VoxelEditor editor = GetTarget();
 
-			bool enableEdit =
-				!Equals(editor, null) &&
-				editor != null &&
-				editor.EnableEdit &&
-				!Equals(editor.Map, null);
+			UpdateEnableEdit(editor);
 
+			Tools.hidden = _enableEdit && editor.selectedTool != VoxelTool.None;
 
-			Tools.hidden = enableEdit;
-
-			if (!enableEdit)
+			if (!_enableEdit)
 				return;
 
 			// ------------------------------------------------------
@@ -79,6 +70,11 @@ namespace VoxelSystem
 
 		}
 
+		void UpdateEnableEdit(VoxelEditor editor) => _enableEdit =
+						!Equals(editor, null) &&
+						editor != null &&
+						editor.EnableEdit &&
+						!Equals(editor.Map, null);
 	}
 }
 

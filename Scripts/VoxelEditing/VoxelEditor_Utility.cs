@@ -1,6 +1,5 @@
 ﻿using MUtility;
-using System;
-using System.Linq;
+using System; 
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -21,13 +20,6 @@ namespace VoxelSystem
 #if UNITY_EDITOR
 			Object[] objects = editor.Objects(record);
 
-			// Debug.Log($"RecordForUndo: {string.Join(", ", objects.Select(o => o.name + o.GetType().ToString()))}");	
-			if (record.HasFlag(RecordType.Map))
-			{
-				string guid = editor.Map.UniqueID;
-				message += VoxelMap.undoGuidString + guid;
-			}
-
 			UnityEditor.Undo.RecordObjects(objects, message);
 
 			foreach (Object obj in objects)
@@ -35,10 +27,8 @@ namespace VoxelSystem
 				if (editor.MapContainer is ScriptableObject so)
 					UnityEditor.EditorUtility.SetDirty(obj);
 			}
-
 #endif
 		}
-
 
 
 		static Object[] Objects(this IVoxelEditor editor, RecordType record)
@@ -115,5 +105,50 @@ namespace VoxelSystem
 
 		public static void Deselect(this IVoxelEditor editor) =>
 			editor.Selection = new BoundsInt(Vector3Int.zero, Vector3Int.one * -1);
+
+		public static void SeparateSelectionToGameObject(this IVoxelEditor voxelEditor)
+		{
+			Transform original = voxelEditor.transform;
+			string name = $"{original.name} - Separated - {voxelEditor.Selection.min}{voxelEditor.Selection.max}";
+			GameObject newGO = new(name);
+			newGO.transform.SetParent(original.parent);
+			newGO.transform.SetSiblingIndex(original.GetSiblingIndex() + 1);
+
+			newGO.transform.position = original.TransformPoint(voxelEditor.Selection.min);
+			newGO.transform.localRotation = original.rotation;
+			newGO.transform.localScale = original.localScale;
+
+			VoxelFilter newMapFilter = newGO.AddComponent<VoxelFilter>();
+			ArrayVoxelMap map = voxelEditor.SeparateSelection();
+			newMapFilter.SetVoxelMap(map);
+			newGO.AddComponent<VoxelEditor>();
+
+			if(!newGO.TryGetComponent(out VoxelRenderer renderer))
+				renderer = newGO.AddComponent<VoxelRenderer>();
+
+			if (original.TryGetComponent(out VoxelRenderer originalRenderer))
+			{
+				renderer.blockLibrary = originalRenderer.blockLibrary;
+				renderer.material = originalRenderer.material;
+				renderer.voxelPalette = originalRenderer.voxelPalette;
+				renderer.mergeCloseEdgesOnTestMesh = originalRenderer.mergeCloseEdgesOnTestMesh;
+				renderer.RegenerateMesh();
+			}
+
+#if UNITY_EDITOR
+			UnityEditor.Undo.RegisterCreatedObjectUndo(newGO, "VoxelMap Separated"); 
+#endif
+		}
+
+		public static void MergeInto(this IVoxelEditor source, IVoxelEditor destination)
+		{
+			RecordForUndo(destination, "Merge Voxel Maps", RecordType.Map);
+			Vector3 sourcePosition = source.transform.position;
+			Vector3 offset = destination.transform.transform.InverseTransformPoint(sourcePosition);
+			Vector3Int offsetInt = offset.RoundToInt();
+
+			destination.Map.CopyFrom(source.Map, Vector3Int.zero, offsetInt, source.Map.FullSize);
+			destination.Map.MapChanged();
+		}
 	}
 }

@@ -4,7 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
-using UnityEngine; 
+using UnityEditorInternal.VR;
+using UnityEngine;
 
 namespace VoxelSystem
 {
@@ -16,7 +17,7 @@ namespace VoxelSystem
 		SerializedProperty selectedPaletteIndexProperty;
 		SerializedProperty transformLockProperty;
 
-		static VoxelEditorSettings iconSettings; 
+		static VoxelEditorSettings iconSettings;
 		static Dictionary<VoxelAction, GUIContent> _actionToContent = new();
 		static Dictionary<(VoxelTool, VoxelAction), GUIContent> _toolToContent = new();
 
@@ -135,6 +136,9 @@ namespace VoxelSystem
 			VoxelTool selectedTool = voxelEditor.selectedTool;
 			TransformLock transformLock = voxelEditor.transformLock;
 
+			UpdateEnableEdit(voxelEditor);
+			GUI.enabled = _enableEdit;
+
 			if (voxelEditor.Map == null)
 			{
 				EditorGUILayout.HelpBox("No Map to Edit. Use VoxelFilter", UnityEditor.MessageType.Warning);
@@ -192,17 +196,17 @@ namespace VoxelSystem
 			}
 			position.x += width + _spacing;
 			text = "Setup from Clipboard";
-			GUI.enabled = VoxelClipboard.HaveContent;
+			GUI.enabled = VoxelClipboard.HaveContent && _enableEdit;
 			if (GUI.Button(position, text))
 			{
 				voxelEditor.RecordForUndo("Selection Cleared", RecordType.Map | RecordType.Transform | RecordType.Editor);
 				voxelEditor.Map.SetupFrom(VoxelClipboard.ClipboardMap);
-				if(voxelEditor.HasSelection())
+				if (voxelEditor.HasSelection())
 					voxelEditor.transform.position += voxelEditor.Selection.min;
 				voxelEditor.Deselect();
 				change |= true;
 			}
-			GUI.enabled = true;
+			GUI.enabled = _enableEdit;
 
 			if (change)
 				voxelEditor.Map.MapChanged();
@@ -224,31 +228,31 @@ namespace VoxelSystem
 			position.height = height;
 
 			Vector3Int fullMapSize = voxelEditor.Map.FullSize;
-			GUI.enabled = voxelEditor.HasSelection();
+			GUI.enabled = _enableEdit && voxelEditor.HasSelection();
 			if (GUI.Button(position, " De-Select"))
 			{
 				voxelEditor.RecordForUndo("Remove Selection", RecordType.Editor);
 				voxelEditor.Deselect();
 			}
 			position.x += width + _spacing;
-			GUI.enabled = voxelEditor.Selection.size != fullMapSize;
+			GUI.enabled = _enableEdit && voxelEditor.Selection.size != fullMapSize;
 			if (GUI.Button(position, " SelectAll"))
 			{
 				voxelEditor.RecordForUndo("Remove Selection", RecordType.Editor);
 				voxelEditor.Selection = new BoundsInt(Vector3Int.zero, fullMapSize);
 			}
-			GUI.enabled = true;
+			GUI.enabled = _enableEdit;
 
 
 			position.x -= width + _spacing;
 			position.y += height + _spacing;
-			GUI.enabled = voxelEditor.HasSelection();
+			GUI.enabled = _enableEdit && voxelEditor.HasSelection();
 			if (GUI.Button(position, " Copy"))
 			{
 				voxelEditor.Copy();
 			}
 			position.x += width + _spacing;
-			GUI.enabled = VoxelClipboard.HaveContent;
+			GUI.enabled = _enableEdit && VoxelClipboard.HaveContent;
 			if (GUI.Button(position, " Paste"))
 			{
 				voxelEditor.RecordForUndo("Voxel Selection Pasted", RecordType.Map | RecordType.Editor);
@@ -256,24 +260,29 @@ namespace VoxelSystem
 				change = true;
 			}
 
-			GUI.enabled = true;
 			position.y += height + _spacing;
 			position.x -= width + _spacing;
-			GUI.color = Color.yellow;
-			if (GUI.Button(position, "Merge in Children"))
+
+			Transform upperSibling = voxelEditor.transform.GetUpperSibling();
+			VoxelEditor upperVoxelEditor = upperSibling == null ? null : upperSibling.GetComponent<VoxelEditor>();
+			string name = upperSibling == null ? "-" : upperSibling.name;
+			GUI.enabled = upperVoxelEditor != null;
+			string toolTip = upperVoxelEditor != null
+				? $"Works best if the rotation and scale is the same.\nNeed to be inside the destination map's bounds."
+				: "Destination need to have a VoxelEditor component";
+			GUIContent content = new GUIContent($"Merge Up: {name}", toolTip);
+			if (GUI.Button(position, content))
 			{
-				// voxelEditor.RecordForUndo("Voxel Selection Pasted", RecordType.Map);
-				Debug.Log("TODO");
+				voxelEditor.MergeInto(upperVoxelEditor); 
 			}
 			position.x += width + _spacing;
-			GUI.enabled = voxelEditor.HasSelection();
+			GUI.enabled = _enableEdit && voxelEditor.HasSelection();
 			if (GUI.Button(position, "Separate Selection"))
 			{
-				voxelEditor.RecordForUndo("Voxel Selection Copied", RecordType.Editor);
-				Debug.Log("TODO");
+				voxelEditor.SeparateSelectionToGameObject();
+				change = true;
 			}
-			GUI.color = Color.white;
-			GUI.enabled = true;
+			GUI.enabled = _enableEdit;
 
 			if (change)
 				voxelEditor.Map.MapChanged();
@@ -302,7 +311,7 @@ namespace VoxelSystem
 			}
 
 			GUI.color = Color.white;
-			GUI.enabled = voxelEditor.EnableEdit && tLock.rotation && tLock.scale;
+			GUI.enabled = _enableEdit && tLock.rotation && tLock.scale;
 			rect.width = width * 3 + 2 * _spacing;
 			GUIContent content = new("Apply Transform to Map", "Apply Transform rotation & scale to the Map (Need to lock rotation and scale)");
 			if (GUI.Button(rect, content))
@@ -313,7 +322,7 @@ namespace VoxelSystem
 				map.ApplyScale(transform);
 				map.ApplyRotation(transform);
 			}
-			GUI.enabled = voxelEditor.EnableEdit;
+			GUI.enabled = _enableEdit;
 
 
 			bool DrawOneLock(bool b, string text)
@@ -346,18 +355,17 @@ namespace VoxelSystem
 
 		void DrawVoxelTool(IVoxelEditor voxelEditor, VoxelTool selectedTool, VoxelAction selectedAction, Rect rect, VoxelTool drawnTool)
 		{
-			GUIContent content = _toolToContent[(drawnTool, selectedAction)]; 
-			GUIStyle style = selectedTool == drawnTool 
-				? GetSelectedButtonStyle(selectedAction, selectedTool.GetHandler().GetSupportedActions(voxelEditor)) 
+			GUIContent content = _toolToContent[(drawnTool, selectedAction)];
+			GUIStyle style = selectedTool == drawnTool
+				? GetSelectedButtonStyle(selectedAction, selectedTool.GetHandler().GetSupportedActions(voxelEditor))
 				: notSelectedButtonStyle;
 
 			if (GUI.Button(rect, content, style))
 			{
-				Debug.Log(voxelEditor);
 				selectedToolProperty.enumValueIndex = selectedTool == drawnTool
 					? (int)VoxelTool.None
 					: (int)drawnTool;
-			} 
+			}
 		}
 
 
@@ -373,16 +381,13 @@ namespace VoxelSystem
 				? new VoxelAction[0]
 				: selectedTool.GetHandler().GetSupportedActions(voxelEditor);
 
-			// if(!supportedActions.Contains(selectedAction))
-			//	 selectedAction = supportedActions.FirstOrDefault();
-
 			foreach (VoxelAction action in VoxelEditor_EnumHelper._allVoxelActions)
 			{
 				GUIContent content = _actionToContent[action];
-				bool isEnabled = supportedActions.Contains(action);
+				bool isActionEnabled = supportedActions.Contains(action);
 				bool isSelected = selectedAction == action;
 
-				GUI.enabled = isEnabled;
+				GUI.enabled = _enableEdit && isActionEnabled;
 
 				GUIStyle style = !isSelected ? notSelectedButtonStyle :
 					action == VoxelAction.Attach ? selectedButtonAttachStyle :
@@ -397,7 +402,7 @@ namespace VoxelSystem
 
 			}
 
-			GUI.enabled = true;
+			GUI.enabled = _enableEdit;
 			GUI.backgroundColor = Color.white;
 		}
 
@@ -431,7 +436,7 @@ namespace VoxelSystem
 			EditorGUIUtility.labelWidth = labelWidth;
 		}
 	}
-	 
+
 }
 
 #endif
