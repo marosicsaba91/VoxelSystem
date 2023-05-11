@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace VoxelSystem
 {
-	public abstract class VoxelBuilder : ScriptableObject
+	public static class VoxelBuilder
 	{
 		static readonly List<Vector3> _vertices = new();
 		static readonly List<Vector3> _normals = new();
@@ -11,23 +11,13 @@ namespace VoxelSystem
 		static readonly List<int> _triangles = new();
 
 		internal delegate void BuilderFunction(
-			ArrayVoxelMap voxelMap,
-			List<Vector3> vertices,
-			List<Vector3> normals,
-			List<Vector2> uv,
-			List<int> triangles);
-
-		internal delegate void OctBuilderFunction(
 			VoxelMap voxelMap,
 			List<Vector3> vertices,
 			List<Vector3> normals,
 			List<Vector2> uv,
 			List<int> triangles);
 
-		public Mesh VoxelMapToMesh(ArrayVoxelMap map) => VoxelMapToMesh(map, BuildMesh);
-		public Mesh VoxelMapToMesh(VoxelMap map) => VoxelMapToMesh(map, BuildMesh);
-
-		internal static Mesh VoxelMapToMesh(VoxelMap map, OctBuilderFunction builderFunction)
+		internal static Mesh VoxelMapToMesh(VoxelMap map, BuilderFunction builderFunction)
 		{
 			_vertices.Clear();
 			_normals.Clear();
@@ -46,8 +36,5 @@ namespace VoxelSystem
 
 			return mesh;
 		}
-
-		protected abstract void BuildMesh(VoxelMap voxelMap, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles);
-		public virtual void DrawGizmos(ArrayVoxelMap map) { }
 	}
 }

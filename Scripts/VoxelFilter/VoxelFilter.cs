@@ -124,7 +124,7 @@ namespace VoxelSystem
 			string path = UnityEditor.EditorUtility.SaveFilePanelInProject("Save Voxel Map", "VoxelMap", "asset", "Save Voxel Map");
 			if (path.Length != 0)
 			{
-				SharedArrayVoxel newMap = ScriptableObject.CreateInstance<SharedArrayVoxel>();
+				SharedArrayVoxelMap newMap = ScriptableObject.CreateInstance<SharedArrayVoxelMap>();
 
 				newMap.map ??= new();
 				newMap.map.SetupFrom(innerMap);

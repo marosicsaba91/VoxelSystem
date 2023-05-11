@@ -4,10 +4,8 @@ using MUtility;
 
 namespace VoxelSystem
 {
-	[CreateAssetMenu(fileName = "DefaultVoxelBuilder", menuName = "VoxelSystem/DefaultVoxelBuilder", order = 3)]
-	public class VoxelBuilderDefault : VoxelBuilder
+	public static class VoxelBuilderDefault
 	{
-		protected override void BuildMesh(VoxelMap map, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles) => BuildTiledMesh(map, vertices, normals, uv, triangles);
 
 		public static void BuildTiledMesh(VoxelMap map, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles)
 		{
@@ -59,12 +57,12 @@ namespace VoxelSystem
 							neighbourY = dirVecI.y + y;
 							neighbourZ = dirVecI.z + z;
 
-							bool neighBourOutOfBounds =
+							bool neighbourOutOfBounds =
 								neighbourX < 0 || neighbourY < 0 || neighbourZ < 0 ||
 								neighbourX >= w || neighbourY >= h || neighbourZ >= d;
 
 
-							if (!neighBourOutOfBounds)
+							if (!neighbourOutOfBounds)
 								if (map.GetVoxel(neighbourX, neighbourY, neighbourZ).IsFilled())
 									continue;
 
@@ -105,7 +103,7 @@ namespace VoxelSystem
 		static TextureQuad[] GenerateTextureCoordinateArray(int textureSize = 16)
 		{
 			// Assume a 16x16 texture atlas
-			TextureQuad[] result = new TextureQuad[textureSize * textureSize];
+			var result = new TextureQuad[textureSize * textureSize];
 
 			// assumption based on, well, because I can
 			for (int i = 0; i < textureSize * textureSize; i++)
@@ -115,10 +113,10 @@ namespace VoxelSystem
 				int y = i % textureSize;
 
 				// Create each Texture coordinate for a quad of 1/16x1/16 dimensions
-				Vector2 tl = new Vector2(x / 16f, y / 16f);
-				Vector2 tr = new Vector2((x + 1) / 16f, y / 16f);
-				Vector2 bl = new Vector2(x / 16f, (y + 1) / 16f);
-				Vector2 br = new Vector2((x + 1) / 16f, (y + 1) / 16f);
+				Vector2 tl = new (x / 16f, y / 16f);
+				Vector2 tr = new ((x + 1) / 16f, y / 16f);
+				Vector2 bl = new (x / 16f, (y + 1) / 16f);
+				Vector2 br = new ((x + 1) / 16f, (y + 1) / 16f);
 
 				// Add the texture quad to the dictionary
 				result[i] = new TextureQuad(tl, tr, bl, br);
