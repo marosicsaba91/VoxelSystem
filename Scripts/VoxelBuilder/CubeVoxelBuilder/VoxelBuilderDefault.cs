@@ -6,7 +6,6 @@ namespace VoxelSystem
 {
 	public static class VoxelBuilderDefault
 	{
-
 		public static void BuildTiledMesh(VoxelMap map, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles)
 		{
 			int w = map.FullSize.x;

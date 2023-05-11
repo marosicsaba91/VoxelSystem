@@ -5,7 +5,7 @@ using VoxelSystem;
 
 namespace VoxelSystemEditor
 {
-	[CustomEditor(typeof(BlockLibrary))]
+	[CustomEditor(typeof(BlockLibraryGenerator))]
 	public class BlockLibraryEditor : UnityEditor.Editor
 	{
 		public override void OnInspectorGUI() => base.OnInspectorGUI();
@@ -22,7 +22,7 @@ namespace VoxelSystemEditor
 			if (Event.current.type != EventType.Repaint)
 				return;
 
-			BlockLibrary blockLibrary = (BlockLibrary)target;
+			BlockLibraryGenerator blockLibrary = (BlockLibraryGenerator)target;
 			if (blockLibrary == null || !blockLibrary.isActiveAndEnabled)
 			{
 				SceneView.duringSceneGui -= Repaint;

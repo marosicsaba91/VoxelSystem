@@ -31,7 +31,7 @@ namespace VoxelSystem
 		float testDistance = 0;
 
 		[FormerlySerializedAs("presentationObjects2")][SerializeField] TransformDirectory transformDictionary = new();
-		[SerializeField] BlockLibrary library;
+		[SerializeField] BlockLibraryGenerator library;
 
 		[SerializeField] List<MeshInfo> meshInfos;
 
@@ -39,7 +39,7 @@ namespace VoxelSystem
 
 		void OnValidate()
 		{
-			library = GetComponentInParent<BlockLibrary>();
+			library = GetComponentInParent<BlockLibraryGenerator>();
 			if (!blockType.HaveAxis())
 				axis = default;
 		}

@@ -21,9 +21,6 @@ namespace VoxelSystem
 	class BlockVisualizer : MonoBehaviour
 	{
 		[SerializeField] BlockDrawingSettings drawingSettings = new();
-		[SerializeField] VoxelBlockLibrary blockLibrary = null;
-
-		[SerializeField] bool mergeCloseEdges = true;
 		[SerializeField] int randomSeed = 0;
 
 
