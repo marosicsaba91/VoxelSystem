@@ -7,7 +7,7 @@ using UnityEngine;
 namespace VoxelSystem
 {
 	[CreateAssetMenu(menuName = "Voxel System/Block Library")]
-	public class VoxelBlockLibrary : ScriptableObject, IBlockLibrary
+	public class VoxelBlockLibrary : ScriptableObject
 	{
 		[Header("Generated Data")]
 		// CACHED DATA - GENERATED
@@ -16,7 +16,7 @@ namespace VoxelSystem
 
 		Dictionary<BlockKey, CustomMesh> _meshCache = new();
 
-		public bool TryGetMesh(Block block, out CustomMesh mesh, BenchmarkTimer benchmarkTimer = null)
+		public bool TryGetMesh(Block block, out CustomMesh mesh)
 		{
 			BlockType blockType = block.blockType;
 			Axis3D axis = block.axis;
@@ -25,11 +25,9 @@ namespace VoxelSystem
 
 			if (_meshCache.IsNullOrEmpty())
 			{
-				benchmarkTimer?.StartModule("Building Mesh Cache");
 				_meshCache = new Dictionary<BlockKey, CustomMesh>();
 				for (int i = 0; i < keys.Count; i++)
 					_meshCache.Add(keys[i], meshes[i]);
-				benchmarkTimer?.StartModule("Search Mesh");
 			}
 
 			return _meshCache.TryGetValue(blockKey, out mesh);

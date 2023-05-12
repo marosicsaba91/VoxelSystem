@@ -13,12 +13,12 @@ namespace VoxelSystem
 		public bool scale;
 	}
 
-	[RequireComponent(typeof(VoxelFilter), typeof(VoxelRenderer))]
+	[RequireComponent(typeof(VoxelFilter), typeof(BlockMeshGenerator))]
 	[ExecuteAlways]
 	class VoxelEditor : MonoBehaviour, IVoxelEditor
 	{
 		[SerializeField, HideInInspector] VoxelFilter voxelFilter;
-		[SerializeField, HideInInspector] VoxelRenderer voxelRenderer;
+		[SerializeField, HideInInspector] BlockMeshGenerator voxelRenderer;
 
 		[SerializeField, HideInInspector] internal TransformLock transformLock = new();
 		[SerializeField, HideInInspector] internal VoxelAction selectedAction = VoxelAction.Attach;
@@ -43,7 +43,7 @@ namespace VoxelSystem
 		private void OnValidate()
 		{
 			voxelFilter = GetComponent<VoxelFilter>();
-			voxelRenderer = GetComponent<VoxelRenderer>();
+			voxelRenderer = GetComponent<BlockMeshGenerator>();
 			VoxelPalette palette = VoxelPalette;
 			if (palette == null)
 				selectedPaletteIndex = 0;

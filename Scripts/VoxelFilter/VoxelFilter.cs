@@ -9,7 +9,7 @@ namespace VoxelSystem
 	class VoxelFilter : MonoBehaviour
 	{
 		[SerializeField, HideInInspector] ArrayVoxelMap innerMap = null;
-		[SerializeField, HideInInspector] VoxelRenderer voxelRenderer;
+		[SerializeField, HideInInspector] BlockMeshGenerator voxelRenderer;
 		[SerializeField, HideInInspector, FormerlySerializedAs("connectedMapHolder")] SharedVoxelMap sharedVoxelMap = null;
 
 		[SerializeField] DisplayMember sharedMap = new(nameof(SharedVoxelMap));
@@ -19,7 +19,7 @@ namespace VoxelSystem
 
 		internal void OnValidate() 
 		{
-			voxelRenderer = GetComponent<VoxelRenderer>();
+			voxelRenderer = GetComponent<BlockMeshGenerator>();
 		}
 
 		public bool HasSharedMap => sharedVoxelMap != null; 
@@ -55,7 +55,7 @@ namespace VoxelSystem
 
 		internal void SetVoxelMap(ArrayVoxelMap map)
 		{
-			voxelRenderer = GetComponent<VoxelRenderer>();
+			voxelRenderer = GetComponent<BlockMeshGenerator>();
 			innerMap = map;
 			sharedVoxelMap = null;
 			innerMap.MapChangedEvent += MapChanged;

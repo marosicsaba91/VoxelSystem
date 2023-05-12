@@ -1,0 +1,27 @@
+Raycast Problems 
+
+
+------ PALETTE SUPPORT -------
+
+VoxelRenderer -> VoxelMeshGenerator
+	Meshes are stored in Mesh files
+	
+Block Generator update
+	Only Full voxels ar tested
+	Only One Color per voxel
+
+Unify CustomMesh & SerialzableMesh ????
+
+
+------ NEW TOOLS -------
+
+Face Tool
+Brush Tool
+Flood Fill
+
+------ MULTIPLE MESH RENDERER -------
+	
+	Adavnced Change Event (Get the parts of map that are changed.)
+	
+
+------ BETTER BLOCK Library & LibraryEditor SUPORT -------

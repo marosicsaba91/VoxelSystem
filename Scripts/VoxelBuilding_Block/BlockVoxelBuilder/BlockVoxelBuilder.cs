@@ -8,25 +8,24 @@ namespace VoxelSystem
 
 	public static class BlockVoxelBuilder
 	{
-		internal static void BuildMeshFromBlocks(IBlockLibrary blockLibrary, List<Block> blocksList,
+		internal static void BuildMeshFromBlocks(VoxelBlockLibrary blockLibrary, List<Block> blocksList,
 			List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles)
 		{
-			BenchmarkTimer timer = new("Mesh Building");
+			//BenchmarkTimer timer = new("Mesh Building");
 			foreach (Block block in blocksList)
 			{
-				timer.StartModule("Search Mesh");
-				if (!blockLibrary.TryGetMesh(block, out CustomMesh mesh, timer))
+				//timer.StartModule("Search Mesh");
+				if (!blockLibrary.TryGetMesh(block, out CustomMesh mesh))
 					continue;
 				Vector3 offset = block.Center;
-				timer.StartModule("Add Vertices");
+				//timer.StartModule("Add Vertices");
 				vertices.AddRange(mesh.vertices.Select(v => v + offset));
 				normals.AddRange(mesh.normals);
 				uv.AddRange(mesh.uv);
-				timer.StartModule("Add Triangles");
+				//timer.StartModule("Add Triangles");
 				triangles.AddRange(mesh.triangles.Select(t => t + vertices.Count - mesh.vertices.Length));
 			}
-			timer.Stop();
-			// Debug.Log(timer);
+			//timer.Stop();
 		}
 
 		internal static void CalculateBlocks(VoxelMap voxelMap, int i, List<Block> blocks, bool mergeCloseEdges)

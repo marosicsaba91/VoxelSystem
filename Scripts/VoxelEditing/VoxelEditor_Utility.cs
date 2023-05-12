@@ -123,10 +123,10 @@ namespace VoxelSystem
 			newMapFilter.SetVoxelMap(map);
 			newGO.AddComponent<VoxelEditor>();
 
-			if(!newGO.TryGetComponent(out VoxelRenderer renderer))
-				renderer = newGO.AddComponent<VoxelRenderer>();
+			if(!newGO.TryGetComponent(out BlockMeshGenerator renderer))
+				renderer = newGO.AddComponent<BlockMeshGenerator>();
 
-			if (original.TryGetComponent(out VoxelRenderer originalRenderer))
+			if (original.TryGetComponent(out BlockMeshGenerator originalRenderer))
 			{
 				renderer.voxelPalette = originalRenderer.voxelPalette;
 				renderer.mergeCloseEdgesOnTestMesh = originalRenderer.mergeCloseEdgesOnTestMesh;
