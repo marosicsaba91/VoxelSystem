@@ -2,6 +2,6 @@ using UnityEngine;
 
 namespace VoxelSystem
 {
-	[CreateAssetMenu(fileName = "ArrayVoxelMap", menuName = "VoxelSystem/ArrayVoxelMap", order = 1)]
+	[CreateAssetMenu(menuName = "Voxel System/Array Voxel Map", order = 1)]
 	public class SharedArrayVoxelMap : SharedVoxelMap<ArrayVoxelMap> { }
 }

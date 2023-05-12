@@ -7,36 +7,22 @@ using VoxelSystem;
 [RequireComponent(typeof(VoxelFilter))]
 public class VoxelRenderer : MonoBehaviour
 {
-	[SerializeField, HideInInspector] VoxelFilter voxelFilter;
-
-	[SerializeField] internal VoxelBlockLibrary blockLibrary;
-	[SerializeField] internal Material material;
+	[SerializeField, HideInInspector] VoxelFilter voxelFilter;	
 	[SerializeField] internal VoxelPalette voxelPalette;
 	[SerializeField] internal bool mergeCloseEdgesOnTestMesh;
+	[SerializeField] bool doBenchmark;
 
-	[SerializeField] Mesh mesh;
+	[SerializeField] List<SerializableMesh> serializableMeshes = new();
 	
-	[SerializeField] DisplayMember regenerateMesh = new(nameof(RegenerateMesh));
+	[SerializeField] DisplayMember regenerateMesh = new(nameof(RegenerateMeshes));
 
 	public Matrix4x4 LocalToWorldMatrix => transform.localToWorldMatrix;
-	public Material Material => material;
-
-	public Mesh Mesh
-	{
-		get
-		{
-			if (mesh == null)
-				RegenerateMesh();
-			return mesh;
-		}
-	}
-
+	 
 	public VoxelMap Map => voxelFilter == null ? null : voxelFilter.GetVoxelMap();
 
 	void OnValidate()
 	{
 		voxelFilter = GetComponent<VoxelFilter>();
-		mesh = null;
 	}
 
 	void LateUpdate()
@@ -44,37 +30,81 @@ public class VoxelRenderer : MonoBehaviour
 		RenderMesh();
 	}
 
+	BenchmarkTimer _timer = new BenchmarkTimer();
+	internal VoxelPalette VoxelPalette => voxelPalette;
+
 	void RenderMesh()
 	{
-		mesh = Mesh;
-		if (mesh == null) return;
-		Graphics.DrawMesh(mesh, transform.localToWorldMatrix, material, gameObject.layer);
+		if (voxelPalette == null)
+			return;
+
+
+		if(voxelPalette.Length != serializableMeshes.Count)
+			RegenerateMeshes();
+
+
+		int i = 0;
+		foreach(VoxelPaletteItem paletteItem in voxelPalette.Items)
+		{
+			SerializableMesh sMesh = serializableMeshes[i];
+
+			StartBenchmarkModul("Create Mesh from SerializableMesh" , i);
+			Mesh mesh = sMesh.GetMesh();
+
+			StartBenchmarkModul("Render Mesh" , i);
+			Graphics.DrawMesh(mesh, transform.localToWorldMatrix, paletteItem.material, gameObject.layer);
+			i++;
+		}
+
+		if (doBenchmark)
+		{
+			if(_timer.GetTotalTotalMilliseconds() > 0)
+				Debug.Log(_timer.ToString());
+			_timer.Clear();
+		}
 	}
 
-	internal void RegenerateMesh()
+	internal void RegenerateMeshes()
 	{
+		int paletteLength = voxelPalette.Length;
+		while (serializableMeshes.Count < paletteLength)
+			serializableMeshes.Add(new SerializableMesh());
+		while (serializableMeshes.Count > paletteLength)
+			serializableMeshes.RemoveAt(serializableMeshes.Count - 1);
+
 		VoxelMap map = Map;
 		if (map == null) return;
-		if (blockLibrary == null) return;
+		 
+		int i = 0;
+		foreach (VoxelPaletteItem paletteItem in voxelPalette.Items)
+		{
+			SerializableMesh sMesh = serializableMeshes[i];
+			sMesh.GenerateMesh(map, i, GenerateMesh);
+			i++;
+		}
 
-		mesh = VoxelBuilder.VoxelMapToMesh(map, GenerateMesh);
+		if (doBenchmark)
+			_timer.Stop();
 	}
+
 
 	// Mesh Generation
-
 	static readonly List<Block> _blockCache = new();
-	void GenerateMesh(VoxelMap voxelMap, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles)
-	{
-		if (voxelMap == null) return;
-		BlockVoxelBuilder.CalculateBlocks(voxelMap, _blockCache, mergeCloseEdgesOnTestMesh);
 
-		BlockVoxelBuilder.BuildMeshFromBlocks(blockLibrary, _blockCache, vertices, normals, uv, triangles);
-		// Debug.Log("Mesh Regenerated: " + name);
+	void GenerateMesh(VoxelMap voxelMap, int i, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles)
+	{
+		StartBenchmarkModul("Generate Blocks basedOnMaps", i);
+		if (voxelMap == null) return;
+		BlockVoxelBuilder.CalculateBlocks(voxelMap, i,  _blockCache, mergeCloseEdgesOnTestMesh);
+		VoxelPaletteItem item = voxelPalette.GetItem(i);
+		StartBenchmarkModul("Build SerializableMesh from Blocks", i);
+		BlockVoxelBuilder.BuildMeshFromBlocks(item.blockLibrary, _blockCache, vertices, normals, uv, triangles);
 	}
 
-	public IEnumerable<PaletteItem> GetPaletteItems() => voxelPalette.Items;
-	public int PaletteLength => voxelPalette == null ? 0 : voxelPalette.Length;
-
-	internal VoxelPalette VoxelPalette => voxelPalette;
+	void StartBenchmarkModul(string s, int i)
+	{
+		if (doBenchmark)
+			_timer.StartModule(s + " - " + i);
+	}
 
 }

@@ -128,11 +128,9 @@ namespace VoxelSystem
 
 			if (original.TryGetComponent(out VoxelRenderer originalRenderer))
 			{
-				renderer.blockLibrary = originalRenderer.blockLibrary;
-				renderer.material = originalRenderer.material;
 				renderer.voxelPalette = originalRenderer.voxelPalette;
 				renderer.mergeCloseEdgesOnTestMesh = originalRenderer.mergeCloseEdgesOnTestMesh;
-				renderer.RegenerateMesh();
+				renderer.RegenerateMeshes();
 			}
 
 #if UNITY_EDITOR

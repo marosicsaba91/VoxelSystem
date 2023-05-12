@@ -1,19 +1,22 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+
 namespace VoxelSystem
 {
-	[CreateAssetMenu(fileName = "VoxelPalette", menuName = "VoxelSystem/VoxelPalette", order = 2)]
-	public class VoxelPalette : ScriptableObject
+	[CreateAssetMenu(menuName = "Voxel System/Voxel Palette", order = 2)]
+	public class VoxelPalette : ScriptableObject, IVoxelPalette
 	{
-		[SerializeField] PaletteItem[] paletteItems = new PaletteItem[0];
+		[SerializeField] VoxelPaletteSetting[] paletteSettings = new VoxelPaletteSetting[0];
 
-		public IEnumerable<PaletteItem> Items => paletteItems;
+		public IEnumerable<VoxelPaletteItem> Items =>
+			from VoxelPaletteSetting setting in paletteSettings
+			from VoxelPaletteItem item in setting.Items
+			select item;
 
-		public int Length => paletteItems.Length;
+		public int Length => paletteSettings.Length;
 
-		public PaletteItem GetItem(int i) => paletteItems[i];
+		public VoxelPaletteItem GetItem(int i) => Items.ElementAt(i);
 
 	}
 }
-
-

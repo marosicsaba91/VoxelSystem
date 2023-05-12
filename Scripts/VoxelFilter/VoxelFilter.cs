@@ -114,7 +114,7 @@ namespace VoxelSystem
 		void MapChanged()
 		{
 			if (voxelRenderer != null || TryGetComponent(out voxelRenderer))
-				voxelRenderer.RegenerateMesh();
+				voxelRenderer.RegenerateMeshes();
 		}
 
 		void ExportVoxelMap()
