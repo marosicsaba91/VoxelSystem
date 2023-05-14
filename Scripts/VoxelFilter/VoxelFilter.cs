@@ -17,6 +17,9 @@ namespace VoxelSystem
 
 		[SerializeField, HideInInspector] SharedVoxelMap _lastFrameSharedMap = null;
 
+
+		public string MapName => HasSharedMap ? SharedVoxelMap.name : name;
+
 		internal void OnValidate() 
 		{
 			voxelRenderer = GetComponent<BlockMeshGenerator>();

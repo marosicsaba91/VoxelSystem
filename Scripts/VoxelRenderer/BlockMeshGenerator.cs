@@ -8,22 +8,52 @@ using VoxelSystem;
 [RequireComponent(typeof(VoxelFilter))]
 public class BlockMeshGenerator : MonoBehaviour
 {
-	[SerializeField, HideInInspector] VoxelFilter voxelFilter;	
+	[SerializeField, HideInInspector] VoxelFilter voxelFilter;
+	[SerializeField, HideInInspector] MeshFilter meshFilter;
 	[SerializeField] internal VoxelPalette voxelPalette;
 	[SerializeField] internal bool mergeCloseEdgesOnTestMesh;
 	[SerializeField] bool doBenchmark;
 
-	//[SerializeField] List<Mesh> destinationMeshes = new();
 	[SerializeField] Mesh destinationMesh;
 
 	[SerializeField] DisplayMember regenerateMesh = new(nameof(RegenerateMeshes));
+	[SerializeField] DisplayMember createMeshFile = new(nameof(CreateMeshFile));
 
 	public Matrix4x4 LocalToWorldMatrix => transform.localToWorldMatrix;
 	 
 	public VoxelMap Map => voxelFilter == null ? null : voxelFilter.GetVoxelMap();
 
+	void CreateMeshFile()
+	{
+# if UNITY_EDITOR
+		if (voxelFilter == null)
+		{
+			Debug.LogWarning("No voxelFilter");
+		}
+
+		if (destinationMesh == null)
+			RegenerateMeshes();
+
+		string path = UnityEditor.EditorUtility.SaveFilePanel(
+			"Save Voxel Mesh",
+			"",
+			voxelFilter.MapName + ".asset",
+			"asset");
+
+		int index = path.IndexOf("Assets/");
+		if (index >= 0)
+			path = path[index..];
+		 
+		if(!path.IsNullOrEmpty())
+			UnityEditor.AssetDatabase.CreateAsset(destinationMesh, path);
+# endif
+	}
+
+
+
 	void OnValidate()
 	{
+		meshFilter = GetComponent<MeshFilter>();
 		voxelFilter = GetComponent<VoxelFilter>();
 	}
 
@@ -96,7 +126,6 @@ public class BlockMeshGenerator : MonoBehaviour
 			i++;
 		}
 
-		destinationMesh.name = "VoxelMesh";
 		StartBenchmarkModul("Setup Mesh");
 		destinationMesh.Clear();
 		destinationMesh.indexFormat = _vertices.Count >= vertexLimitOf16Bit ?
@@ -116,18 +145,32 @@ public class BlockMeshGenerator : MonoBehaviour
 		{
 			SubMeshDescriptor descriptor = _descriptors[j];
 			destinationMesh.SetSubMesh(j, descriptor);
-		}
+		} 
+
+		destinationMesh.UploadMeshData(true);
 
 		if (doBenchmark)
 		{
 			Debug.Log(_benchmarkTimer.ToString());
 			_benchmarkTimer.Clear();
 		}
-	}
 
+
+
+		if (meshFilter != null)
+			meshFilter.mesh = destinationMesh;
+	}
+	
 	void RegenerateMeshData(VoxelMap voxelMap, VoxelPaletteItem paletteItem, int index)
 	{
 		if (voxelMap == null) return;
+		if (destinationMesh == null)
+		{
+			destinationMesh = new()
+			{
+				name = voxelFilter.MapName
+			};
+		}
 
 		StartBenchmarkModul("Generate Blocks based on Map", index);
 		BlockVoxelBuilder.CalculateBlocks(voxelMap, index, _blockCache, mergeCloseEdgesOnTestMesh);

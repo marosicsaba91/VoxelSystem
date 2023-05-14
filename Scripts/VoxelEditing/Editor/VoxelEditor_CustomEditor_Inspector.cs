@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
-using UnityEditorInternal.VR;
 using UnityEngine;
 
 namespace VoxelSystem
@@ -12,8 +11,6 @@ namespace VoxelSystem
 	[CustomEditor(typeof(VoxelEditor))]
 	partial class VoxelEditor_CustomEditor : Editor
 	{
-		SerializedProperty selectedActionProperty;
-		SerializedProperty selectedToolProperty;
 		SerializedProperty selectedPaletteIndexProperty;
 		SerializedProperty transformLockProperty;
 
@@ -65,8 +62,6 @@ namespace VoxelSystem
 
 		void SetupSerializedProperties()
 		{
-			selectedActionProperty = serializedObject.FindProperty(nameof(VoxelEditor.selectedAction));
-			selectedToolProperty = serializedObject.FindProperty(nameof(VoxelEditor.selectedTool));
 			selectedPaletteIndexProperty = serializedObject.FindProperty(nameof(VoxelEditor.selectedPaletteIndex));
 			transformLockProperty = serializedObject.FindProperty(nameof(VoxelEditor.transformLock));
 		}
@@ -133,7 +128,7 @@ namespace VoxelSystem
 			SetupSerializedProperties();
 
 			VoxelAction selectedAction = voxelEditor.SelectedAction;
-			VoxelTool selectedTool = voxelEditor.selectedTool;
+			VoxelTool selectedTool = voxelEditor.SelectedTool;
 			TransformLock transformLock = voxelEditor.transformLock;
 
 			UpdateEnableEdit(voxelEditor);
@@ -362,9 +357,8 @@ namespace VoxelSystem
 
 			if (GUI.Button(rect, content, style))
 			{
-				selectedToolProperty.enumValueIndex = selectedTool == drawnTool
-					? (int)VoxelTool.None
-					: (int)drawnTool;
+				voxelEditor.SelectedTool = voxelEditor.SelectedTool == drawnTool
+					? VoxelTool.None : drawnTool;
 			}
 		}
 
@@ -396,8 +390,8 @@ namespace VoxelSystem
 					action == VoxelAction.Repaint ? selectedButtonRecolorStyle : selectedButtonStyle;
 
 				if (GUI.Button(rect, content, style))
-					selectedActionProperty.enumValueIndex = (int)action;
-				// GUI.backgroundColor = Color.white;
+					voxelEditor.SelectedAction = action;
+
 				rect.x += width + _spacing;
 
 			}

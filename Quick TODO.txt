@@ -2,9 +2,6 @@ Raycast Problems
 
 
 ------ PALETTE SUPPORT -------
-
-VoxelRenderer -> VoxelMeshGenerator
-	Meshes are stored in Mesh files
 	
 Block Generator update
 	Only Full voxels ar tested

@@ -56,15 +56,17 @@ namespace VoxelSystem
 
 			UpdateEnableEdit(editor);
 
-			Tools.hidden = _enableEdit && editor.selectedTool != VoxelTool.None;
+			Tools.hidden = _enableEdit && editor.SelectedTool != VoxelTool.None;
 
 			if (!_enableEdit)
 				return;
 
 			// ------------------------------------------------------
 
+			if (editor.SelectedTool == VoxelTool.None) return;
+
 			HandleUtility.AddDefaultControl(GUIUtility.GetControlID(FocusType.Passive));
-			VoxelToolHandler hander = editor.selectedTool.GetHandler();
+			VoxelToolHandler hander = editor.SelectedTool.GetHandler();
 			Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
 			hander?.ExecuteEditorControl(editor, guiEvent, ray);
 

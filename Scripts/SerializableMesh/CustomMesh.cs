@@ -3,7 +3,6 @@ using UnityEngine;
 
 namespace VoxelSystem
 {
-
 	[Serializable]
 	public struct CustomMesh
 	{

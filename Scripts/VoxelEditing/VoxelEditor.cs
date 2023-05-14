@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using MUtility;
 using System;
 using Object = UnityEngine.Object;
 
@@ -17,19 +16,19 @@ namespace VoxelSystem
 	[ExecuteAlways]
 	class VoxelEditor : MonoBehaviour, IVoxelEditor
 	{
+		static VoxelAction selectedAction = VoxelAction.Attach;
+		static VoxelTool selectedTool = VoxelTool.None;
+
 		[SerializeField, HideInInspector] VoxelFilter voxelFilter;
 		[SerializeField, HideInInspector] BlockMeshGenerator voxelRenderer;
 
 		[SerializeField, HideInInspector] internal TransformLock transformLock = new();
-		[SerializeField, HideInInspector] internal VoxelAction selectedAction = VoxelAction.Attach;
-		[SerializeField, HideInInspector] internal VoxelTool selectedTool = VoxelTool.None;
 		[SerializeField, HideInInspector] internal int selectedPaletteIndex = 0;
 		[SerializeField, HideInInspector] internal BoundsInt selection = new(Vector3Int.zero, Vector3Int.one * -1);
 
 		public TransformLock TransformLock { get => transformLock; set => transformLock = value; }
 
-		public VoxelMap Map => voxelFilter == null ? null : voxelFilter.GetVoxelMap();
-		bool HasConnectedMap() => voxelFilter != null && voxelFilter.HasSharedMap;
+		public VoxelMap Map => voxelFilter == null ? null : voxelFilter.GetVoxelMap(); 
 
 		public BoundsInt Selection { get => selection; set => selection = value; }
 
@@ -51,7 +50,7 @@ namespace VoxelSystem
 				selectedPaletteIndex = Mathf.Max(Mathf.Min(selectedPaletteIndex, palette.Length - 1), 0);
 		}
 
-		public string MapName => HasConnectedMap() ? voxelFilter.SharedVoxelMap.name : voxelFilter.name;
+		public string MapName => voxelFilter == null ? "-" : voxelFilter.MapName;
 		public VoxelTool SelectedTool { get => selectedTool; set => selectedTool = value; }
 		public VoxelAction SelectedAction { get => selectedAction; set => selectedAction = value; }
 
