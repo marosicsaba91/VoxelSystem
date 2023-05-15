@@ -1,6 +1,6 @@
 ﻿using MUtility; 
 using System.Collections.Generic;
-using UnityEditor;
+//using UnityEditor;
 using UnityEngine; 
 
 namespace VoxelSystem
@@ -48,8 +48,9 @@ namespace VoxelSystem
 
 		internal void ExecuteEditorControl(IVoxelEditor voxelEditor, Event guiEvent, Ray ray)
 		{
-			Matrix4x4 matrix4X4 = Handles.matrix;
-			Handles.matrix = voxelEditor.transform.localToWorldMatrix;
+#if UNITY_EDITOR
+			Matrix4x4 matrix4X4 = UnityEditor.Handles.matrix;
+			UnityEditor.Handles.matrix = voxelEditor.transform.localToWorldMatrix;
 
 
 			if (_currentEventType == MouseEventType.None)
@@ -65,13 +66,14 @@ namespace VoxelSystem
 			if (useEvent)
 				UseMouseEvent(guiEvent);
 
-			Handles.matrix = matrix4X4;
+			UnityEditor.Handles.matrix = matrix4X4;
+#endif
 		}
-
 		// --------------------- Raycast ---------------------
 
 		void TryExecuteRaycast(IVoxelEditor voxelEditor, Event guiEvent, Ray ray)
-		{
+		{ 
+#if UNITY_EDITOR
 			if (!DoRaycastVoxelCursor(voxelEditor, out bool raycastOutside))
 			{
 				_isLastRayHit = false;
@@ -85,15 +87,16 @@ namespace VoxelSystem
 				{
 					// DRAW VOXEL CURSOR
 					Color color = GetCursorColor(voxelEditor.SelectedAction);
-					Handles.color = new(color.r, color.g, color.b, color.a / 4f);
-					Handles.DrawWireCube((Vector3)_lastValidHit.voxelIndex + Vector3.one * 0.5f, Vector3.one); 
-					Handles.DrawWireCube(_lastValidHit.hitWorldPosition, Vector3.one * 0.2f);
+					UnityEditor.Handles.color = new(color.r, color.g, color.b, color.a / 4f);
+					UnityEditor.Handles.DrawWireCube((Vector3)_lastValidHit.voxelIndex + Vector3.one * 0.5f, Vector3.one);
+					UnityEditor.Handles.DrawWireCube(_lastValidHit.hitWorldPosition, Vector3.one * 0.2f);
 
-					Handles.color = color;
+					UnityEditor.Handles.color = color;
 					Drawable drawable = GetDrawableVoxelSide(_lastValidHit);
 					drawable.DrawHandle();
 				}
 			}
+#endif
 		}
 		Color GetCursorColor(VoxelAction selectedAction) => selectedAction switch
 		{
@@ -188,6 +191,8 @@ namespace VoxelSystem
 
 		void ExecuteOneHandle(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo, Ray ray, out bool useEvent)
 		{
+			useEvent = false;
+#if UNITY_EDITOR
 			VoxelMap map = voxelEditor.Map;
 			VoxelTool _tool = voxelEditor.SelectedTool;
 			GeneralDirection3D direction = handleInfo.direction;
@@ -196,23 +201,22 @@ namespace VoxelSystem
 			Vector3Int editingSpace = voxelEditor.HasSelection() ? voxelEditor.Selection.size : map.FullSize;
 			float sizeMultiplier = Mathf.Sqrt(editingSpace.AbsMean() / 20f);  // 20 looks good
 			_standardSpacing = sizeMultiplier * 2;
-			useEvent = false;
 
 			Color color = axis.GetAxisColor();
 			Color focused = (color + Color.white) / 2f;
-			Handles.color = color;
+			UnityEditor.Handles.color = color;
 
 			Vector3 directionVector = direction.ToVector();
 			var rotation = Quaternion.LookRotation(directionVector);
 
-			Handles.CapFunction capFunction = handleInfo.coneType == HandeleConeType.Arrow
-				? Handles.ConeHandleCap
-				: Handles.CubeHandleCap;
+			UnityEditor.Handles.CapFunction capFunction = handleInfo.coneType == HandeleConeType.Arrow
+				? UnityEditor.Handles.ConeHandleCap
+				: UnityEditor.Handles.CubeHandleCap;
 
 			if (handleInfo.coneType == HandeleConeType.Box)
 				sizeMultiplier *= 0.7f;
 
-			AdvancedHandles.HandleResult handleResult =
+			HandleResult handleResult =
 				AdvancedHandles.Handle(handlePos, rotation, sizeMultiplier, capFunction, color, focused, color);
 
 			// Handle Click
@@ -275,8 +279,10 @@ namespace VoxelSystem
 			if (!handleInfo.text.IsNullOrEmpty())
 			{
 				textStyle.normal.textColor = (color + Color.white) / 2f;
-				Handles.Label(handlePos + Vector3.up * _standardSpacing, handleInfo.text, textStyle);
+				UnityEditor.Handles.Label(handlePos + Vector3.up * _standardSpacing, handleInfo.text, textStyle);
 			}
+
+#endif
 		}
 
 		static int GetDistance(Vector3 startPoint, Ray ray, Vector3 directionVector)

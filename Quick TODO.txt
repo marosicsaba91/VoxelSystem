@@ -2,13 +2,11 @@ Raycast Problems
 
 
 ------ PALETTE SUPPORT -------
-	
-Block Generator update
-	Only Full voxels ar tested
-	Only One Color per voxel
 
-Unify CustomMesh & SerialzableMesh ????
-
+BlockGeneration
+	Only Filled Blocks
+	Multiple block container
+	Throw away on border
 
 ------ NEW TOOLS -------
 

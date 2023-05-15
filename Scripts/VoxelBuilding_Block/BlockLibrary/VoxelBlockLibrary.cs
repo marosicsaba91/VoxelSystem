@@ -90,10 +90,11 @@ namespace VoxelSystem
 		}
 
 
-		public void MakeDirty() =>
+		public void MakeDirty()
+		{
 #if UNITY_EDITOR
 			UnityEditor.EditorUtility.SetDirty(this);
 #endif
-
+		}
 	}
 }

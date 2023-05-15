@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 using VoxelSystem;
+using TMPro;
 
 [ExecuteAlways]
 [RequireComponent(typeof(VoxelFilter))]
@@ -12,12 +13,14 @@ public class BlockMeshGenerator : MonoBehaviour
 	[SerializeField, HideInInspector] MeshFilter meshFilter;
 	[SerializeField] internal VoxelPalette voxelPalette;
 	[SerializeField] internal bool mergeCloseEdgesOnTestMesh;
-	[SerializeField] bool doBenchmark;
 
 	[SerializeField] Mesh destinationMesh;
 
 	[SerializeField] DisplayMember regenerateMesh = new(nameof(RegenerateMeshes));
 	[SerializeField] DisplayMember createMeshFile = new(nameof(CreateMeshFile));
+
+	[SerializeField] bool doBenchmark;
+	[SerializeField] TMP_Text debugText;
 
 	public Matrix4x4 LocalToWorldMatrix => transform.localToWorldMatrix;
 	 
@@ -25,12 +28,7 @@ public class BlockMeshGenerator : MonoBehaviour
 
 	void CreateMeshFile()
 	{
-# if UNITY_EDITOR
-		if (voxelFilter == null)
-		{
-			Debug.LogWarning("No voxelFilter");
-		}
-
+# if UNITY_EDITOR 
 		if (destinationMesh == null)
 			RegenerateMeshes();
 
@@ -57,43 +55,6 @@ public class BlockMeshGenerator : MonoBehaviour
 		voxelFilter = GetComponent<VoxelFilter>();
 	}
 
-
-	//void LateUpdate()
-	//{
-	//	// RenderMesh();
-	//}
-	//void RenderMesh()
-	//{
-	//	if (voxelPalette == null)
-	//		return;
-
-
-	//	if(voxelPalette.Length != serializableMeshes.Count)
-	//		RegenerateMeshes();
-
-
-	//	int i = 0;
-	//	foreach(VoxelPaletteItem paletteItem in voxelPalette.Items)
-	//	{
-	//		SerializableMesh sMesh = serializableMeshes[i];
-
-	//		StartBenchmarkModul("Create Mesh from SerializableMesh" , i);
-	//		Mesh mesh = sMesh.GetMesh();
-
-	//		StartBenchmarkModul("Render Mesh" , i);
-	//		Graphics.DrawMesh(mesh, transform.localToWorldMatrix, paletteItem.material, gameObject.layer);
-	//		i++;
-	//	}
-
-	//	if (doBenchmark)
-	//	{
-	//		if(_timer.GetTotalTotalMilliseconds() > 0)
-	//			Debug.Log(_timer.ToString());
-	//		_timer.Clear();
-	//	}
-	//}
-
-
 	static BenchmarkTimer _benchmarkTimer = new BenchmarkTimer();
 	internal VoxelPalette VoxelPalette => voxelPalette;
 
@@ -107,7 +68,7 @@ public class BlockMeshGenerator : MonoBehaviour
 
 	const int vertexLimitOf16Bit = 65536;
 
-	internal void RegenerateMeshes()
+	public void RegenerateMeshes()
 	{
 		StartBenchmarkModul("Clear Lists");
 		_vertices.Clear();
@@ -118,16 +79,17 @@ public class BlockMeshGenerator : MonoBehaviour
 		_descriptors.Clear();
 
 
-		VoxelMap map = Map;
+		StartBenchmarkModul("Generate Blocks based on VoxelMap");
+		GenerateBlocks(Map);
+
 		int i = 0;
 		foreach (VoxelPaletteItem paletteItem in voxelPalette.Items)
 		{
-			RegenerateMeshData(map, paletteItem, i);
+			RegenerateMeshData(_blockCache[i], paletteItem, i);
 			i++;
 		}
 
 		StartBenchmarkModul("Setup Mesh");
-		destinationMesh.Clear();
 		destinationMesh.indexFormat = _vertices.Count >= vertexLimitOf16Bit ?
 			IndexFormat.UInt32 : IndexFormat.UInt16;
 
@@ -145,25 +107,42 @@ public class BlockMeshGenerator : MonoBehaviour
 		{
 			SubMeshDescriptor descriptor = _descriptors[j];
 			destinationMesh.SetSubMesh(j, descriptor);
-		} 
+		}
 
-		destinationMesh.UploadMeshData(true);
+		// destinationMesh.UploadMeshData(true);
 
 		if (doBenchmark)
 		{
-			Debug.Log(_benchmarkTimer.ToString());
+			string benchmarkResult = _benchmarkTimer.ToString();
+			if (debugText != null)
+				debugText.text = benchmarkResult;
+			Debug.Log(benchmarkResult);
+
 			_benchmarkTimer.Clear();
 		}
-
-
 
 		if (meshFilter != null)
 			meshFilter.mesh = destinationMesh;
 	}
-	
-	void RegenerateMeshData(VoxelMap voxelMap, VoxelPaletteItem paletteItem, int index)
+
+	static readonly List<List<Block>> _blockCache = new();
+	void GenerateBlocks(VoxelMap voxelMap)
 	{
 		if (voxelMap == null) return;
+
+		while (_blockCache.Count > voxelPalette.Length)
+			_blockCache.RemoveAt(_blockCache.Count-1);
+		while (_blockCache.Count < voxelPalette.Length)
+			_blockCache.Add(new List<Block>());
+
+		foreach(List<Block> block in _blockCache)
+			block.Clear();
+
+		BlockVoxelBuilder.CalculateBlocks(voxelMap, _blockCache, mergeCloseEdgesOnTestMesh);
+	}
+	
+	void RegenerateMeshData(List<Block> blocks, VoxelPaletteItem paletteItem, int index)
+	{
 		if (destinationMesh == null)
 		{
 			destinationMesh = new()
@@ -172,11 +151,8 @@ public class BlockMeshGenerator : MonoBehaviour
 			};
 		}
 
-		StartBenchmarkModul("Generate Blocks based on Map", index);
-		BlockVoxelBuilder.CalculateBlocks(voxelMap, index, _blockCache, mergeCloseEdgesOnTestMesh);
-
 		StartBenchmarkModul("Generate Vertex & Triangle data", index);
-		BlockVoxelBuilder.BuildMeshFromBlocks(paletteItem.blockLibrary, _blockCache, _vertices, _normals, _uv, _triangles);
+		BlockVoxelBuilder.BuildMeshFromBlocks(paletteItem.blockLibrary, blocks, _vertices, _normals, _uv, _triangles);
 		
 		StartBenchmarkModul("Generate SubMesh data", index);
 		int triangleCount = _triangles.Count - _currentTriangleIndex;
@@ -185,7 +161,6 @@ public class BlockMeshGenerator : MonoBehaviour
 	}
 
 	// Mesh Generation
-	static readonly List<Block> _blockCache = new();
 
 
 	void StartBenchmarkModul(string message)
