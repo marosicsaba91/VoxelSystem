@@ -77,8 +77,6 @@ namespace VoxelSystem
 
 		public sealed override int GetVoxel(int x, int y, int z) => intVoxelData[Index(x, y, z)];
 
-		public int GetFast(int x, int y, int z, int w, int h) => intVoxelData[x + (y * w) + (z * w * h)];
-
 		// SET Voxels ----------------------------
 
 		public sealed override bool SetVoxel(int x, int y, int z, int voxel)

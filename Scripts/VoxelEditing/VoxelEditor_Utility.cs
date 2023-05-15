@@ -129,7 +129,7 @@ namespace VoxelSystem
 			if (original.TryGetComponent(out BlockMeshGenerator originalRenderer))
 			{
 				renderer.voxelPalette = originalRenderer.voxelPalette;
-				renderer.mergeCloseEdgesOnTestMesh = originalRenderer.mergeCloseEdgesOnTestMesh;
+				renderer.blockSetting = originalRenderer.blockSetting;
 				renderer.RegenerateMeshes();
 			}
 

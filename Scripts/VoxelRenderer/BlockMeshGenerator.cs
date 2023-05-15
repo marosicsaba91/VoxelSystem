@@ -12,7 +12,8 @@ public class BlockMeshGenerator : MonoBehaviour
 	[SerializeField, HideInInspector] VoxelFilter voxelFilter;
 	[SerializeField, HideInInspector] MeshFilter meshFilter;
 	[SerializeField] internal VoxelPalette voxelPalette;
-	[SerializeField] internal bool mergeCloseEdgesOnTestMesh;
+
+	[SerializeField] internal BlockCalculationSetting blockSetting;
 
 	[SerializeField] Mesh destinationMesh;
 
@@ -90,6 +91,7 @@ public class BlockMeshGenerator : MonoBehaviour
 		}
 
 		StartBenchmarkModul("Setup Mesh");
+		destinationMesh.Clear();
 		destinationMesh.indexFormat = _vertices.Count >= vertexLimitOf16Bit ?
 			IndexFormat.UInt32 : IndexFormat.UInt16;
 
@@ -138,7 +140,7 @@ public class BlockMeshGenerator : MonoBehaviour
 		foreach(List<Block> block in _blockCache)
 			block.Clear();
 
-		BlockVoxelBuilder.CalculateBlocks(voxelMap, _blockCache, mergeCloseEdgesOnTestMesh);
+		BlockVoxelBuilder.CalculateBlocks(voxelMap, _blockCache, blockSetting);
 	}
 	
 	void RegenerateMeshData(List<Block> blocks, VoxelPaletteItem paletteItem, int index)

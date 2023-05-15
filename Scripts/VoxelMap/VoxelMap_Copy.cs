@@ -1,6 +1,4 @@
-﻿
-using MUtility;
-using System;
+﻿using MUtility;
 using UnityEngine;
 
 namespace VoxelSystem
