@@ -93,7 +93,7 @@ public class BlockMeshGenerator : MonoBehaviour
 		_benchmarkTimer?.StartModule("Generate Blocks based on VoxelMap");
 
 		BlockMapGenerator.blockSetup = blockSetting;
-		List<Dictionary<(Vector3Int, Vector3Int), Block>> blocks = BlockMapGenerator.CalculateBlocks(Map, voxelPalette.Length);
+		List<Dictionary<Vector3Int, Block>> blocks = BlockMapGenerator.CalculateBlocks(Map, voxelPalette.Length);
 
 		int i = 0;
 		foreach (VoxelPaletteItem paletteItem in voxelPalette.Items)
@@ -140,7 +140,7 @@ public class BlockMeshGenerator : MonoBehaviour
 	}
 
 
-	void RegenerateMeshData(Dictionary<(Vector3Int, Vector3Int), Block> blocks, VoxelPaletteItem paletteItem, int index)
+	void RegenerateMeshData(Dictionary<Vector3Int, Block> blocks, VoxelPaletteItem paletteItem, int index)
 	{
 		if (destinationMesh == null)
 		{
@@ -152,7 +152,7 @@ public class BlockMeshGenerator : MonoBehaviour
 
 		if (doBenchmark)
 			_benchmarkTimer.StartModule(("Generate Vertex & Triangle data" + index));
-		BuildMeshFromBlocks(paletteItem.blockLibrary, blocks.Values, _vertices, _normals, _uv, _triangles);
+		BuildMeshFromBlocks(paletteItem.blockLibrary, blocks, _vertices, _normals, _uv, _triangles);
 
 		if (doBenchmark)
 			_benchmarkTimer.StartModule(("Generate SubMesh data" + index));
@@ -162,14 +162,20 @@ public class BlockMeshGenerator : MonoBehaviour
 		_currentTriangleIndex = _triangles.Count;
 	}
 
-	static void BuildMeshFromBlocks(VoxelBlockLibrary blockLibrary, IEnumerable<Block> blocks,
+	static void BuildMeshFromBlocks(VoxelBlockLibrary blockLibrary, IEnumerable<KeyValuePair<Vector3Int,Block>> blocks,
 	List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles)
 	{
-		foreach (Block block in blocks)
+		Vector3 quarter = Vector3.one * 0.25f;
+
+		foreach (KeyValuePair<Vector3Int, Block> blockWithPosition in blocks)
 		{
-			if (!blockLibrary.TryGetMesh(block, out CustomMesh mesh))
+			Vector3Int subVoxelIndex = blockWithPosition.Key;
+			Block block = blockWithPosition.Value;  
+			if (!blockLibrary.TryGetMesh(block.blockType, block.axis, block.subVoxel, out CustomMesh mesh))
 				continue;
-			Vector3 offset = block.Center;
+			Vector3 offset = blockWithPosition.Value.Center(subVoxelIndex);
+
+
 			vertices.AddRange(mesh.vertices.Select(v => v + offset));
 			normals.AddRange(mesh.normals);
 			uv.AddRange(mesh.uv);

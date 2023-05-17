@@ -24,8 +24,8 @@ namespace VoxelSystem
 	{
 		public static BlockGenerationSetting blockSetup = new();
 
-		static readonly List<Dictionary<(Vector3Int, Vector3Int), Block>> _allBlockByMaterial = new();
-		static Dictionary<(Vector3Int, Vector3Int), Block> _currentMaterialBlocks = new();
+		static readonly List<Dictionary<Vector3Int, Block>> _allBlockByMaterial = new();
+		static Dictionary<Vector3Int, Block> _currentMaterialBlocks = new();
 		static NeighbourData[,,] neighbours = new NeighbourData[3, 3, 3];
 
 		static VoxelMap _currentVoxelMap;
@@ -33,7 +33,7 @@ namespace VoxelSystem
 
 		static List<Vector3> _breakPoints = new();
 
-		public static List<Dictionary<(Vector3Int, Vector3Int), Block>> CalculateBlocks(VoxelMap map, int materialCount)
+		public static List<Dictionary<Vector3Int, Block>> CalculateBlocks(VoxelMap map, int materialCount)
 		{
 			//_timer?.StartModule("Setup");
 			while (_allBlockByMaterial.Count < materialCount)
@@ -132,19 +132,20 @@ namespace VoxelSystem
 
 
 			Vector3Int voxelIndex = new(vXi, vYi, vZi);
-			Vector3Int subVoxelDir = new(dX, dY, dZ);
+			Vector3Int subVoxel = new(dX, dY, dZ);
+			Vector3Int subVoxelIndex = (voxelIndex * 2) + (subVoxel + Vector3Int.one) / 2;
 
 			// Is Filled On The Edge ---------------------------------------------------------------------------------------------
 
 			if (neighbourCount == 0) // CORNER // ----------------------------------------------------------------------------
 			{
-				_currentMaterialBlocks.Add((voxelIndex, subVoxelDir), new Block(BlockType.CornerPositive, voxelIndex, subVoxelDir, Vector3Int.one));
+				_currentMaterialBlocks.Add(subVoxelIndex, new Block(BlockType.CornerPositive, subVoxel));
 
 				if (crossNeighbourCount != 0 && blockSetup.mergeCloseEdges) // BREAKING POINT IN MODEL
 				{
 					Axis3D axis = nXY.isSame ? Axis3D.Z : nYZ.isSame ? Axis3D.X : Axis3D.Y;
-					Vector3 normalVector = axis.ToVector().MultiplyAllAxis(subVoxelDir);
-					_breakPoints.Add(voxelIndex + (Vector3)subVoxelDir * 0.25f - normalVector * 0.5f);
+					Vector3 normalVector = axis.ToVector().MultiplyAllAxis(subVoxel);
+					_breakPoints.Add(voxelIndex + (Vector3)subVoxel * 0.25f - normalVector * 0.5f);
 				}
 				return;
 			}
@@ -153,7 +154,7 @@ namespace VoxelSystem
 			{
 				if (crossNeighbourCount == 0) // CROSS
 				{
-					_currentMaterialBlocks.Add((voxelIndex, subVoxelDir), new Block(BlockType.CrossCorner, voxelIndex, subVoxelDir, Vector3Int.one));
+					_currentMaterialBlocks.Add(subVoxelIndex, new Block(BlockType.CrossCorner, subVoxel));
 				}
 				return;
 			}
@@ -171,41 +172,40 @@ namespace VoxelSystem
 				if (crossNeighbourCount == 0) // SIDE TO EDGE NEGATIVE
 				{
 					Axis3D axis = normal.ToAxis();
-					_currentMaterialBlocks.Add((voxelIndex, subVoxelDir), new Block(BlockType.SideToNegativeEdge, voxelIndex, subVoxelDir, Vector3Int.one, axis));
+					_currentMaterialBlocks.Add(subVoxelIndex, new Block(BlockType.SideToNegativeEdge, subVoxel, axis));
 					return;
 				}
 
-				Vector3Int inPlaneNeighbourIndex = Vector3Int.one + subVoxelDir - normal;
+				Vector3Int inPlaneNeighbourIndex = Vector3Int.one + subVoxel - normal;
 				NeighbourData inPlaneNeighbour = neighbours[inPlaneNeighbourIndex.x, inPlaneNeighbourIndex.y, inPlaneNeighbourIndex.z];
 
 				if (crossNeighbour2Count == 1 && inPlaneNeighbour.isSame) // SIDE
 				{
 					Axis3D axis = normal.ToAxis();
-					_currentMaterialBlocks.Add((voxelIndex, subVoxelDir), new Block(BlockType.SidePositive, voxelIndex, subVoxelDir, Vector3Int.one, axis));
+					_currentMaterialBlocks.Add(subVoxelIndex, new Block(BlockType.SidePositive, subVoxel, axis));
 				}
 
 				else if (crossNeighbourCount == 3 || (crossNeighbourCount == 2 && !inPlaneNeighbour.isSame)) // NEGATIVE CORNERS
 				{
 					voxelIndex += normal;
-					subVoxelDir -= normal * 2;
-					_currentMaterialBlocks.AddOrChangeValue((voxelIndex, subVoxelDir), new Block(BlockType.CornerNegative, voxelIndex, subVoxelDir, Vector3Int.one));
+					subVoxel -= normal * 2;
+					_currentMaterialBlocks.AddOrChangeValue(subVoxelIndex +normal, new Block(BlockType.CornerNegative, subVoxel));
 					return;
 				}
 
 				bool negativeEdge =
-					(crossNeighbourCount == 2 && nXYZ.isSame) || // COMMON
-					(crossNeighbourCount == 1 && !inPlaneNeighbour.isSame && nXYZ.isSame); // ON CLOSE COLUMNS
+					(crossNeighbourCount == 2 && nXYZ.isSame) || //  NEGATIVE EDGE (COMMON)
+					(crossNeighbourCount == 1 && !inPlaneNeighbour.isSame && nXYZ.isSame); //  NEGATIVE EDGE (COLUMNS - Different Size)
 
 				if (negativeEdge) // NEGATIVE EDGE
 				{
 
-					SeparateVector(subVoxelDir - normal, out Vector3Int normal1, out Vector3Int normal2);
+					SeparateVector(subVoxel - normal, out Vector3Int normal1, out Vector3Int normal2);
 					Vector3Int crossEdgeIndex = Vector3Int.one + normal + normal1;
-					NeighbourData crossEdgeNeighbour = neighbours[crossEdgeIndex.x, crossEdgeIndex.y, crossEdgeIndex.z];
-					voxelIndex += normal;
-					subVoxelDir -= normal * 2;
+					NeighbourData crossEdgeNeighbour = neighbours[crossEdgeIndex.x, crossEdgeIndex.y, crossEdgeIndex.z]; 
+					subVoxel -= normal * 2;
 					Axis3D axis = crossEdgeNeighbour.isSame ? normal2.ToAxis() : normal1.ToAxis();
-					_currentMaterialBlocks.TryAdd((voxelIndex, subVoxelDir), new Block(BlockType.EdgeNegative, voxelIndex, subVoxelDir, Vector3Int.one, axis));
+					_currentMaterialBlocks.TryAdd(subVoxelIndex + normal, new Block(BlockType.EdgeNegative, subVoxel, axis));
 				}
 
 				return;
@@ -216,7 +216,7 @@ namespace VoxelSystem
 
 				if (crossNeighbourCount == 0) // EDGE
 				{
-					_currentMaterialBlocks.Add((voxelIndex, subVoxelDir), new Block(BlockType.EdgePositive, voxelIndex, subVoxelDir, Vector3Int.one, axis));
+					_currentMaterialBlocks.Add(subVoxelIndex, new Block(BlockType.EdgePositive, subVoxel, axis));
 					return;
 				}
 
@@ -228,12 +228,11 @@ namespace VoxelSystem
 					(crossEdgeNeighbour.isSame && blockSetup.mergeCloseEdges && nXYZ.isSame) ||  // NEGATIVE EDGE (COLUMNS - Merge)
 					(crossEdgeNeighbour.isSame && crossNeighbourCount == 2 && nXYZ.isSame);      // NEGATIVE EDGE (COLUMNS - Different Size)
 
-				if (negativeEdge) // NEGATIVE EDGE (MERGE)
+				if (negativeEdge) // NEGATIVE EDGE
 				{
-					SeparateVector(normal, out Vector3Int normal1, out Vector3Int _);
-					voxelIndex += normal1;
-					subVoxelDir -= normal1 * 2;
-					_currentMaterialBlocks.TryAdd((voxelIndex, subVoxelDir), new Block(BlockType.EdgeNegative, voxelIndex, subVoxelDir, Vector3Int.one, axis));
+					SeparateVector(normal, out Vector3Int normal1, out Vector3Int _); 
+					subVoxel -= normal1 * 2;
+					_currentMaterialBlocks.TryAdd(subVoxelIndex + normal1, new Block(BlockType.EdgeNegative, subVoxel, axis));
 					return;
 				}
 
@@ -242,14 +241,14 @@ namespace VoxelSystem
 					if (crossEdgeNeighbour.isSame)
 					{
 						if (!blockSetup.mergeCloseEdges || !nXYZ.isSame) // EDGE						
-							_currentMaterialBlocks.Add((voxelIndex, subVoxelDir), new Block(BlockType.EdgePositive, voxelIndex, subVoxelDir, Vector3Int.one, axis));
+							_currentMaterialBlocks.Add(subVoxelIndex, new Block(BlockType.EdgePositive, subVoxel, axis));
 					}
 					else
 					{
 						if (nXYZ.isSame) // EDGE TO EDGE
 						{
 							SeparateVector(normal, out Vector3Int normal1, out Vector3Int normal2);
-							crossEdgeIndex = Vector3Int.one + subVoxelDir - normal + normal1;
+							crossEdgeIndex = Vector3Int.one + subVoxel - normal + normal1;
 							crossEdgeNeighbour = neighbours[crossEdgeIndex.x, crossEdgeIndex.y, crossEdgeIndex.z];
 							Axis3D connectingAxis = crossEdgeNeighbour.isSame ? normal2.ToAxis() : normal1.ToAxis();
 							if (axis == Axis3D.X && connectingAxis != Axis3D.Y)
@@ -258,7 +257,7 @@ namespace VoxelSystem
 								return;
 							if (axis == Axis3D.Z && connectingAxis != Axis3D.X)
 								return;
-							_currentMaterialBlocks.Add((voxelIndex, subVoxelDir), new Block(BlockType.EdgeToEdge, voxelIndex, subVoxelDir, Vector3Int.one, axis));
+							_currentMaterialBlocks.Add(subVoxelIndex, new Block(BlockType.EdgeToEdge, subVoxel, axis));
 						}
 					}
 					return;
@@ -267,7 +266,7 @@ namespace VoxelSystem
 
 				if (crossNeighbourCount == 2 && nXYZ.isSame && !crossEdgeNeighbour.isSame) // EDGE TO SIDE
 				{
-					_currentMaterialBlocks.Add((voxelIndex, subVoxelDir), new Block(BlockType.SideToPositiveEdge, voxelIndex, subVoxelDir, Vector3Int.one, axis));
+					_currentMaterialBlocks.Add(subVoxelIndex, new Block(BlockType.SideToPositiveEdge, subVoxel, axis));
 				}
 			}
 		}

@@ -16,11 +16,9 @@ namespace VoxelSystem
 
 		Dictionary<BlockKey, CustomMesh> _meshCache = new();
 
-		public bool TryGetMesh(Block block, out CustomMesh mesh)
-		{
-			BlockType blockType = block.blockType;
-			Axis3D axis = block.axis;
-			SubVoxelFlags dir = SubVoxelUtility.FromVector(block.subVoxel);
+		public bool TryGetMesh(BlockType blockType, Axis3D axis, Vector3Int subVoxel, out CustomMesh mesh)
+		{ 
+			SubVoxelFlags dir = SubVoxelUtility.FromVector(subVoxel);
 			BlockKey blockKey = new(blockType, dir, axis);
 
 			if (_meshCache.IsNullOrEmpty())
