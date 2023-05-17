@@ -3,10 +3,16 @@ Raycast Problems
 
 ------ PALETTE SUPPORT -------
 
+CloseEdges
+Old Generation problam
+CODE CLEAN !!!!
+
 BlockGeneration
 	Only Filled Blocks
 	Multiple block container
 	Throw away on border
+	
+Code Analisis
 
 ------ NEW TOOLS -------
 

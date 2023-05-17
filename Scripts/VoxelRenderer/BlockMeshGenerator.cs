@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using VoxelSystem;
 using TMPro;
+using UnityEngine.UIElements;
 
 [ExecuteAlways]
 [RequireComponent(typeof(VoxelFilter))]
@@ -132,10 +133,7 @@ public class BlockMeshGenerator : MonoBehaviour
 	{
 		if (voxelMap == null) return;
 
-		while (_blockCache.Count > voxelPalette.Length)
-			_blockCache.RemoveAt(_blockCache.Count-1);
-		while (_blockCache.Count < voxelPalette.Length)
-			_blockCache.Add(new List<Block>());
+		_blockCache.SetCount(voxelPalette.Length, () => new List<Block>());
 
 		foreach(List<Block> block in _blockCache)
 			block.Clear();
@@ -176,4 +174,19 @@ public class BlockMeshGenerator : MonoBehaviour
 			_benchmarkTimer.StartModule(message + " - " + index);
 	}
 
+
+	private void OnDrawGizmos()
+	{
+		List<(Vector3Int, Vector3Int)> subVoxels = BlockVoxelBuilder.possibleCorners;
+
+		Gizmos.color = new(0,0,0,0.3f);
+		Gizmos.matrix = transform.localToWorldMatrix;
+
+		foreach ((Vector3Int, Vector3Int) subVoxel in subVoxels)
+		{
+			Vector3 position = subVoxel.Item1 + Vector3.one * 0.5f + (Vector3)subVoxel.Item2 * 0.25f;
+			Gizmos.DrawWireCube(position, Vector3.one * 0.2f);
+
+		}
+	}
 }

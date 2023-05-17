@@ -5,31 +5,30 @@ namespace VoxelSystem
 {
 	public struct Block
 	{
-		public static readonly Vector3 halfVoxel = new(0.5f, 0.5f, 0.5f);
+		public static readonly Vector3 quarterVoxel = new(0.25f, 0.25f, 0.25f);
 
 		public readonly BlockType blockType;
 		public Vector3Int doubleSize;
 
-		public Vector3Int inVoxelDirection;
+		public Vector3Int voxelIndex; // Center of the first half voxel
+		public Vector3Int subVoxel;
 		public Axis3D axis;
-		public Vector3 position; // Center of the first half voxel
 
-		public Block(BlockType blockType, Vector3Int inVoxelDirection, Vector3Int doubleSize, Axis3D axis,
-			Vector3 position)
+		public Block(BlockType blockType, Vector3Int voxelIndex, Vector3Int subVoxel, Vector3Int doubleSize, Axis3D axis)
 		{
 			this.blockType = blockType;
 			this.doubleSize = doubleSize;
-			this.position = position;
+			this.voxelIndex = voxelIndex;
 			this.axis = axis;
-			this.inVoxelDirection = inVoxelDirection;
+			this.subVoxel = subVoxel;
 		}
 
-		public Block(BlockType blockType, Vector3Int inVoxelDirection, Vector3Int doubleSize, Vector3 position)
+		public Block(BlockType blockType, Vector3Int voxelIndex, Vector3Int subVoxel, Vector3Int doubleSize)
 		{
 			this.blockType = blockType;
 			this.doubleSize = doubleSize;
-			this.position = position;
-			this.inVoxelDirection = inVoxelDirection;
+			this.voxelIndex = voxelIndex;
+			this.subVoxel = subVoxel;
 			axis = default;
 		}
 
@@ -37,8 +36,8 @@ namespace VoxelSystem
 
 		public Vector3 RealSize => (Vector3)doubleSize / 2f;
 
-		public Vector3 Center => position + RealSize / 2f;
-
+		public Vector3 Center => voxelIndex + (Vector3)Vector3Int.Max(subVoxel, Vector3Int.zero) * 0.5f + (Vector3)doubleSize * 0.25f;
+			
 
 		public void DrawGizmo(float margin, System.Random random)
 		{
@@ -58,7 +57,7 @@ namespace VoxelSystem
 			Vector3 realSize = RealSize - margin * Vector3.one;
 
 
-			Vector3 normal = inVoxelDirection;
+			Vector3 normal = subVoxel;
 
 			Vector3 c1 = center +
 						 new Vector3(normal.x * 0.25f, normal.y * margin / 2f, normal.z * margin / 2f);
@@ -88,7 +87,7 @@ namespace VoxelSystem
 			Vector3 center = Center;
 
 			Vector3 axisNeg = Vector3.one - axis.ToVector();
-			Vector3 normal = inVoxelDirection.MultiplyAllAxis(axisNeg);
+			Vector3 normal = subVoxel.MultiplyAllAxis(axisNeg);
 
 			if (normal.x == 0)
 			{
@@ -128,7 +127,7 @@ namespace VoxelSystem
 		void DrawSide(float margin)
 		{
 			Vector3 normal = axis.ToVector();
-			Vector3 offset = normal.MultiplyAllAxis(inVoxelDirection);
+			Vector3 offset = normal.MultiplyAllAxis(subVoxel);
 
 			Vector3 center = Center + offset * 0.25f;
 			Vector3 realSize = RealSize - (2 * margin * Vector3.one);
@@ -171,7 +170,7 @@ namespace VoxelSystem
 			rand += 1;
 			float radius = 0.1f * rand;
 			Gizmos.DrawWireSphere(center, radius);
-			Vector3 center2 = center + (Vector3)inVoxelDirection * (radius * 0.5f);
+			Vector3 center2 = center + (Vector3)subVoxel * (radius * 0.5f);
 			Gizmos.DrawWireCube(center2, new Vector3(radius, radius, radius));
 
 

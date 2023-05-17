@@ -10,8 +10,8 @@ namespace VoxelSystem
 	struct BlockCalculationSetting
 	{
 		public bool mergeCloseEdges;
-		public bool separateVoxelMaterials;
 		public bool openOnSides;
+		public bool showFacesBetweenMaterials;
 	}
 
 	public static class BlockVoxelBuilder
@@ -31,11 +31,19 @@ namespace VoxelSystem
 			}
 		}
 
-		static BlockCalculationSetting blockSetup = new ();
+		static List<Vector3> breakPoints = new();
+		public static List<(Vector3Int,Vector3Int)> possibleCorners = new();
+		static BlockCalculationSetting blockSetup = new();
+		static VoxelMap voxelMap;
+		static Vector3Int size;
 
-		internal static void CalculateBlocks(VoxelMap voxelMap, List<List<Block>> blocksByMaterial, BlockCalculationSetting setup)
+
+		internal static void CalculateBlocks(VoxelMap map, List<List<Block>> blocksByMaterial, BlockCalculationSetting setup)
 		{
-			Vector3Int size = voxelMap.FullSize;
+			possibleCorners.Clear();
+			breakPoints.Clear();
+			voxelMap = map;
+			size = map.FullSize;
 			blockSetup = setup;
 
 			int materialCount = blocksByMaterial.Count;
@@ -44,232 +52,229 @@ namespace VoxelSystem
 				for (int y = size.y - 1; y >= 0; y--)
 					for (int z = size.z - 1; z >= 0; z--)
 					{
-						int voxelValue = voxelMap.GetVoxel(x, y, z);
+						int voxelValue = map.GetVoxel(x, y, z);
 						if (voxelValue.IsEmpty()) continue;
 						int materialIndex = (voxelValue >= materialCount) ? materialCount - 1 : voxelValue;
-						blocksByMaterial[materialIndex].AddRange(VoxelToBlocks(voxelMap, voxelValue, x, y, z));
+						blocksByMaterial[materialIndex].AddRange(VoxelToBlocks(voxelValue, x, y, z));
 					}
 		}
+
 
 		// Methods
-		static IEnumerable<Block> VoxelToBlocks(VoxelMap voxelMap, int voxelValue, int vXi, int vYi, int vZi) // Voxel Index
+		static IEnumerable<Block> VoxelToBlocks(int voxelValue, int vXi, int vYi, int vZi) // Voxel Index
 		{
-			var voxelIndex = new Vector3Int(vXi, vYi, vZi);
-
-			Vector3Int blockSize = Vector3Int.one;
-
-			for (int dX = -1; dX <= 1; dX += 2) // In Voxel Direction
+			for (int dX = -1; dX <= 1; dX += 2) // Sub-Voxels
 				for (int dY = -1; dY <= 1; dY += 2)
 					for (int dZ = -1; dZ <= 1; dZ += 2)
+						foreach (Block b in SubVoxelToBlock(voxelValue, vXi, vYi, vZi, dX, dY, dZ))
+							yield return b;
+		}
+
+		static IEnumerable<Block> SubVoxelToBlock(int voxelValue, int vXi, int vYi, int vZi, int dX, int dY, int dZ)
+		{
+			int nXi = vXi + dX; // Neighbour Voxel Index
+			int nYi = vYi + dY;
+			int nZi = vZi + dZ;
+
+			Vector3Int voxelIndex = new(vXi, vYi, vZi);
+			Vector3Int subVoxelDir = new(dX, dY, dZ);
+
+			bool nXf = GetAnyNeighbour(voxelValue, nXi, vYi, vZi, out bool f1);
+			bool nYf = GetAnyNeighbour(voxelValue, vXi, nYi, vZi, out bool f2);
+			bool nZf = GetAnyNeighbour(voxelValue, vXi, vYi, nZi, out bool f3);
+			bool nXYf = GetAnyNeighbour(voxelValue, nXi, nYi, vZi, out bool f4);
+			bool nYZf = GetAnyNeighbour(voxelValue, vXi, nYi, nZi, out bool f5);
+			bool nZXf = GetAnyNeighbour(voxelValue, nXi, vYi, nZi, out bool f6);
+			bool nXYZf = GetAnyNeighbour(voxelValue, nXi, nYi, nZi, out bool f7);
+
+			// ---------------------------------------------------------------------------------------------
+
+			int neighbourCount = (nXf ? 1 : 0) + (nYf ? 1 : 0) + (nZf ? 1 : 0);
+			int crossNeighbourCount = (nXYf ? 1 : 0) + (nYZf ? 1 : 0) + (nZXf ? 1 : 0);
+			int crossNeighbour2Count = (nXYf ? 1 : 0) + (nYZf ? 1 : 0) + (nZXf ? 1 : 0) + (nXYZf ? 1 : 0);
+
+			if (blockSetup.showFacesBetweenMaterials)
+			{
+				if (neighbourCount == 3 && crossNeighbour2Count == 4) // IS FULLY FILLED
+					yield break;
+			}
+			else
+			{
+				if (f1 && f2 && f3 && f4 && f5 && f6 && f7) // IS FULLY FILLED or BETWEEN TWO MATERIALS
+					yield break;
+			}
+
+
+			// IS FILLED
+
+			if (neighbourCount == 0) // CORNER // ----------------------------------------------------------------------------
+			{
+				yield return new Block(BlockType.CornerPositive, voxelIndex, subVoxelDir, Vector3Int.one);
+
+				if (crossNeighbourCount != 0 && blockSetup.mergeCloseEdges) // BREAKING POINT IN MODEL
+				{
+					Axis3D axis = nXYf ? Axis3D.Z : nYZf ? Axis3D.X : Axis3D.Y;
+					Vector3 normalVector = axis.ToVector().MultiplyAllAxis(subVoxelDir);
+					breakPoints.Add(voxelIndex + (Vector3)subVoxelDir * 0.25f - normalVector * 0.5f);
+				}
+			}
+			else if (neighbourCount == 3) // ----------------------------------------------------------------------------
+			{
+				if (crossNeighbourCount == 0) // CROSS
+				{
+					yield return new Block(BlockType.CrossCorner, voxelIndex, subVoxelDir, Vector3Int.one);
+				}
+				else if (crossNeighbourCount == 2 && !nXYZf) // EDGE NEGATIVE
+				{
+					Axis3D axis = !nXYf ? Axis3D.Z : !nYZf ? Axis3D.X : Axis3D.Y;
+					yield return new Block(BlockType.EdgeNegative, voxelIndex, subVoxelDir, Vector3Int.one, axis);
+				}
+				else if (crossNeighbourCount == 3) // CORNER NEGATIVE
+				{
+					yield return new Block(BlockType.CornerNegative, voxelIndex, subVoxelDir, Vector3Int.one);
+
+					if (crossNeighbourCount != 3 && !blockSetup.mergeCloseEdges) // BREAKING POINT IN MODEL
 					{
-						int nXi = vXi + dX; // Neighbour Voxel Index
-						int nYi = vYi + dY;
-						int nZi = vZi + dZ;
-						Vector3Int inVoxelDir = new(dX, dY, dZ);
+						Axis3D axis = !nXYf ? Axis3D.Z : !nYZf ? Axis3D.X : Axis3D.Y;
+						Vector3 normalVector = axis.ToVector().MultiplyAllAxis(subVoxelDir);
+						breakPoints.Add(voxelIndex + (Vector3)subVoxelDir * 0.25f - normalVector * 0.5f);
+					}
+				}
+			}
 
-						var blockPosition = new Vector3(
-							vXi + (dX + 1) * 0.25f,
-							vYi + (dY + 1) * 0.25f,
-							vZi + (dZ + 1) * 0.25f);
+			var normal = new Vector3Int
+			{
+				x = nXf ? 0 : dX,
+				y = nYf ? 0 : dY,
+				z = nZf ? 0 : dZ
+			};
 
-						bool nXe = nXi >= 0 && nXi < voxelMap.FullSize.x; // Do Neighbour Row Exist
-						bool nYe = nYi >= 0 && nYi < voxelMap.FullSize.y;
-						bool nZe = nZi >= 0 && nZi < voxelMap.FullSize.z;
+			if (neighbourCount == 2) // -------------------------- SIDE ---------------------------------------------
+			{
+				if (crossNeighbour2Count == 0) // SIDE TO EDGE NEGATIVE
+				{
+					Axis3D axis = normal.ToAxis();
+					yield return new Block(BlockType.SideToNegativeEdge, voxelIndex, subVoxelDir, Vector3Int.one, axis);
+					yield break;
+				}
 
-						bool nXf =   GetNeighbour(voxelMap, voxelValue, nXi, vYi, vZi, nXe);
-						bool nYf =   GetNeighbour(voxelMap, voxelValue, vXi, nYi, vZi, nYe);
-						bool nZf =   GetNeighbour(voxelMap, voxelValue, vXi, vYi, nZi, nZe); 
-						bool nXYf = GetCrossNeighbour(voxelMap, voxelValue, nXi, nYi, vZi, nXe && nYe);
-						bool nYZf = GetCrossNeighbour(voxelMap, voxelValue, vXi, nYi, nZi, nYe && nZe);
-						bool nZXf = GetCrossNeighbour(voxelMap, voxelValue, nXi, vYi, nZi, nZe && nXe);
-						bool nXYZf = GetCrossNeighbour(voxelMap, voxelValue, nXi, nYi, nZi, nXe && nYe && nZe);
-						 
+				Vector3Int inPlaneNeighbourIndex = voxelIndex + subVoxelDir - normal;
+				bool inPlaneNeighbour = GetAnyNeighbour(voxelValue, inPlaneNeighbourIndex, out bool _);
 
-						// ---------------------------------------------------------------------------------------------
+				if (crossNeighbour2Count == 1 && inPlaneNeighbour) // SIDE
+				{
+					Axis3D axis = normal.ToAxis();
+					yield return new Block(BlockType.SidePositive, voxelIndex, subVoxelDir, Vector3Int.one, axis);
+				}
 
-						int neighbourCount = (nXf ? 1 : 0) + (nYf ? 1 : 0) + (nZf ? 1 : 0);
-						int crossNeighbourCount = (nXYf ? 1 : 0) + (nYZf ? 1 : 0) + (nZXf ? 1 : 0);
-						int crossNeighbour2Count = (nXYf ? 1 : 0) + (nYZf ? 1 : 0) + (nZXf ? 1 : 0) + (nXYZf ? 1 : 0);
-
-						if (neighbourCount == 3 && crossNeighbour2Count == 4)
-							continue;
-
-						var normal = new Vector3Int();
-						Axis3D axis;
-
-						// IS FILLED
-
-						if (neighbourCount == 0) // CORNER
+				else if (crossNeighbourCount == 3 || (crossNeighbourCount == 2 && ! inPlaneNeighbour)) // POSSIBLE NEGATIVE CORNERS
+				{
+					possibleCorners.Add((voxelIndex + normal, subVoxelDir - normal * 2));
+				}
+			}
+			else if (neighbourCount == 1) // ----------------------------------------------------------------------------
+			{
+				if (crossNeighbourCount == 0) // EDGE
+				{
+					Axis3D axis = Negate(normal);
+					yield return new Block(BlockType.EdgePositive, voxelIndex, subVoxelDir, Vector3Int.one, axis);
+				}
+				else if (crossNeighbourCount == 1)
+				{
+					if (nXYZf) // EDGE TO EDGE
+					{
+						Vector3Int nIndex = voxelIndex + normal;
+						bool middleNeighbourFilled = GetAnyNeighbour(voxelValue, nIndex.x, nIndex.y, nIndex.z, out bool _);
+						if (!middleNeighbourFilled)
 						{
-							yield return new Block(BlockType.CornerPositive, inVoxelDir, blockSize, blockPosition);
-
-							if (crossNeighbourCount != 0 && blockSetup.mergeCloseEdges) // BREAKING POINT IN MODEL
-							{
-								axis = nXYf ? Axis3D.Z : nYZf ? Axis3D.X : Axis3D.Y;
-								Vector3 normalVector = axis.ToVector().MultiplyAllAxis(inVoxelDir);
-								blockPosition += (Vector3)inVoxelDir * 0.25f - normalVector * 0.5f;
-								yield return new Block(BlockType.BreakPoint, inVoxelDir, blockSize, axis, blockPosition);
-							}
-							continue;
-						}
-
-						normal.x = nXf ? 0 : dX;
-						normal.y = nYf ? 0 : dY;
-						normal.z = nZf ? 0 : dZ;
-
-						if (neighbourCount == 2)
-						{
-							if (crossNeighbour2Count == 1) // SIDE
-							{
-								Vector3Int crossEdgePosition = voxelIndex + inVoxelDir - normal;
-								bool crossEdgeFilled = voxelMap.IsFilledSafe(crossEdgePosition);
-								if (crossEdgeFilled) // (NOT IN "EDGE TO EDGE" Cross)
-								{
-									axis = normal.ToAxis();
-									yield return new Block(BlockType.SidePositive, inVoxelDir, blockSize, axis, blockPosition);
-								}
-							}
-							else if (crossNeighbour2Count == 0) // SIDE TO EDGE NEGATIVE
-							{
-								axis = normal.ToAxis();
-
-								//Vector3Int crossEdgeIndex = voxelIndex - normal;
-								// bool crossEdgeFilled = voxelMap.IsFilledSafe(crossEdgeIndex);
-								// if (crossEdgeFilled)
-
-								yield return new Block(BlockType.SideToNegativeEdge, inVoxelDir, blockSize, axis, blockPosition);
-							}
-						}
-						else if (neighbourCount == 1 && crossNeighbourCount == 0) // EDGE
-						{
-							axis = Negate(normal);
-							yield return new Block(BlockType.EdgePositive, inVoxelDir, blockSize, axis, blockPosition);
-							continue;
-						}
-						if (neighbourCount == 1 && crossNeighbourCount == 1 && (!blockSetup.mergeCloseEdges || !nXYZf))  // EDGE
-						{
-							axis = Negate(normal);
-							Vector3Int crossEdgePosition = voxelIndex + normal;
-							bool crossEdgeFilled = voxelMap.IsFilledSafe(crossEdgePosition);
-							if (crossEdgeFilled)
-							{
-								yield return new Block(BlockType.EdgePositive, inVoxelDir, blockSize, axis, blockPosition);
-								continue;
-							}
-						}
-						if (neighbourCount == 1 && crossNeighbourCount == 1 && nXYZf) // EDGE TO EDGE
-						{
-							bool middleNeighbourFilled = voxelMap.IsFilledSafe(voxelIndex + normal);
-							if (!middleNeighbourFilled)
-							{
-								axis = Negate(normal);
-								SeparateVector(normal, out Vector3Int normal1, out Vector3Int normal2);
-								Vector3Int crossEdgeIndex1 = voxelIndex + inVoxelDir - normal + normal1;
-								bool crossEdgeFilled1 = voxelMap.IsFilledSafe(crossEdgeIndex1);
-								Axis3D connectingAxis = crossEdgeFilled1 ? normal2.ToAxis() : normal1.ToAxis();
-								if (axis == Axis3D.X && connectingAxis != Axis3D.Y)
-									continue;
-								if (axis == Axis3D.Y && connectingAxis != Axis3D.Z)
-									continue;
-								if (axis == Axis3D.Z && connectingAxis != Axis3D.X)
-									continue;
-								yield return new Block(BlockType.EdgeToEdge, inVoxelDir, blockSize, axis, blockPosition);
-							}
-						}
-						else if (neighbourCount == 1 && crossNeighbourCount == 2 && nXYZf) // SIDE TO EDGE
-						{
-							axis = Negate(normal);
-							Vector3Int crossEdgeIndex = voxelIndex + normal;
-							bool crossEdgeFilled = voxelMap.IsFilledSafe(crossEdgeIndex);
-							if (!crossEdgeFilled)
-							{
-								yield return new Block(BlockType.SideToPositiveEdge, inVoxelDir, blockSize, axis,
-									blockPosition);
-							}
-						}
-
-						if (neighbourCount == 3)
-						{
-							if (crossNeighbourCount == 3) // CORNER NEGATIVE
-							{
-								yield return new Block(BlockType.CornerNegative, -inVoxelDir, blockSize, blockPosition + ((Vector3)inVoxelDir) * 0.5f);
-
-								if (crossNeighbourCount != 3 && !blockSetup.mergeCloseEdges) // BREAKING POINT IN MODEL
-								{
-									axis = !nXYf ? Axis3D.Z : !nYZf ? Axis3D.X : Axis3D.Y;
-									Vector3 normalVector = axis.ToVector().MultiplyAllAxis(inVoxelDir);
-									blockPosition += (Vector3)inVoxelDir * 0.25f - normalVector * 0.5f;
-									yield return new Block(BlockType.BreakPoint, inVoxelDir, blockSize, axis, blockPosition);
-								}
-
-								continue;
-							}
-
-							if (crossNeighbourCount == 0) // CROSS
-							{
-								yield return new Block(BlockType.CrossCorner, inVoxelDir, blockSize, blockPosition);
-								continue;
-							}
-
-							normal.x = !nXf ? 0 : -dX;
-							normal.y = !nYf ? 0 : -dY;
-							normal.z = !nZf ? 0 : -dZ;
-
-
-							if (crossNeighbourCount == 2 && !nXYZf) // EDGE NEGATIVE
-							{
-								axis = !nXYf ? Axis3D.Z : !nYZf ? Axis3D.X : Axis3D.Y;
-								yield return new Block(BlockType.EdgeNegative, -inVoxelDir, blockSize, axis, blockPosition + ((Vector3)inVoxelDir) * 0.5f);
-							}
-
-							//if (neighbourCount == 2 && crossNeighbourCount == 2 && (mergeCloseEdges || nXYZf))   // EDGE NEGATIVE
-							//{
-							//	Axis3D axis = Negate(normal);
-							//	Vector3Int crossEdgePosition = voxelIndex - normal;
-							//	bool crossEdgeFilled = voxelMap.IsFilledSafe(crossEdgePosition);
-							//	if (!crossEdgeFilled)
-							//	{
-							//		yield return new Block(BlockType.EdgeNegative, inVoxelDir, blockSize, axis, blockPosition);
-							//	}
-							//}
+							Axis3D axis = Negate(normal);
+							SeparateVector(normal, out Vector3Int normal1, out Vector3Int normal2);
+							Vector3Int crossEdgeIndex1 = voxelIndex + subVoxelDir - normal + normal1;
+							bool crossEdgeFilled1 = GetAnyNeighbour(voxelValue, crossEdgeIndex1.x, crossEdgeIndex1.y, crossEdgeIndex1.z, out bool _);
+							Axis3D connectingAxis = crossEdgeFilled1 ? normal2.ToAxis() : normal1.ToAxis();
+							if (axis == Axis3D.X && connectingAxis != Axis3D.Y)
+								yield break;
+							if (axis == Axis3D.Y && connectingAxis != Axis3D.Z)
+								yield break;
+							if (axis == Axis3D.Z && connectingAxis != Axis3D.X)
+								yield break;
+							yield return new Block(BlockType.EdgeToEdge, voxelIndex, subVoxelDir, Vector3Int.one, axis);
 						}
 					}
-		}
-
-		static bool GetNeighbour(
-			VoxelMap voxelMap, int voxelValue, int xi, int yi, int zi, bool voxelExists)
-		{
-			if (!voxelExists)
-			{
-				if (blockSetup.openOnSides) return true;
-				else return false;
-			}
-
-			int val = voxelMap.GetVoxel(xi, yi, zi);
-			return blockSetup.separateVoxelMaterials ?
-				val == voxelValue : val.IsFilled();
-		}
-
-		static bool GetCrossNeighbour(
-	VoxelMap voxelMap, int voxelValue, int xi, int yi, int zi, bool voxelExists)
-		{
-			if (!voxelExists)
-			{
-				if (blockSetup.openOnSides)
-				{
-					Vector3Int size = voxelMap.FullSize;
-					xi = Mathf.Clamp(xi, 0, size.x - 1);
-					yi = Mathf.Clamp(yi, 0, size.y - 1);
-					zi = Mathf.Clamp(zi, 0, size.z - 1);
-					return voxelMap.GetVoxel(xi, yi, zi).IsFilled();
+					if (!blockSetup.mergeCloseEdges || !nXYZf)  // EDGE
+					{
+						Axis3D axis = Negate(normal);
+						Vector3Int nIndex = voxelIndex + normal;
+						bool crossEdgeFilled = GetAnyNeighbour(voxelValue, nIndex.x, nIndex.y, nIndex.z, out bool _);
+						if (crossEdgeFilled)
+						{
+							yield return new Block(BlockType.EdgePositive, voxelIndex, subVoxelDir, Vector3Int.one, axis);
+							yield break;
+						}
+					}
 				}
-				else return false;
+
+				// MERGE CLOSE EDGES TEST
+				//if (neighbourCount == 2 && crossNeighbourCount == 2 && (mergeCloseEdges || nXYZf))   // EDGE NEGATIVE
+				//{
+				//	Axis3D axis = Negate(normal);
+				//	Vector3Int crossEdgePosition = voxelIndex - normal;
+				//	bool crossEdgeFilled = voxelMap.IsFilledSafe(crossEdgePosition);
+				//	if (!crossEdgeFilled)
+				//	{
+				//		yield return new Block(BlockType.EdgeNegative, inVoxelDir, blockSize, axis, blockPosition);
+				//	}
+				//}
+
+
+				else if (crossNeighbourCount == 2 && nXYZf) // EDGE TO SIDE
+				{
+					Axis3D axis = Negate(normal);
+					Vector3Int crossEdgeIndex = voxelIndex + normal;
+					bool crossEdgeFilled = GetAnyNeighbour(voxelValue, crossEdgeIndex, out bool _);
+					if (!crossEdgeFilled)
+					{
+						yield return new Block(BlockType.SideToPositiveEdge, voxelIndex, subVoxelDir, Vector3Int.one, axis);
+					}
+				}
+			}
+		}
+
+
+		static bool GetAnyNeighbour(int currentValue, Vector3Int index, out bool filled) => GetAnyNeighbour(currentValue, index.x, index.y, index.z, out filled);
+
+		static bool GetAnyNeighbour(int currentValue, int x, int y, int z, out bool filled)
+		{
+			// if Neighbour Exists
+			int val;
+			if (x >= 0 && x < voxelMap.FullSize.x &&
+				y >= 0 && y < voxelMap.FullSize.y &&
+				z >= 0 && z < voxelMap.FullSize.z)
+			{
+				val = voxelMap.GetVoxel(x, y, z);
+				filled = val.IsFilled();
+				return val == currentValue;
 			}
 
-			int val = voxelMap.GetVoxel(xi, yi, zi);
-			return blockSetup.separateVoxelMaterials ?
-				val == voxelValue : val.IsFilled();
+			// Neighbour Do NOT Exists:
+
+			if (!blockSetup.openOnSides)
+			{
+				filled = false;
+				return false;
+			}
+
+			Vector3Int size = voxelMap.FullSize;
+			int xin = Mathf.Clamp(x, 0, size.x - 1);
+			int yin = Mathf.Clamp(y, 0, size.y - 1);
+			int zin = Mathf.Clamp(z, 0, size.z - 1);
+
+			val = voxelMap.GetVoxel(xin, yin, zin);
+			filled = val.IsFilled();
+			return val == currentValue;
 		}
+
+
 
 		static void SeparateVector(Vector3Int vector, out Vector3Int a, out Vector3Int b)
 		{

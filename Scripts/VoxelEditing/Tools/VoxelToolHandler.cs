@@ -109,7 +109,7 @@ namespace VoxelSystem
 
 		void HandleRaycast(IVoxelEditor voxelEditor, Ray ray, Event guiEvent, bool raycastOutside)
 		{
-			if (!guiEvent.isMouse || guiEvent.button != 0) return;
+			if (!guiEvent.isMouse || guiEvent.button is not 0) return;
 
 			Transform transform = voxelEditor.transform;
 			VoxelMap map = _isMouseDown ? _originalMap : voxelEditor.Map;
@@ -120,6 +120,9 @@ namespace VoxelSystem
 
 			if (guiEvent.type == EventType.MouseDown)
 			{
+				if (guiEvent.modifiers == EventModifiers.Control)
+					Debug.Log(hit.voxelIndex);
+
 				_originalSelection = voxelEditor.Selection;
 				_currentEventType = MouseEventType.Down;
 				HandleCursorDown(voxelEditor, _isLastRayHit, hit);

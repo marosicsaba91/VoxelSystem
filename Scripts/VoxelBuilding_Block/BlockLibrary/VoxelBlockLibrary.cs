@@ -20,7 +20,7 @@ namespace VoxelSystem
 		{
 			BlockType blockType = block.blockType;
 			Axis3D axis = block.axis;
-			SubVoxelFlags dir = SubVoxelUtility.FromVector(block.inVoxelDirection);
+			SubVoxelFlags dir = SubVoxelUtility.FromVector(block.subVoxel);
 			BlockKey blockKey = new(blockType, dir, axis);
 
 			if (_meshCache.IsNullOrEmpty())
