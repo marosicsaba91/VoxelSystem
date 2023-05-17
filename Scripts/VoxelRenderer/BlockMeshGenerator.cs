@@ -5,6 +5,7 @@ using UnityEngine.Rendering;
 using VoxelSystem;
 using TMPro;
 using UnityEngine.UIElements;
+using System.Linq;
 
 [ExecuteAlways]
 [RequireComponent(typeof(VoxelFilter))]
@@ -14,7 +15,7 @@ public class BlockMeshGenerator : MonoBehaviour
 	[SerializeField, HideInInspector] MeshFilter meshFilter;
 	[SerializeField] internal VoxelPalette voxelPalette;
 
-	[SerializeField] internal BlockCalculationSetting blockSetting;
+	[SerializeField] internal BlockGenerationSetting blockSetting;
 
 	[SerializeField] Mesh destinationMesh;
 
@@ -25,12 +26,12 @@ public class BlockMeshGenerator : MonoBehaviour
 	[SerializeField] TMP_Text debugText;
 
 	public Matrix4x4 LocalToWorldMatrix => transform.localToWorldMatrix;
-	 
+
 	public VoxelMap Map => voxelFilter == null ? null : voxelFilter.GetVoxelMap();
 
 	void CreateMeshFile()
 	{
-# if UNITY_EDITOR 
+#if UNITY_EDITOR
 		if (destinationMesh == null)
 			RegenerateMeshes();
 
@@ -43,10 +44,10 @@ public class BlockMeshGenerator : MonoBehaviour
 		int index = path.IndexOf("Assets/");
 		if (index >= 0)
 			path = path[index..];
-		 
-		if(!path.IsNullOrEmpty())
+
+		if (!path.IsNullOrEmpty())
 			UnityEditor.AssetDatabase.CreateAsset(destinationMesh, path);
-# endif
+#endif
 	}
 
 
@@ -64,7 +65,7 @@ public class BlockMeshGenerator : MonoBehaviour
 	public static List<Vector3> _vertices = new();
 	public static List<Vector3> _normals = new();
 	public static List<Vector2> _uv = new();
-	public static List<int> _triangles = new(); 
+	public static List<int> _triangles = new();
 	public static int _currentTriangleIndex = 0;
 	public static List<SubMeshDescriptor> _descriptors = new();
 
@@ -72,7 +73,15 @@ public class BlockMeshGenerator : MonoBehaviour
 
 	public void RegenerateMeshes()
 	{
-		StartBenchmarkModul("Clear Lists");
+		if (doBenchmark)
+			_benchmarkTimer ??= new BenchmarkTimer();
+		else
+			_benchmarkTimer = null;
+
+		_benchmarkTimer?.StartModule("Clear Lists");
+
+
+
 		_vertices.Clear();
 		_normals.Clear();
 		_uv.Clear();
@@ -81,30 +90,32 @@ public class BlockMeshGenerator : MonoBehaviour
 		_descriptors.Clear();
 
 
-		StartBenchmarkModul("Generate Blocks based on VoxelMap");
-		GenerateBlocks(Map);
+		_benchmarkTimer?.StartModule("Generate Blocks based on VoxelMap");
+
+		BlockMapGenerator.blockSetup = blockSetting;
+		List<List<Block>> blocks = BlockMapGenerator.CalculateBlocks(Map, voxelPalette.Length);
 
 		int i = 0;
 		foreach (VoxelPaletteItem paletteItem in voxelPalette.Items)
 		{
-			RegenerateMeshData(_blockCache[i], paletteItem, i);
+			RegenerateMeshData(blocks[i], paletteItem, i);
 			i++;
 		}
 
-		StartBenchmarkModul("Setup Mesh");
+		_benchmarkTimer?.StartModule("Setup Mesh");
 		destinationMesh.Clear();
 		destinationMesh.indexFormat = _vertices.Count >= vertexLimitOf16Bit ?
 			IndexFormat.UInt32 : IndexFormat.UInt16;
 
-		StartBenchmarkModul("Copy Vertex data to Mesh");
+		_benchmarkTimer?.StartModule("Copy Vertex data to Mesh");
 		destinationMesh.vertices = _vertices.ToArray();
 		destinationMesh.normals = _normals.ToArray();
 		destinationMesh.uv = _uv.ToArray();
 
-		StartBenchmarkModul("Copy Triangle data to Mesh");
+		_benchmarkTimer?.StartModule("Copy Triangle data to Mesh");
 		destinationMesh.triangles = _triangles.ToArray();
 
-		StartBenchmarkModul("Copy SubMesh data");
+		_benchmarkTimer?.StartModule("Copy SubMesh data");
 		destinationMesh.subMeshCount = _descriptors.Count;
 		for (int j = 0; j < _descriptors.Count; j++)
 		{
@@ -128,19 +139,7 @@ public class BlockMeshGenerator : MonoBehaviour
 			meshFilter.mesh = destinationMesh;
 	}
 
-	static readonly List<List<Block>> _blockCache = new();
-	void GenerateBlocks(VoxelMap voxelMap)
-	{
-		if (voxelMap == null) return;
 
-		_blockCache.SetCount(voxelPalette.Length, () => new List<Block>());
-
-		foreach(List<Block> block in _blockCache)
-			block.Clear();
-
-		BlockVoxelBuilder.CalculateBlocks(voxelMap, _blockCache, blockSetting);
-	}
-	
 	void RegenerateMeshData(List<Block> blocks, VoxelPaletteItem paletteItem, int index)
 	{
 		if (destinationMesh == null)
@@ -151,42 +150,61 @@ public class BlockMeshGenerator : MonoBehaviour
 			};
 		}
 
-		StartBenchmarkModul("Generate Vertex & Triangle data", index);
-		BlockVoxelBuilder.BuildMeshFromBlocks(paletteItem.blockLibrary, blocks, _vertices, _normals, _uv, _triangles);
-		
-		StartBenchmarkModul("Generate SubMesh data", index);
+		if (doBenchmark)
+			_benchmarkTimer.StartModule(("Generate Vertex & Triangle data" + index));
+		BuildMeshFromBlocks(paletteItem.blockLibrary, blocks, _vertices, _normals, _uv, _triangles);
+
+		if (doBenchmark)
+			_benchmarkTimer.StartModule(("Generate SubMesh data" + index));
+
 		int triangleCount = _triangles.Count - _currentTriangleIndex;
 		_descriptors.Add(new SubMeshDescriptor(_currentTriangleIndex, triangleCount));
 		_currentTriangleIndex = _triangles.Count;
 	}
 
-	// Mesh Generation
-
-
-	void StartBenchmarkModul(string message)
+	static void BuildMeshFromBlocks(VoxelBlockLibrary blockLibrary, List<Block> blocksList,
+	List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles)
 	{
-		if (doBenchmark)
-			_benchmarkTimer.StartModule(message);
-	}
-	void StartBenchmarkModul(string message, int index)
-	{
-		if (doBenchmark)
-			_benchmarkTimer.StartModule(message + " - " + index);
-	}
-
-
-	private void OnDrawGizmos()
-	{
-		List<(Vector3Int, Vector3Int)> subVoxels = BlockVoxelBuilder.possibleCorners;
-
-		Gizmos.color = new(0,0,0,0.3f);
-		Gizmos.matrix = transform.localToWorldMatrix;
-
-		foreach ((Vector3Int, Vector3Int) subVoxel in subVoxels)
+		foreach (Block block in blocksList)
 		{
-			Vector3 position = subVoxel.Item1 + Vector3.one * 0.5f + (Vector3)subVoxel.Item2 * 0.25f;
-			Gizmos.DrawWireCube(position, Vector3.one * 0.2f);
-
+			if (!blockLibrary.TryGetMesh(block, out CustomMesh mesh))
+				continue;
+			Vector3 offset = block.Center;
+			vertices.AddRange(mesh.vertices.Select(v => v + offset));
+			normals.AddRange(mesh.normals);
+			uv.AddRange(mesh.uv);
+			triangles.AddRange(mesh.triangles.Select(t => t + vertices.Count - mesh.vertices.Length));
 		}
 	}
+
+	// Mesh Generation
+
+	
+	private void OnDrawGizmos()
+	{
+		Gizmos.matrix = transform.localToWorldMatrix;
+
+		Gizmos.color = new(0, 0, 0, 0.3f);
+		foreach (var corners in BlockMapGenerator._allNegativeCornersByMaterial)
+			foreach (var corner in corners)
+			{
+				float r = Random.Range(0.15f, 0.25f);
+				Vector3 position = corner.Item1 + Vector3.one * 0.5f + (Vector3)corner.Item2 * 0.25f;
+				Gizmos.DrawWireCube(position, Vector3.one * r);
+			}
+
+		Gizmos.color = new(0, 0, 1, 0.3f);
+		foreach (var edges in BlockMapGenerator._allNegativeEdgesByMaterial)
+			foreach (var edge in edges)
+			{
+				float r = Random.Range(0.15f, 0.25f);
+				Vector3 position = edge.Item1 + Vector3.one * 0.5f + (Vector3)edge.Item2 * 0.25f;
+				Gizmos.DrawWireCube(position, Vector3.one * r);
+				Vector3 dir = edge.Item3.ToVector() * r;
+				Gizmos.DrawLine(position + dir, position - dir);
+
+			}
+		Gizmos.matrix = Matrix4x4.identity;
+	}
+	
 }
