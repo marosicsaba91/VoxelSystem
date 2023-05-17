@@ -93,7 +93,7 @@ public class BlockMeshGenerator : MonoBehaviour
 		_benchmarkTimer?.StartModule("Generate Blocks based on VoxelMap");
 
 		BlockMapGenerator.blockSetup = blockSetting;
-		List<List<Block>> blocks = BlockMapGenerator.CalculateBlocks(Map, voxelPalette.Length);
+		List<Dictionary<(Vector3Int, Vector3Int), Block>> blocks = BlockMapGenerator.CalculateBlocks(Map, voxelPalette.Length);
 
 		int i = 0;
 		foreach (VoxelPaletteItem paletteItem in voxelPalette.Items)
@@ -140,7 +140,7 @@ public class BlockMeshGenerator : MonoBehaviour
 	}
 
 
-	void RegenerateMeshData(List<Block> blocks, VoxelPaletteItem paletteItem, int index)
+	void RegenerateMeshData(Dictionary<(Vector3Int, Vector3Int), Block> blocks, VoxelPaletteItem paletteItem, int index)
 	{
 		if (destinationMesh == null)
 		{
@@ -152,7 +152,7 @@ public class BlockMeshGenerator : MonoBehaviour
 
 		if (doBenchmark)
 			_benchmarkTimer.StartModule(("Generate Vertex & Triangle data" + index));
-		BuildMeshFromBlocks(paletteItem.blockLibrary, blocks, _vertices, _normals, _uv, _triangles);
+		BuildMeshFromBlocks(paletteItem.blockLibrary, blocks.Values, _vertices, _normals, _uv, _triangles);
 
 		if (doBenchmark)
 			_benchmarkTimer.StartModule(("Generate SubMesh data" + index));
@@ -162,10 +162,10 @@ public class BlockMeshGenerator : MonoBehaviour
 		_currentTriangleIndex = _triangles.Count;
 	}
 
-	static void BuildMeshFromBlocks(VoxelBlockLibrary blockLibrary, List<Block> blocksList,
+	static void BuildMeshFromBlocks(VoxelBlockLibrary blockLibrary, IEnumerable<Block> blocks,
 	List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles)
 	{
-		foreach (Block block in blocksList)
+		foreach (Block block in blocks)
 		{
 			if (!blockLibrary.TryGetMesh(block, out CustomMesh mesh))
 				continue;
@@ -179,7 +179,7 @@ public class BlockMeshGenerator : MonoBehaviour
 
 	// Mesh Generation
 
-	
+	/*
 	private void OnDrawGizmos()
 	{
 		Gizmos.matrix = transform.localToWorldMatrix;
@@ -206,5 +206,6 @@ public class BlockMeshGenerator : MonoBehaviour
 			}
 		Gizmos.matrix = Matrix4x4.identity;
 	}
-	
+	*/
+
 }
