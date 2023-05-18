@@ -1,5 +1,6 @@
 ﻿using MUtility;
-using System.IO; 
+using System;
+using System.IO;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -9,7 +10,6 @@ namespace VoxelSystem
 	class VoxelFilter : MonoBehaviour
 	{
 		[SerializeField, HideInInspector] ArrayVoxelMap innerMap = null;
-		[SerializeField, HideInInspector] BlockMeshGenerator voxelRenderer;
 		[SerializeField, HideInInspector, FormerlySerializedAs("connectedMapHolder")] SharedVoxelMap sharedVoxelMap = null;
 
 		[SerializeField] DisplayMember sharedMap = new(nameof(SharedVoxelMap));
@@ -17,14 +17,11 @@ namespace VoxelSystem
 
 		[SerializeField, HideInInspector] SharedVoxelMap _lastFrameSharedMap = null;
 
+		public Action MapChanged;
+		void OnMapChanged() => MapChanged?.Invoke();
 
 		public string MapName => HasSharedMap ? SharedVoxelMap.name : name;
-
-		internal void OnValidate() 
-		{
-			voxelRenderer = GetComponent<BlockMeshGenerator>();
-		}
-
+		
 		public bool HasSharedMap => sharedVoxelMap != null; 
 
 		public SharedVoxelMap SharedVoxelMap
@@ -43,7 +40,7 @@ namespace VoxelSystem
 				else
 				{
 					sharedVoxelMap = value;
-					MapChanged();
+					OnMapChanged();
 				} 
 			}
 		}
@@ -58,10 +55,9 @@ namespace VoxelSystem
 
 		internal void SetVoxelMap(ArrayVoxelMap map)
 		{
-			voxelRenderer = GetComponent<BlockMeshGenerator>();
 			innerMap = map;
 			sharedVoxelMap = null;
-			innerMap.MapChangedEvent += MapChanged;
+			innerMap.MapChangedEvent += OnMapChanged;
 		}
 
 		void Update() // ExecuteAlways
@@ -75,49 +71,42 @@ namespace VoxelSystem
 			{
 				innerMap = new();
 				innerMap.Setup();
-				MapChanged();
+				OnMapChanged();
 			}
 			VoxelMap map = GetVoxelMap();
 			if (map != null)
-				map.MapChangedEvent += MapChanged;
+				map.MapChangedEvent += OnMapChanged;
 		}
 
 		void OnDisable()
 		{
 			VoxelMap map = GetVoxelMap();
 			if (map != null)
-				map.MapChangedEvent -= MapChanged;
+				map.MapChangedEvent -= OnMapChanged;
 		}
 
 		void SubscribeToChange()
 		{
 			if (_lastFrameSharedMap == null && sharedVoxelMap == null)
 			{
-				innerMap.MapChangedEvent -= MapChanged;
-				innerMap.MapChangedEvent += MapChanged;
+				innerMap.MapChangedEvent -= OnMapChanged;
+				innerMap.MapChangedEvent += OnMapChanged;
 			}
 
 			if (_lastFrameSharedMap == sharedVoxelMap)
 				return;
 
 			if (_lastFrameSharedMap != null)
-				_lastFrameSharedMap.Map.MapChangedEvent -= MapChanged;
+				_lastFrameSharedMap.Map.MapChangedEvent -= OnMapChanged;
 			else if (innerMap != null)
-				innerMap.MapChangedEvent -= MapChanged;
+				innerMap.MapChangedEvent -= OnMapChanged;
 
 			if (sharedVoxelMap != null)
-				sharedVoxelMap.Map.MapChangedEvent += MapChanged;
+				sharedVoxelMap.Map.MapChangedEvent += OnMapChanged;
 			else if (innerMap != null)
-				innerMap.MapChangedEvent += MapChanged;
+				innerMap.MapChangedEvent += OnMapChanged;
 
 			_lastFrameSharedMap = sharedVoxelMap;
-		}
-
-
-		void MapChanged()
-		{
-			if (voxelRenderer != null || TryGetComponent(out voxelRenderer))
-				voxelRenderer.RegenerateMeshes();
 		}
 
 		void ExportVoxelMap()

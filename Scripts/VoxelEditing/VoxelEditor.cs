@@ -1,9 +1,12 @@
 ﻿using UnityEngine;
 using System;
 using Object = UnityEngine.Object;
+using System.Collections.Generic;
 
 namespace VoxelSystem
 {
+	public enum ToolState { None, Down, Drag, Up }
+
 	[Serializable]
 	public struct TransformLock
 	{
@@ -12,23 +15,26 @@ namespace VoxelSystem
 		public bool scale;
 	}
 
-	[RequireComponent(typeof(VoxelFilter), typeof(BlockMeshGenerator))]
+	[RequireComponent(typeof(VoxelFilter))]
 	[ExecuteAlways]
 	class VoxelEditor : MonoBehaviour, IVoxelEditor
 	{
 		static VoxelAction selectedAction = VoxelAction.Attach;
 		static VoxelTool selectedTool = VoxelTool.None;
+		static ToolState toolState = ToolState.None;
+		static int selectedPaletteIndex = 0;
 
-		[SerializeField, HideInInspector] VoxelFilter voxelFilter;
-		[SerializeField, HideInInspector] BlockMeshGenerator voxelRenderer;
+		[SerializeField] internal VoxelFilter voxelFilter;
+		[SerializeField] internal VoxelMeshGenerator meshGenerator;
+		[SerializeField] internal VoxelMeshGenerator quickMeshGenerator;
+
 
 		[SerializeField, HideInInspector] internal TransformLock transformLock = new();
-		[SerializeField, HideInInspector] internal int selectedPaletteIndex = 0;
 		[SerializeField, HideInInspector] internal BoundsInt selection = new(Vector3Int.zero, Vector3Int.one * -1);
 
 		public TransformLock TransformLock { get => transformLock; set => transformLock = value; }
 
-		public VoxelMap Map => voxelFilter == null ? null : voxelFilter.GetVoxelMap(); 
+		public VoxelMap Map => voxelFilter == null ? null : voxelFilter.GetVoxelMap();
 
 		public BoundsInt Selection { get => selection; set => selection = value; }
 
@@ -41,18 +47,38 @@ namespace VoxelSystem
 
 		private void OnValidate()
 		{
-			voxelFilter = GetComponent<VoxelFilter>();
-			voxelRenderer = GetComponent<BlockMeshGenerator>();
-			VoxelPalette palette = VoxelPalette;
-			if (palette == null)
-				selectedPaletteIndex = 0;
-			else
-				selectedPaletteIndex = Mathf.Max(Mathf.Min(selectedPaletteIndex, palette.Length - 1), 0);
+			if (voxelFilter == null)
+				voxelFilter = GetComponent<VoxelFilter>();
+			if (meshGenerator == null)
+				meshGenerator = GetComponent<VoxelMeshGenerator>();
+		}
+
+		public int PaletteLength => meshGenerator == null ? 1 : meshGenerator.PaletteLength;
+		public IEnumerable<IVoxelPaletteItem> PaletteItems
+		{
+			get
+			{
+				if (meshGenerator == null)
+					yield break;
+				foreach (IVoxelPaletteItem item in meshGenerator.PaletteItems)
+					yield return (IVoxelPaletteItem)item;
+			}
 		}
 
 		public string MapName => voxelFilter == null ? "-" : voxelFilter.MapName;
 		public VoxelTool SelectedTool { get => selectedTool; set => selectedTool = value; }
 		public VoxelAction SelectedAction { get => selectedAction; set => selectedAction = value; }
+		public ToolState ToolState
+		{
+			get => toolState;
+			set
+			{
+				if (toolState == value) return;
+				toolState = value;
+				if (value == ToolState.None && meshGenerator != null && meshGenerator != quickMeshGenerator)
+					meshGenerator.RegenerateMeshes();
+			}
+		}
 
 		// --- Palette ---
 		public int SelectedPaletteIndex
@@ -60,13 +86,35 @@ namespace VoxelSystem
 			get => selectedPaletteIndex;
 			set => selectedPaletteIndex = value;
 		}
-		public VoxelPalette VoxelPalette => voxelRenderer == null ? null : voxelRenderer.VoxelPalette;
+		// public IVoxelPalette<IVoxelPaletteItem> VoxelPalette => voxelGenerator == null ? null : voxelGenerator.VoxelPalette;
 
 		// --------------------------------------
+
+		VoxelFilter _lastFilter;
 		void Update()
 		{
 			DoLockTransform();
+
+			if (voxelFilter != null)
+			{
+				voxelFilter.MapChanged -= OnMapChanged;
+				voxelFilter.MapChanged += OnMapChanged;
+				_lastFilter = voxelFilter;
+			}
+			else if (_lastFilter != null) 
+			{
+				_lastFilter.MapChanged -= OnMapChanged;
+			}
 		}
+
+		void OnMapChanged() 
+		{
+			if(toolState is ToolState.Down or ToolState.Drag && quickMeshGenerator != null)
+				quickMeshGenerator.RegenerateMeshes();
+			else if(meshGenerator != null)
+				meshGenerator.RegenerateMeshes();
+		}
+
 
 		void DoLockTransform()
 		{
@@ -89,7 +137,7 @@ namespace VoxelSystem
 
 		void OnDrawGizmosSelected()
 		{
-			if(voxelFilter == null)
+			if (voxelFilter == null)
 				voxelFilter = GetComponent<VoxelFilter>();
 
 			if (Map == null)
@@ -113,7 +161,7 @@ namespace VoxelSystem
 				// const float offset2 = -0.025f;
 				// selectionSize = selection.size + (2 * offset2 * Vector3.one);
 				// Gizmos.DrawWireCube((Vector3)selection.min - offset2 * Vector3.one + selectionSize / 2f, selectionSize); 
-			} 
+			}
 
 			Gizmos.matrix = Matrix4x4.identity;
 		}

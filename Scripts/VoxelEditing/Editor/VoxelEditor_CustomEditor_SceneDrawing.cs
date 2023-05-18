@@ -1,4 +1,5 @@
 #if UNITY_EDITOR
+using MUtility;
 using UnityEditor;
 using UnityEngine;
 
@@ -21,7 +22,6 @@ namespace VoxelSystem
 				editor.Map?.UndoRedoEvenInvokedOnMap();
 				return;
 			}
-
 		}
 
 		// ------------------------------------------------------
@@ -61,6 +61,9 @@ namespace VoxelSystem
 			if (!_enableEdit)
 				return;
 
+			if (guiEvent.isKey)
+				HandleFastKeys(editor, guiEvent);
+
 			// ------------------------------------------------------
 
 			if (editor.SelectedTool == VoxelTool.None) return;
@@ -70,6 +73,15 @@ namespace VoxelSystem
 			Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
 			hander?.ExecuteEditorControl(editor, guiEvent, ray);
 
+		}
+
+		void HandleFastKeys(VoxelEditor editor, Event guiEvent) 
+		{
+			if (guiEvent.keyCode.TryGetValue(out int number))
+			{
+				editor.SelectedPaletteIndex = number;
+				guiEvent.Use();
+			}
 		}
 
 		void UpdateEnableEdit(VoxelEditor editor) => _enableEdit =

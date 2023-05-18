@@ -6,17 +6,17 @@ using UnityEngine;
 namespace VoxelSystem
 {
 	[Serializable]
-	public struct VoxelPaletteSetting : IVoxelPalette
+	public abstract class VoxelPaletteSetting<TPalette, TItem> : IVoxelPalette<TItem> where TPalette : IVoxelPalette<TItem> where TItem : IVoxelPaletteItem
 	{
 		enum VoxelPaletteItemType { Single, Multiple}
 
 		[SerializeField] VoxelPaletteItemType type;
-		[SerializeField, HideIf(nameof(IsSingle))] VoxelPalette palette;
-		[SerializeField, ShowIf(nameof(IsSingle))] VoxelPaletteItem voxelSetting;
+		[SerializeField, HideIf(nameof(IsSingle))] TPalette palette;
+		[SerializeField, ShowIf(nameof(IsSingle))] TItem voxelSetting;
 
 		bool IsSingle => type == VoxelPaletteItemType.Single;	
 
-		public IEnumerable<VoxelPaletteItem> Items 
+		public IEnumerable<TItem> Items 
 		{
 			get
 			{
@@ -26,7 +26,7 @@ namespace VoxelSystem
 					yield break;
 				else
 				{
-					foreach (VoxelPaletteItem item in palette.Items)
+					foreach (TItem item in palette.Items)
 						yield return item;
 				}
 			} 

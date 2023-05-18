@@ -121,17 +121,11 @@ namespace VoxelSystem
 			VoxelFilter newMapFilter = newGO.AddComponent<VoxelFilter>();
 			ArrayVoxelMap map = voxelEditor.SeparateSelection();
 			newMapFilter.SetVoxelMap(map);
-			newGO.AddComponent<VoxelEditor>();
+			VoxelEditor newEditor = newGO.AddComponent<VoxelEditor>();
+			newEditor.voxelFilter = newMapFilter;
 
-			if(!newGO.TryGetComponent(out BlockMeshGenerator renderer))
-				renderer = newGO.AddComponent<BlockMeshGenerator>();
-
-			if (original.TryGetComponent(out BlockMeshGenerator originalRenderer))
-			{
-				renderer.voxelPalette = originalRenderer.voxelPalette;
-				renderer.blockSetting = originalRenderer.blockSetting;
-				renderer.RegenerateMeshes();
-			}
+			foreach (VoxelMeshGenerator generator in newGO.GetComponents<VoxelMeshGenerator>())
+				newEditor.meshGenerator = generator.CreateACopy(newGO);
 
 #if UNITY_EDITOR
 			UnityEditor.Undo.RegisterCreatedObjectUndo(newGO, "VoxelMap Separated"); 

@@ -1,12 +1,9 @@
 ﻿using MUtility; 
-using System.Collections.Generic;
-//using UnityEditor;
+using System.Collections.Generic; 
 using UnityEngine; 
 
 namespace VoxelSystem
 {
-	public enum MouseEventType { None, Down, Drag, Up }
-
 	public struct VoxelHandelInfo
 	{
 		public Vector3 position;
@@ -21,7 +18,6 @@ namespace VoxelSystem
 		protected static Vector3 _originalTransformPosition = Vector3.zero;
 		protected static BoundsInt _originalSelection;
 		protected static Vector3Int _originalMapSize;
-		protected static MouseEventType _currentEventType;
 		protected static float _standardSpacing = 1;
 
 		// Raycast Helper Variables
@@ -53,7 +49,7 @@ namespace VoxelSystem
 			UnityEditor.Handles.matrix = voxelEditor.transform.localToWorldMatrix;
 
 
-			if (_currentEventType == MouseEventType.None)
+			if (voxelEditor.ToolState == ToolState.None)
 			{
 				_originalSelection = voxelEditor.Selection;
 				_originalMapSize = voxelEditor.Map.FullSize;
@@ -124,7 +120,7 @@ namespace VoxelSystem
 					Debug.Log(hit.voxelIndex);
 
 				_originalSelection = voxelEditor.Selection;
-				_currentEventType = MouseEventType.Down;
+				voxelEditor.ToolState = ToolState.Down;
 				HandleCursorDown(voxelEditor, _isLastRayHit, hit);
 			}
 			else if (!_isMouseDown)
@@ -135,16 +131,16 @@ namespace VoxelSystem
 
 			if (guiEvent.type == EventType.MouseDrag)
 			{
-				_currentEventType = MouseEventType.Drag;
+				voxelEditor.ToolState = ToolState.Drag;
 				HandleCursorDrag(voxelEditor, _isLastRayHit, hit);
 			}
 			else if (guiEvent.type == EventType.MouseUp)
 			{
-				_currentEventType = MouseEventType.Up;
+				voxelEditor.ToolState = ToolState.Up;
 				if (OnVoxelCursorUp(voxelEditor, _lastValidHit))
 					voxelEditor.Map.MapChanged();
 				_isMouseDown = false;
-				_currentEventType = MouseEventType.None;
+				voxelEditor.ToolState = ToolState.None;
 				_originalSelection = voxelEditor.Selection;
 			}
 
@@ -238,7 +234,7 @@ namespace VoxelSystem
 			{
 				case HandleEvent.LmbPress: // START DRAG 
 					_originalSelection = voxelEditor.Selection;
-					_currentEventType = MouseEventType.Down;
+					voxelEditor.ToolState = ToolState.Down;
 					_lastHandleVector = Vector3Int.zero;
 					_clickPositionGlobal = voxelEditor.transform.TransformPoint(handleResult.clickPosition);
 					_originalMap ??= new ArrayVoxelMap();
@@ -251,9 +247,9 @@ namespace VoxelSystem
 
 				case HandleEvent.LmbDrag: // DRAG
 
-					_handleSteps = GetDistance(_clickPositionGlobal, ray, directionVector); 
+					_handleSteps = GetDistance(_clickPositionGlobal, ray, directionVector);
 
-					_currentEventType = MouseEventType.Drag;
+					voxelEditor.ToolState = ToolState.Drag;
 					Vector3Int vec = direction.ToVectorInt() * _handleSteps;
 					bool changed = _lastHandleVector != vec;
 					_handleDragDirection = direction;
@@ -264,13 +260,13 @@ namespace VoxelSystem
 					break;
 
 				case HandleEvent.LmbRelease: // RELEASE 
-					_currentEventType = MouseEventType.Up;
+					voxelEditor.ToolState = ToolState.Up;
 					_handleSteps = GetDistance(_clickPositionGlobal, ray, directionVector);
 					if (OnHandleUp(voxelEditor, handleInfo, _handleSteps))
 						voxelEditor.Map.MapChanged();
 					_handleSteps = 0;
 					_lastHandleVector = Vector3Int.zero;
-					_currentEventType = MouseEventType.None;
+					voxelEditor.ToolState = ToolState.None;
 					_originalSelection = voxelEditor.Selection;
 
 					break;

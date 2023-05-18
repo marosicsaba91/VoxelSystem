@@ -2,14 +2,16 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!21 &2100000
 Material:
-  serializedVersion: 6
+  serializedVersion: 8
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Sand
   m_Shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
-  m_ShaderKeywords: _EMISSION
+  m_ValidKeywords:
+  - _EMISSION
+  m_InvalidKeywords: []
   m_LightmapFlags: 2
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -62,7 +64,7 @@ Material:
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _GlossMapScale: 1
-    - _Glossiness: 0.288
+    - _Glossiness: 0.195
     - _GlossyReflections: 1
     - _Metallic: 0
     - _Mode: 0
@@ -74,6 +76,6 @@ Material:
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:
-    - _Color: {r: 0.7529412, g: 0.53953505, b: 0.12549017, a: 1}
+    - _Color: {r: 0.9245283, g: 0.66990143, b: 0.17007834, a: 1}
     - _EmissionColor: {r: 0.2735849, g: 0.081301175, b: 0.116290055, a: 1}
   m_BuildTextureStacks: []

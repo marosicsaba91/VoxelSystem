@@ -97,8 +97,9 @@ LightmapSettings:
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
-  m_LightingDataAsset: {fileID: 0}
-  m_LightingSettings: {fileID: 4890085278179872738, guid: 477cc4148fad3449482a3bc3178594e2,
+  m_LightingDataAsset: {fileID: 112000000, guid: cc5c9a442dd29a146ba87b7cecc3c1a5,
+    type: 2}
+  m_LightingSettings: {fileID: 4890085278179872738, guid: 55c4d3eca620d6e4292cd1e1ee1f1cb0,
     type: 2}
 --- !u!196 &4
 NavMeshSettings:
@@ -114,8 +115,8 @@ NavMeshSettings:
     ledgeDropHeight: 0
     maxJumpAcrossDistance: 0
     minRegionArea: 2
-    manualCellSize: 0
-    cellSize: 0.033333335
+    manualCellSize: 1
+    cellSize: 0.05
     manualTileSize: 0
     tileSize: 256
     accuratePlacement: 0
@@ -468,6 +469,7 @@ GameObject:
   m_Component:
   - component: {fileID: 358482732}
   - component: {fileID: 358482731}
+  - component: {fileID: 358482734}
   - component: {fileID: 358482730}
   - component: {fileID: 358482729}
   - component: {fileID: 358482728}
@@ -502,7 +504,7 @@ MeshRenderer:
   m_Materials:
   - {fileID: 2100000, guid: d02ba6665376cc84bbee93a9d6d117c9, type: 2}
   - {fileID: 2100000, guid: 41059e89a753bc140b2471fd177752d0, type: 2}
-  - {fileID: 2100000, guid: c7b3668150f02324d836968dd6b39a65, type: 2}
+  - {fileID: 2100000, guid: cff7319fc0831c5419d983a6bcace865, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -545,12 +547,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   voxelFilter: {fileID: 358482731}
-  voxelRenderer: {fileID: 358482730}
+  meshGenerator: {fileID: 358482730}
+  quickMeshGenerator: {fileID: 358482734}
   transformLock:
     position: 1
     rotation: 1
     scale: 1
-  selectedPaletteIndex: 12
   selection:
     m_Position: {x: 0, y: 0, z: 0}
     m_Size: {x: -1, y: -1, z: -1}
@@ -567,22 +569,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   voxelFilter: {fileID: 358482731}
-  meshFilter: {fileID: 358482728}
-  voxelPalette: {fileID: 11400000, guid: 4657ccbc5717131488335abccb232d26, type: 2}
-  blockSetting:
-    mergeCloseEdges: 0
-    openOnSides: 1
-    continueSidesAndEdgesBetweenMaterials: 0
-    showFacesBetweenMaterials: 0
+  voxelPalette: {fileID: 11400000, guid: 4f17607bd7a28a74db498e851f6903b6, type: 2}
   destinationMesh: {fileID: 4300000, guid: dc5565de3ff683942b3abc15cf22e3dc, type: 2}
+  destinationMeshFilter: {fileID: 358482728}
+  destinationMeshCollider: {fileID: 0}
   regenerateMesh:
     functionZoom: 1
     functionOffset: {x: 0, y: 0}
   createMeshFile:
     functionZoom: 1
     functionOffset: {x: 0, y: 0}
-  doBenchmark: 1
-  debugText: {fileID: 1320589956}
+  doBenchmark: 0
+  benchmarkOutput: {fileID: 1320589956}
+  blockGenerationSetting:
+    mergeCloseEdges: 0
+    openOnSides: 1
+    continueSidesAndEdgesBetweenMaterials: 0
+    showFacesBetweenMaterials: 0
 --- !u!114 &358482731
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -599,7 +602,6 @@ MonoBehaviour:
     uniqueID: 3237d333-054d-4a61-8f91-15567c92682a
     size: {x: 13, y: 12, z: 10}
     intVoxelData: 000000000000000000000000ffffffffffffffffffffffff00000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000ffffffffffffffffffffffff00000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffff00000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffff00000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffff00000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00000000
-  voxelRenderer: {fileID: 358482730}
   sharedVoxelMap: {fileID: 11400000, guid: 30eaa5ed1d572a943a7721d13aeb8581, type: 2}
   sharedMap:
     functionZoom: 1
@@ -617,7 +619,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 358482726}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 19, y: 0, z: 9}
+  m_LocalPosition: {x: 19, y: -9, z: 9}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -637,7 +639,32 @@ MeshCollider:
   serializedVersion: 4
   m_Convex: 0
   m_CookingOptions: 30
-  m_Mesh: {fileID: 4300000, guid: dc5565de3ff683942b3abc15cf22e3dc, type: 2}
+  m_Mesh: {fileID: 4300000, guid: 49957801b5b1bf94ea343e154a0e1bd5, type: 2}
+--- !u!114 &358482734
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 358482726}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a2b86cf6814adf4ab9d2a36c302d307, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  voxelFilter: {fileID: 358482731}
+  voxelPalette: {fileID: 11400000, guid: f54bc344acf98b74fba165a951dc3c34, type: 2}
+  destinationMesh: {fileID: 4300000, guid: 49957801b5b1bf94ea343e154a0e1bd5, type: 2}
+  destinationMeshFilter: {fileID: 358482728}
+  destinationMeshCollider: {fileID: 358482733}
+  regenerateMesh:
+    functionZoom: 1
+    functionOffset: {x: 0, y: 0}
+  createMeshFile:
+    functionZoom: 1
+    functionOffset: {x: 0, y: 0}
+  doBenchmark: 0
+  benchmarkOutput: {fileID: 1320589956}
 --- !u!1 &524754513
 GameObject:
   m_ObjectHideFlags: 0
@@ -1721,15 +1748,13 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Unnamed Benchmark - Total Time:\t 175,50 ms\r\n------------------------------------\r\nClear
-    Lists:\t 0,00 ms\t (0,00 %)\r\nGenerate Blocks based on VoxelMap:\t 42,89 ms\t
-    (24,44 %)\r\nGenerate Vertex & Triangle data0:\t 109,67 ms\t (62,49 %)\r\nGenerate
-    SubMesh data0:\t 0,00 ms\t (0,00 %)\r\nGenerate Vertex & Triangle data1:\t 13,96
-    ms\t (7,96 %)\r\nGenerate SubMesh data1:\t 0,00 ms\t (0,00 %)\r\nGenerate Vertex
-    & Triangle data2:\t 3,02 ms\t (1,72 %)\r\nGenerate SubMesh data2:\t 0,00 ms\t
-    (0,00 %)\r\nSetup Mesh:\t 0,00 ms\t (0,00 %)\r\nCopy Vertex data to Mesh:\t 2,97
-    ms\t (1,69 %)\r\nCopy Triangle data to Mesh:\t 0,99 ms\t (0,57 %)\r\nCopy SubMesh
-    data:\t 1,99 ms\t (1,14 %)\r\n"
+  m_text: "Unnamed Benchmark - Total Time:\t 297,57 ms\r\n------------------------------------\r\nClear
+    Lists:\t 0,00 ms\t (0,00 %)\r\nGenerate Blocks based on VoxelMap:\t 107,75 ms\t
+    (36,21 %)\r\nGenerate Vertex & Triangle data0:\t 151,89 ms\t (51,04 %)\r\nGenerate
+    Vertex & Triangle data1:\t 17,95 ms\t (6,03 %)\r\nGenerate Vertex & Triangle
+    data2:\t 9,01 ms\t (3,03 %)\r\nSetup Mesh:\t 1,00 ms\t (0,34 %)\r\nCopy Vertex
+    data to Mesh:\t 3,99 ms\t (1,34 %)\r\nCopy Triangle data to Mesh:\t 2,99 ms\t
+    (1,00 %)\r\nCopy SubMesh data:\t 2,99 ms\t (1,01 %)\r\n"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2021,12 +2046,12 @@ Camera:
   serializedVersion: 2
   m_ClearFlags: 1
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
-  m_projectionMatrixMode: 2
+  m_projectionMatrixMode: 1
   m_GateFitMode: 1
   m_FOVAxisMode: 0
   m_SensorSize: {x: 1, y: 1}
   m_LensShift: {x: 0, y: 0}
-  m_FocalLength: 1.8660254
+  m_FocalLength: 2.08265
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
@@ -2035,9 +2060,9 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 30.000002
+  field of view: 27
   orthographic: 0
-  orthographic size: 7.142857
+  orthographic size: 35
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -2060,14 +2085,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1687258581}
-  m_LocalRotation: {x: -0.2502926, y: 0.31395417, z: -0.086182676, w: -0.9117889}
-  m_LocalPosition: {x: 106.21, y: 60.1, z: -40.22}
+  m_LocalRotation: {x: -0.25006613, y: 0.31634018, z: -0.08683766, w: -0.9109638}
+  m_LocalPosition: {x: 127.7, y: 81.5, z: -70.2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 30.7, y: 322, z: 0}
+  m_LocalEulerAnglesHint: {x: 30.7, y: 321.7, z: 0}
 --- !u!1 &1753448590
 GameObject:
   m_ObjectHideFlags: 0
@@ -2493,7 +2518,7 @@ Light:
   m_Type: 1
   m_Shape: 0
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 0.75
+  m_Intensity: 0.7
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.802082
@@ -2502,7 +2527,7 @@ Light:
     m_Type: 2
     m_Resolution: 3
     m_CustomResolution: -1
-    m_Strength: 0.602
+    m_Strength: 0.51
     m_Bias: 0
     m_NormalBias: 0
     m_NearPlane: 0.1

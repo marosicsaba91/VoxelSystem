@@ -10,7 +10,7 @@ namespace VoxelSystem
 	{
 		public bool mergeCloseEdges;
 		public bool openOnSides;
-		public bool continueSidesAndEdgesBetweenMaterials;
+		// public bool continueSidesAndEdgesBetweenMaterials;
 		public bool showFacesBetweenMaterials;
 	}
 
@@ -23,8 +23,7 @@ namespace VoxelSystem
 	public static class BlockMapGenerator
 	{
 		public static BlockGenerationSetting blockSetup = new();
-
-		static readonly List<Dictionary<Vector3Int, Block>> _allBlockByMaterial = new();
+		 
 		static Dictionary<Vector3Int, Block> _currentMaterialBlocks = new();
 		static NeighbourData[,,] neighbours = new NeighbourData[3, 3, 3];
 
@@ -33,15 +32,15 @@ namespace VoxelSystem
 
 		static List<Vector3> _breakPoints = new();
 
-		public static List<Dictionary<Vector3Int, Block>> CalculateBlocks(VoxelMap map, int materialCount)
+		public static void CalculateBlocks(List<Dictionary<Vector3Int, Block>> blockByMaterial, VoxelMap map, int materialCount)
 		{
 			//_timer?.StartModule("Setup");
-			while (_allBlockByMaterial.Count < materialCount)
-				_allBlockByMaterial.Add(new());
+			while (blockByMaterial.Count < materialCount)
+				blockByMaterial.Add(new());
 
 			for (int i = 0; i < materialCount; i++)
 			{
-				_allBlockByMaterial[i].Clear();
+				blockByMaterial[i].Clear();
 			}
 
 			_breakPoints.Clear();
@@ -67,15 +66,13 @@ namespace VoxelSystem
 
 
 						int materialIndex = (voxelValue >= materialCount) ? materialCount - 1 : voxelValue;
-						_currentMaterialBlocks = _allBlockByMaterial[materialIndex];
+						_currentMaterialBlocks = blockByMaterial[materialIndex];
 
 						for (int dX = -1; dX <= 1; dX += 2) // Sub-Voxels
 							for (int dY = -1; dY <= 1; dY += 2)
 								for (int dZ = -1; dZ <= 1; dZ += 2)
 									SubVoxelToBlock(vXi, vYi, vZi, dX, dY, dZ);
-					}
-
-			return _allBlockByMaterial;
+					} 
 		}
 
 		static NeighbourData GetAnyNeighbour(int currentValue, int x, int y, int z)

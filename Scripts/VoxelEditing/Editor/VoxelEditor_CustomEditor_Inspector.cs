@@ -11,9 +11,6 @@ namespace VoxelSystem
 	[CustomEditor(typeof(VoxelEditor))]
 	partial class VoxelEditor_CustomEditor : Editor
 	{
-		SerializedProperty selectedPaletteIndexProperty;
-		SerializedProperty transformLockProperty;
-
 		static VoxelEditorSettings iconSettings;
 		static Dictionary<VoxelAction, GUIContent> _actionToContent = new();
 		static Dictionary<(VoxelTool, VoxelAction), GUIContent> _toolToContent = new();
@@ -30,6 +27,7 @@ namespace VoxelSystem
 
 		static Texture warningIcon;
 		static GUIStyle headerStyle;
+		static GUIStyle paletteStyle;
 
 		static GUIStyle notSelectedButtonStyle;
 		static GUIStyle selectedButtonStyle;
@@ -62,8 +60,7 @@ namespace VoxelSystem
 
 		void SetupSerializedProperties()
 		{
-			selectedPaletteIndexProperty = serializedObject.FindProperty(nameof(VoxelEditor.selectedPaletteIndex));
-			transformLockProperty = serializedObject.FindProperty(nameof(VoxelEditor.transformLock));
+			// transformLockProperty = serializedObject.FindProperty(nameof(VoxelEditor.transformLock));
 		}
 
 		static void SetupGuiContentAndStyle()
@@ -74,6 +71,7 @@ namespace VoxelSystem
 				try
 				{
 					headerStyle = new GUIStyle(EditorStyles.boldLabel) { alignment = TextAnchor.MiddleCenter };
+					paletteStyle = new GUIStyle(EditorStyles.boldLabel) { alignment = TextAnchor.MiddleCenter };
 
 					notSelectedButtonStyle = new GUIStyle(GUI.skin.button);
 					selectedButtonStyle = new GUIStyle(GUI.skin.button);
@@ -402,32 +400,51 @@ namespace VoxelSystem
 
 		void DrawVoxelPalette(IVoxelEditor voxelEditor)
 		{
-			Rect rect = EditorGUILayout.GetControlRect(false, _actionButtonHeight);
+			Rect rect = EditorGUILayout.GetControlRect(false, EditorGUIUtility.singleLineHeight);
 
-			VoxelPalette palette = voxelEditor.VoxelPalette;
-			int paletteLength = palette != null ? palette.Length : 0;
+			int paletteLength = voxelEditor.PaletteLength;
 			int selected = voxelEditor.SelectedPaletteIndex;
-
-			// Set the length of label
-			float labelWidth = EditorGUIUtility.labelWidth;
-			EditorGUIUtility.labelWidth = rect.width - 40f;
 
 			// IntField Flexing
 			GUIContent content = (selected > 0 && selected >= paletteLength)
-				? new("Color Index:", warningIcon, "This index is over the current voxel palette's range!")
+				? new("Voxel Material Index:", warningIcon, "This index is over the current voxel palette's range!")
 				: new("Color Index:", "The index of the voxel type in the voxel palette");
 
 			int newValue = EditorGUI.IntField(rect, content, selected);
 			newValue = Mathf.Max(newValue, 0);
 
-			rect.height = EditorGUIUtility.singleLineHeight;
+			int i = 0;
+			const int itemsInARow = 6;
+			const float colorSpacing = 6;
+			float itemWidth = (rect.width - (itemsInARow - 1) * _spacing) / itemsInARow;
+			foreach (IVoxelPaletteItem item in voxelEditor.PaletteItems)
+			{
+				if (i % itemsInARow == 0)
+				{
+					rect = EditorGUILayout.GetControlRect(false, _toolButtonHeight);
+					rect.width = itemWidth;
+				}
+
+				GUI.color = i == selected ? Color.white : new Color(1, 1, 1, 0.5f);
+				bool click = GUI.Button(rect, item.Name);
+				Rect colorRect = new (rect.x + colorSpacing, rect.y + colorSpacing, rect.width - 2 * colorSpacing, rect.height - 2 * colorSpacing);
+				GUI.color = i == selected ? Color.white : new Color(1, 1, 1, 0.65f);
+				EditorHelper.DrawBox(colorRect, item.Color);
+				GUI.color = Color.Lerp(Color.black, item.Color, 0.25f);
+				GUI.Label(rect, item.Name, paletteStyle);
+				if (click)
+					newValue = i;
+
+				rect.x += (itemWidth + _spacing);
+				i++;
+			}
+
+
 			if (newValue != selected)
 			{
 				Undo.RecordObject(voxelEditor.EditorObject, "Selected Voxel Type Changed");
 				voxelEditor.SelectedPaletteIndex = newValue;
 			}
-
-			EditorGUIUtility.labelWidth = labelWidth;
 		}
 	}
 

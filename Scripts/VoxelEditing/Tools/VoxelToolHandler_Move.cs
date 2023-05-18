@@ -21,7 +21,7 @@ namespace VoxelSystem
 				Vector3 position = GetMapSidePosition(voxelEditor, side);
 				
 				string text = voxelEditor.HasSelection() ?null:
-					_currentEventType == MouseEventType.Drag && _handleDragDirection == side 
+					voxelEditor.ToolState == ToolState.Drag && _handleDragDirection == side 
 					? _handleSteps.ToString() : null;
 
 				yield return new VoxelHandelInfo()

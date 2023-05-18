@@ -1,28 +1,11 @@
-Raycast Problems 
-
+Raycast Problems
 
 ------ PALETTE SUPPORT -------
-
-CloseEdges
-Old Generation problam
-CODE CLEAN !!!!
-
-BlockGeneration
-	Only Filled Blocks
-	Multiple block container
-	Throw away on border
-	
-Code Analisis
 
 ------ NEW TOOLS -------
 
 Face Tool
 Brush Tool
 Flood Fill
-
------- MULTIPLE MESH RENDERER -------
-	
-	Adavnced Change Event (Get the parts of map that are changed.)
-	
 
 ------ BETTER BLOCK Library & LibraryEditor SUPORT -------

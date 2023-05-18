@@ -14,8 +14,8 @@ namespace VoxelSystem
 		public static int GetOriginalSize(IVoxelEditor voxelEditor, GeneralDirection3D side)
 		{
 			Vector3Int sizeVector = voxelEditor.HasSelection()
-				? (_currentEventType == MouseEventType.None ? voxelEditor.Selection.size : _originalSelection.size)
-				: (_currentEventType == MouseEventType.None ? voxelEditor.Map.FullSize : _originalMapSize);
+				? (voxelEditor.ToolState == ToolState.None ? voxelEditor.Selection.size : _originalSelection.size)
+				: (voxelEditor.ToolState == ToolState.None ? voxelEditor.Map.FullSize : _originalMapSize);
 			return sizeVector.GetAxis(side.GetAxis());
 		}
 
@@ -59,7 +59,7 @@ namespace VoxelSystem
 				int originalSize = GetOriginalSize(voxelEditor, side);
 				string text;
 
-				if (_currentEventType == MouseEventType.Drag && _handleDragDirection == side)
+				if (voxelEditor.ToolState == ToolState.Drag && _handleDragDirection == side)
 				{
 					int steps = GetResizeSteps(voxelEditor, originalSize, side);
 					text = GetStepText(originalSize, steps);
@@ -91,7 +91,7 @@ namespace VoxelSystem
 			Axis3D axis = handleInfo.direction.GetAxis();
 			int oSize = _originalMapSize.GetAxis(axis);
 
-			bool isUpEvent = _currentEventType == MouseEventType.Up;
+			bool isUpEvent = voxelEditor.ToolState == ToolState.Up;
 			if (steps <= -oSize)
 			{
 				if (isUpEvent)

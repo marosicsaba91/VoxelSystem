@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace VoxelSystem
 {
@@ -20,10 +21,12 @@ namespace VoxelSystem
 
 		// Palette
 		int SelectedPaletteIndex { get; set; }
-		VoxelPalette VoxelPalette { get; }
+		int PaletteLength { get; }
+		IEnumerable<IVoxelPaletteItem> PaletteItems { get; }
 
 		// Selection
 
 		BoundsInt Selection { get; set; }
+		ToolState ToolState { get; set; }
 	}
 }
