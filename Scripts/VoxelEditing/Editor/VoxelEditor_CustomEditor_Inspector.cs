@@ -443,6 +443,8 @@ namespace VoxelSystem
 			if (newValue != selected)
 			{
 				Undo.RecordObject(voxelEditor.EditorObject, "Selected Voxel Type Changed");
+				if (voxelEditor.SelectedAction == VoxelAction.Erase)
+					voxelEditor.SelectedAction = VoxelAction.Attach;
 				voxelEditor.SelectedPaletteIndex = newValue;
 			}
 		}

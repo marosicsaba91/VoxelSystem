@@ -1,6 +1,7 @@
 using MUtility;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -195,5 +196,83 @@ namespace VoxelSystem
 			Raycast(globalRay.Transform(matrix), out hit, returnOutsideVoxel);
 
 		protected abstract bool Raycast(Ray localRay, out VoxelHit hit, bool returnOutsideVoxel = false);
+
+		// ------------- FloodFill -------------
+
+		static HashSet<Vector3Int> _floodFillAlreadyChecked = new HashSet<Vector3Int>();
+		static HashSet<Vector3Int> _nextRound1 = new HashSet<Vector3Int>();
+		static HashSet<Vector3Int> _nextRound2 = new HashSet<Vector3Int>();
+		int _floodFillRoundIndex = 0;
+
+		public bool FloodFill(Vector3Int index, int value, VoxelAction action, bool everyFilled) 
+		{
+			BenchmarkTimer bt = new BenchmarkTimer();
+			bt.StartModule("FF");
+			int voxel = GetVoxel(index);
+			if (action == VoxelAction.Erase)
+				value = emptyValue;
+			if (value == emptyValue && voxel == emptyValue) return false;
+			if (!everyFilled && voxel == value) return false;
+
+			_floodFillAlreadyChecked.Clear();
+			_nextRound1.Clear();
+			_nextRound2.Clear();
+			_nextRound1.Add(index);
+			_floodFillRoundIndex = 0;
+
+			FloodFill(voxel, value, everyFilled);
+
+			Debug.Log(bt);
+			return true;
+		}
+
+		void FloodFill(int startValue, int changeValue, bool everyFilled)
+		{
+			HashSet<Vector3Int> current, next;
+			do
+			{
+				current = _floodFillRoundIndex % 2 == 0 ? _nextRound1 : _nextRound2;
+				next = _floodFillRoundIndex % 2 == 0 ? _nextRound2 : _nextRound1;
+
+				next.Clear();
+				GeneralDirection3D[] directions = DirectionUtility.generalDirection3DValues;
+
+				foreach (Vector3Int index in current)
+				{
+					SetVoxel(index, changeValue);
+					_floodFillAlreadyChecked.Add(index);
+
+
+					for (int i = 0; i < directions.Length; i++)
+					{
+						GeneralDirection3D direction = directions[i];
+						Vector3Int nextIndex = direction.ToVectorInt() + index;
+						if (_floodFillAlreadyChecked.Contains(nextIndex))
+							continue;
+						if (!IsValidCoord(nextIndex))
+						{
+							_floodFillAlreadyChecked.Add(nextIndex);
+							continue;
+						}
+						int nextVoxel = GetVoxel(nextIndex);
+
+						bool isDifferent = everyFilled 
+							? nextVoxel.IsFilled() != startValue.IsFilled() 
+							: nextVoxel != startValue; 
+
+						if (isDifferent)
+						{
+							_floodFillAlreadyChecked.Add(nextIndex);
+							continue;
+						}
+
+
+						next.Add(nextIndex);
+					}
+				}
+
+				_floodFillRoundIndex++;
+			} while (!next.IsEmpty());
+		} 
 	}
 }

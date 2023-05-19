@@ -71,7 +71,7 @@ namespace VoxelSystem
 			voxelFilter = GetComponent<VoxelFilter>();
 		}
 
-		protected static BenchmarkTimer _benchmarkTimer = new BenchmarkTimer();
+		protected static BenchmarkTimer _benchmarkTimer;
 
 		static readonly List<Vector3> _vertices = new();
 		static readonly List<Vector3> _normals = new();
@@ -89,7 +89,7 @@ namespace VoxelSystem
 				return;
 
 			if (doBenchmark)
-				_benchmarkTimer ??= new BenchmarkTimer();
+				_benchmarkTimer ??= new BenchmarkTimer(name + " " + GetType());
 			else
 				_benchmarkTimer = null;
 

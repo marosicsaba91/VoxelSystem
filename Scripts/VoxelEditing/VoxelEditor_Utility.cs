@@ -142,5 +142,11 @@ namespace VoxelSystem
 			destination.Map.CopyFrom(source.Map, Vector3Int.zero, offsetInt, source.Map.FullSize);
 			destination.Map.MapChanged();
 		}
+
+		public static bool FloodFill(this IVoxelEditor editor, Vector3Int index)
+		{
+			editor.RecordForUndo("FloodFill Voxel", RecordType.Map); 
+			return editor.Map.FloodFill(index, editor.SelectedPaletteIndex, editor.SelectedAction, editor.SelectedAction == VoxelAction.Overwrite);
+		}
 	}
 }

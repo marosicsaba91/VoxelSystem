@@ -14,12 +14,12 @@ OcclusionCullingSettings:
 RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 9
-  m_Fog: 0
-  m_FogColor: {r: 0.5728895, g: 0.49052152, b: 0.6886792, a: 1}
+  m_Fog: 1
+  m_FogColor: {r: 0.7411765, g: 0.92549026, b: 0.90196085, a: 1}
   m_FogMode: 1
   m_FogDensity: 0.05
-  m_LinearFogStart: 5
-  m_LinearFogEnd: 20.01
+  m_LinearFogStart: 145.1
+  m_LinearFogEnd: 182.6
   m_AmbientSkyColor: {r: 0.3301887, g: 0.3301887, b: 0.3301887, a: 1}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
@@ -27,7 +27,7 @@ RenderSettings:
   m_AmbientMode: 3
   m_SubtractiveShadowColor: {r: 0.26415092, g: 0.26415092, b: 0.26415092, a: 1}
   m_SkyboxMaterial: {fileID: 2100000, guid: 50bf15468c19e0e40b5bf26662770a34, type: 2}
-  m_HaloStrength: 0.021
+  m_HaloStrength: 0
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
   m_HaloTexture: {fileID: 0}
@@ -579,12 +579,11 @@ MonoBehaviour:
   createMeshFile:
     functionZoom: 1
     functionOffset: {x: 0, y: 0}
-  doBenchmark: 0
+  doBenchmark: 1
   benchmarkOutput: {fileID: 1320589956}
   blockGenerationSetting:
     mergeCloseEdges: 0
-    openOnSides: 1
-    continueSidesAndEdgesBetweenMaterials: 0
+    openOnSides: 0
     showFacesBetweenMaterials: 0
 --- !u!114 &358482731
 MonoBehaviour:
@@ -619,7 +618,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 358482726}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 19, y: -9, z: 9}
+  m_LocalPosition: {x: 20, y: -29, z: 10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -663,7 +662,7 @@ MonoBehaviour:
   createMeshFile:
     functionZoom: 1
     functionOffset: {x: 0, y: 0}
-  doBenchmark: 0
+  doBenchmark: 1
   benchmarkOutput: {fileID: 1320589956}
 --- !u!1 &524754513
 GameObject:
@@ -1748,13 +1747,13 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Unnamed Benchmark - Total Time:\t 297,57 ms\r\n------------------------------------\r\nClear
-    Lists:\t 0,00 ms\t (0,00 %)\r\nGenerate Blocks based on VoxelMap:\t 107,75 ms\t
-    (36,21 %)\r\nGenerate Vertex & Triangle data0:\t 151,89 ms\t (51,04 %)\r\nGenerate
-    Vertex & Triangle data1:\t 17,95 ms\t (6,03 %)\r\nGenerate Vertex & Triangle
-    data2:\t 9,01 ms\t (3,03 %)\r\nSetup Mesh:\t 1,00 ms\t (0,34 %)\r\nCopy Vertex
-    data to Mesh:\t 3,99 ms\t (1,34 %)\r\nCopy Triangle data to Mesh:\t 2,99 ms\t
-    (1,00 %)\r\nCopy SubMesh data:\t 2,99 ms\t (1,01 %)\r\n"
+  m_text: "VoxelMap A BlockMeshGenerator - Total Time:\t 411,90 ms\r\n------------------------------------\r\nClear
+    Lists:\t 0,00 ms\t (0,00 %)\r\nGenerate Blocks based on VoxelMap:\t 79,79 ms\t
+    (19,37 %)\r\nGenerate Vertex & Triangle data0:\t 195,51 ms\t (47,46 %)\r\nGenerate
+    Vertex & Triangle data1:\t 60,81 ms\t (14,76 %)\r\nGenerate Vertex & Triangle
+    data2:\t 43,88 ms\t (10,65 %)\r\nSetup Mesh:\t 1,99 ms\t (0,48 %)\r\nCopy Vertex
+    data to Mesh:\t 14,96 ms\t (3,63 %)\r\nCopy Triangle data to Mesh:\t 7,98 ms\t
+    (1,94 %)\r\nCopy SubMesh data:\t 6,98 ms\t (1,69 %)\r\n"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}

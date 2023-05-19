@@ -1,13 +1,20 @@
-﻿namespace VoxelSystem
+﻿using UnityEngine;
+
+namespace VoxelSystem
 {
 	public class VoxelToolHandler_FloodFill : VoxelToolHandler
 	{
 		public sealed override VoxelAction[] GetSupportedActions(IVoxelEditor voxelEditor) => allVoxelActions;
 
-		protected override bool DoRaycastVoxelCursor(IVoxelEditor voxelEditor, out bool raycastOutside)
+		protected sealed override bool DoRaycastVoxelCursor(IVoxelEditor voxelEditor, out bool raycastOutside)
 		{
-			raycastOutside = false;
+			raycastOutside = voxelEditor.SelectedAction.IsAdditive();
 			return true;
+		}
+
+		protected sealed override bool OnVoxelCursorDown(IVoxelEditor voxelEditor, VoxelHit hit)
+		{
+			return voxelEditor.FloodFill(hit.voxelIndex);  
 		}
 	}
 }

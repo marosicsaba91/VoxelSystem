@@ -1,4 +1,5 @@
-﻿using MUtility; 
+﻿using MUtility;
+using System;
 using System.Collections.Generic; 
 using UnityEngine; 
 
@@ -26,6 +27,7 @@ namespace VoxelSystem
 		protected static VoxelHit _lastValidHit;
 		protected static VoxelHit _mouseDownHit;
 		protected static VoxelHit _lastHandledHit;
+		protected static Color cursorColor = Color.white;
 
 		// Handle Helper Variables
 		public static Vector3 _clickPositionGlobal;
@@ -65,6 +67,10 @@ namespace VoxelSystem
 			UnityEditor.Handles.matrix = matrix4X4;
 #endif
 		}
+
+		// In the future, this method will work not just for handle drawing
+		public static void Draw(Drawable d, Color c)=> d.DrawHandle(c);
+		
 		// --------------------- Raycast ---------------------
 
 		void TryExecuteRaycast(IVoxelEditor voxelEditor, Event guiEvent, Ray ray)
@@ -81,20 +87,26 @@ namespace VoxelSystem
 			{
 				if (_isLastRayHit)
 				{
-					// DRAW VOXEL CURSOR
-					Color color = GetCursorColor(voxelEditor.SelectedAction);
-					UnityEditor.Handles.color = new(color.r, color.g, color.b, color.a / 4f);
-					UnityEditor.Handles.DrawWireCube((Vector3)_lastValidHit.voxelIndex + Vector3.one * 0.5f, Vector3.one);
-					UnityEditor.Handles.DrawWireCube(_lastValidHit.hitWorldPosition, Vector3.one * 0.2f);
-
-					UnityEditor.Handles.color = color;
-					Drawable drawable = GetDrawableVoxelSide(_lastValidHit);
-					drawable.DrawHandle();
+					Color color = GetActionColor(voxelEditor.SelectedAction);
+					DrawCursor(color);
 				}
 			}
 #endif
 		}
-		Color GetCursorColor(VoxelAction selectedAction) => selectedAction switch
+
+		protected virtual void DrawCursor(Color actionColor) 
+		{
+			Color fadedColor = new(actionColor.r, actionColor.g, actionColor.b, actionColor.a / 4f);
+			Vector3 voxelCenter = (Vector3)_lastValidHit.voxelIndex + Vector3.one * 0.5f;
+			var cube = new Cuboid(Vector3.one).ToDrawable();
+			cube.Translate(voxelCenter); 
+			Draw(cube, fadedColor); 
+			 
+			Drawable side = GetDrawableVoxelSide(_lastValidHit);
+			Draw(side, actionColor);
+		}
+
+		Color GetActionColor(VoxelAction selectedAction) => selectedAction switch
 		{
 			VoxelAction.Attach => new Color(0.4f,1,0.3f),
 			VoxelAction.Erase => new Color(1, 0.2f, 0.1f),
@@ -223,6 +235,7 @@ namespace VoxelSystem
 			{
 				if (OnHandleClick(voxelEditor, handleInfo))
 				{
+					voxelEditor.ToolState = ToolState.Up;
 					voxelEditor.Map.MapChanged();
 					useEvent = true;
 					return;

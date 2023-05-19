@@ -136,7 +136,7 @@ namespace VoxelSystem
 
 			if (neighbourCount == 0) // CORNER // ----------------------------------------------------------------------------
 			{
-				_currentMaterialBlocks.Add(subVoxelIndex, new Block(BlockType.CornerPositive, subVoxel));
+				_currentMaterialBlocks.TryAdd(subVoxelIndex, new Block(BlockType.CornerPositive, subVoxel));
 
 				if (crossNeighbourCount != 0 && blockSetup.mergeCloseEdges) // BREAKING POINT IN MODEL
 				{
