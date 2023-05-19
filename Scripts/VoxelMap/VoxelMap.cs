@@ -205,9 +205,7 @@ namespace VoxelSystem
 		int _floodFillRoundIndex = 0;
 
 		public bool FloodFill(Vector3Int index, int value, VoxelAction action, bool everyFilled) 
-		{
-			BenchmarkTimer bt = new BenchmarkTimer();
-			bt.StartModule("FF");
+		{  
 			int voxel = GetVoxel(index);
 			if (action == VoxelAction.Erase)
 				value = emptyValue;
@@ -221,8 +219,7 @@ namespace VoxelSystem
 			_floodFillRoundIndex = 0;
 
 			FloodFill(voxel, value, everyFilled);
-
-			Debug.Log(bt);
+			 
 			return true;
 		}
 

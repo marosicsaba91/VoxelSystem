@@ -1747,13 +1747,13 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "VoxelMap A BlockMeshGenerator - Total Time:\t 411,90 ms\r\n------------------------------------\r\nClear
-    Lists:\t 0,00 ms\t (0,00 %)\r\nGenerate Blocks based on VoxelMap:\t 79,79 ms\t
-    (19,37 %)\r\nGenerate Vertex & Triangle data0:\t 195,51 ms\t (47,46 %)\r\nGenerate
-    Vertex & Triangle data1:\t 60,81 ms\t (14,76 %)\r\nGenerate Vertex & Triangle
-    data2:\t 43,88 ms\t (10,65 %)\r\nSetup Mesh:\t 1,99 ms\t (0,48 %)\r\nCopy Vertex
-    data to Mesh:\t 14,96 ms\t (3,63 %)\r\nCopy Triangle data to Mesh:\t 7,98 ms\t
-    (1,94 %)\r\nCopy SubMesh data:\t 6,98 ms\t (1,69 %)\r\n"
+  m_text: "VoxelMap A BlockMeshGenerator - Total Time:\t 436,93 ms\r\n------------------------------------\r\nClear
+    Lists:\t 0,00 ms\t (0,00 %)\r\nGenerate Blocks based on VoxelMap:\t 78,79 ms\t
+    (18,03 %)\r\nGenerate Vertex & Triangle data0:\t 198,49 ms\t (45,43 %)\r\nGenerate
+    Vertex & Triangle data1:\t 53,91 ms\t (12,34 %)\r\nGenerate Vertex & Triangle
+    data2:\t 46,85 ms\t (10,72 %)\r\nSetup Mesh:\t 1,99 ms\t (0,46 %)\r\nCopy Vertex
+    data to Mesh:\t 41,89 ms\t (9,59 %)\r\nCopy Triangle data to Mesh:\t 9,01 ms\t
+    (2,06 %)\r\nCopy SubMesh data:\t 5,98 ms\t (1,37 %)\r\n"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}

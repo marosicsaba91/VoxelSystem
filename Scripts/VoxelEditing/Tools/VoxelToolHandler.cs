@@ -88,21 +88,21 @@ namespace VoxelSystem
 				if (_isLastRayHit)
 				{
 					Color color = GetActionColor(voxelEditor.SelectedAction);
-					DrawCursor(color);
+					OnDrawCursor(voxelEditor, color, _lastValidHit);
 				}
 			}
 #endif
 		}
 
-		protected virtual void DrawCursor(Color actionColor) 
+		protected virtual void OnDrawCursor(IVoxelEditor voxelEditor, Color actionColor, VoxelHit hit) 
 		{
 			Color fadedColor = new(actionColor.r, actionColor.g, actionColor.b, actionColor.a / 4f);
-			Vector3 voxelCenter = (Vector3)_lastValidHit.voxelIndex + Vector3.one * 0.5f;
+			Vector3 voxelCenter = (Vector3)hit.voxelIndex + Vector3.one * 0.5f;
 			var cube = new Cuboid(Vector3.one).ToDrawable();
 			cube.Translate(voxelCenter); 
 			Draw(cube, fadedColor); 
 			 
-			Drawable side = GetDrawableVoxelSide(_lastValidHit);
+			Drawable side = GetDrawableVoxelSide(hit);
 			Draw(side, actionColor);
 		}
 
@@ -374,7 +374,7 @@ namespace VoxelSystem
 			return center + (dir.MultiplyAllAxis(size) / 2f) + dir * _standardSpacing;
 		}
 
-		static Drawable GetDrawableVoxelSide(VoxelHit hit)
+		protected static Drawable GetDrawableVoxelSide(VoxelHit hit)
 		{
 			var polygons = new List<Vector3[]>
 			{
@@ -384,36 +384,34 @@ namespace VoxelSystem
 				GetVoxelSide(hit.voxelIndex, hit.side, 0.25f)
 			};
 			return new Drawable(polygons);
+		}
+		protected static Vector3[] GetVoxelSide(Vector3Int localCoordinate, GeneralDirection3D side, float sizeMultiplier)
+		{
+			Vector3 x =
+				side is GeneralDirection3D.Up or GeneralDirection3D.Down ? new(sizeMultiplier * 0.5f, y: 0, z: 0) :
+				side is GeneralDirection3D.Left or GeneralDirection3D.Right ? new(x: 0, y: 0, sizeMultiplier * 0.5f) :
+				side is GeneralDirection3D.Forward or GeneralDirection3D.Back ? new(x: 0, sizeMultiplier * 0.5f, z: 0) : Vector3.zero;
+			Vector3 y =
+				side is GeneralDirection3D.Up or GeneralDirection3D.Down ? new(x: 0, y: 0, sizeMultiplier * 0.5f) :
+				side is GeneralDirection3D.Left or GeneralDirection3D.Right ? new(x: 0, sizeMultiplier * 0.5f, z: 0) :
+				side is GeneralDirection3D.Forward or GeneralDirection3D.Back ? new(sizeMultiplier * 0.5f, y: 0, z: 0) : Vector3.zero;
+			Vector3 offset =
+				side == GeneralDirection3D.Up ? new(x: 0, y: 0.5f, z: 0) :
+				side == GeneralDirection3D.Down ? new(x: 0, y: -0.5f, z: 0) :
+				side == GeneralDirection3D.Left ? new(x: -0.5f, y: 0, z: 0) :
+				side == GeneralDirection3D.Right ? new(x: 0.5f, y: 0, z: 0) :
+				side == GeneralDirection3D.Forward ? new(x: 0, y: 0, z: 0.5f) :
+				side == GeneralDirection3D.Back ? new(x: 0, y: 0, z: -0.5f) : Vector3.zero;
 
-			static Vector3[] GetVoxelSide(Vector3Int localCoordinate, GeneralDirection3D side, float sizeMultiplier)
-			{
-				Vector3 x =
-					side is GeneralDirection3D.Up or GeneralDirection3D.Down ? new(sizeMultiplier * 0.5f, y: 0, z: 0) :
-					side is GeneralDirection3D.Left or GeneralDirection3D.Right ? new(x: 0, y: 0, sizeMultiplier * 0.5f) :
-					side is GeneralDirection3D.Forward or GeneralDirection3D.Back ? new(x: 0, sizeMultiplier * 0.5f, z: 0) : Vector3.zero;
-				Vector3 y =
-					side is GeneralDirection3D.Up or GeneralDirection3D.Down ? new(x: 0, y: 0, sizeMultiplier * 0.5f) :
-					side is GeneralDirection3D.Left or GeneralDirection3D.Right ? new(x: 0, sizeMultiplier * 0.5f, z: 0) :
-					side is GeneralDirection3D.Forward or GeneralDirection3D.Back ? new(sizeMultiplier * 0.5f, y: 0, z: 0) : Vector3.zero;
-				Vector3 offset =
-					side == GeneralDirection3D.Up ? new(x: 0, y: 0.5f, z: 0) :
-					side == GeneralDirection3D.Down ? new(x: 0, y: -0.5f, z: 0) :
-					side == GeneralDirection3D.Left ? new(x: -0.5f, y: 0, z: 0) :
-					side == GeneralDirection3D.Right ? new(x: 0.5f, y: 0, z: 0) :
-					side == GeneralDirection3D.Forward ? new(x: 0, y: 0, z: 0.5f) :
-					side == GeneralDirection3D.Back ? new(x: 0, y: 0, z: -0.5f) : Vector3.zero;
-
-				Vector3 halfSize = new(x: 0.5f, y: 0.5f, z: 0.5f);
-				return new[]{
+			Vector3 halfSize = new(x: 0.5f, y: 0.5f, z: 0.5f);
+			return new[]{
 				localCoordinate + offset + x + y + halfSize,
 				localCoordinate + offset + x + -y + halfSize,
 				localCoordinate + offset + -x + -y + halfSize,
 				localCoordinate + offset + -x + y + halfSize,
 				localCoordinate + offset + x + y + halfSize,
 			};
-			}
 		}
-
 
 		// ------------------ Supported Actions -----------------------------
 
