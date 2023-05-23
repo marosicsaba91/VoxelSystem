@@ -18,8 +18,8 @@ RenderSettings:
   m_FogColor: {r: 0.7411765, g: 0.92549026, b: 0.90196085, a: 1}
   m_FogMode: 1
   m_FogDensity: 0.05
-  m_LinearFogStart: 145.1
-  m_LinearFogEnd: 182.6
+  m_LinearFogStart: 150
+  m_LinearFogEnd: 250
   m_AmbientSkyColor: {r: 0.3301887, g: 0.3301887, b: 0.3301887, a: 1}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
@@ -533,7 +533,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 358482726}
-  m_Mesh: {fileID: 4300000, guid: dc5565de3ff683942b3abc15cf22e3dc, type: 2}
+  m_Mesh: {fileID: 4300000, guid: 49957801b5b1bf94ea343e154a0e1bd5, type: 2}
 --- !u!114 &358482729
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -547,15 +547,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   voxelFilter: {fileID: 358482731}
-  meshGenerator: {fileID: 358482730}
-  quickMeshGenerator: {fileID: 358482734}
+  meshGenerator: {fileID: 358482734}
   transformLock:
-    position: 1
-    rotation: 1
-    scale: 1
+    position: 0
+    rotation: 0
+    scale: 0
   selection:
-    m_Position: {x: 0, y: 0, z: 0}
-    m_Size: {x: -1, y: -1, z: -1}
+    m_Position: {x: 38, y: 32, z: 19}
+    m_Size: {x: 9, y: 2, z: 5}
 --- !u!114 &358482730
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -573,6 +572,7 @@ MonoBehaviour:
   destinationMesh: {fileID: 4300000, guid: dc5565de3ff683942b3abc15cf22e3dc, type: 2}
   destinationMeshFilter: {fileID: 358482728}
   destinationMeshCollider: {fileID: 0}
+  autoRegenerateMeshes: 0
   regenerateMesh:
     functionZoom: 1
     functionOffset: {x: 0, y: 0}
@@ -618,7 +618,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 358482726}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 20, y: -29, z: 10}
+  m_LocalPosition: {x: 21.08, y: -25.57, z: 9.53}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -656,13 +656,14 @@ MonoBehaviour:
   destinationMesh: {fileID: 4300000, guid: 49957801b5b1bf94ea343e154a0e1bd5, type: 2}
   destinationMeshFilter: {fileID: 358482728}
   destinationMeshCollider: {fileID: 358482733}
+  autoRegenerateMeshes: 1
   regenerateMesh:
     functionZoom: 1
     functionOffset: {x: 0, y: 0}
   createMeshFile:
     functionZoom: 1
     functionOffset: {x: 0, y: 0}
-  doBenchmark: 1
+  doBenchmark: 0
   benchmarkOutput: {fileID: 1320589956}
 --- !u!1 &524754513
 GameObject:
@@ -1747,13 +1748,13 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "VoxelMap A BlockMeshGenerator - Total Time:\t 436,93 ms\r\n------------------------------------\r\nClear
-    Lists:\t 0,00 ms\t (0,00 %)\r\nGenerate Blocks based on VoxelMap:\t 78,79 ms\t
-    (18,03 %)\r\nGenerate Vertex & Triangle data0:\t 198,49 ms\t (45,43 %)\r\nGenerate
-    Vertex & Triangle data1:\t 53,91 ms\t (12,34 %)\r\nGenerate Vertex & Triangle
-    data2:\t 46,85 ms\t (10,72 %)\r\nSetup Mesh:\t 1,99 ms\t (0,46 %)\r\nCopy Vertex
-    data to Mesh:\t 41,89 ms\t (9,59 %)\r\nCopy Triangle data to Mesh:\t 9,01 ms\t
-    (2,06 %)\r\nCopy SubMesh data:\t 5,98 ms\t (1,37 %)\r\n"
+  m_text: "VoxelMap A BlockMeshGenerator - Total Time:\t 769,10 ms\r\n------------------------------------\r\nClear
+    Lists:\t 0,00 ms\t (0,00 %)\r\nGenerate Blocks based on VoxelMap:\t 222,41 ms\t
+    (28,92 %)\r\nGenerate Vertex & Triangle data0:\t 354,20 ms\t (46,05 %)\r\nGenerate
+    Vertex & Triangle data1:\t 77,79 ms\t (10,11 %)\r\nGenerate Vertex & Triangle
+    data2:\t 47,87 ms\t (6,22 %)\r\nSetup Mesh:\t 2,00 ms\t (0,26 %)\r\nCopy Vertex
+    data to Mesh:\t 47,84 ms\t (6,22 %)\r\nCopy Triangle data to Mesh:\t 9,97 ms\t
+    (1,30 %)\r\nCopy SubMesh data:\t 7,01 ms\t (0,91 %)\r\n"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2085,7 +2086,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1687258581}
   m_LocalRotation: {x: -0.25006613, y: 0.31634018, z: -0.08683766, w: -0.9109638}
-  m_LocalPosition: {x: 127.7, y: 81.5, z: -70.2}
+  m_LocalPosition: {x: 129.4, y: 77.1, z: -72.2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -16893,7 +16894,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6275471709889662383}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -70, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

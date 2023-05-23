@@ -13,7 +13,8 @@ namespace VoxelSystem
 	{
 		static VoxelEditorSettings iconSettings;
 		static Dictionary<VoxelAction, GUIContent> _actionToContent = new();
-		static Dictionary<(VoxelTool, VoxelAction), GUIContent> _toolToContent = new();
+		static Dictionary<VoxelTool, GUIContent> _toolToContent = new();
+		static Dictionary<(VoxelTool, VoxelAction), GUIContent> _toolWithActionToContent = new();
 
 		static float _spacing;
 		const int _actionButtonHeight = 20;  // 16+4
@@ -91,27 +92,41 @@ namespace VoxelSystem
 			warningIcon = EditorGUIUtility.IconContent("Warning").image;
 			_spacing = EditorGUIUtility.standardVerticalSpacing;
 
-			if (!_actionToContent.IsNullOrEmpty() && !_toolToContent.IsNullOrEmpty())
+			if (!_actionToContent.IsNullOrEmpty() && !_toolWithActionToContent.IsNullOrEmpty())
 				return;
 
 			iconSettings = VoxelEditorSettings.Instance;
 
 			_actionToContent = new Dictionary<VoxelAction, GUIContent>();
-			_toolToContent = new Dictionary<(VoxelTool, VoxelAction), GUIContent>();
+			_toolToContent = new Dictionary<VoxelTool, GUIContent>();
+			_toolWithActionToContent = new Dictionary<(VoxelTool, VoxelAction), GUIContent>();
+
+			foreach (VoxelTool tool in VoxelEditor_EnumHelper._allVoxelTools)
+			{
+				Texture texture = iconSettings.GetToolIcon(tool);
+				if (texture != null)
+				{
+					string toolTip = tool.ToString();
+					GUIContent content = new(texture, toolTip);
+					_toolToContent.Add(tool, content);
+				}
+			}
 
 			foreach (VoxelAction action in VoxelEditor_EnumHelper._allVoxelActions)
 			{
 				Texture texture = iconSettings.GetActionIcon(action);
 				GUIContent content = new(texture, action.GetTooltip());
 				_actionToContent.Add(action, content);
+
 				foreach (VoxelTool tool in VoxelEditor_EnumHelper._allVoxelTools)
 				{
 					texture = iconSettings.GetToolIcon(tool, action);
-					string toolTip = tool.IsCursorTool()
-						? tool.ToString() + " - " + action.ToString()
-						: tool.ToString();
-					GUIContent content2 = new(texture, toolTip);
-					_toolToContent.Add((tool, action), content2);
+					if (texture != null)
+					{
+						string toolTip = tool.ToString() + " - " + action.ToString();
+						content = new(texture, toolTip);
+						_toolWithActionToContent.Add((tool, action), content);
+					}
 				}
 			}
 		}
@@ -139,15 +154,12 @@ namespace VoxelSystem
 			}
 
 			DrawTitle(voxelEditor);
-
-			EditorGUILayout.Space();
 			DrawMapCommands(voxelEditor);
-			EditorGUILayout.Space();
-			DrawToolRow(voxelEditor, transformTools, selectedTool, selectedAction);
 			DrawTransformLocks(transformLock, voxelEditor);
 			EditorGUILayout.Space();
-			DrawToolRow(voxelEditor, cursorTools, selectedTool, selectedAction);
 			DrawVoxelActions(voxelEditor, selectedAction, selectedTool);
+			DrawToolRow(voxelEditor, cursorTools, selectedTool, selectedAction);
+			DrawToolRow(voxelEditor, transformTools, selectedTool, selectedAction);
 			EditorGUILayout.Space();
 			DrawSelectionTools(voxelEditor);
 			EditorGUILayout.Space();
@@ -173,24 +185,21 @@ namespace VoxelSystem
 
 			bool change = false;
 			position.height = height;
-			string text = voxelEditor.HasSelection() ? "Clear Selection" : "Clear Map";
-			if (GUI.Button(position, text))
+			if (GUI.Button(position, "Clear Map"))
 			{
-				voxelEditor.RecordForUndo("Selection Cleared", RecordType.Map);
-				change |= voxelEditor.ClearInsideSelection();
+				voxelEditor.RecordForUndo("Map Cleared", RecordType.Map);
+				change = voxelEditor.Map.ClearWhole();
 			}
 
 			position.x += width + _spacing;
-			text = voxelEditor.HasSelection() ? "Fill Selection" : "Fill Map";
-			if (GUI.Button(position, text))
+			if (GUI.Button(position, "Fill Map"))
 			{
-				voxelEditor.RecordForUndo("Selection Cleared", RecordType.Map);
-				change |= voxelEditor.FillInsideSelection();
+				voxelEditor.RecordForUndo("Map Filled", RecordType.Map);
+				change = voxelEditor.Map.SetWhole(voxelEditor.SelectedPaletteIndex);
 			}
 			position.x += width + _spacing;
-			text = "Setup from Clipboard";
 			GUI.enabled = VoxelClipboard.HaveContent && _enableEdit;
-			if (GUI.Button(position, text))
+			if (GUI.Button(position, "Setup from Clipboard"))
 			{
 				voxelEditor.RecordForUndo("Selection Cleared", RecordType.Map | RecordType.Transform | RecordType.Editor);
 				voxelEditor.Map.SetupFrom(VoxelClipboard.ClipboardMap);
@@ -208,53 +217,75 @@ namespace VoxelSystem
 		void DrawSelectionTools(IVoxelEditor voxelEditor)
 		{
 			float height = EditorGUIUtility.singleLineHeight;
-			Rect position = EditorGUILayout.GetControlRect(false, height * 3 + 2 * _spacing);
+			Rect position = EditorGUILayout.GetControlRect(false, height * 4 + 3 * _spacing);
 			int count = 3;
 			float width = (position.width - (count - 1) * _spacing) / count;
-			position.width = width;
+			Rect buttonRect = position;
+			buttonRect.width = width;
 
-
-			DrawVoxelTool(voxelEditor, voxelEditor.SelectedTool, voxelEditor.SelectedAction, position, VoxelTool.Select);
-			position.x += width + _spacing;
+			buttonRect.height = height * 2 + _spacing;
+			DrawVoxelTool(voxelEditor, voxelEditor.SelectedTool, voxelEditor.SelectedAction, buttonRect, VoxelTool.Select);
+			buttonRect.x += width + _spacing;
 
 			bool change = false;
-			position.height = height;
+			buttonRect.height = height;
 
 			Vector3Int fullMapSize = voxelEditor.Map.FullSize;
 			GUI.enabled = _enableEdit && voxelEditor.HasSelection();
-			if (GUI.Button(position, " De-Select"))
+			if (GUI.Button(buttonRect, " De-Select"))
 			{
 				voxelEditor.RecordForUndo("Remove Selection", RecordType.Editor);
 				voxelEditor.Deselect();
 			}
-			position.x += width + _spacing;
+			buttonRect.x += width + _spacing;
 			GUI.enabled = _enableEdit && voxelEditor.Selection.size != fullMapSize;
-			if (GUI.Button(position, " SelectAll"))
+			if (GUI.Button(buttonRect, " SelectAll"))
 			{
 				voxelEditor.RecordForUndo("Remove Selection", RecordType.Editor);
 				voxelEditor.Selection = new BoundsInt(Vector3Int.zero, fullMapSize);
 			}
 			GUI.enabled = _enableEdit;
 
-
-			position.x -= width + _spacing;
-			position.y += height + _spacing;
+			buttonRect.x -= width + _spacing;
+			buttonRect.y += height + _spacing;
 			GUI.enabled = _enableEdit && voxelEditor.HasSelection();
-			if (GUI.Button(position, " Copy"))
+			if (GUI.Button(buttonRect, " Copy"))
 			{
 				voxelEditor.Copy();
 			}
-			position.x += width + _spacing;
+			buttonRect.x += width + _spacing;
 			GUI.enabled = _enableEdit && VoxelClipboard.HaveContent;
-			if (GUI.Button(position, " Paste"))
+			if (GUI.Button(buttonRect, " Paste"))
 			{
 				voxelEditor.RecordForUndo("Voxel Selection Pasted", RecordType.Map | RecordType.Editor);
 				voxelEditor.Paste();
 				change = true;
 			}
+			 
+			width = (position.width - _spacing) / 2;
+			buttonRect = position;
+			buttonRect.y += height * 2 + 2 * _spacing;
+			buttonRect.height = height;
+			buttonRect.width = width;
 
-			position.y += height + _spacing;
-			position.x -= width + _spacing;
+			GUI.enabled = _enableEdit && voxelEditor.HasSelection();
+			if (GUI.Button(buttonRect, "Clear Selection"))
+			{
+				voxelEditor.RecordForUndo("Selection Cleared", RecordType.Map);
+				change = voxelEditor.ClearInsideSelection();
+			}
+
+			buttonRect.x += width + _spacing;
+			GUI.enabled = _enableEdit && voxelEditor.HasSelection();
+			if (GUI.Button(buttonRect, "Fill Selection"))
+			{
+				voxelEditor.RecordForUndo("Selection Filled", RecordType.Map);
+				change = voxelEditor.FillInsideSelection();
+			}
+
+
+			buttonRect.y += height + _spacing;
+			buttonRect.x -= width + _spacing;
 
 			Transform upperSibling = voxelEditor.transform.GetUpperSibling();
 			VoxelEditor upperVoxelEditor = upperSibling == null ? null : upperSibling.GetComponent<VoxelEditor>();
@@ -264,13 +295,13 @@ namespace VoxelSystem
 				? $"Works best if the rotation and scale is the same.\nNeed to be inside the destination map's bounds."
 				: "Destination need to have a VoxelEditor component";
 			GUIContent content = new GUIContent($"Merge Up: {name}", toolTip);
-			if (GUI.Button(position, content))
+			if (GUI.Button(buttonRect, content))
 			{
-				voxelEditor.MergeInto(upperVoxelEditor); 
+				voxelEditor.MergeInto(upperVoxelEditor);
 			}
-			position.x += width + _spacing;
+			buttonRect.x += width + _spacing;
 			GUI.enabled = _enableEdit && voxelEditor.HasSelection();
-			if (GUI.Button(position, "Separate Selection"))
+			if (GUI.Button(buttonRect, "Separate Selection"))
 			{
 				voxelEditor.SeparateSelectionToGameObject();
 				change = true;
@@ -285,13 +316,12 @@ namespace VoxelSystem
 		{
 			Rect position = EditorGUILayout.GetControlRect(false, EditorGUIUtility.singleLineHeight);
 
-			int count = 6;
+			int count = 3;
 			float width = (position.width - (count - 1) * _spacing) / count;
 			var rect = new Rect(position.x, position.y, width, position.height);
 			TransformLock tLockOriginal = tLock;
 
 			tLock.position = DrawOneLock(tLock.position, "Position");
-
 			tLock.rotation = DrawOneLock(tLock.rotation, "Rotation");
 
 			//rect.width = width * 4 + 3 * spacing;
@@ -305,7 +335,7 @@ namespace VoxelSystem
 
 			GUI.color = Color.white;
 			GUI.enabled = _enableEdit && tLock.rotation && tLock.scale;
-			rect.width = width * 3 + 2 * _spacing;
+			rect = EditorGUILayout.GetControlRect(false, EditorGUIUtility.singleLineHeight);
 			GUIContent content = new("Apply Transform to Map", "Apply Transform rotation & scale to the Map (Need to lock rotation and scale)");
 			if (GUI.Button(rect, content))
 			{
@@ -321,7 +351,7 @@ namespace VoxelSystem
 			bool DrawOneLock(bool b, string text)
 			{
 
-				GUIContent cont = new(null, b ? iconSettings.lockOnIcon : iconSettings.lockOffIcon, "Locking Transform " + text + " to whole values");
+				GUIContent cont = new(text, b ? iconSettings.lockOnIcon : iconSettings.lockOffIcon, "Locking Transform " + text + " to whole values");
 				GUI.color = b ? new Color(0.75f, 0.75f, 0.75f) : Color.white;
 				if (GUI.Button(rect, cont))
 					b = !b;
@@ -346,9 +376,23 @@ namespace VoxelSystem
 			GUI.color = Color.white;
 		}
 
+
 		void DrawVoxelTool(IVoxelEditor voxelEditor, VoxelTool selectedTool, VoxelAction selectedAction, Rect rect, VoxelTool drawnTool)
 		{
-			GUIContent content = _toolToContent[(drawnTool, selectedAction)];
+			bool isActionSupported = false;
+			if (drawnTool != VoxelTool.None)
+			{
+				VoxelAction[] supportedActions = drawnTool.GetHandler().GetSupportedActions(voxelEditor);
+				isActionSupported = supportedActions.Contains(selectedAction);
+
+				if (drawnTool == selectedTool && !isActionSupported && !supportedActions.IsEmpty())
+					voxelEditor.SelectedAction = supportedActions[0];
+			}
+
+			GUIContent content = isActionSupported
+				? _toolWithActionToContent[(drawnTool, selectedAction)]
+				: _toolToContent[drawnTool];
+
 			GUIStyle style = selectedTool == drawnTool
 				? GetSelectedButtonStyle(selectedAction, selectedTool.GetHandler().GetSupportedActions(voxelEditor))
 				: notSelectedButtonStyle;
@@ -370,7 +414,7 @@ namespace VoxelSystem
 			var rect = new Rect(position.x, position.y, width, position.height);
 
 			VoxelAction[] supportedActions = selectedTool == VoxelTool.None
-				? new VoxelAction[0]
+				? VoxelEditor_EnumHelper._allVoxelActions
 				: selectedTool.GetHandler().GetSupportedActions(voxelEditor);
 
 			foreach (VoxelAction action in VoxelEditor_EnumHelper._allVoxelActions)
@@ -400,7 +444,16 @@ namespace VoxelSystem
 
 		void DrawVoxelPalette(IVoxelEditor voxelEditor)
 		{
-			Rect rect = EditorGUILayout.GetControlRect(false, EditorGUIUtility.singleLineHeight);
+			Rect position = EditorGUILayout.GetControlRect(false, EditorGUIUtility.singleLineHeight);
+
+			Rect rect = position;
+			const float colorPickerWidth = 20;
+			rect.width = colorPickerWidth; 
+			DrawVoxelTool(voxelEditor, voxelEditor.SelectedTool, voxelEditor.SelectedAction, rect, VoxelTool.ColorPicker);
+
+
+			rect.x += colorPickerWidth + _spacing;
+			rect.width = position.width - colorPickerWidth + _spacing;
 
 			int paletteLength = voxelEditor.PaletteLength;
 			int selected = voxelEditor.SelectedPaletteIndex;
@@ -413,29 +466,32 @@ namespace VoxelSystem
 			int newValue = EditorGUI.IntField(rect, content, selected);
 			newValue = Mathf.Max(newValue, 0);
 
+
+
+
 			int i = 0;
 			const int itemsInARow = 6;
 			const float colorSpacing = 6;
-			float itemWidth = (rect.width - (itemsInARow - 1) * _spacing) / itemsInARow;
+			float itemWidth = (position.width - (itemsInARow - 1) * _spacing) / itemsInARow;
 			foreach (IVoxelPaletteItem item in voxelEditor.PaletteItems)
 			{
 				if (i % itemsInARow == 0)
 				{
-					rect = EditorGUILayout.GetControlRect(false, _toolButtonHeight);
-					rect.width = itemWidth;
+					position = EditorGUILayout.GetControlRect(false, _toolButtonHeight);
+					position.width = itemWidth;
 				}
 
 				GUI.color = i == selected ? Color.white : new Color(1, 1, 1, 0.5f);
-				bool click = GUI.Button(rect, item.Name);
-				Rect colorRect = new (rect.x + colorSpacing, rect.y + colorSpacing, rect.width - 2 * colorSpacing, rect.height - 2 * colorSpacing);
+				bool click = GUI.Button(position, item.Name);
+				Rect colorRect = new(position.x + colorSpacing, position.y + colorSpacing, position.width - 2 * colorSpacing, position.height - 2 * colorSpacing);
 				GUI.color = i == selected ? Color.white : new Color(1, 1, 1, 0.65f);
 				EditorHelper.DrawBox(colorRect, item.Color);
 				GUI.color = Color.Lerp(Color.black, item.Color, 0.25f);
-				GUI.Label(rect, item.Name, paletteStyle);
+				GUI.Label(position, item.Name, paletteStyle);
 				if (click)
 					newValue = i;
 
-				rect.x += (itemWidth + _spacing);
+				position.x += (itemWidth + _spacing);
 				i++;
 			}
 

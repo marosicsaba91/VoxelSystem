@@ -11,6 +11,9 @@ namespace VoxelSystem
 
 		Vector3Int _start = new();
 
+		protected override void OnDrawCursor(IVoxelEditor voxelEditor, Color actionColor, VoxelHit hit) => 
+			base.OnDrawCursor(voxelEditor, Color.yellow, hit);
+
 		protected override IEnumerable<VoxelHandelInfo> GetHandeles(IVoxelEditor voxelEditor)
 		{
 			if (useCursor || !voxelEditor.HasSelection())

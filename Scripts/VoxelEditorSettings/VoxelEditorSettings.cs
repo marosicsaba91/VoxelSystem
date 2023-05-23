@@ -2,8 +2,9 @@ using MUtility;
 using System;
 using UnityEngine;
 using VoxelSystem;
+using static System.Collections.Specialized.BitVector32;
 
-[CreateAssetMenu]
+// [CreateAssetMenu]
 internal class VoxelEditorSettings : ScriptableObject
 {
 
@@ -54,6 +55,18 @@ internal class VoxelEditorSettings : ScriptableObject
 	public Texture resizeVoxelToolIcon;
 	public Texture repeatVoxelToolIcon;
 
+	public Texture moveAttachVoxelToolIcon;
+	public Texture rotateAttachVoxelToolIcon;
+	public Texture mirrorAttachVoxelToolIcon;
+	public Texture resizeAttachVoxelToolIcon;
+	public Texture repeatAttachVoxelToolIcon;
+
+	public Texture moveOverWriteVoxelToolIcon;
+	public Texture rotateOverWriteVoxelToolIcon;
+	public Texture mirrorOverWriteVoxelToolIcon;
+	public Texture resizeOverWriteVoxelToolIcon;
+	public Texture repeatOverWriteVoxelToolIcon;
+
 	public Texture colorPickerVoxelToolIcon;
 
 	public Texture lockOffIcon;
@@ -75,7 +88,26 @@ internal class VoxelEditorSettings : ScriptableObject
 		_ => throw new ArgumentOutOfRangeException(nameof(action), action, null)
 	};
 
-	internal Texture GetToolIcon(VoxelTool tool, VoxelAction action = VoxelAction.Overwrite) => tool switch
+	internal Texture GetToolIcon(VoxelTool tool) => tool switch
+	{
+		VoxelTool.Move => moveVoxelToolIcon,
+		VoxelTool.Turn => rotateVoxelToolIcon,
+		VoxelTool.Mirror => mirrorVoxelToolIcon,
+		VoxelTool.Resize => resizeVoxelToolIcon,
+		VoxelTool.Repeat => repeatVoxelToolIcon,
+		VoxelTool.ResizeCanvas => resizeCanvasVoxelToolIcon,
+		VoxelTool.ColorPicker => colorPickerVoxelToolIcon,
+		VoxelTool.Select => selectVoxelToolIcon,
+
+		VoxelTool.Box => overWriteBoxVoxelToolIcon,
+		VoxelTool.Face => overWriteFaceVoxelToolIcon,
+		VoxelTool.FloodFill => overWriteFaceVoxelToolIcon,
+
+		VoxelTool.None => null,
+		_ => null,
+	};
+
+	internal Texture GetToolIcon(VoxelTool tool, VoxelAction action) => tool switch
 	{
 		VoxelTool.Box => action switch
 		{
@@ -83,7 +115,7 @@ internal class VoxelEditorSettings : ScriptableObject
 			VoxelAction.Erase => eraseBoxVoxelToolIcon,
 			VoxelAction.Repaint => recolorBox_VoxelToolIcon,
 			VoxelAction.Overwrite => overWriteBoxVoxelToolIcon,
-			_ => throw new ArgumentOutOfRangeException(nameof(action), action, null)
+			_ => null
 		},
 		VoxelTool.Face => action switch
 		{
@@ -91,7 +123,7 @@ internal class VoxelEditorSettings : ScriptableObject
 			VoxelAction.Erase => eraseFaceVoxelToolIcon,
 			VoxelAction.Repaint => recolorFaceVoxelToolIcon,
 			VoxelAction.Overwrite => overWriteFaceVoxelToolIcon,
-			_ => throw new ArgumentOutOfRangeException(nameof(action), action, null)
+			_ => null
 		},
 		VoxelTool.FloodFill => action switch
 		{
@@ -99,28 +131,44 @@ internal class VoxelEditorSettings : ScriptableObject
 			VoxelAction.Erase => erasePaintBucketVoxelToolIcon,
 			VoxelAction.Repaint => recolorPaintBucketVoxelToolIcon,
 			VoxelAction.Overwrite => overWritePaintBucketVoxelToolIcon,
-			_ => throw new ArgumentOutOfRangeException(nameof(action), action, null)
+			_ => null
 		},
-		VoxelTool.Select => selectVoxelToolIcon,
+		VoxelTool.Move => action switch
+		{
+			VoxelAction.Attach => moveAttachVoxelToolIcon,
+			VoxelAction.Overwrite => moveOverWriteVoxelToolIcon,
+			_ => null,
+		},
+		VoxelTool.Turn => action switch
+		{
+			VoxelAction.Attach => rotateAttachVoxelToolIcon,
+			VoxelAction.Overwrite => rotateOverWriteVoxelToolIcon,
+			_ => null,
+		},
+		VoxelTool.Mirror => action switch
+		{
+			VoxelAction.Attach => mirrorAttachVoxelToolIcon,
+			VoxelAction.Overwrite => mirrorOverWriteVoxelToolIcon,
+			_ => null,
+		},
+		VoxelTool.Resize => action switch
+		{
+			VoxelAction.Attach => resizeAttachVoxelToolIcon,
+			VoxelAction.Overwrite => resizeOverWriteVoxelToolIcon,
+			_ => null,
+		},
+		VoxelTool.Repeat => action switch
+		{
+			VoxelAction.Attach => repeatAttachVoxelToolIcon,
+			VoxelAction.Overwrite => repeatOverWriteVoxelToolIcon,
+			_ => null,
+		},
 
-		//VoxelTool.Select => action switch
-		//{
-		//	VoxelAction.Attach => addSelectVoxelToolIcon,
-		//	VoxelAction.Erase => removeSelectVoxelToolIcon,
-		//	VoxelAction.Repaint => colorSelectVoxelToolIcon,
-		//	VoxelAction.Overwrite => overWriteSelectVoxelToolIcon,
-		//	_ => throw new ArgumentOutOfRangeException(nameof(action), action, null)
-		//},	
-
-		VoxelTool.Turn => rotateVoxelToolIcon,
-		VoxelTool.Mirror => mirrorVoxelToolIcon,
-		VoxelTool.ResizeCanvas => resizeCanvasVoxelToolIcon,	
-		VoxelTool.Resize => resizeVoxelToolIcon,
-		VoxelTool.Repeat => repeatVoxelToolIcon,
+		VoxelTool.ResizeCanvas => resizeCanvasVoxelToolIcon,
 		VoxelTool.ColorPicker => colorPickerVoxelToolIcon,
-		VoxelTool.Move => moveVoxelToolIcon,
+		VoxelTool.Select => selectVoxelToolIcon,
 		VoxelTool.None => null,
-		_ => throw new ArgumentOutOfRangeException(nameof(tool), tool, null)
+		_ => null,
 
 	};
 }

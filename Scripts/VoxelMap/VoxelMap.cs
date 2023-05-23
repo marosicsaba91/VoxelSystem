@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.XR;
 using Object = UnityEngine.Object;
 
 namespace VoxelSystem
@@ -116,6 +117,7 @@ namespace VoxelSystem
 
 		public abstract bool SetVoxel(int x, int y, int z, int value);
 		public bool SetVoxel(Vector3Int coordinate, int value) => SetVoxel(coordinate.x, coordinate.y, coordinate.z, value);
+		public bool SetVoxel(Vector3Int coordinate, VoxelAction action, int value) => SetVoxel(coordinate.x, coordinate.y, coordinate.z, action, value);
 
 		public virtual bool SetVoxel(int x, int y, int z, VoxelAction action, int value)
 		{
@@ -144,7 +146,6 @@ namespace VoxelSystem
 			return SetVoxel(x, y, z, v);
 		}
 
-		public bool SetVoxel(Vector3Int coordinate, VoxelAction action, int value) => SetVoxel(coordinate.x, coordinate.y, coordinate.z, action, value);
 		public bool FillVoxel(int x, int y, int z, int value) => SetVoxel(x, y, z, VoxelAction.Repaint, value);
 		public bool FillVoxel(Vector3Int coordinate, int value) => SetVoxel(coordinate.x, coordinate.y, coordinate.z, VoxelAction.Attach, value);
 		public bool RepaintVoxel(int x, int y, int z, int value) => SetVoxel(x, y, z, VoxelAction.Repaint, value);
@@ -178,6 +179,24 @@ namespace VoxelSystem
 
 		internal bool ClearRange(BoundsInt bound) => SetRange(bound, emptyValue);
 
+		public bool ResetRange(VoxelMap original, Vector3Int startCoordinate, Vector3Int endCoordinate)
+		{ 
+			bool changed = false;
+			Vector3Int min = Vector3Int.Min(startCoordinate, endCoordinate);
+			 min = Vector3Int.Max(min, Vector3Int.zero);
+			Vector3Int max = Vector3Int.Max(startCoordinate, endCoordinate);
+			max = Vector3Int.Min(max, FullSize - Vector3Int.one);
+
+			BoundsInt bound = new BoundsInt(min, max + Vector3Int.one - min);
+			foreach (Vector3Int index in bound.WalkThrough())
+			{
+				int v = original.GetVoxel(index);
+				changed |= SetVoxel(index, v);
+			}
+			return changed;
+		}
+
+
 		// ------------- RayCast -------------
 
 		public bool Raycast(Ray globalRay, out VoxelHit hit, Transform voxelTransform, bool returnOutsideVoxel = false)
@@ -196,80 +215,5 @@ namespace VoxelSystem
 			Raycast(globalRay.Transform(matrix), out hit, returnOutsideVoxel);
 
 		protected abstract bool Raycast(Ray localRay, out VoxelHit hit, bool returnOutsideVoxel = false);
-
-		// ------------- FloodFill -------------
-
-		static HashSet<Vector3Int> _floodFillAlreadyChecked = new HashSet<Vector3Int>();
-		static HashSet<Vector3Int> _nextRound1 = new HashSet<Vector3Int>();
-		static HashSet<Vector3Int> _nextRound2 = new HashSet<Vector3Int>();
-		int _floodFillRoundIndex = 0;
-
-		public bool FloodFill(Vector3Int index, int value, VoxelAction action, bool everyFilled) 
-		{  
-			int voxel = GetVoxel(index);
-			if (action == VoxelAction.Erase)
-				value = emptyValue;
-			if (value == emptyValue && voxel == emptyValue) return false;
-			if (!everyFilled && voxel == value) return false;
-
-			_floodFillAlreadyChecked.Clear();
-			_nextRound1.Clear();
-			_nextRound2.Clear();
-			_nextRound1.Add(index);
-			_floodFillRoundIndex = 0;
-
-			FloodFill(voxel, value, everyFilled);
-			 
-			return true;
-		}
-
-		void FloodFill(int startValue, int changeValue, bool everyFilled)
-		{
-			HashSet<Vector3Int> current, next;
-			do
-			{
-				current = _floodFillRoundIndex % 2 == 0 ? _nextRound1 : _nextRound2;
-				next = _floodFillRoundIndex % 2 == 0 ? _nextRound2 : _nextRound1;
-
-				next.Clear();
-				GeneralDirection3D[] directions = DirectionUtility.generalDirection3DValues;
-
-				foreach (Vector3Int index in current)
-				{
-					SetVoxel(index, changeValue);
-					_floodFillAlreadyChecked.Add(index);
-
-
-					for (int i = 0; i < directions.Length; i++)
-					{
-						GeneralDirection3D direction = directions[i];
-						Vector3Int nextIndex = direction.ToVectorInt() + index;
-						if (_floodFillAlreadyChecked.Contains(nextIndex))
-							continue;
-						if (!IsValidCoord(nextIndex))
-						{
-							_floodFillAlreadyChecked.Add(nextIndex);
-							continue;
-						}
-						int nextVoxel = GetVoxel(nextIndex);
-
-						bool isDifferent = everyFilled 
-							? nextVoxel.IsFilled() != startValue.IsFilled() 
-							: nextVoxel != startValue; 
-
-						if (isDifferent)
-						{
-							_floodFillAlreadyChecked.Add(nextIndex);
-							continue;
-						}
-
-
-						next.Add(nextIndex);
-					}
-				}
-
-				_floodFillRoundIndex++;
-			} while (!next.IsEmpty());
-		} 
 	}
 }

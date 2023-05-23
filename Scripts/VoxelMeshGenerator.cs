@@ -25,6 +25,7 @@ namespace VoxelSystem
 		[SerializeField] MeshFilter destinationMeshFilter;
 		[SerializeField] MeshCollider destinationMeshCollider;
 
+		[SerializeField] bool autoRegenerateMeshes = true;
 		[SerializeField] DisplayMember regenerateMesh = new(nameof(RegenerateMeshes));
 		[SerializeField] DisplayMember createMeshFile = new(nameof(CreateMeshFile));
 
@@ -64,6 +65,27 @@ namespace VoxelSystem
 			if (!path.IsNullOrEmpty())
 				UnityEditor.AssetDatabase.CreateAsset(destinationMesh, path);
 #endif
+		}
+
+		VoxelFilter _lastFilter;
+		void Update()
+		{
+			if (voxelFilter != null)
+			{
+				voxelFilter.MapChanged -= OnMapChanged;
+				voxelFilter.MapChanged += OnMapChanged;
+				_lastFilter = voxelFilter;
+			}
+			else if (_lastFilter != null)
+			{
+				_lastFilter.MapChanged -= OnMapChanged;
+			}
+		}
+
+		void OnMapChanged()
+		{
+			if (autoRegenerateMeshes)
+				RegenerateMeshes();
 		}
 
 		void OnValidate()

@@ -24,9 +24,8 @@ namespace VoxelSystem
 		static ToolState toolState = ToolState.None;
 		static int selectedPaletteIndex = 0;
 
-		[SerializeField] internal VoxelFilter voxelFilter;
-		[SerializeField] internal VoxelMeshGenerator meshGenerator;
-		[SerializeField] internal VoxelMeshGenerator quickMeshGenerator;
+		[SerializeField, HideInInspector] internal VoxelFilter voxelFilter;
+		[SerializeField, HideInInspector] internal VoxelMeshGenerator meshGenerator;
 
 
 		[SerializeField, HideInInspector] internal TransformLock transformLock = new();
@@ -47,10 +46,8 @@ namespace VoxelSystem
 
 		private void OnValidate()
 		{
-			if (voxelFilter == null)
-				voxelFilter = GetComponent<VoxelFilter>();
-			if (meshGenerator == null)
-				meshGenerator = GetComponent<VoxelMeshGenerator>();
+			voxelFilter = GetComponent<VoxelFilter>();
+			meshGenerator = GetComponent<VoxelMeshGenerator>();
 		}
 
 		public int PaletteLength => meshGenerator == null ? 1 : meshGenerator.PaletteLength;
@@ -71,13 +68,7 @@ namespace VoxelSystem
 		public ToolState ToolState
 		{
 			get => toolState;
-			set
-			{
-				if (toolState == value) return;
-				toolState = value;
-				if (value == ToolState.None && meshGenerator != null && meshGenerator != quickMeshGenerator)
-					meshGenerator.RegenerateMeshes();
-			}
+			set => toolState = value;
 		}
 
 		// --- Palette ---
@@ -89,33 +80,10 @@ namespace VoxelSystem
 		// public IVoxelPalette<IVoxelPaletteItem> VoxelPalette => voxelGenerator == null ? null : voxelGenerator.VoxelPalette;
 
 		// --------------------------------------
-
-		VoxelFilter _lastFilter;
 		void Update()
 		{
 			DoLockTransform();
-
-			if (voxelFilter != null)
-			{
-				voxelFilter.MapChanged -= OnMapChanged;
-				voxelFilter.MapChanged += OnMapChanged;
-				_lastFilter = voxelFilter;
-			}
-			else if (_lastFilter != null) 
-			{
-				_lastFilter.MapChanged -= OnMapChanged;
-			}
 		}
-
-		void OnMapChanged() 
-		{
-			if(toolState is ToolState.Down or ToolState.Drag && quickMeshGenerator != null)
-				quickMeshGenerator.RegenerateMeshes();
-			else if(meshGenerator != null)
-				meshGenerator.RegenerateMeshes();
-		}
-
-
 		void DoLockTransform()
 		{
 			if (TransformLock.position)
@@ -147,20 +115,12 @@ namespace VoxelSystem
 
 			Vector3Int mapSize = Map.FullSize;
 
-			Gizmos.color = this.HasSelection() ? new Color(1f, 1f, 1f, 0.25f) : Color.white;
-			Gizmos.DrawWireCube((Vector3)mapSize / 2f, mapSize);
-
-
 			if (this.HasSelection()) // Draw Selection
 			{
 				Gizmos.color = Color.yellow;
 				const float offset = 0.05f;
 				Vector3 selectionSize = selection.size + (2 * offset * Vector3.one);
 				Gizmos.DrawWireCube((Vector3)selection.min - offset * Vector3.one + selectionSize / 2f, selectionSize);
-
-				// const float offset2 = -0.025f;
-				// selectionSize = selection.size + (2 * offset2 * Vector3.one);
-				// Gizmos.DrawWireCube((Vector3)selection.min - offset2 * Vector3.one + selectionSize / 2f, selectionSize); 
 			}
 
 			Gizmos.matrix = Matrix4x4.identity;

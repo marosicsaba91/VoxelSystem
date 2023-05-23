@@ -1,7 +1,7 @@
 ﻿using MUtility;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 namespace VoxelSystem
 {
@@ -14,121 +14,147 @@ namespace VoxelSystem
 			return true;
 		}
 
-		HashSet<Vector3Int> originalSide = new HashSet<Vector3Int>();
-		HashSet<Vector3Int> alreadyChecked = new HashSet<Vector3Int>();
-		Vector3Int[] searchDirections = new Vector3Int[4];
-		Vector3Int normal;
+		readonly HashSet<Vector3Int> _originalSide = new();
 		 
-		static HashSet<Vector3Int> _nextRound1 = new HashSet<Vector3Int>();
-		static HashSet<Vector3Int> _nextRound2 = new HashSet<Vector3Int>();
-		int _checkRoundIndex = 0;
+		GeneralDirection3D surfaceDirection;
+		Vector3Int surfaceNormal;
+		int offsetValue;
+		int lastOffsetValue;
 
 		protected sealed override void OnDrawCursor(IVoxelEditor voxelEditor, Color actionColor, VoxelHit hit)
 		{
-			Drawable side = GetDrawableVoxelSide(_lastValidHit);
-			Draw(side, actionColor);
-			
-			SetupSearchDirections(hit.side);
-			SearchPlane(voxelEditor.Map, hit.voxelIndex, voxelEditor.SelectedAction == VoxelAction.Repaint);
-
-			foreach (Vector3Int item in originalSide)
+			if (voxelEditor.ToolState == ToolState.None)
 			{
-				Drawable d = new(GetVoxelSide(item, hit.side, 1f)); 
-				Draw(d, actionColor);
-			}
-			
-		}
-		 
-		void SetupSearchDirections(GeneralDirection3D side)
-		{
-			Axis3D axis = side.GetAxis();
-			normal = side.ToVectorInt();
+				offsetValue = 0;
+				lastOffsetValue = 0;
+				Drawable side = GetDrawableVoxelSide(_lastValidHit);
+				Draw(side, actionColor);
 
-			var p1 = (Axis3D)(((int)axis + 1) % 3);
-			var p2 = (Axis3D)(((int)axis + 2) % 3);
+				//if (voxelEditor.Map.GetVoxel(hit.voxelIndex) == IntVoxelUtility.emptyValue)
+				//	return;
 
-			GeneralDirection3D d1 = p1.ToPositiveDirection();
-			GeneralDirection3D d2 = d1.Opposite();
-			GeneralDirection3D d3 = p2.ToPositiveDirection();
-			GeneralDirection3D d4 = d3.Opposite();
-
-			searchDirections[0] = d1.ToVectorInt();
-			searchDirections[1] = d2.ToVectorInt();
-			searchDirections[2] = d3.ToVectorInt();
-			searchDirections[3] = d4.ToVectorInt();
-		}
-
-		public void SearchPlane(VoxelMap map, Vector3Int startIndex, bool colorOnly)
-		{ 
-			int startVoxel = map.GetVoxel(startIndex);
-
-			if (startVoxel.IsEmpty())
-			{
-				originalSide.Clear();
-				return;
+				voxelEditor.Map.SearchPlane(_originalSide, hit.voxelIndex, hit.side, voxelEditor.SelectedAction == VoxelAction.Repaint);
 			}
 
-			originalSide.Clear();
-			alreadyChecked.Clear();
-			_nextRound1.Clear();
-			_nextRound2.Clear();
-			_nextRound1.Add(startIndex);
-			_checkRoundIndex = 0;
+			Drawable d = VoxelMap_DrawingUtilities.GetContourDrawable(_originalSide);
+			if (offsetValue > 0 ^ !surfaceDirection.IsPositive())
+			{
+				Vector3 off = _mouseDownHit.voxelIndex.MultiplyAllAxis(surfaceNormal.Abs());
+				d.Translate(-off);
+				d.Scale(Vector3Int.one + (offsetValue * surfaceNormal));
+				d.Translate(off);
+			}
+			else if (offsetValue > 0 && !surfaceDirection.IsPositive())
+			{
+				Vector3 off = _mouseDownHit.voxelIndex.MultiplyAllAxis(surfaceNormal.Abs());
+				d.Translate(-off);
+				d.Scale(Vector3Int.one + ((offsetValue +1) * surfaceNormal));
+				d.Translate(off - surfaceNormal);
+			}
+			else if (offsetValue < 0 && surfaceDirection.IsPositive())
+			{
+				Vector3 off = _mouseDownHit.voxelIndex.MultiplyAllAxis(surfaceNormal.Abs());
+				d.Translate(-off);
+				d.Scale(Vector3Int.one + ((offsetValue - 1) * surfaceNormal));
+				d.Translate(off + surfaceNormal);
+			} 
 
-			SearchPlane(map, startVoxel, colorOnly); 
+			Draw(d, actionColor);
 		}
 
-		void SearchPlane(VoxelMap map, int searchValue, bool colorOnly)
+		protected override bool OnVoxelCursorDown(IVoxelEditor voxelEditor, VoxelHit hit)
 		{
-			HashSet<Vector3Int> current, next;
-			do
+			// if (voxelEditor.Map.GetVoxel(hit.voxelIndex) == IntVoxelUtility.emptyValue)
+			//	return false;
+
+			voxelEditor.Map.SearchPlane(_originalSide, hit.voxelIndex, hit.side, voxelEditor.SelectedAction == VoxelAction.Repaint);
+			surfaceDirection = hit.side;
+			surfaceNormal = hit.side.ToVectorInt();
+
+			return false;
+		}
+
+		protected override bool OnVoxelCursorDrag(IVoxelEditor voxelEditor, VoxelHit hit)
+		{
+			voxelEditor.RecordForUndo("Face Tool", RecordType.Map);
+
+			offsetValue = GetOffset(voxelEditor);
+			if (offsetValue == lastOffsetValue)
+				return false;
+
+
+			bool isChanged = false;
+			foreach (Vector3Int originalIndex in _originalSide)
 			{
-				current = _checkRoundIndex % 2 == 0 ? _nextRound1 : _nextRound2;
-				next = _checkRoundIndex % 2 == 0 ? _nextRound2 : _nextRound1;
+				Vector3Int currentEnd = originalIndex + (surfaceNormal * offsetValue);
+				Vector3Int lastEnd = originalIndex + (surfaceNormal * lastOffsetValue);
+				VoxelAction action = voxelEditor.SelectedAction;
+				if (action == VoxelAction.Repaint)
+					action = VoxelAction.Overwrite;
 
-				next.Clear(); 
-
-				foreach (Vector3Int index in current)
-				{
-					originalSide.Add(index);
-					alreadyChecked.Add(index);
-
-					for (int i = 0; i < searchDirections.Length; i++)
+				if (offsetValue > 0)
+				{ 
+					if (Mathf.Abs(lastOffsetValue) > Mathf.Abs(offsetValue))// Reset original voxels
 					{
-						Vector3Int direction = searchDirections[i];
-						Vector3Int nextIndex = direction + index;
-						if (alreadyChecked.Contains(nextIndex))
-							continue;
-						if (!map.IsValidCoord(nextIndex))
-						{
-							alreadyChecked.Add(nextIndex);
-							continue;
-						}
-						int nextVoxel = map.GetVoxel(nextIndex);
-						bool isDifferent = colorOnly
-							? nextVoxel != searchValue
-							: nextVoxel.IsFilled() != searchValue.IsFilled();
-
-						if (isDifferent)
-						{
-							alreadyChecked.Add(nextIndex);
-							continue;
-						}
-
-						Vector3Int upperIndex = nextIndex + normal;
-						if (map.IsFilledSafe(upperIndex))
-						{
-							alreadyChecked.Add(nextIndex);
-							continue;
-						}
-
-
-						next.Add(nextIndex);
+						currentEnd += surfaceNormal;
+						lastEnd += surfaceNormal;
+						isChanged |= voxelEditor.Map.ResetRange(_originalMap, currentEnd, lastEnd);
+					}
+					else // Set new voxels
+					{
+						int originalValue = voxelEditor.Map.GetVoxel(originalIndex);
+						isChanged |= voxelEditor.Map.SetRange(currentEnd, lastEnd, action, originalValue);
 					}
 				}
+				else 
+				{
+					if (Mathf.Abs(lastOffsetValue) > Mathf.Abs(offsetValue))// Reset original voxels
+					{ 
+						isChanged |= voxelEditor.Map.ResetRange(_originalMap, currentEnd, lastEnd);
+					}
+					else // Set new voxels
+					{
+						currentEnd += surfaceNormal; 
+						int originalValue = voxelEditor.Map.GetVoxel(originalIndex);
+						isChanged |= voxelEditor.Map.SetRange(currentEnd, lastEnd, action, originalValue);
+					}
+				}
+			}
 
-				_checkRoundIndex++;
-			} while (!next.IsEmpty());
+			lastOffsetValue = offsetValue;
+			return isChanged;
+		}
+
+		private int GetOffset(IVoxelEditor voxelEditor)
+		{
+			Vector3 hitPosition = _mouseDownHit.hitWorldPosition;
+			Vector3Int hitIndex = _mouseDownHit.voxelIndex;
+			Ray localRay = _globalRay.Transform(voxelEditor.transform.worldToLocalMatrix);
+			Vector3 paneRight = Vector3.Cross(localRay.direction, surfaceNormal);
+			Vector3 paneNormal = Vector3.Cross(paneRight, surfaceNormal);
+			Plain plane = new(hitPosition, paneNormal);
+			Vector3 intersectPoint = plane.Intersect(localRay);
+
+			Line line = new(hitPosition, hitPosition + surfaceNormal);
+			Vector3 cursorPoint = line.ClosestPointOnLineToPoint(intersectPoint);
+
+			Vector3Int offsetVector = (cursorPoint - hitPosition).RoundToInt();
+			offsetVector.Clamp(-hitIndex - Vector3Int.one, voxelEditor.Map.FullSize - hitIndex - Vector3Int.one);
+
+			int absoluteOffset = offsetVector.x + offsetVector.y + offsetVector.z;
+			int offsetValue = absoluteOffset * (surfaceNormal.x + surfaceNormal.y + surfaceNormal.z);
+			if (voxelEditor.SelectedAction == VoxelAction.Attach)
+				offsetValue = Mathf.Max(offsetValue, 0);
+			if (voxelEditor.SelectedAction == VoxelAction.Erase)
+				offsetValue = Mathf.Min(offsetValue, 0);
+			return offsetValue;
+		}
+
+		protected override bool OnVoxelCursorUp(IVoxelEditor voxelEditor, VoxelHit hit) 
+		{
+			offsetValue = 0;
+			lastOffsetValue = 0;
+			return false;
 		}
 	}
 }

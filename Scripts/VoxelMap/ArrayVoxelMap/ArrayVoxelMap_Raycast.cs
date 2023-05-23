@@ -106,7 +106,10 @@ namespace VoxelSystem
 			Vector3Int lastFoundVoxel = entry.voxelIndex;
 			Vector3 lastIntersect = entry.hitWorldPosition;
 
-			while (true)
+			const int maxIterations = 100000;
+
+
+			for (int i = 0; i< maxIterations; i++)
 			{
 				cursor.hitWorldPosition = lastIntersect;
 				cursor.voxelIndex = lastFoundVoxel;
@@ -117,10 +120,11 @@ namespace VoxelSystem
 					xIsPositive ? Ceil(lastIntersect.x) - lastIntersect.x : Floor(lastIntersect.x) - lastIntersect.x,
 					yIsPositive ? Ceil(lastIntersect.y) - lastIntersect.y : Floor(lastIntersect.y) - lastIntersect.y,
 					zIsPositive ? Ceil(lastIntersect.z) - lastIntersect.z : Floor(lastIntersect.z) - lastIntersect.z);
+
 				Vector3 distanceToIntersect = new (
-					stepDistance.x / rayDirection.x,
-					stepDistance.y / rayDirection.y,
-					stepDistance.z / rayDirection.z);
+					rayDirection.x == 0 ? float.MaxValue : (stepDistance.x / rayDirection.x),
+					rayDirection.y == 0 ? float.MaxValue : (stepDistance.y / rayDirection.y),
+					rayDirection.z == 0 ? float.MaxValue : (stepDistance.z / rayDirection.z));
 
 				float minDistance = Mathf.Min(distanceToIntersect.x, distanceToIntersect.y, distanceToIntersect.z);
 				if (Math.Abs(minDistance - distanceToIntersect.x) < epsilon)
@@ -157,6 +161,10 @@ namespace VoxelSystem
 					return true;
 				}
 			}
+			Debug.LogError("Max Iterations Reached!");
+			hit = default;
+			return false;
+
 		}
 
 		static int Ceil(float f)

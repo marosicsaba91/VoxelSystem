@@ -1,5 +1,4 @@
 ﻿using MUtility;
-using System;
 using System.Collections.Generic; 
 using UnityEngine; 
 
@@ -27,15 +26,16 @@ namespace VoxelSystem
 		protected static VoxelHit _lastValidHit;
 		protected static VoxelHit _mouseDownHit;
 		protected static VoxelHit _lastHandledHit;
-		protected static Color cursorColor = Color.white;
+		protected static Color _cursorColor = Color.white;
+		protected static Ray _globalRay;
 
 		// Handle Helper Variables
 		public static Vector3 _clickPositionGlobal;
-		protected static Vector3 _lastHandleVector;
+		protected static Vector3Int _lastHandleVector;
 		protected static GeneralDirection3D _handleDragDirection;
 		protected static int _handleSteps = 0;
 
-		protected static GUIStyle textStyle = new GUIStyle()
+		protected static GUIStyle _textStyle = new ()
 		{
 			alignment = TextAnchor.MiddleCenter,
 			fontSize = 15,
@@ -49,7 +49,7 @@ namespace VoxelSystem
 #if UNITY_EDITOR
 			Matrix4x4 matrix4X4 = UnityEditor.Handles.matrix;
 			UnityEditor.Handles.matrix = voxelEditor.transform.localToWorldMatrix;
-
+			_globalRay = ray;
 
 			if (voxelEditor.ToolState == ToolState.None)
 			{
@@ -61,8 +61,8 @@ namespace VoxelSystem
 			if (!useEvent)
 				TryExecuteRaycast(voxelEditor, guiEvent, ray);
 
-			if (useEvent)
-				UseMouseEvent(guiEvent);
+			else if (guiEvent.type is EventType.MouseDown or EventType.MouseDrag or EventType.MouseUp && guiEvent.button == 0) // Left Mouse
+				guiEvent.Use();
 
 			UnityEditor.Handles.matrix = matrix4X4;
 #endif
@@ -81,8 +81,9 @@ namespace VoxelSystem
 				_isLastRayHit = false;
 				return;
 			}
-
+			
 			HandleRaycast(voxelEditor, ray, guiEvent, raycastOutside);
+			
 			if (guiEvent.type == EventType.Repaint)
 			{
 				if (_isLastRayHit)
@@ -155,8 +156,7 @@ namespace VoxelSystem
 				voxelEditor.ToolState = ToolState.None;
 				_originalSelection = voxelEditor.Selection;
 			}
-
-			UseMouseEvent(guiEvent);
+			guiEvent.Use();
 		}
 
 		void HandleCursorDown(IVoxelEditor voxelEditor, bool isHit, VoxelHit hit)
@@ -260,7 +260,7 @@ namespace VoxelSystem
 
 				case HandleEvent.LmbDrag: // DRAG
 
-					_handleSteps = GetDistance(_clickPositionGlobal, ray, directionVector);
+					_handleSteps = GetDistance(voxelEditor, _clickPositionGlobal, ray, directionVector);
 
 					voxelEditor.ToolState = ToolState.Drag;
 					Vector3Int vec = direction.ToVectorInt() * _handleSteps;
@@ -274,7 +274,7 @@ namespace VoxelSystem
 
 				case HandleEvent.LmbRelease: // RELEASE 
 					voxelEditor.ToolState = ToolState.Up;
-					_handleSteps = GetDistance(_clickPositionGlobal, ray, directionVector);
+					_handleSteps = GetDistance(voxelEditor, _clickPositionGlobal, ray, directionVector);
 					if (OnHandleUp(voxelEditor, handleInfo, _handleSteps))
 						voxelEditor.Map.MapChanged();
 					_handleSteps = 0;
@@ -290,19 +290,23 @@ namespace VoxelSystem
 
 			if (!handleInfo.text.IsNullOrEmpty())
 			{
-				textStyle.normal.textColor = (color + Color.white) / 2f;
-				UnityEditor.Handles.Label(handlePos + Vector3.up * _standardSpacing, handleInfo.text, textStyle);
+				_textStyle.normal.textColor = (color + Color.white) / 2f;
+				UnityEditor.Handles.Label(handlePos + Vector3.up * _standardSpacing, handleInfo.text, _textStyle);
 			}
 
 #endif
 		}
 
-		static int GetDistance(Vector3 startPoint, Ray ray, Vector3 directionVector)
+		static int GetDistance(IVoxelEditor editor, Vector3 startPoint, Ray ray, Vector3 directionVector)
 		{
-			Vector3 planeNormal = directionVector.GetPerpendicular(); 
-			Plane plane = new(planeNormal, startPoint);
-			plane.Raycast(ray, out float enter);
-			Vector3 intersect = ray.GetPoint(enter);
+			Vector3 normal = directionVector;
+
+			Ray localRay = _globalRay.Transform(editor.transform.worldToLocalMatrix);
+			Vector3 paneRight = Vector3.Cross(localRay.direction, normal);
+			Vector3 paneNormal = Vector3.Cross(paneRight, normal);
+			Plain plane = new(startPoint, paneNormal);
+			 
+			Vector3 intersect = plane.Intersect(ray);
 			Vector3 cursorMovement = intersect - startPoint;
 			float distance = Vector3.Dot(cursorMovement, directionVector); 
 			return Mathf.RoundToInt(distance);
@@ -317,16 +321,9 @@ namespace VoxelSystem
 
 		// ------------------ Static Methods -----------------------------
 
-		static void UseMouseEvent(Event guiEvent)
-		{
-			if (guiEvent.type is EventType.MouseDown or EventType.MouseDrag or EventType.MouseUp && guiEvent.button == 0) // Left Mouse
-				guiEvent.Use();
-		}
-
 		protected static bool IsMapSideVisible(IVoxelEditor voxelEditor, Vector3 size, GeneralDirection3D side)
 		{
-			// TODO: Simplify
-
+			// TODO: Simplify 
 			Vector3 sideNormal = side.ToVectorInt();
 			Vector3 halfSize = new(size.x / 2f, size.y / 2f, size.z / 2f);
 			Vector3 halfNormalInSize = new(halfSize.x * sideNormal.x, halfSize.y * sideNormal.y, halfSize.z * sideNormal.z);

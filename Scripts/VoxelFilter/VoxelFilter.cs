@@ -1,6 +1,7 @@
 ﻿using MUtility;
 using System;
 using System.IO;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -126,6 +127,21 @@ namespace VoxelSystem
 				UnityEditor.AssetDatabase.Refresh();
 			}
 #endif
+		}
+
+		void OnDrawGizmosSelected()
+		{ 
+			Gizmos.matrix = transform.localToWorldMatrix;
+
+			VoxelMap map = GetVoxelMap();
+
+			if (map == null)
+				return;
+
+			Gizmos.color = new Color(1f, 1f, 1f, 0.2f);
+			Vector3 mapSize = map.FullSize;
+			Gizmos.DrawWireCube(mapSize / 2f, mapSize); 
+			Gizmos.matrix = Matrix4x4.identity;
 		}
 	}
 }

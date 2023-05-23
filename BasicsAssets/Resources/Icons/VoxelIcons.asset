@@ -60,6 +60,26 @@ MonoBehaviour:
     type: 3}
   resizeVoxelToolIcon: {fileID: 2800000, guid: 5cf2501a976454c43a8d2902a6d23473, type: 3}
   repeatVoxelToolIcon: {fileID: 2800000, guid: 90b17d74b8db9a148b74aa3e087ff55f, type: 3}
+  moveAttachVoxelToolIcon: {fileID: 2800000, guid: b288a35347635904fa95c1e3b60d9b7f,
+    type: 3}
+  rotateAttachVoxelToolIcon: {fileID: 2800000, guid: be54e311329f7524cbfa11d801f8b24b,
+    type: 3}
+  mirrorAttachVoxelToolIcon: {fileID: 2800000, guid: 72f333d03d03b354e99c8c9c2a6223ce,
+    type: 3}
+  resizeAttachVoxelToolIcon: {fileID: 2800000, guid: 475e8cabed40ae045872e0d1cbeb3b0a,
+    type: 3}
+  repeatAttachVoxelToolIcon: {fileID: 2800000, guid: 34008876fe0ae5f4c8fae5683ce6b16f,
+    type: 3}
+  moveOverWriteVoxelToolIcon: {fileID: 2800000, guid: 1a6cd0f2441c288418fbe16c13f3c130,
+    type: 3}
+  rotateOverWriteVoxelToolIcon: {fileID: 2800000, guid: f2b1aae683c61fc41bb088070707d476,
+    type: 3}
+  mirrorOverWriteVoxelToolIcon: {fileID: 2800000, guid: 076a1cfbc404ffa4ebf04f6dc746704e,
+    type: 3}
+  resizeOverWriteVoxelToolIcon: {fileID: 2800000, guid: 295de225b8838334eba24d1a91fe87da,
+    type: 3}
+  repeatOverWriteVoxelToolIcon: {fileID: 2800000, guid: 5b22dd6cb5623dc4f9fa7cc3a4063b82,
+    type: 3}
   colorPickerVoxelToolIcon: {fileID: 2800000, guid: a707cc8b10ea5a94384bf57345cf239e,
     type: 3}
   lockOffIcon: {fileID: 2800000, guid: 3379c7673910ea64a831fcc17aa0ffc6, type: 3}

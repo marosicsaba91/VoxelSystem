@@ -14,7 +14,7 @@ namespace VoxelSystem
 		[SerializeField, HideIf(nameof(IsSingle))] TPalette palette;
 		[SerializeField, ShowIf(nameof(IsSingle))] TItem voxelSetting;
 
-		bool IsSingle => type == VoxelPaletteItemType.Single;	
+		protected bool IsSingle => type == VoxelPaletteItemType.Single;	
 
 		public IEnumerable<TItem> Items 
 		{
