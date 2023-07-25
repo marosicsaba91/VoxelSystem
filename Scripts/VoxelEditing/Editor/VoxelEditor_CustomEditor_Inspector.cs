@@ -211,7 +211,7 @@ namespace VoxelSystem
 			GUI.enabled = _enableEdit;
 
 			if (change)
-				voxelEditor.Map.MapChanged();
+				voxelEditor.Map.MapChanged(MapChange.Final);
 		}
 
 		void DrawSelectionTools(IVoxelEditor voxelEditor)
@@ -283,7 +283,6 @@ namespace VoxelSystem
 				change = voxelEditor.FillInsideSelection();
 			}
 
-
 			buttonRect.y += height + _spacing;
 			buttonRect.x -= width + _spacing;
 
@@ -294,7 +293,7 @@ namespace VoxelSystem
 			string toolTip = upperVoxelEditor != null
 				? $"Works best if the rotation and scale is the same.\nNeed to be inside the destination map's bounds."
 				: "Destination need to have a VoxelEditor component";
-			GUIContent content = new GUIContent($"Merge Up: {name}", toolTip);
+			GUIContent content = new($"Merge Up: {name}", toolTip);
 			if (GUI.Button(buttonRect, content))
 			{
 				voxelEditor.MergeInto(upperVoxelEditor);
@@ -309,7 +308,7 @@ namespace VoxelSystem
 			GUI.enabled = _enableEdit;
 
 			if (change)
-				voxelEditor.Map.MapChanged();
+				voxelEditor.Map.MapChanged(MapChange.Final);
 		}
 
 		void DrawTransformLocks(TransformLock tLock, VoxelEditor voxelEditor)
@@ -318,7 +317,7 @@ namespace VoxelSystem
 
 			int count = 3;
 			float width = (position.width - (count - 1) * _spacing) / count;
-			var rect = new Rect(position.x, position.y, width, position.height);
+			Rect rect = new(position.x, position.y, width, position.height);
 			TransformLock tLockOriginal = tLock;
 
 			tLock.position = DrawOneLock(tLock.position, "Position");
@@ -366,7 +365,7 @@ namespace VoxelSystem
 
 			int count = tools.Length;
 			float width = (position.width - (count - 1) * _spacing) / count;
-			var rect = new Rect(position.x, position.y, width, position.height);
+			Rect rect = new(position.x, position.y, width, position.height);
 
 			foreach (VoxelTool tool in tools)
 			{
@@ -411,7 +410,7 @@ namespace VoxelSystem
 
 			int count = VoxelEditor_EnumHelper._allVoxelActions.Length;
 			float width = (position.width - (count - 1) * _spacing) / count;
-			var rect = new Rect(position.x, position.y, width, position.height);
+			Rect rect = new(position.x, position.y, width, position.height);
 
 			VoxelAction[] supportedActions = selectedTool == VoxelTool.None
 				? VoxelEditor_EnumHelper._allVoxelActions

@@ -1,13 +1,12 @@
 using MUtility;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using UnityEngine;
-using UnityEngine.XR;
 using Object = UnityEngine.Object;
 
 namespace VoxelSystem
 {
+	public enum MapChange { None, Quick, Final }
 	public struct VoxelHit
 	{
 		public Vector3Int voxelIndex;
@@ -15,11 +14,12 @@ namespace VoxelSystem
 		public Vector3 hitWorldPosition;  // Is it wordPos?
 	}
 
+	public delegate void MapChangedDelegate(bool isQuick);
 
 	[Serializable]
 	public abstract partial class VoxelMap
 	{
-		static Dictionary<string, VoxelMap> mapDictionary = new();
+		static readonly Dictionary<string, VoxelMap> mapDictionary = new();
 		public static bool TryGetMapByGuid(string guid, out VoxelMap map)
 		{
 			map = null;
@@ -32,12 +32,12 @@ namespace VoxelSystem
 				}
 			}
 
-			VoxelFilter[] filters = Object.FindObjectsByType<VoxelFilter>( FindObjectsSortMode.None );
+			VoxelFilter[] filters = Object.FindObjectsByType<VoxelFilter>(FindObjectsSortMode.None);
 			foreach (VoxelFilter filter in filters)
 			{
-				VoxelMap vMap = filter.GetVoxelMap(); 
+				VoxelMap vMap = filter.GetVoxelMap();
 				mapDictionary.TryAdd(vMap.UniqueID, vMap);
-				if(vMap.UniqueID.Equals(guid))
+				if (vMap.UniqueID.Equals(guid))
 					map = vMap;
 			}
 
@@ -48,15 +48,25 @@ namespace VoxelSystem
 		// ------------- GET Information -------------
 
 		protected const int emptyValue = IntVoxelUtility.emptyValue;
-		public bool IsVoxelFilled(int v) => v != emptyValue;
-		public bool IsVoxelEmpty(int v) => v == emptyValue;
+		public bool IsVoxelFilled(int voxelValue) => voxelValue != emptyValue;
+		public bool IsVoxelEmpty(int voxelValue) => voxelValue == emptyValue;
 
 		public abstract BoundsInt VoxelBoundaries { get; protected set; }
 		public abstract Vector3Int FullSize { get; protected set; }
-		[SerializeField] string uniqueID;
-		public string UniqueID => uniqueID; 
 
-		public bool IsValidCoord(int x, int y, int z) => VoxelBoundaries.Contains(new Vector3Int(x,y,z));
+		public virtual int Length
+		{
+			get
+			{
+				Vector3Int size = FullSize;
+				return size.x * size.y * size.z;
+			}
+		}
+
+		[SerializeField] string uniqueID;
+		public string UniqueID => uniqueID;
+
+		public bool IsValidCoord(int x, int y, int z) => VoxelBoundaries.Contains(new Vector3Int(x, y, z));
 
 		public bool IsValidCoord(Vector3Int coordinate) => IsValidCoord(coordinate.x, coordinate.y, coordinate.z);
 
@@ -70,7 +80,7 @@ namespace VoxelSystem
 		}
 		// ------------- Constructing -------------
 
-		protected void SetupUniqueID() 
+		protected void SetupUniqueID()
 		{
 			uniqueID = Guid.NewGuid().ToString();
 			mapDictionary.TryAdd(UniqueID, this);
@@ -81,18 +91,21 @@ namespace VoxelSystem
 
 		// ------------- Changed Event -------------
 
-		public event Action MapChangedEvent;
 
-		internal void MapChanged()
+		public event MapChangedDelegate MapChangedEvent;
+
+		internal void MapChanged(MapChange change)
 		{
-			OnMapChanged();
-			MapChangedEvent?.Invoke();
+			if (change == MapChange.None) return;
+			bool isQuick = change == MapChange.Quick;
+			OnMapChanged(isQuick);
+			MapChangedEvent?.Invoke(isQuick);
 		}
 
-		protected virtual void OnMapChanged() { }
+		protected virtual void OnMapChanged(bool isQuick) { }
 
 		internal void UndoRedoEvenInvokedOnMap() =>
-			MapChangedEvent?.Invoke();
+			MapChangedEvent?.Invoke(false);
 
 		// ------------- GET Voxels -------------
 
@@ -169,7 +182,7 @@ namespace VoxelSystem
 
 		public bool ClearRange(Vector3Int startCoordinate, Vector3Int endCoordinate) => SetRange(startCoordinate, endCoordinate, VoxelAction.Erase, emptyValue);
 
-		internal bool SetRange(BoundsInt bound, int paletteIndex) 
+		internal bool SetRange(BoundsInt bound, int paletteIndex)
 		{
 			bool changed = false;
 			foreach (Vector3Int c in bound.WalkThrough())
@@ -180,14 +193,14 @@ namespace VoxelSystem
 		internal bool ClearRange(BoundsInt bound) => SetRange(bound, emptyValue);
 
 		public bool ResetRange(VoxelMap original, Vector3Int startCoordinate, Vector3Int endCoordinate)
-		{ 
+		{
 			bool changed = false;
 			Vector3Int min = Vector3Int.Min(startCoordinate, endCoordinate);
-			 min = Vector3Int.Max(min, Vector3Int.zero);
+			min = Vector3Int.Max(min, Vector3Int.zero);
 			Vector3Int max = Vector3Int.Max(startCoordinate, endCoordinate);
 			max = Vector3Int.Min(max, FullSize - Vector3Int.one);
 
-			BoundsInt bound = new BoundsInt(min, max + Vector3Int.one - min);
+			BoundsInt bound = new(min, max + Vector3Int.one - min);
 			foreach (Vector3Int index in bound.WalkThrough())
 			{
 				int v = original.GetVoxel(index);

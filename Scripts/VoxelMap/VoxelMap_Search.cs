@@ -48,8 +48,8 @@ namespace VoxelSystem
 
 
 			Axis3D axis = side.GetAxis();
-			var p1 = (Axis3D)(((int)axis + 1) % 3);
-			var p2 = (Axis3D)(((int)axis + 2) % 3);
+			Axis3D p1 = (Axis3D)(((int)axis + 1) % 3);
+			Axis3D p2 = (Axis3D)(((int)axis + 2) % 3);
 
 			GeneralDirection3D d1 = p1.ToPositiveDirection();
 			GeneralDirection3D d2 = d1.Opposite();

@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace VoxelSystem
 {
-	public struct Block
+	public readonly struct Block
 	{
 		public readonly Vector3Int doubleSize;
 		public readonly BlockType blockType;

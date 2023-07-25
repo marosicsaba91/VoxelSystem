@@ -13,7 +13,7 @@ namespace VoxelSystem
 		[SerializeField] Vector3Int size;
 		[SerializeField] int[] intVoxelData;
 
-		public override Vector3Int FullSize
+		public sealed override Vector3Int FullSize
 		{
 			get => size;
 			protected set // Reset Whole Map
@@ -24,11 +24,13 @@ namespace VoxelSystem
 				if (intVoxelData != null && size == value) return;
 
 				size = value;
-				intVoxelData = new int[size.x * size.y * size.z];
+				intVoxelData = new int[Length];
 			}
 		}
 
-		// Constructor -----------------------------------------------------------------------------
+		public sealed override int Length => size.x * size.y * size.z;
+
+		// Constructor -----------------------------------------------------------------------------     
 
 		public ArrayVoxelMap() { SetupUniqueID(); }
 
@@ -43,7 +45,7 @@ namespace VoxelSystem
 		public sealed override void Setup(Vector3Int size, int value = IntVoxelUtility.emptyValue)
 		{
 			FullSize = size;
-			SetWhole(value); 
+			SetWhole(value);
 		}
 
 		public sealed override BoundsInt VoxelBoundaries
@@ -54,11 +56,16 @@ namespace VoxelSystem
 
 		// GET Voxels ----------------------------
 
-		public int Index(Vector3Int coordinate) => Index(coordinate.x, coordinate.y, coordinate.z);
+		public int Index(Vector3Int coordinate) => Index(coordinate.x, coordinate.y, coordinate.z, size);
+		public static int Index(Vector3Int coordinate, Vector3Int size) =>
+			Index(coordinate.x, coordinate.y, coordinate.z, size);
 
-		public int Index(int x, int y, int z) => x + (y * size.x) + (z * size.x * size.y);
+		public int Index(int x, int y, int z) => Index(x, y, z, size);
+		public static int Index(int x, int y, int z, Vector3Int size) =>
+			x + (y * size.x) + (z * size.x * size.y);
 
-		Vector3Int Index(int i)
+		Vector3Int Index(int i) => Index(i, size);
+		public static Vector3Int Index(int i, Vector3Int size)
 		{
 			int z = i / (size.x * size.y);
 			i -= z * size.x * size.y;
@@ -70,6 +77,7 @@ namespace VoxelSystem
 
 			return new Vector3Int(x, y, z);
 		}
+
 
 		public int GetHighestValue() => intVoxelData.Prepend(-1).Max();
 
@@ -90,7 +98,7 @@ namespace VoxelSystem
 		public sealed override bool SetVoxel(int x, int y, int z, VoxelAction action, int value)
 		{
 			int index = Index(x, y, z);
-			if (index<0 || index>= intVoxelData.Length) return false;
+			if (index < 0 || index >= intVoxelData.Length) return false;
 			int v = intVoxelData[index];
 			int oldVal = v;
 			switch (action)
@@ -110,13 +118,13 @@ namespace VoxelSystem
 					v = emptyValue;
 					break;
 			}
-			if(oldVal == v)
+			if (oldVal == v)
 				return false;
 
 			intVoxelData[index] = v;
 			return true;
 		}
-		
+
 		public sealed override bool SetWhole(int value)
 		{
 			for (int i = 0; i < intVoxelData.Length; i++)
@@ -126,7 +134,8 @@ namespace VoxelSystem
 			return true;  // Faster to say, it is always changed.
 		}
 
-		public sealed override bool SetRange(Vector3Int startCoordinate, Vector3Int endCoordinate, VoxelAction action, int value)
+		public sealed override bool SetRange
+			(Vector3Int startCoordinate, Vector3Int endCoordinate, VoxelAction action, int value)
 		{
 			Vector3Int size = FullSize;
 			int minX = Mathf.Max(0, Mathf.Min(startCoordinate.x, endCoordinate.x, size.x));
@@ -164,7 +173,7 @@ namespace VoxelSystem
 							{
 								intVoxelData[index] = value;
 								changed |= true;
-							}  
+							}
 						}
 			}
 			else if (action == VoxelAction.Attach)
@@ -194,7 +203,7 @@ namespace VoxelSystem
 							{
 								intVoxelData[index] = IntVoxelUtility.emptyValue;
 								changed |= true;
-							} 
+							}
 						}
 			}
 

@@ -1,6 +1,6 @@
 ﻿using MUtility;
-using System.Collections.Generic; 
-using UnityEngine; 
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace VoxelSystem
 {
@@ -14,28 +14,28 @@ namespace VoxelSystem
 
 	public abstract class VoxelToolHandler
 	{
-		protected static ArrayVoxelMap _originalMap = null; // Target Voxel Map before Mouse Down
-		protected static Vector3 _originalTransformPosition = Vector3.zero;
-		protected static BoundsInt _originalSelection;
-		protected static Vector3Int _originalMapSize;
-		protected static float _standardSpacing = 1;
+		protected static ArrayVoxelMap originalMap = null; // Target Voxel Map before Mouse Down
+		protected static Vector3 originalTransformPosition = Vector3.zero;
+		protected static BoundsInt originalSelection;
+		protected static Vector3Int originalMapSize;
+		protected static float standardSpacing = 1;
 
 		// Raycast Helper Variables
-		protected static bool _isLastRayHit;
-		protected static bool _isMouseDown;
-		protected static VoxelHit _lastValidHit;
-		protected static VoxelHit _mouseDownHit;
-		protected static VoxelHit _lastHandledHit;
-		protected static Color _cursorColor = Color.white;
-		protected static Ray _globalRay;
+		protected static bool isLastRayHit;
+		protected static bool isMouseDown;
+		protected static VoxelHit lastValidHit;
+		protected static VoxelHit mouseDownHit;
+		protected static VoxelHit lastHandledHit;
+		protected static Color cursorColor = Color.white;
+		protected static Ray globalRay;
 
 		// Handle Helper Variables
-		public static Vector3 _clickPositionGlobal;
-		protected static Vector3Int _lastHandleVector;
-		protected static GeneralDirection3D _handleDragDirection;
-		protected static int _handleSteps = 0;
+		public static Vector3 clickPositionGlobal;
+		protected static Vector3Int lastHandleVector;
+		protected static GeneralDirection3D handleDragDirection;
+		protected static int handleSteps = 0;
 
-		protected static GUIStyle _textStyle = new ()
+		protected static GUIStyle textStyle = new()
 		{
 			alignment = TextAnchor.MiddleCenter,
 			fontSize = 15,
@@ -49,12 +49,12 @@ namespace VoxelSystem
 #if UNITY_EDITOR
 			Matrix4x4 matrix4X4 = UnityEditor.Handles.matrix;
 			UnityEditor.Handles.matrix = voxelEditor.transform.localToWorldMatrix;
-			_globalRay = ray;
+			globalRay = ray;
 
 			if (voxelEditor.ToolState == ToolState.None)
 			{
-				_originalSelection = voxelEditor.Selection;
-				_originalMapSize = voxelEditor.Map.FullSize;
+				originalSelection = voxelEditor.Selection;
+				originalMapSize = voxelEditor.Map.FullSize;
 			}
 
 			ExecutedHandles(voxelEditor, ray, out bool useEvent);
@@ -69,47 +69,47 @@ namespace VoxelSystem
 		}
 
 		// In the future, this method will work not just for handle drawing
-		public static void Draw(Drawable d, Color c)=> d.DrawHandle(c);
-		
+		public static void Draw(Drawable d, Color c) => d.DrawHandle(c);
+
 		// --------------------- Raycast ---------------------
 
 		void TryExecuteRaycast(IVoxelEditor voxelEditor, Event guiEvent, Ray ray)
-		{ 
+		{
 #if UNITY_EDITOR
 			if (!DoRaycastVoxelCursor(voxelEditor, out bool raycastOutside))
 			{
-				_isLastRayHit = false;
+				isLastRayHit = false;
 				return;
 			}
-			
+
 			HandleRaycast(voxelEditor, ray, guiEvent, raycastOutside);
-			
+
 			if (guiEvent.type == EventType.Repaint)
 			{
-				if (_isLastRayHit)
+				if (isLastRayHit)
 				{
 					Color color = GetActionColor(voxelEditor.SelectedAction);
-					OnDrawCursor(voxelEditor, color, _lastValidHit);
+					OnDrawCursor(voxelEditor, color, lastValidHit);
 				}
 			}
 #endif
 		}
 
-		protected virtual void OnDrawCursor(IVoxelEditor voxelEditor, Color actionColor, VoxelHit hit) 
+		protected virtual void OnDrawCursor(IVoxelEditor voxelEditor, Color actionColor, VoxelHit hit)
 		{
 			Color fadedColor = new(actionColor.r, actionColor.g, actionColor.b, actionColor.a / 4f);
 			Vector3 voxelCenter = (Vector3)hit.voxelIndex + Vector3.one * 0.5f;
-			var cube = new Cuboid(Vector3.one).ToDrawable();
-			cube.Translate(voxelCenter); 
-			Draw(cube, fadedColor); 
-			 
+			Drawable cube = new Cuboid(Vector3.one).ToDrawable();
+			cube.Translate(voxelCenter);
+			Draw(cube, fadedColor);
+
 			Drawable side = GetDrawableVoxelSide(hit);
 			Draw(side, actionColor);
 		}
 
 		Color GetActionColor(VoxelAction selectedAction) => selectedAction switch
 		{
-			VoxelAction.Attach => new Color(0.4f,1,0.3f),
+			VoxelAction.Attach => new Color(0.4f, 1, 0.3f),
 			VoxelAction.Erase => new Color(1, 0.2f, 0.1f),
 			VoxelAction.Overwrite => new Color(0.2f, 0.7f, 1),
 			VoxelAction.Repaint => new Color(1, 1, 1),
@@ -121,22 +121,22 @@ namespace VoxelSystem
 			if (!guiEvent.isMouse || guiEvent.button is not 0) return;
 
 			Transform transform = voxelEditor.transform;
-			VoxelMap map = _isMouseDown ? _originalMap : voxelEditor.Map;
-			_isLastRayHit = map.Raycast(ray, out VoxelHit hit, transform, raycastOutside);
+			VoxelMap map = isMouseDown ? originalMap : voxelEditor.Map;
+			isLastRayHit = map.Raycast(ray, out VoxelHit hit, transform, raycastOutside);
 
-			if (_isLastRayHit)
-				_lastValidHit = hit;
+			if (isLastRayHit)
+				lastValidHit = hit;
 
 			if (guiEvent.type == EventType.MouseDown)
 			{
 				if (guiEvent.modifiers == EventModifiers.Control)
 					Debug.Log(hit.voxelIndex);
 
-				_originalSelection = voxelEditor.Selection;
+				originalSelection = voxelEditor.Selection;
 				voxelEditor.ToolState = ToolState.Down;
-				HandleCursorDown(voxelEditor, _isLastRayHit, hit);
+				HandleCursorDown(voxelEditor, isLastRayHit, hit);
 			}
-			else if (!_isMouseDown)
+			else if (!isMouseDown)
 			{
 				guiEvent.Use();
 				return;
@@ -145,46 +145,47 @@ namespace VoxelSystem
 			if (guiEvent.type == EventType.MouseDrag)
 			{
 				voxelEditor.ToolState = ToolState.Drag;
-				HandleCursorDrag(voxelEditor, _isLastRayHit, hit);
+				HandleCursorDrag(voxelEditor, isLastRayHit, hit);
 			}
 			else if (guiEvent.type == EventType.MouseUp)
 			{
 				voxelEditor.ToolState = ToolState.Up;
-				if (OnVoxelCursorUp(voxelEditor, _lastValidHit))
-					voxelEditor.Map.MapChanged();
-				_isMouseDown = false;
+				MapChange change = OnVoxelCursorUp(voxelEditor, lastValidHit);
+				voxelEditor.Map.MapChanged(change);
+
+				isMouseDown = false;
 				voxelEditor.ToolState = ToolState.None;
-				_originalSelection = voxelEditor.Selection;
+				originalSelection = voxelEditor.Selection;
 			}
 			guiEvent.Use();
 		}
 
 		void HandleCursorDown(IVoxelEditor voxelEditor, bool isHit, VoxelHit hit)
 		{
-			_mouseDownHit = hit;
-			_isMouseDown = isHit;
+			mouseDownHit = hit;
+			isMouseDown = isHit;
 
 			if (!isHit) return;
 
-			if (_originalMap == null || _originalMap.FullSize == Vector3Int.zero)
-				_originalMap = new ArrayVoxelMap();
-			_originalMap.SetupFrom(voxelEditor.Map);
+			if (originalMap == null || originalMap.FullSize == Vector3Int.zero)
+				originalMap = new ArrayVoxelMap();
+			originalMap.SetupFrom(voxelEditor.Map);
 
-			if (OnVoxelCursorDown(voxelEditor, hit))
-				voxelEditor.Map.MapChanged();
+			MapChange change = OnVoxelCursorDown(voxelEditor, hit);
+			voxelEditor.Map.MapChanged(change);
 
-			_lastHandledHit = hit;
+			lastHandledHit = hit;
 		}
 
 		void HandleCursorDrag(IVoxelEditor voxelEditor, bool isHit, VoxelHit hit)
 		{
 			if (!isHit) return;
-			if (hit.voxelIndex == _lastHandledHit.voxelIndex) return;
+			if (hit.voxelIndex == lastHandledHit.voxelIndex) return;
 
-			if (OnVoxelCursorDrag(voxelEditor, hit))
-				voxelEditor.Map.MapChanged();
+			MapChange change = OnVoxelCursorDrag(voxelEditor, hit);
+			voxelEditor.Map.MapChanged(change);
 
-			_lastHandledHit = hit;
+			lastHandledHit = hit;
 		}
 
 
@@ -211,14 +212,14 @@ namespace VoxelSystem
 			Vector3 handlePos = handleInfo.position;
 			Vector3Int editingSpace = voxelEditor.HasSelection() ? voxelEditor.Selection.size : map.FullSize;
 			float sizeMultiplier = Mathf.Sqrt(editingSpace.AbsMean() / 20f);  // 20 looks good
-			_standardSpacing = sizeMultiplier * 2;
+			standardSpacing = sizeMultiplier * 2;
 
 			Color color = axis.GetAxisColor();
 			Color focused = (color + Color.white) / 2f;
 			UnityEditor.Handles.color = color;
 
 			Vector3 directionVector = direction.ToVector();
-			var rotation = Quaternion.LookRotation(directionVector);
+			Quaternion rotation = Quaternion.LookRotation(directionVector);
 
 			UnityEditor.Handles.CapFunction capFunction = handleInfo.coneType == HandeleConeType.Arrow
 				? UnityEditor.Handles.ConeHandleCap
@@ -230,57 +231,64 @@ namespace VoxelSystem
 			HandleResult handleResult =
 				AdvancedHandles.Handle(handlePos, rotation, sizeMultiplier, capFunction, color, focused, color);
 
+			MapChange change;
+
 			// Handle Click
 			if (handleResult.handleEvent is HandleEvent.LmbClick or HandleEvent.LmbDoubleClick)
 			{
-				if (OnHandleClick(voxelEditor, handleInfo))
+				change = OnHandleClick(voxelEditor, handleInfo);
+				if (change!= MapChange.None)
 				{
 					voxelEditor.ToolState = ToolState.Up;
-					voxelEditor.Map.MapChanged();
+					voxelEditor.Map.MapChanged(change);
 					useEvent = true;
 					return;
 				}
 			}
-
 			// Handle Drag
 			switch (handleResult.handleEvent)
 			{
 				case HandleEvent.LmbPress: // START DRAG 
-					_originalSelection = voxelEditor.Selection;
+					originalSelection = voxelEditor.Selection;
 					voxelEditor.ToolState = ToolState.Down;
-					_lastHandleVector = Vector3Int.zero;
-					_clickPositionGlobal = voxelEditor.transform.TransformPoint(handleResult.clickPosition);
-					_originalMap ??= new ArrayVoxelMap();
-					_originalMap.SetupFrom(map);
-					_originalMapSize = map.FullSize;
-					_originalTransformPosition = voxelEditor.transform.position;
-					if (OnHandleDown(voxelEditor, handleInfo))
-						voxelEditor.Map.MapChanged();
+					lastHandleVector = Vector3Int.zero;
+					clickPositionGlobal = voxelEditor.transform.TransformPoint(handleResult.clickPosition);
+					originalMap ??= new ArrayVoxelMap();
+					originalMap.SetupFrom(map);
+					originalMapSize = map.FullSize;
+					originalTransformPosition = voxelEditor.transform.position;
+
+					change = OnHandleDown(voxelEditor, handleInfo);
+					voxelEditor.Map.MapChanged(change);
+
 					break;
 
 				case HandleEvent.LmbDrag: // DRAG
 
-					_handleSteps = GetDistance(voxelEditor, _clickPositionGlobal, ray, directionVector);
+					handleSteps = GetDistance(voxelEditor, clickPositionGlobal, ray, directionVector);
 
 					voxelEditor.ToolState = ToolState.Drag;
-					Vector3Int vec = direction.ToVectorInt() * _handleSteps;
-					bool changed = _lastHandleVector != vec;
-					_handleDragDirection = direction;
-					_lastHandleVector = vec;
+					Vector3Int vec = direction.ToVectorInt() * handleSteps;
+					bool changed = lastHandleVector != vec;
+					handleDragDirection = direction;
+					lastHandleVector = vec;
 					if (changed)
-						if (OnHandleDrag(voxelEditor, handleInfo, _handleSteps))
-							voxelEditor.Map.MapChanged();
+					{
+						change = OnHandleDrag(voxelEditor, handleInfo, handleSteps);
+						voxelEditor.Map.MapChanged(change);
+					}
+
 					break;
 
 				case HandleEvent.LmbRelease: // RELEASE 
 					voxelEditor.ToolState = ToolState.Up;
-					_handleSteps = GetDistance(voxelEditor, _clickPositionGlobal, ray, directionVector);
-					if (OnHandleUp(voxelEditor, handleInfo, _handleSteps))
-						voxelEditor.Map.MapChanged();
-					_handleSteps = 0;
-					_lastHandleVector = Vector3Int.zero;
+					handleSteps = GetDistance(voxelEditor, clickPositionGlobal, ray, directionVector);
+					change = OnHandleUp(voxelEditor, handleInfo, handleSteps);
+					voxelEditor.Map.MapChanged(change);
+					handleSteps = 0;
+					lastHandleVector = Vector3Int.zero;
 					voxelEditor.ToolState = ToolState.None;
-					_originalSelection = voxelEditor.Selection;
+					originalSelection = voxelEditor.Selection;
 
 					break;
 			}
@@ -290,8 +298,8 @@ namespace VoxelSystem
 
 			if (!handleInfo.text.IsNullOrEmpty())
 			{
-				_textStyle.normal.textColor = (color + Color.white) / 2f;
-				UnityEditor.Handles.Label(handlePos + Vector3.up * _standardSpacing, handleInfo.text, _textStyle);
+				textStyle.normal.textColor = (color + Color.white) / 2f;
+				UnityEditor.Handles.Label(handlePos + Vector3.up * standardSpacing, handleInfo.text, textStyle);
 			}
 
 #endif
@@ -301,22 +309,22 @@ namespace VoxelSystem
 		{
 			Vector3 normal = directionVector;
 
-			Ray localRay = _globalRay.Transform(editor.transform.worldToLocalMatrix);
+			Ray localRay = globalRay.Transform(editor.transform.worldToLocalMatrix);
 			Vector3 paneRight = Vector3.Cross(localRay.direction, normal);
 			Vector3 paneNormal = Vector3.Cross(paneRight, normal);
 			Plain plane = new(startPoint, paneNormal);
-			 
+
 			Vector3 intersect = plane.Intersect(ray);
 			Vector3 cursorMovement = intersect - startPoint;
-			float distance = Vector3.Dot(cursorMovement, directionVector); 
+			float distance = Vector3.Dot(cursorMovement, directionVector);
 			return Mathf.RoundToInt(distance);
 		}
 
 		protected void Reset(IVoxelEditor voxelEditor)
 		{
-			voxelEditor.Map.SetupFrom(_originalMap);
-			voxelEditor.transform.position = _originalTransformPosition;
-			voxelEditor.Selection = _originalSelection;
+			voxelEditor.Map.SetupFrom(originalMap);
+			voxelEditor.transform.position = originalTransformPosition;
+			voxelEditor.Selection = originalSelection;
 		}
 
 		// ------------------ Static Methods -----------------------------
@@ -348,7 +356,7 @@ namespace VoxelSystem
 		{
 			Vector3 localShift = direction.ToVector() * steps;
 			Vector3 globalShift = voxelEditor.transform.TransformVector(localShift);
-			voxelEditor.transform.position = _originalTransformPosition + globalShift;
+			voxelEditor.transform.position = originalTransformPosition + globalShift;
 		}
 
 		protected static Vector3 GetMapSidePosition(IVoxelEditor voxelEditor, GeneralDirection3D direction)
@@ -368,12 +376,12 @@ namespace VoxelSystem
 			}
 
 			Vector3 dir = direction.ToVector();
-			return center + (dir.MultiplyAllAxis(size) / 2f) + dir * _standardSpacing;
+			return center + (dir.MultiplyAllAxis(size) / 2f) + dir * standardSpacing;
 		}
 
 		protected static Drawable GetDrawableVoxelSide(VoxelHit hit)
 		{
-			var polygons = new List<Vector3[]>
+			List<Vector3[]> polygons = new()
 			{
 				GetVoxelSide(hit.voxelIndex, hit.side, 1f),
 				GetVoxelSide(hit.voxelIndex, hit.side, 0.75f),
@@ -416,20 +424,19 @@ namespace VoxelSystem
 		protected static readonly VoxelAction[] allVoxelActions = VoxelEditor_EnumHelper._allVoxelActions;
 		public virtual VoxelAction[] GetSupportedActions(IVoxelEditor voxelEditor) => noVoxelAction;
 
-		protected static VoxelAction[] GetTransformActions(IVoxelEditor voxelEditor) => 
+		protected static VoxelAction[] GetTransformActions(IVoxelEditor voxelEditor) =>
 			voxelEditor.HasSelection() ? VoxelEditor_EnumHelper._transformActions : noVoxelAction;
 
 		// ------------------ Virtual Methods: Cursor Voxel -----------------------------
-
 
 		protected virtual bool DoRaycastVoxelCursor(IVoxelEditor voxelEditor, out bool raycastOutside)
 		{
 			raycastOutside = false;
 			return false;
 		}
-		protected virtual bool OnVoxelCursorDown(IVoxelEditor voxelEditor, VoxelHit hit) => false;
-		protected virtual bool OnVoxelCursorDrag(IVoxelEditor voxelEditor, VoxelHit hit) => false;
-		protected virtual bool OnVoxelCursorUp(IVoxelEditor voxelEditor, VoxelHit hit) => false;
+		protected virtual MapChange OnVoxelCursorDown(IVoxelEditor voxelEditor, VoxelHit hit) => MapChange.None;
+		protected virtual MapChange OnVoxelCursorDrag(IVoxelEditor voxelEditor, VoxelHit hit) => MapChange.None;
+		protected virtual MapChange OnVoxelCursorUp(IVoxelEditor voxelEditor, VoxelHit hit) => MapChange.None;
 
 		// ------------------ Virtual Methods: Handles -----------------------------
 
@@ -438,9 +445,9 @@ namespace VoxelSystem
 			yield break;
 		}
 
-		protected virtual bool OnHandleClick(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo) => false;
-		protected virtual bool OnHandleDown(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo) => false;
-		protected virtual bool OnHandleDrag(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo, int steps) => false;
-		protected virtual bool OnHandleUp(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo, int steps) => false;
+		protected virtual MapChange OnHandleClick(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo) => MapChange.None;
+		protected virtual MapChange OnHandleDown(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo) => MapChange.None;
+		protected virtual MapChange OnHandleDrag(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo, int steps) => MapChange.None;
+		protected virtual MapChange OnHandleUp(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo, int steps) => MapChange.None;
 	}
 }

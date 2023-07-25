@@ -27,7 +27,6 @@ namespace VoxelSystem
 		[SerializeField, HideInInspector] internal VoxelFilter voxelFilter;
 		[SerializeField, HideInInspector] internal VoxelMeshGenerator meshGenerator;
 
-
 		[SerializeField, HideInInspector] internal TransformLock transformLock = new();
 		[SerializeField, HideInInspector] internal BoundsInt selection = new(Vector3Int.zero, Vector3Int.one * -1);
 
@@ -58,7 +57,7 @@ namespace VoxelSystem
 				if (meshGenerator == null)
 					yield break;
 				foreach (IVoxelPaletteItem item in meshGenerator.PaletteItems)
-					yield return (IVoxelPaletteItem)item;
+					yield return item;
 			}
 		}
 
@@ -77,7 +76,6 @@ namespace VoxelSystem
 			get => selectedPaletteIndex;
 			set => selectedPaletteIndex = value;
 		}
-		// public IVoxelPalette<IVoxelPaletteItem> VoxelPalette => voxelGenerator == null ? null : voxelGenerator.VoxelPalette;
 
 		// --------------------------------------
 		void Update()
@@ -112,8 +110,6 @@ namespace VoxelSystem
 				return;
 
 			Gizmos.matrix = transform.localToWorldMatrix;
-
-			Vector3Int mapSize = Map.FullSize;
 
 			if (this.HasSelection()) // Draw Selection
 			{

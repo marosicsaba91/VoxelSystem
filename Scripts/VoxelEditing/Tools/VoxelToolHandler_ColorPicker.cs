@@ -1,6 +1,4 @@
-﻿using MUtility;
-using System;
-using System.Linq;
+﻿using System.Linq;
 using UnityEngine;
 
 namespace VoxelSystem
@@ -21,14 +19,21 @@ namespace VoxelSystem
 			base.OnDrawCursor(voxelEditor, color, hit);
 		}
 
-		protected override bool OnVoxelCursorDown(IVoxelEditor voxelEditor, VoxelHit hit) => Pick(voxelEditor, hit.voxelIndex);
+		protected override MapChange OnVoxelCursorDown(IVoxelEditor voxelEditor, VoxelHit hit)
+		{
+			Pick(voxelEditor, hit.voxelIndex);
+			return MapChange.None;
+		}
 
-		protected override bool OnVoxelCursorDrag(IVoxelEditor voxelEditor, VoxelHit hit) => Pick(voxelEditor, hit.voxelIndex);
+		protected override MapChange OnVoxelCursorDrag(IVoxelEditor voxelEditor, VoxelHit hit)
+		{
+			Pick(voxelEditor, hit.voxelIndex);
+			return MapChange.None;
+		}
 
-		bool Pick(IVoxelEditor voxelEditor, Vector3Int inxed)
+		void Pick(IVoxelEditor voxelEditor, Vector3Int index)
 		{ 
-			voxelEditor.SelectedPaletteIndex = voxelEditor.Map.GetVoxel(inxed);
-			return false;
+			voxelEditor.SelectedPaletteIndex = voxelEditor.Map.GetVoxel(index);
 		}
 	}
 }

@@ -7,8 +7,8 @@ namespace VoxelSystem
 {
 	class PlayModeHandleManager : MonoBehaviour
 	{
-		List<PlayModeHandele> unUsedPool = new List<PlayModeHandele>();
-		List<PlayModeHandele> pool = new List<PlayModeHandele>();
+		readonly List<PlayModeHandele> unUsedPool = new();
+		readonly List<PlayModeHandele> pool = new();
 
 		internal void PutBack(PlayModeHandele playModeHandele) => throw new NotImplementedException();
 	}

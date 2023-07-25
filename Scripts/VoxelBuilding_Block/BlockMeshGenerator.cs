@@ -14,7 +14,7 @@ public class BlockMeshGenerator : VoxelMeshGenerator<BlockVoxelPalette, BlockVox
 
 	protected sealed override void BeforeMeshGeneration(VoxelMap map, BlockVoxelPalette voxelPalette)
 	{
-		_benchmarkTimer?.StartModule("Generate Blocks based on VoxelMap"); 
+		benchmarkTimer?.StartModule("Generate Blocks based on VoxelMap"); 
 
 		BlockMapGenerator.blockSetup = blockGenerationSetting;
 		BlockMapGenerator.CalculateBlocks(blocksByMaterial, map, voxelPalette.Length);
@@ -22,7 +22,7 @@ public class BlockMeshGenerator : VoxelMeshGenerator<BlockVoxelPalette, BlockVox
 
 	protected sealed override void GenerateMeshData(int materialIndex, BlockVoxelPaletteItem paletteItem, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles)
 	{
-		_benchmarkTimer?.StartModule(("Generate Vertex & Triangle data" + materialIndex));
+		benchmarkTimer?.StartModule(("Generate Vertex & Triangle data" + materialIndex));
 
 		Dictionary<Vector3Int, Block> blocks = blocksByMaterial[materialIndex];
 		VoxelBlockLibrary blockLibrary = paletteItem.blockLibrary;

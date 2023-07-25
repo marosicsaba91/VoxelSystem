@@ -10,7 +10,6 @@ namespace VoxelSystem
 	{
 		public bool mergeCloseEdges;
 		public bool openOnSides;
-		// public bool continueSidesAndEdgesBetweenMaterials;
 		public bool showFacesBetweenMaterials;
 	}
 
@@ -25,16 +24,15 @@ namespace VoxelSystem
 		public static BlockGenerationSetting blockSetup = new();
 		 
 		static Dictionary<Vector3Int, Block> _currentMaterialBlocks = new();
-		static NeighbourData[,,] neighbours = new NeighbourData[3, 3, 3];
+		static readonly NeighbourData[,,] neighbours = new NeighbourData[3, 3, 3];
 
 		static VoxelMap _currentVoxelMap;
 		static Vector3Int _currentMapSize;
 
-		static List<Vector3> _breakPoints = new();
+		static readonly List<Vector3> _breakPoints = new();
 
 		public static void CalculateBlocks(List<Dictionary<Vector3Int, Block>> blockByMaterial, VoxelMap map, int materialCount)
 		{
-			//_timer?.StartModule("Setup");
 			while (blockByMaterial.Count < materialCount)
 				blockByMaterial.Add(new());
 
@@ -156,7 +154,7 @@ namespace VoxelSystem
 				return;
 			}
 
-			var normal = new Vector3Int
+			Vector3Int normal = new()
 			{
 				x = nX.isSame ? 0 : dX,
 				y = nY.isSame ? 0 : dY,
@@ -184,7 +182,6 @@ namespace VoxelSystem
 
 				else if (crossNeighbourCount == 3 || (crossNeighbourCount == 2 && !inPlaneNeighbour.isSame)) // NEGATIVE CORNERS
 				{
-					voxelIndex += normal;
 					subVoxel -= normal * 2;
 					_currentMaterialBlocks.AddOrChangeValue(subVoxelIndex +normal, new Block(BlockType.CornerNegative, subVoxel));
 					return;
@@ -227,7 +224,7 @@ namespace VoxelSystem
 
 				if (negativeEdge) // NEGATIVE EDGE
 				{
-					SeparateVector(normal, out Vector3Int normal1, out Vector3Int _); 
+					SeparateVector(normal, out Vector3Int normal1, out _); 
 					subVoxel -= normal1 * 2;
 					_currentMaterialBlocks.TryAdd(subVoxelIndex + normal1, new Block(BlockType.EdgeNegative, subVoxel, axis));
 					return;

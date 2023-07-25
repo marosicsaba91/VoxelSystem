@@ -28,7 +28,7 @@ namespace VoxelSystem
 
 		[Header("Visualisation")]
 		[SerializeField, Range(0, 0.5f)]
-		float testDistance = 0;
+		 float testDistance = 0;
 
 		[FormerlySerializedAs("presentationObjects2")][SerializeField] TransformDirectory transformDictionary = new();
 		[SerializeField] BlockLibraryGenerator library;
@@ -117,7 +117,7 @@ namespace VoxelSystem
 
 			if (mesh != null)
 			{
-				if (!t.TryGetComponent<MeshFilter>(out var meshFilter))
+				if (!t.TryGetComponent<MeshFilter>(out MeshFilter meshFilter))
 					meshFilter = t.gameObject.AddComponent<MeshFilter>();
 				meshFilter.sharedMesh = mesh;
 			}
@@ -127,7 +127,7 @@ namespace VoxelSystem
 				library == null || library.Material == null ? DefaultBlockInfo.Instance.MaterialNotFoundMaterial :
 				library.Material;
 
-			if (!t.TryGetComponent<MeshRenderer>(out var meshRenderer))
+			if (!t.TryGetComponent<MeshRenderer>(out MeshRenderer meshRenderer))
 				meshRenderer = t.gameObject.AddComponent<MeshRenderer>();
 			meshRenderer.sharedMaterial = material;
 		}

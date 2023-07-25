@@ -64,7 +64,7 @@ namespace VoxelSystem
 		static TextureQuad[] GenerateTextureCoordinateArray(int textureSize = 16)
 		{
 			// Assume a 16x16 texture atlas
-			var result = new TextureQuad[textureSize * textureSize];
+			TextureQuad[] result = new TextureQuad[textureSize * textureSize];
 
 			// assumption based on, well, because I can
 			for (int i = 0; i < textureSize * textureSize; i++)

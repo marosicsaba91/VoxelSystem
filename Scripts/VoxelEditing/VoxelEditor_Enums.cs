@@ -38,7 +38,7 @@ namespace VoxelSystem
 
 		// --------------------- Voxel Tool Handlers ---------------------
 
-		static Dictionary<VoxelTool, VoxelToolHandler> handlers = new Dictionary<VoxelTool, VoxelToolHandler>();
+		static readonly Dictionary<VoxelTool, VoxelToolHandler> handlers = new();
 
 		public static VoxelToolHandler GetHandler(this VoxelTool tool) 
 		{
@@ -63,9 +63,9 @@ namespace VoxelSystem
 				VoxelTool.FloodFill => typeof(VoxelToolHandler_FloodFill),
 				VoxelTool.ColorPicker => typeof(VoxelToolHandler_ColorPicker),
 				_ => throw new ArgumentOutOfRangeException($"No handler for tool: {nameof(tool)}", tool, null)
-			};	
+			};
 
-			var instance = (VoxelToolHandler)Activator.CreateInstance(t);
+			VoxelToolHandler instance = (VoxelToolHandler)Activator.CreateInstance(t);
 			handlers.Add(tool, instance);
 			return instance;
 		}

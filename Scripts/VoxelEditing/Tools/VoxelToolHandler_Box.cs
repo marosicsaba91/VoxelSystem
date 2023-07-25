@@ -14,26 +14,26 @@ namespace VoxelSystem
 			raycastOutside = voxelEditor.SelectedAction.IsAdditive();
 			return true;
 		}
-		protected sealed override bool OnVoxelCursorDown(IVoxelEditor voxelEditor, VoxelHit hit)
+		protected sealed override MapChange OnVoxelCursorDown(IVoxelEditor voxelEditor, VoxelHit hit)
 		{
 			VoxelMap map = voxelEditor.Map;
 			voxelEditor.RecordForUndo("BoxTool used on VoxelMap", recordType);
 			_lastBound = new (hit.voxelIndex, Vector3Int.one);
 
 			_lastTimeMapChanged = map.SetVoxel(hit.voxelIndex, voxelEditor.SelectedAction, voxelEditor.SelectedPaletteIndex);
-			return _lastTimeMapChanged;
+			return _lastTimeMapChanged ? MapChange.Quick : MapChange.None;
 		}
 
-		protected override bool OnVoxelCursorDrag(IVoxelEditor voxelEditor, VoxelHit hit)
+		protected sealed override MapChange OnVoxelCursorDrag(IVoxelEditor voxelEditor, VoxelHit hit)
 		{
 			VoxelMap map = voxelEditor.Map;
 
-			var min = Vector3Int.Min(_mouseDownHit.voxelIndex, hit.voxelIndex);
-			var max = Vector3Int.Max(_mouseDownHit.voxelIndex, hit.voxelIndex);
+			Vector3Int min = Vector3Int.Min(mouseDownHit.voxelIndex, hit.voxelIndex);
+			Vector3Int max = Vector3Int.Max(mouseDownHit.voxelIndex, hit.voxelIndex);
 
 			BoundsInt bound = new(min, max - min + Vector3Int.one);
 
-			map.CopyFrom(_originalMap, _lastBound.min, _lastBound.min, _lastBound.size, VoxelAction.Overwrite); 
+			map.CopyFrom(originalMap, _lastBound.min, _lastBound.min, _lastBound.size, VoxelAction.Overwrite); 
 			voxelEditor.RecordForUndo("BoxTool used on VoxelMap", recordType);
 
 			bool mapChanged = map.SetRange(min, max, voxelEditor.SelectedAction, voxelEditor.SelectedPaletteIndex);
@@ -42,7 +42,9 @@ namespace VoxelSystem
 			_lastTimeMapChanged = mapChanged;
 			_lastBound = bound;
 
-			return updateMap;
+			return updateMap ? MapChange.Quick : MapChange.None;
 		}
+
+		protected sealed override MapChange OnVoxelCursorUp(IVoxelEditor voxelEditor, VoxelHit hit) => MapChange.Final;
 	}
 }

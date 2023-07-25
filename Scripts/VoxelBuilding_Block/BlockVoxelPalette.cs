@@ -1,4 +1,3 @@
-using MUtility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +22,6 @@ namespace VoxelSystem
 	[CreateAssetMenu(menuName = "Voxel System/Block Voxel Palette", order = 2)]
 	public class BlockVoxelPalette : ScriptableObject, IVoxelPalette<BlockVoxelPaletteItem> 
 	{
-
 		[SerializeField] BlockVoxelPaletteSetting[] paletteSettings = new BlockVoxelPaletteSetting[0];
 
 		public IEnumerable<BlockVoxelPaletteItem> Items =>

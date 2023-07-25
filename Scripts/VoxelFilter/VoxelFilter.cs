@@ -1,7 +1,5 @@
 ﻿using MUtility;
-using System;
 using System.IO;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -18,8 +16,13 @@ namespace VoxelSystem
 
 		[SerializeField, HideInInspector] SharedVoxelMap _lastFrameSharedMap = null;
 
-		public Action MapChanged;
-		void OnMapChanged() => MapChanged?.Invoke();
+		public event MapChangedDelegate MapChanged; 
+
+
+		void OnMapChanged(bool quick)
+		{
+			MapChanged?.Invoke(quick); 
+		}
 
 		public string MapName => HasSharedMap ? SharedVoxelMap.name : name;
 		
@@ -41,7 +44,7 @@ namespace VoxelSystem
 				else
 				{
 					sharedVoxelMap = value;
-					OnMapChanged();
+					OnMapChanged(false);
 				} 
 			}
 		}
@@ -72,7 +75,7 @@ namespace VoxelSystem
 			{
 				innerMap = new();
 				innerMap.Setup();
-				OnMapChanged();
+				OnMapChanged(false);
 			}
 			VoxelMap map = GetVoxelMap();
 			if (map != null)

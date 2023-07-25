@@ -1,12 +1,15 @@
 ﻿using MUtility;
-using System;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.EditorCoroutines.Editor;
 using UnityEngine;
 using UnityEngine.Rendering;
 
 namespace VoxelSystem
 {
+	enum ChangeOn { Never, OnQuickChange, OnFinalChange, EveryChange }
+
 	public abstract class VoxelMeshGenerator : MonoBehaviour
 	{
 		internal abstract int PaletteLength { get; }
@@ -18,6 +21,7 @@ namespace VoxelSystem
 
 	public abstract class VoxelMeshGenerator<TVoxelPalette, TPaletteItem> : VoxelMeshGenerator where TVoxelPalette : IVoxelPalette<TPaletteItem>
 	{
+
 		[SerializeField, HideInInspector] VoxelFilter voxelFilter;
 		[SerializeField] TVoxelPalette voxelPalette;
 
@@ -25,7 +29,8 @@ namespace VoxelSystem
 		[SerializeField] MeshFilter destinationMeshFilter;
 		[SerializeField] MeshCollider destinationMeshCollider;
 
-		[SerializeField] bool autoRegenerateMeshes = true;
+		[SerializeField] ChangeOn autoRegenerateMeshes = ChangeOn.Never;
+		[SerializeField, Min(0)] float regenDelay;
 		[SerializeField] DisplayMember regenerateMesh = new(nameof(RegenerateMeshes));
 		[SerializeField] DisplayMember createMeshFile = new(nameof(CreateMeshFile));
 
@@ -82,18 +87,39 @@ namespace VoxelSystem
 			}
 		}
 
-		void OnMapChanged()
+		EditorCoroutine _delayedGeneration = null;
+
+		void OnMapChanged(bool quick)
 		{
-			if (autoRegenerateMeshes)
+			if (autoRegenerateMeshes == ChangeOn.Never) return;
+
+			if (_delayedGeneration != null)
+				EditorCoroutineUtility.StopCoroutine(_delayedGeneration);
+
+			if ((quick && autoRegenerateMeshes == ChangeOn.OnQuickChange) ||
+				autoRegenerateMeshes == ChangeOn.EveryChange)
 				RegenerateMeshes();
+
+			else if (!quick && autoRegenerateMeshes is ChangeOn.OnFinalChange)
+				_delayedGeneration = EditorCoroutineUtility.StartCoroutine(RegenerateMeshesAfterDelay(), this);
 		}
+
+		IEnumerator RegenerateMeshesAfterDelay()
+		{
+			float time = Time.realtimeSinceStartup;
+			while (Time.realtimeSinceStartup - time < regenDelay)
+				yield return null;
+			RegenerateMeshes();
+		}
+
+
 
 		void OnValidate()
 		{
 			voxelFilter = GetComponent<VoxelFilter>();
 		}
 
-		protected static BenchmarkTimer _benchmarkTimer;
+		protected static BenchmarkTimer benchmarkTimer;
 
 		static readonly List<Vector3> _vertices = new();
 		static readonly List<Vector3> _normals = new();
@@ -105,17 +131,17 @@ namespace VoxelSystem
 
 		const int vertexLimitOf16Bit = 65536;
 
-		public override sealed void RegenerateMeshes()
+		public sealed override void RegenerateMeshes()
 		{
 			if (!isActiveAndEnabled)
 				return;
 
 			if (doBenchmark)
-				_benchmarkTimer ??= new BenchmarkTimer(name + " " + GetType());
+				benchmarkTimer ??= new BenchmarkTimer(name + " " + GetType());
 			else
-				_benchmarkTimer = null;
+				benchmarkTimer = null;
 
-			_benchmarkTimer?.StartModule("Clear Lists");
+			benchmarkTimer?.StartModule("Clear Lists");
 
 
 
@@ -150,20 +176,20 @@ namespace VoxelSystem
 				};
 			}
 
-			_benchmarkTimer?.StartModule("Setup Mesh");
+			benchmarkTimer?.StartModule("Setup Mesh");
 			destinationMesh.Clear();
 			destinationMesh.indexFormat = _vertices.Count >= vertexLimitOf16Bit ?
 				IndexFormat.UInt32 : IndexFormat.UInt16;
 
-			_benchmarkTimer?.StartModule("Copy Vertex data to Mesh");
+			benchmarkTimer?.StartModule("Copy Vertex data to Mesh");
 			destinationMesh.vertices = _vertices.ToArray();
 			destinationMesh.normals = _normals.ToArray();
 			destinationMesh.uv = _uv.ToArray();
 
-			_benchmarkTimer?.StartModule("Copy Triangle data to Mesh");
+			benchmarkTimer?.StartModule("Copy Triangle data to Mesh");
 			destinationMesh.triangles = _triangles.ToArray();
 
-			_benchmarkTimer?.StartModule("Copy SubMesh data");
+			benchmarkTimer?.StartModule("Copy SubMesh data");
 			destinationMesh.subMeshCount = _descriptors.Count;
 			for (int j = 0; j < _descriptors.Count; j++)
 			{
@@ -173,12 +199,12 @@ namespace VoxelSystem
 
 			if (doBenchmark)
 			{
-				string benchmarkResult = _benchmarkTimer.ToString();
+				string benchmarkResult = benchmarkTimer.ToString();
 				if (benchmarkOutput != null)
 					benchmarkOutput.text = benchmarkResult;
 				Debug.Log(benchmarkResult);
 
-				_benchmarkTimer.Clear();
+				benchmarkTimer.Clear();
 			}
 
 			if (destinationMeshCollider != null)

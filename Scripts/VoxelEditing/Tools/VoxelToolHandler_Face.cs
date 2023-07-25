@@ -1,7 +1,6 @@
 ﻿using MUtility;
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
 
 namespace VoxelSystem
 {
@@ -15,7 +14,7 @@ namespace VoxelSystem
 		}
 
 		readonly HashSet<Vector3Int> _originalSide = new();
-		 
+
 		GeneralDirection3D surfaceDirection;
 		Vector3Int surfaceNormal;
 		int offsetValue;
@@ -27,7 +26,7 @@ namespace VoxelSystem
 			{
 				offsetValue = 0;
 				lastOffsetValue = 0;
-				Drawable side = GetDrawableVoxelSide(_lastValidHit);
+				Drawable side = GetDrawableVoxelSide(lastValidHit);
 				Draw(side, actionColor);
 
 				//if (voxelEditor.Map.GetVoxel(hit.voxelIndex) == IntVoxelUtility.emptyValue)
@@ -39,30 +38,30 @@ namespace VoxelSystem
 			Drawable d = VoxelMap_DrawingUtilities.GetContourDrawable(_originalSide);
 			if (offsetValue > 0 ^ !surfaceDirection.IsPositive())
 			{
-				Vector3 off = _mouseDownHit.voxelIndex.MultiplyAllAxis(surfaceNormal.Abs());
+				Vector3 off = mouseDownHit.voxelIndex.MultiplyAllAxis(surfaceNormal.Abs());
 				d.Translate(-off);
 				d.Scale(Vector3Int.one + (offsetValue * surfaceNormal));
 				d.Translate(off);
 			}
 			else if (offsetValue > 0 && !surfaceDirection.IsPositive())
 			{
-				Vector3 off = _mouseDownHit.voxelIndex.MultiplyAllAxis(surfaceNormal.Abs());
+				Vector3 off = mouseDownHit.voxelIndex.MultiplyAllAxis(surfaceNormal.Abs());
 				d.Translate(-off);
-				d.Scale(Vector3Int.one + ((offsetValue +1) * surfaceNormal));
+				d.Scale(Vector3Int.one + ((offsetValue + 1) * surfaceNormal));
 				d.Translate(off - surfaceNormal);
 			}
 			else if (offsetValue < 0 && surfaceDirection.IsPositive())
 			{
-				Vector3 off = _mouseDownHit.voxelIndex.MultiplyAllAxis(surfaceNormal.Abs());
+				Vector3 off = mouseDownHit.voxelIndex.MultiplyAllAxis(surfaceNormal.Abs());
 				d.Translate(-off);
 				d.Scale(Vector3Int.one + ((offsetValue - 1) * surfaceNormal));
 				d.Translate(off + surfaceNormal);
-			} 
+			}
 
 			Draw(d, actionColor);
 		}
 
-		protected override bool OnVoxelCursorDown(IVoxelEditor voxelEditor, VoxelHit hit)
+		protected override MapChange OnVoxelCursorDown(IVoxelEditor voxelEditor, VoxelHit hit)
 		{
 			// if (voxelEditor.Map.GetVoxel(hit.voxelIndex) == IntVoxelUtility.emptyValue)
 			//	return false;
@@ -70,17 +69,17 @@ namespace VoxelSystem
 			voxelEditor.Map.SearchPlane(_originalSide, hit.voxelIndex, hit.side, voxelEditor.SelectedAction == VoxelAction.Repaint);
 			surfaceDirection = hit.side;
 			surfaceNormal = hit.side.ToVectorInt();
-
-			return false;
+			 
+			return MapChange.None;
 		}
 
-		protected override bool OnVoxelCursorDrag(IVoxelEditor voxelEditor, VoxelHit hit)
+		protected override MapChange OnVoxelCursorDrag(IVoxelEditor voxelEditor, VoxelHit hit)
 		{
 			voxelEditor.RecordForUndo("Face Tool", RecordType.Map);
 
 			offsetValue = GetOffset(voxelEditor);
 			if (offsetValue == lastOffsetValue)
-				return false;
+				return MapChange.None;
 
 
 			bool isChanged = false;
@@ -93,12 +92,12 @@ namespace VoxelSystem
 					action = VoxelAction.Overwrite;
 
 				if (offsetValue > 0)
-				{ 
+				{
 					if (Mathf.Abs(lastOffsetValue) > Mathf.Abs(offsetValue))// Reset original voxels
 					{
 						currentEnd += surfaceNormal;
 						lastEnd += surfaceNormal;
-						isChanged |= voxelEditor.Map.ResetRange(_originalMap, currentEnd, lastEnd);
+						isChanged |= voxelEditor.Map.ResetRange(originalMap, currentEnd, lastEnd);
 					}
 					else // Set new voxels
 					{
@@ -106,15 +105,15 @@ namespace VoxelSystem
 						isChanged |= voxelEditor.Map.SetRange(currentEnd, lastEnd, action, originalValue);
 					}
 				}
-				else 
+				else
 				{
 					if (Mathf.Abs(lastOffsetValue) > Mathf.Abs(offsetValue))// Reset original voxels
-					{ 
-						isChanged |= voxelEditor.Map.ResetRange(_originalMap, currentEnd, lastEnd);
+					{
+						isChanged |= voxelEditor.Map.ResetRange(originalMap, currentEnd, lastEnd);
 					}
 					else // Set new voxels
 					{
-						currentEnd += surfaceNormal; 
+						currentEnd += surfaceNormal;
 						int originalValue = voxelEditor.Map.GetVoxel(originalIndex);
 						isChanged |= voxelEditor.Map.SetRange(currentEnd, lastEnd, action, originalValue);
 					}
@@ -122,14 +121,14 @@ namespace VoxelSystem
 			}
 
 			lastOffsetValue = offsetValue;
-			return isChanged;
+			return isChanged ? MapChange.Quick : MapChange.None;
 		}
 
 		private int GetOffset(IVoxelEditor voxelEditor)
 		{
-			Vector3 hitPosition = _mouseDownHit.hitWorldPosition;
-			Vector3Int hitIndex = _mouseDownHit.voxelIndex;
-			Ray localRay = _globalRay.Transform(voxelEditor.transform.worldToLocalMatrix);
+			Vector3 hitPosition = mouseDownHit.hitWorldPosition;
+			Vector3Int hitIndex = mouseDownHit.voxelIndex;
+			Ray localRay = globalRay.Transform(voxelEditor.transform.worldToLocalMatrix);
 			Vector3 paneRight = Vector3.Cross(localRay.direction, surfaceNormal);
 			Vector3 paneNormal = Vector3.Cross(paneRight, surfaceNormal);
 			Plain plane = new(hitPosition, paneNormal);
@@ -150,11 +149,11 @@ namespace VoxelSystem
 			return offsetValue;
 		}
 
-		protected override bool OnVoxelCursorUp(IVoxelEditor voxelEditor, VoxelHit hit) 
+		protected override MapChange OnVoxelCursorUp(IVoxelEditor voxelEditor, VoxelHit hit)
 		{
 			offsetValue = 0;
 			lastOffsetValue = 0;
-			return false;
+			return MapChange.Final;
 		}
 	}
 }

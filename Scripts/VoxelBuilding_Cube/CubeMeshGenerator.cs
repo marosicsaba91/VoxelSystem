@@ -25,7 +25,7 @@ public class CubeMeshGenerator : VoxelMeshGenerator<CubeVoxelPalette, CubeVoxelP
 		public int uvIndex;
 	}
 
-	List<List<Side>> sidesByMaterial = new();
+	readonly List<List<Side>> sidesByMaterial = new();
 
 	protected sealed override void BeforeMeshGeneration(VoxelMap map, CubeVoxelPalette palette)
 	{

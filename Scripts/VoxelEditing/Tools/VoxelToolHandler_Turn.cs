@@ -22,7 +22,7 @@ namespace VoxelSystem
 				yield return new VoxelHandelInfo()
 				{
 					coneType = HandeleConeType.Arrow,
-					position = position + dir1.ToVector() * _standardSpacing,
+					position = position + dir1.ToVector() * standardSpacing,
 					direction = dir1,
 				};
 
@@ -30,13 +30,13 @@ namespace VoxelSystem
 				yield return new VoxelHandelInfo()
 				{
 					coneType = HandeleConeType.Arrow,
-					position = position + dir2.ToVector() * _standardSpacing,
+					position = position + dir2.ToVector() * standardSpacing,
 					direction = dir2,
 				};
 			}
 		}
 
-		protected override bool OnHandleClick(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo)
+		protected override MapChange OnHandleClick(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo)
 		{
 			voxelEditor.RecordForUndo("VoxelMap Turned", RecordType.Map | RecordType.Transform);
 
@@ -65,7 +65,7 @@ namespace VoxelSystem
 				voxelEditor.Turn(axis, side.IsPositive() ^ dir.IsPositive());
 			}
 
-			return true;
+			return MapChange.Final;
 		}
 		static void TurnSelection(IVoxelEditor editor, Axis3D axis, bool leftHandPositive)
 		{

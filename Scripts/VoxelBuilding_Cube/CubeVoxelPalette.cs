@@ -12,7 +12,7 @@ namespace VoxelSystem
 	[CreateAssetMenu(menuName = "Voxel System/Cube Voxel Palette", order = 2)]
 	public class CubeVoxelPalette : ScriptableObject, IVoxelPalette<CubeVoxelPaletteItem> 
 	{
-		[SerializeField] CubeVoxelPaletteSetting[] paletteSettings = new CubeVoxelPaletteSetting[0];
+		[SerializeField]  CubeVoxelPaletteSetting[] paletteSettings = new CubeVoxelPaletteSetting[0];
 
 		public IEnumerable<CubeVoxelPaletteItem> Items =>
 			from CubeVoxelPaletteSetting setting in paletteSettings

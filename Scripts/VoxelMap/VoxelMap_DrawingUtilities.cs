@@ -130,7 +130,7 @@ namespace VoxelSystem
 				Vector3 center = (Vector3)index + half + d;
 				Vector3 o1 = axis.Next().ToVector() * ((1 + offset) * 0.5f);
 				Vector3 o2 = axis.Previous().ToVector() * ((1 + offset) * 0.5f);
-				var polygon = new Vector3[5];
+				Vector3[] polygon = new Vector3[5];
 				polygon[0] = center + o1 + o2;
 				polygon[1] = center + o1 - o2;
 				polygon[2] = center - o1 - o2;

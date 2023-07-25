@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace VoxelSystem
+﻿namespace VoxelSystem
 {
 	static class IntVoxelUtility
 	{

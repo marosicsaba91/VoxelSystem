@@ -14,19 +14,19 @@ namespace VoxelSystem
 		public static int GetOriginalSize(IVoxelEditor voxelEditor, GeneralDirection3D side)
 		{
 			Vector3Int sizeVector = voxelEditor.HasSelection()
-				? (voxelEditor.ToolState == ToolState.None ? voxelEditor.Selection.size : _originalSelection.size)
-				: (voxelEditor.ToolState == ToolState.None ? voxelEditor.Map.FullSize : _originalMapSize);
+				? (voxelEditor.ToolState == ToolState.None ? voxelEditor.Selection.size : originalSelection.size)
+				: (voxelEditor.ToolState == ToolState.None ? voxelEditor.Map.FullSize : originalMapSize);
 			return sizeVector.GetAxis(side.GetAxis());
 		}
 
 		public static int GetResizeSteps(IVoxelEditor voxelEditor, int originalSize, GeneralDirection3D side)
 		{
-			int steps = Mathf.Max(_handleSteps, -originalSize + 1);
+			int steps = Mathf.Max(handleSteps, -originalSize + 1);
 			if (voxelEditor.HasSelection())
 			{
 				Axis3D axis3D = side.GetAxis();
-				int selectionSize = _originalSelection.size.GetAxis(axis3D);
-				int selectionMin = _originalSelection.position.GetAxis(axis3D);
+				int selectionSize = originalSelection.size.GetAxis(axis3D);
+				int selectionMin = originalSelection.position.GetAxis(axis3D);
 				int mapSize = voxelEditor.Map.FullSize.GetAxis(axis3D);
 
 				if (side.IsPositive())
@@ -49,8 +49,6 @@ namespace VoxelSystem
 
 		protected override IEnumerable<VoxelHandelInfo> GetHandeles(IVoxelEditor voxelEditor)
 		{
-			bool isSelectionOperation = voxelEditor.HasSelection();
-
 			for (int i = 0; i < DirectionUtility.generalDirection3DValues.Length; i++)
 			{
 				GeneralDirection3D side = DirectionUtility.generalDirection3DValues[i];
@@ -59,7 +57,7 @@ namespace VoxelSystem
 				int originalSize = GetOriginalSize(voxelEditor, side);
 				string text;
 
-				if (voxelEditor.ToolState == ToolState.Drag && _handleDragDirection == side)
+				if (voxelEditor.ToolState == ToolState.Drag && handleDragDirection == side)
 				{
 					int steps = GetResizeSteps(voxelEditor, originalSize, side);
 					text = GetStepText(originalSize, steps);
@@ -77,19 +75,19 @@ namespace VoxelSystem
 			}
 		}
 
-		protected override bool OnHandleDown(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo) 
+		protected override MapChange OnHandleDown(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo) 
 		{
 			_lastStepsClamped = 0;
 			voxelEditor.SeparateSelection();
-			return false;
+			return MapChange.None;
 		}
 
-		protected override bool OnHandleDrag(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo, int steps)
+		protected override MapChange OnHandleDrag(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo, int steps)
 		{
 			GeneralDirection3D direction = handleInfo.direction;
 
 			Axis3D axis = handleInfo.direction.GetAxis();
-			int oSize = _originalMapSize.GetAxis(axis);
+			int oSize = originalMapSize.GetAxis(axis);
 
 			bool isUpEvent = voxelEditor.ToolState == ToolState.Up;
 			if (steps <= -oSize)
@@ -97,7 +95,7 @@ namespace VoxelSystem
 				if (isUpEvent)
 					steps = -oSize + 1;
 				else
-					return false;
+					return MapChange.None;
 			}
 
 			VoxelMap map = voxelEditor.Map;
@@ -106,9 +104,9 @@ namespace VoxelSystem
 			int stepsClamped = steps;
 			if (isSelectionOperation)
 			{
-				BoundsInt selection = _originalSelection;
+				BoundsInt selection = originalSelection;
 				 
-				int mapSize = _originalMapSize.GetAxis(axis);
+				int mapSize = originalMapSize.GetAxis(axis);
 				if (direction.IsPositive())
 				{
 					stepsClamped = Mathf.Clamp(steps,
@@ -124,7 +122,7 @@ namespace VoxelSystem
 				}
 
 				if (stepsClamped == _lastStepsClamped && !isUpEvent)
-					return false;
+					return MapChange.None;
 				_lastStepsClamped = stepsClamped; 
 			}
 
@@ -140,19 +138,24 @@ namespace VoxelSystem
 			}
 
 			if (isSelectionOperation)
-				return DoResizeSelection(voxelEditor, direction, stepsClamped);
+			{
+				if(DoResizeSelection(voxelEditor, direction, stepsClamped))
+					return MapChange.Quick;
+				else
+					return MapChange.None;
+			}
 		
 
 			if ( !direction.IsPositive())
 				Translate(voxelEditor, direction, stepsClamped);
 			DoResizeMap(map, direction, stepsClamped);
-			return true;
+			return MapChange.Quick;
 		}
 
-		protected override bool OnHandleUp(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo, int steps)
+		protected override MapChange OnHandleUp(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo, int steps)
 		{
 			OnHandleDrag(voxelEditor, handleInfo, steps);
-			return false;
+			return MapChange.Final;
 		}
 
 		protected abstract void DoResizeMap(VoxelMap map, GeneralDirection3D direction, int steps);
@@ -206,7 +209,7 @@ namespace VoxelSystem
 			 map.ResizeCanvas(direction, steps, false);
 		protected override bool DoResizeSelection(IVoxelEditor voxelEditor, GeneralDirection3D direction, int steps)
 		{
-			voxelEditor.Selection = _originalSelection.ResizeWithLimits(direction,  steps, Vector3Int.zero, _originalMapSize, Vector3Int.one);
+			voxelEditor.Selection = originalSelection.ResizeWithLimits(direction,  steps, Vector3Int.zero, originalMapSize, Vector3Int.one);
 			return false;
 		}
 	}

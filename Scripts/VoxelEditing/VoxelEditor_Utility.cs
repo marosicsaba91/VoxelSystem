@@ -1,6 +1,5 @@
 ﻿using MUtility;
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -39,7 +38,7 @@ namespace VoxelSystem
 			bool RecordSelection = record.HasFlag(RecordType.Editor);
 
 			int count = (recordMap ? 1 : 0) + (recordTransform ? 1 : 0) + (RecordSelection ? 1 : 0);
-			var objects = new Object[count];
+			Object[] objects = new Object[count];
 
 			int index = 0;
 			if (recordMap)
@@ -92,7 +91,7 @@ namespace VoxelSystem
 				return null;
 
 			BoundsInt selection = voxelEditor.Selection;
-			var separated = new ArrayVoxelMap(selection.size);
+			ArrayVoxelMap separated = new(selection.size);
 			separated.CopyFrom(voxelEditor.Map, selection.min, Vector3Int.zero, selection.size);
 
 			return separated;
@@ -141,7 +140,7 @@ namespace VoxelSystem
 			Vector3Int offsetInt = offset.RoundToInt();
 
 			destination.Map.CopyFrom(source.Map, Vector3Int.zero, offsetInt, source.Map.FullSize);
-			destination.Map.MapChanged();
+			destination.Map.MapChanged(MapChange.Final);
 		}
 	}
 }

@@ -22,7 +22,7 @@ namespace VoxelSystemEditor
 			if (Event.current.type != EventType.Repaint)
 				return;
 
-			var blockLibrary = (BlockLibraryGenerator)target;
+			BlockLibraryGenerator blockLibrary = (BlockLibraryGenerator)target;
 			if (blockLibrary == null || !blockLibrary.isActiveAndEnabled)
 			{
 				SceneView.duringSceneGui -= Repaint;

@@ -1,5 +1,4 @@
 ﻿using MUtility;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -28,7 +27,7 @@ namespace VoxelSystem
 			}
 		}
 
-		protected override bool OnHandleClick(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo)
+		protected override MapChange OnHandleClick(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo)
 		{
 			if (voxelEditor.HasSelection())
 			{
@@ -39,8 +38,8 @@ namespace VoxelSystem
 			{
 				voxelEditor.RecordForUndo("VoxelMap Mirrored", RecordType.Map);
 				voxelEditor.Map.Mirror(handleInfo.direction.GetAxis());
-			} 
-			return true;
+			}
+			return MapChange.Final;
 		}
 
 		void MirrorSelection(IVoxelEditor voxelEditor, Axis3D axis3D, BoundsInt selection)

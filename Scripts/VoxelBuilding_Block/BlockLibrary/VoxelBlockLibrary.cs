@@ -47,7 +47,7 @@ namespace VoxelSystem
 		}
 
 		[SerializeField, UsedImplicitly]
-		DisplayMessage warning = new(nameof(WarningMessage), true)
+		readonly DisplayMessage warning = new(nameof(WarningMessage), true)
 		{ messageType = MessageType.Warning, messageSize = MessageSize.Normal };
 
 		public string WarningMessage

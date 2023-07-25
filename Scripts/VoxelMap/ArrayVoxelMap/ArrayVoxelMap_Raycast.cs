@@ -34,34 +34,28 @@ namespace VoxelSystem
 				if (!ray.IntersectPlaneFast(sideNormal, planeOrigin, out Vector3 entryPoint))
 					continue;
 
-				if (!positive)
+				if (positive)
+				{
+					firstFoundVoxel = new((int)entryPoint.x, (int)entryPoint.y,
+						(int)entryPoint.z);
+				}
+				else
 				{
 					entryPoint = (mapSize + entryPoint);
 					firstFoundVoxel = new((int)entryPoint.x, (int)entryPoint.y,
 						(int)entryPoint.z);
 					firstFoundVoxel += sideNormal;
 				}
-				else
-				{
-					firstFoundVoxel = new((int)entryPoint.x, (int)entryPoint.y,
-						(int)entryPoint.z);
-				}
 
-				//
-				if (mapSize.x < firstFoundVoxel.x || firstFoundVoxel.x < 0)
-					continue;
-				if (mapSize.y < firstFoundVoxel.y || firstFoundVoxel.y < 0)
-					continue;
-				if (mapSize.z < firstFoundVoxel.z || firstFoundVoxel.z < 0)
-					continue;
+				// 
+				if (mapSize.x < firstFoundVoxel.x || firstFoundVoxel.x < 0) continue;
+				if (mapSize.y < firstFoundVoxel.y || firstFoundVoxel.y < 0) continue;
+				if (mapSize.z < firstFoundVoxel.z || firstFoundVoxel.z < 0) continue;
 
 				const float epsilon = 0.001f;
-				if (entryPoint.x <= -epsilon || entryPoint.x >= mapSize.x + epsilon)
-					continue;
-				if (entryPoint.y <= -epsilon || entryPoint.y >= mapSize.y + epsilon)
-					continue;
-				if (entryPoint.z <= -epsilon || entryPoint.z >= mapSize.z + epsilon)
-					continue;
+				if (entryPoint.x <= -epsilon || entryPoint.x >= mapSize.x + epsilon) continue;
+				if (entryPoint.y <= -epsilon || entryPoint.y >= mapSize.y + epsilon) continue;
+				if (entryPoint.z <= -epsilon || entryPoint.z >= mapSize.z + epsilon) continue;
 
 				hit = new VoxelHit()
 				{

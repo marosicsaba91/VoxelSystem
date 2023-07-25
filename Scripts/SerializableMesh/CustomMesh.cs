@@ -46,8 +46,8 @@ namespace VoxelSystem
 			Vector3[] normals = mesh.normals;
 
 			// Create a new array to hold the rotated vertices
-			var transformedV = new Vector3[vertices.Length];
-			var transformedN = new Vector3[vertices.Length];
+			Vector3[] transformedV = new Vector3[vertices.Length];
+			Vector3[] transformedN = new Vector3[vertices.Length];
 			// Apply the rotation to each vertex
 			for (int i = 0; i < vertices.Length; i++)
 			{
@@ -55,7 +55,7 @@ namespace VoxelSystem
 				transformedN[i] = transformation.MultiplyVector(normals[i]);
 
 			}
-			var customMesh = new CustomMesh
+			CustomMesh customMesh = new()
 			{
 				vertices = transformedV,
 				triangles = mesh.triangles,

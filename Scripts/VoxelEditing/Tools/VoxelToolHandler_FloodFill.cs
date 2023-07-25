@@ -14,11 +14,11 @@ namespace VoxelSystem
 			return true;
 		}
 
-		static HashSet<Vector3Int> chunk = new();
+		static readonly HashSet<Vector3Int> chunk = new();
 
 		protected sealed override void OnDrawCursor(IVoxelEditor voxelEditor, Color actionColor, VoxelHit hit)
 		{
-			Drawable side = GetDrawableVoxelSide(_lastValidHit);
+			Drawable side = GetDrawableVoxelSide(lastValidHit);
 			Draw(side, actionColor);
 
 			VoxelMap map = voxelEditor.Map;
@@ -38,27 +38,24 @@ namespace VoxelSystem
 				drawable.Translate(center);
 				Draw(drawable, actionColor);
 			}
-
-			// Draw(VoxelMap_DrawingUtilities.GetIndicesDrawable(chunk), actionColor);
-
 		}
 
-		protected sealed override bool OnVoxelCursorDown(IVoxelEditor voxelEditor, VoxelHit hit)
+		protected sealed override MapChange OnVoxelCursorDown(IVoxelEditor voxelEditor, VoxelHit hit)
 		{
 			VoxelMap map = voxelEditor.Map;
 			voxelEditor.RecordForUndo("FloodFill Voxel", RecordType.Map);
 
 			int voxel = map.GetVoxel(hit.voxelIndex);
 			if (voxel == voxelEditor.SelectedPaletteIndex)
-				return false;
+				return MapChange.None;
 			if (voxel == IntVoxelUtility.emptyValue && voxelEditor.SelectedAction == VoxelAction.Erase)
-				return false;
+				return MapChange.None;
 			map.SearchChunk(chunk, hit.voxelIndex, voxelEditor.SelectedAction != VoxelAction.Overwrite);
 
 			bool changed = false;
 			foreach (Vector3Int voxelI in chunk)
 				changed |= map.SetVoxel(voxelI, voxelEditor.SelectedAction, voxelEditor.SelectedPaletteIndex);
-			return changed;
+			return changed ? MapChange.Quick : MapChange.None;
 		}
 
 	}
