@@ -100,7 +100,7 @@ namespace VoxelSystem
 				}
 
 				if (oldIndex < 0)
-					newVoxelData[i] = IntVoxelUtility.emptyValue;
+					newVoxelData[i].SetEmpty();
 				else
 					newVoxelData[i] = intVoxelData[oldIndex];
 			}
@@ -145,7 +145,7 @@ namespace VoxelSystem
 				else
 					oldIndex = Index(ox, oy, oz);
 				if (oldIndex < 0)
-					newVoxelData[i] = IntVoxelUtility.emptyValue;
+					newVoxelData[i].SetEmpty();
 				else
 					newVoxelData[i] = intVoxelData[oldIndex];
 			}

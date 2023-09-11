@@ -70,7 +70,7 @@ namespace VoxelSystem
 
 		public static bool ClearInsideSelection(this IVoxelEditor editor) => FillInsideSelection(editor, IntVoxelUtility.emptyValue);
 
-		public static bool FillInsideSelection(this IVoxelEditor editor) => FillInsideSelection(editor, editor.SelectedPaletteIndex);
+		public static bool FillInsideSelection(this IVoxelEditor editor) => FillInsideSelection(editor, editor.SelectedMaterialIndex);
 
 		public static bool FillInsideSelection(this IVoxelEditor editor, int paletteIndex)
 		{

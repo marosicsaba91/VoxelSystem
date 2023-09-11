@@ -47,9 +47,7 @@ namespace VoxelSystem
 
 		// ------------- GET Information -------------
 
-		protected const int emptyValue = IntVoxelUtility.emptyValue;
-		public bool IsVoxelFilled(int voxelValue) => voxelValue != emptyValue;
-		public bool IsVoxelEmpty(int voxelValue) => voxelValue == emptyValue;
+		public bool IsVoxelEmpty(int voxelValue) => voxelValue.IsEmpty();
 
 		public abstract BoundsInt VoxelBoundaries { get; protected set; }
 		public abstract Vector3Int FullSize { get; protected set; }
@@ -87,6 +85,8 @@ namespace VoxelSystem
 		}
 
 		public abstract void Setup();
+
+		protected const int emptyValue = IntVoxelUtility.emptyValue;
 		public abstract void Setup(Vector3Int size, int value = emptyValue);
 
 		// ------------- Changed Event -------------
@@ -112,19 +112,21 @@ namespace VoxelSystem
 		public abstract int GetVoxel(int x, int y, int z);
 		public int GetVoxel(Vector3Int coordinate) => GetVoxel(coordinate.x, coordinate.y, coordinate.z);
 
-		public bool TryGetVoxel(Vector3Int index, out int voxel)
+		public bool TryGetVoxel(Vector3Int index, out int voxel) =>
+			TryGetVoxel(index.x, index.y, index.z, out voxel);
+		public bool TryGetVoxel(int x, int y, int z, out int voxel)
 		{
-			if (!IsValidCoord(index))
+			if (!IsValidCoord(x, y, z))
 			{
 				voxel = default;
 				return false;
 			}
-			voxel = GetVoxel(index.x, index.y, index.z);
+			voxel = GetVoxel(x, y, z);
 			return true;
 		}
 
 		public bool IsFilledSafe(Vector3Int coordinate) =>
-			TryGetVoxel(coordinate, out int voxel) && IsVoxelFilled(voxel);
+			TryGetVoxel(coordinate, out int voxel) && voxel.IsFilled();
 
 		// ------------- SET Voxels -------------
 
@@ -144,15 +146,15 @@ namespace VoxelSystem
 					v = value;
 					break;
 				case VoxelAction.Repaint:
-					if (IsVoxelFilled(oldV))
+					if (oldV.IsFilled())
 						v = value;
 					break;
 				case VoxelAction.Attach:
-					if (IsVoxelEmpty(oldV))
+					if (oldV.IsEmpty())
 						v = value;
 					break;
 				case VoxelAction.Erase:
-					v = emptyValue;
+					v.SetEmpty();
 					break;
 			}
 

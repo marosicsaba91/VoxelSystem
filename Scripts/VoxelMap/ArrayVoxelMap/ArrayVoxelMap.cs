@@ -34,7 +34,7 @@ namespace VoxelSystem
 
 		public ArrayVoxelMap() { SetupUniqueID(); }
 
-		public ArrayVoxelMap(Vector3Int size, int value = IntVoxelUtility.emptyValue)
+		public ArrayVoxelMap(Vector3Int size, int value = emptyValue)
 		{
 			SetupUniqueID();
 			Setup(size, value);
@@ -42,7 +42,7 @@ namespace VoxelSystem
 
 		public sealed override void Setup() => Setup(defaultMapSize * Vector3Int.one);
 
-		public sealed override void Setup(Vector3Int size, int value = IntVoxelUtility.emptyValue)
+		public sealed override void Setup(Vector3Int size, int value = emptyValue)
 		{
 			FullSize = size;
 			SetWhole(value);
@@ -107,15 +107,15 @@ namespace VoxelSystem
 					v = value;
 					break;
 				case VoxelAction.Repaint:
-					if (oldVal != IntVoxelUtility.emptyValue)
+					if (oldVal.IsFilled())
 						v = value;
 					break;
 				case VoxelAction.Attach:
-					if (oldVal == IntVoxelUtility.emptyValue)
+					if (oldVal.IsEmpty())
 						v = value;
 					break;
 				case VoxelAction.Erase:
-					v = emptyValue;
+					v.SetEmpty();
 					break;
 			}
 			if (oldVal == v)
@@ -199,9 +199,9 @@ namespace VoxelSystem
 						{
 							int index = x + (y * size.x) + (z * size.x * size.y);
 							int originalValue = intVoxelData[index];
-							if (originalValue != IntVoxelUtility.emptyValue)
+							if (originalValue.IsFilled())
 							{
-								intVoxelData[index] = IntVoxelUtility.emptyValue;
+								intVoxelData[index].SetEmpty();
 								changed |= true;
 							}
 						}

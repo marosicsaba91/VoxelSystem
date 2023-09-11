@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace VoxelSystem
 {
@@ -13,9 +12,9 @@ namespace VoxelSystem
 
 		protected override void OnDrawCursor(IVoxelEditor voxelEditor, Color actionColor, VoxelHit hit)
 		{
-			int paletteIndex = voxelEditor.SelectedPaletteIndex;
-			paletteIndex = Mathf.Clamp(paletteIndex, 0, voxelEditor.PaletteLength - 1);
-			Color color = voxelEditor.PaletteItems.ElementAt(paletteIndex).Color;
+			int paletteIndex = voxelEditor.SelectedMaterialIndex;
+			paletteIndex = Mathf.Clamp(paletteIndex, 0, voxelEditor.MaterialPaletteLength - 1);
+			Color color = voxelEditor.MaterialPaletteItems[paletteIndex].DisplayColor;
 			base.OnDrawCursor(voxelEditor, color, hit);
 		}
 
@@ -33,7 +32,7 @@ namespace VoxelSystem
 
 		void Pick(IVoxelEditor voxelEditor, Vector3Int index)
 		{ 
-			voxelEditor.SelectedPaletteIndex = voxelEditor.Map.GetVoxel(index);
+			voxelEditor.SelectedMaterialIndex = voxelEditor.Map.GetVoxel(index);
 		}
 	}
 }

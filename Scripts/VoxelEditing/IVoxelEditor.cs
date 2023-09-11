@@ -19,10 +19,10 @@ namespace VoxelSystem
 		VoxelTool SelectedTool { get; set; }
 		VoxelAction SelectedAction { get; set; }
 
-		// Palette
-		int SelectedPaletteIndex { get; set; }
-		int PaletteLength { get; }
-		IEnumerable<IVoxelPaletteItem> PaletteItems { get; }
+		// Material Palette
+		int SelectedMaterialIndex { get; set; }
+		int MaterialPaletteLength { get; }
+		IReadOnlyList<MaterialSetup> MaterialPaletteItems { get; }
 
 		// Selection
 

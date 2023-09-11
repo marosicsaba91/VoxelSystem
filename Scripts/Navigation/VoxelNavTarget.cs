@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace VoxelSystem
 {
 	[ExecuteAlways]
-	class VoxelNavTarget : MonoBehaviour
+	public class VoxelNavTarget : MonoBehaviour
 	{
 		[SerializeField] VoxelFilter filter;
 		[SerializeField] Vector3Int targetPoint;

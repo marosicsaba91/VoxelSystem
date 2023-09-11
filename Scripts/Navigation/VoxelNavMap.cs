@@ -11,30 +11,43 @@ namespace VoxelSystem
 	public class VoxelNavMap : MonoBehaviour
 	{
 		[SerializeField] VoxelFilter voxelFilter;
-		[SerializeField] VoxelNavAgentType agentType;
+		[SerializeField] VoxelNavAgentSetting agentSetting;
+
 		[SerializeField] VoxelNavTarget[] targets;
+
 		[Space]
 		[SerializeField] ChangeOn autoRegenerateMap = ChangeOn.Never;
 		[SerializeField] float regenDelay;
+
+		[Header("Commands")]
 		[SerializeField] DisplayMember clearNavData = new(nameof(ClearNavData));
+		[SerializeField] DisplayMember calculateVoxels = new(nameof(CalculatePossibleVoxels));
+		[SerializeField] DisplayMember calculateConnections = new(nameof(SetupConnections));
+		[SerializeField] DisplayMember setupWeightWaves = new(nameof(SetupWave));
 		[SerializeField] DisplayMember calculateNextDistanceLevel = new(nameof(CalculateNextDistanceLevel));
-		[SerializeField] DisplayMember recalculateNavDataQuick = new(nameof(RecalculateNavDataQuick));
-		[SerializeField] DisplayMember recalculateNavDataSlow = new(nameof(RecalculateNavDataSlow));
 
 		[Space]
-		[SerializeField] bool visualize = true;
-		[SerializeField, ColorUsage(false)] Color color = Color.red;
-		[SerializeField, ShowIf(nameof(visualize)), Min(1)] int maxDistanceToShow = 10;
-		[SerializeField, ShowIf(nameof(visualize)), Range(0, 1)] float minDistanceAlpha = 0.1f;
-		[SerializeField, ShowIf(nameof(visualize)), Range(0, 1)] float maxDistanceAlpha = 0.5f;
-		[SerializeField, ShowIf(nameof(visualize)), Min(0.0001f)] float slowTimeStep = 0.1f;
+		[SerializeField] DisplayMember recalculateNavDataQuick = new(nameof(RecalculateNavDataQuick));
+
+		[Space]
+
+		[Space]
+		[SerializeField] bool visualizePoints = true;
+		[SerializeField, ShowIf(nameof(visualizePoints))] Color pointColor = Color.blue;
+		[SerializeField, ShowIf(nameof(visualizePoints))] bool showPoints = true;
+		[SerializeField, ShowIf(nameof(visualizePoints))] Color lineColor = Color.red;
+		[SerializeField, ShowIf(nameof(visualizePoints))] bool showAllConnections = false;
+		[SerializeField, ShowIf(nameof(visualizePoints))] bool showCheapestConnections = true;
+		[SerializeField, ShowIf(nameof(visualizePoints))] bool showWaves = true;
+		[Space]
+		[SerializeField, ShowIf(nameof(visualizePoints)), Min(1)] int maxDistanceToShow = 10;
+		[SerializeField, ShowIf(nameof(visualizePoints)), Range(0, 1)] float maxDistanceAlpha = 0.5f;
+
 
 		readonly Dictionary<Vector3Int, NavVoxelData> navMap = new();
-
-		readonly Dictionary<Vector3Int, NavVoxelData> currentLevel = new();
-		readonly Dictionary<Vector3Int, NavVoxelData> nextLevel = new();
-
 		VoxelFilter _lastFilter;
+
+		//--------------------------------------------------------------------
 
 		void Update()
 		{
@@ -64,17 +77,19 @@ namespace VoxelSystem
 				RecalculateNavDataQuick();
 
 			else if (!quick && autoRegenerateMap is ChangeOn.OnFinalChange)
-				_delayedGeneration = EditorCoroutineUtility.StartCoroutine(RegenerateMeshesAfterDelay(), this);
+				_delayedGeneration = EditorCoroutineUtility.StartCoroutine(RegenerateNavDataAfterDelay(), this);
+
 		}
 
-		IEnumerator RegenerateMeshesAfterDelay()
+		IEnumerator RegenerateNavDataAfterDelay()
 		{
 			float time = Time.realtimeSinceStartup;
 			while (Time.realtimeSinceStartup - time < regenDelay)
 				yield return null;
 			RecalculateNavDataQuick();
+
+			yield return null;
 		}
-		 
 
 		void Start()
 		{
@@ -82,266 +97,185 @@ namespace VoxelSystem
 				RecalculateNavDataQuick();
 		}
 
-		protected static BenchmarkTimer benchmarkTimer;
+		// --------------------------------------------------------------------
 
+		protected static BenchmarkTimer benchmarkTimer;
 		void RecalculateNavDataQuick()
 		{
 			benchmarkTimer ??= new BenchmarkTimer(name + " " + GetType());
-			benchmarkTimer?.StartModule("Clear Lists");
+			benchmarkTimer?.StartModule("Calculate Possible Voxels");
 
-			ClearNavData();
-			while (currentLevel.Count > 0)
-				CalculateNextDistanceLevel();
+			CalculatePossibleVoxels();
+			benchmarkTimer?.StartModule("Setup Connections");
+			SetupConnections();
 
-			string benchmarkResult = benchmarkTimer.ToString(); 
+			benchmarkTimer?.StartModule("Setup Weight Waves");
+			SetupWave();
+
+			benchmarkTimer?.StartModule("Calculate Connection Weights");
+			_wave.CalculateValuesQuick();
+
+			string benchmarkResult = benchmarkTimer.ToString();
 			Debug.Log(benchmarkResult);
 
 			benchmarkTimer.Clear();
 		}
 
-#if UNITY_EDITOR
-		Unity.EditorCoroutines.Editor.EditorCoroutine slowCoroutine = null;
-#endif
+		// --------------------------------------------------------------------
 
-		void RecalculateNavDataSlow()
+		void ClearNavData() => _positionsCache.Clear();
+
+		readonly List<Vector3Int> _positionsCache = new();
+		void CalculatePossibleVoxels()
 		{
-#if UNITY_EDITOR
+			_positionsCache.Clear();
+			agentSetting.GetPossiblePositions(voxelFilter.GetVoxelMap(), _positionsCache);
 
-			if (slowCoroutine != null)
-			{
-				Unity.EditorCoroutines.Editor.EditorCoroutineUtility.StopCoroutine(slowCoroutine);
-				slowCoroutine = null;
-				return;
-			}
-
-
-			slowCoroutine = Unity.EditorCoroutines.Editor.EditorCoroutineUtility.
-				StartCoroutine(SlowRecalculateCoroutine(), this);
-
-
-			IEnumerator SlowRecalculateCoroutine()
-			{
-				double lastFresh = UnityEditor.EditorApplication.timeSinceStartup;
-				ClearNavData();
-
-				while (currentLevel.Count > 0)
-				{
-					double freshAge = 0;
-					while (freshAge < slowTimeStep)
-					{
-						freshAge = UnityEditor.EditorApplication.timeSinceStartup - lastFresh;
-						yield return null;
-					}
-
-					lastFresh = UnityEditor.EditorApplication.timeSinceStartup;
-					CalculateNextDistanceLevel();
-					UnityEditor.SceneView.RepaintAll();
-				}
-
-				slowCoroutine = null;
-			}
-#endif
-		}
-		void ClearNavData()
-		{
 			navMap.Clear();
-			currentLevel.Clear();
-			nextLevel.Clear();
-			// indexPointsSetupAlready.Clear();
+			for (int i = 0; i < _positionsCache.Count; i++)
+			{
+				Vector3Int position = _positionsCache[i];
+				navMap.Add(position, new NavVoxelData(position));
+			}
+		}
 
-			// Setup TargetPoints
+		void SetupConnections() => agentSetting.SetupConnections(voxelFilter.GetVoxelMap(), navMap);
+
+
+		readonly NavConnectionWeightWave _wave = new();
+		void SetupWave()
+		{
+			_wave.Clear();
 			for (int i = 0; i < targets.Length; i++)
 			{
-				Vector3Int targetIndexPoint = targets[i].TargetPoint;
-				NavVoxelData newNavData = new(targetIndexPoint, true);
-				currentLevel.Add(targetIndexPoint, newNavData);
-				navMap.Add(targetIndexPoint, newNavData);
-				// indexPointsSetupAlready.Add(targetIndexPoint);
+				Vector3Int index = targets[i].TargetPoint;
+				if (navMap.TryGetValue(index, out NavVoxelData voxel))
+					_wave.SetupTarget(voxel);
 			}
 		}
 
-		void CalculateNextDistanceLevel()
-		{
-			if (voxelFilter == null)
-				return;
-			VoxelMap map = voxelFilter.GetVoxelMap();
-			if (map == null)
-				return;
 
-			nextLevel.Clear();
-			foreach ((Vector3Int currentIndexPoint, NavVoxelData currentVoxel) in currentLevel)
-			{
-				foreach (GeneralDirection3D direction in DirectionUtility.generalDirection3DValues)
-				{
-					Vector3Int nextIndexPoint = currentIndexPoint + direction.ToVectorInt();
-					if (!map.IsValidCoord(nextIndexPoint))
-						continue;
 
-					int voxelValue = map.GetVoxel(nextIndexPoint);
-					if (voxelValue.IsFilled())
-						continue;
+		void CalculateNextDistanceLevel() => _wave.NextLevel();
 
-					if (!navMap.TryGetValue(nextIndexPoint, out NavVoxelData nextVoxel))
-					{
-						nextVoxel = new NavVoxelData(nextIndexPoint, false);
-						navMap.Add(nextIndexPoint, nextVoxel);
-						nextLevel.Add(nextIndexPoint, nextVoxel);
-					}
-
-					nextVoxel.TryAddConnection(currentVoxel, direction.Opposite());
-				}
-			}
-			currentLevel.Clear();
-
-			foreach ((Vector3Int point, NavVoxelData data) in nextLevel)
-				currentLevel.Add(point, data);
-		}
+		//--------------------------------------------------------------------
 
 		void OnDrawGizmos()
 		{
-			if (!visualize)
-				return;
-			if (navMap == null)
-				return;
-			if (voxelFilter == null)
-				return;
+			if (!visualizePoints) return;
+			if (navMap == null) return;
+			if (voxelFilter == null) return;
 
 			Transform mapTransform = voxelFilter.transform;
 
-			Vector3 half = Vector3.one / 2f;
-
-			foreach ((Vector3Int point, NavVoxelData data) in navMap)
+			// Points
+			if (showPoints)
 			{
-				VoxelGate minimumGate = data.GetMinimalCostGate();
-				if (minimumGate == null)
-					continue;
-				if (minimumGate.distanceLeft > maxDistanceToShow)
-					continue;
-
-				Vector3 centerPoint = mapTransform.TransformPoint(point + half);
-				Vector3 closestOutput = centerPoint + mapTransform.TransformVector(minimumGate.inCellPosition);
-
-				float a = Mathf.Lerp(minDistanceAlpha, maxDistanceAlpha, minimumGate.distanceLeft / maxDistanceToShow);
-				Gizmos.color = new Color(color.r, color.g, color.b, a);
-
-				Gizmos.DrawLine(centerPoint, closestOutput);
+				Gizmos.color = pointColor;
+				foreach (NavVoxelData voxel in navMap.Values)
+				{
+					float cost = voxel.cost;
+					if (cost > maxDistanceToShow) continue;
+					if (cost < 0 ) continue;
+					Vector3 voxelPosition = voxel.GlobalPoint(mapTransform);
+					TextGizmos.TextColor = pointColor;
+					// max one decimal, preferably no decimal
+					string costString = cost.ToString("0.#");
+					TextGizmos.DrawText(voxelPosition, costString);
+				}
 			}
 
-			foreach ((Vector3Int point, NavVoxelData _) in currentLevel)
+			// Cheapest Connections
+			if (showCheapestConnections && !showAllConnections)
 			{
-				Vector3 worldPoint = mapTransform.TransformPoint(point + half);
-				Gizmos.color = Color.yellow;
-				Gizmos.DrawSphere(worldPoint, 0.3f);
+				Gizmos.color = lineColor;
+				foreach (NavVoxelData voxel in navMap.Values)
+				{
+					float cost = voxel.cost;
+					if (cost > maxDistanceToShow) continue;
+					if (cost < 0) continue;
+					NavVoxelData minimumCostNeighbour = voxel.GetMinimalCostNeighbour();
+					if (minimumCostNeighbour == null) continue;
+
+					Vector3 voxelPosition = voxel.GlobalPoint(mapTransform);
+					Vector3 closestPosition = minimumCostNeighbour.GlobalPoint(mapTransform);
+					float a = Mathf.Lerp(lineColor.a, maxDistanceAlpha, minimumCostNeighbour.cost / (maxDistanceToShow - 1));
+					Gizmos.color = new Color(lineColor.r, lineColor.g, lineColor.b, a);
+					DrawQuickArrow(voxelPosition, closestPosition);
+				}
+			}
+			// All Connections
+			else if (showAllConnections)
+			{
+				Gizmos.color = lineColor;
+				foreach (NavVoxelData voxel in navMap.Values)
+				{
+					Vector3 voxelPosition = voxel.GlobalPoint(mapTransform);
+					float cost = voxel.cost;
+					if (cost >= maxDistanceToShow) continue;
+					if (cost < 0) continue;
+					float a = Mathf.Lerp(lineColor.a, maxDistanceAlpha, cost / (maxDistanceToShow - 1));
+					Gizmos.color = new Color(lineColor.r, lineColor.g, lineColor.b, a);
+					foreach (NavVoxelData neighbour in voxel.neighbours)
+						DrawQuickArrow(voxelPosition, neighbour.GlobalPoint(mapTransform));
+
+				}
 			}
 
+			// Waves
+			if (showWaves)
+				foreach (NavVoxelData data in _wave.CurrentLevel)
+				{
+					Vector3 worldPoint = data.GlobalPoint(mapTransform);
+					Gizmos.color = lineColor;
+					Gizmos.DrawSphere(worldPoint, 0.5f);
+				}
+
+			static void DrawQuickArrow(Vector3 from, Vector3 to)
+			{
+				const float baseSze = 0.1f;
+				const float gapPercent = 0.1f;
+				Vector3 perpendicular = (from - to).GetPerpendicular();
+				Vector3 start = Vector3.Lerp(from, to, gapPercent);
+				Vector3 end = Vector3.Lerp(from, to, 1 - gapPercent);
+				Gizmos.DrawLine(start, end);
+				Gizmos.DrawLine(start + perpendicular * baseSze, start - perpendicular * baseSze);
+			}
 		}
 
-		internal void GetPath(Vector3 position, List<Vector3> path)
+		//--------------------------------------------------------------------
+
+		internal bool TryGetPath(Vector3 position, List<Vector3> path)
 		{
 			path.Clear();
 			if (navMap == null)
-				return;
+				return false;
 			if (voxelFilter == null)
-				return;
+				return false;
 
-			path.Add(position); 
 			Transform t = voxelFilter.transform;
+			Vector3 half = Vector3.one / 2f;
 
 			Vector3 localPosInMap = t.InverseTransformPoint(position);
-			Vector3Int currentIndexPoint = Vector3Int.RoundToInt(localPosInMap);
-			if (!navMap.TryGetValue(currentIndexPoint, out NavVoxelData currentVoxel))
-				return;
+			Vector3Int indexPoint = Vector3Int.RoundToInt(localPosInMap);
+			path.Add(t.TransformPoint(indexPoint + half));
+			Debug.Log($"LocalPos: {localPosInMap} Index: {indexPoint}");
+			if (!navMap.TryGetValue(indexPoint, out NavVoxelData currentVoxel))
+				return false;
 
-			Vector3 half = Vector3.one / 2f;
 			while (currentVoxel != null)
 			{
-				currentIndexPoint = currentVoxel.indexPoint;
-				VoxelGate nextGate = currentVoxel.GetMinimalCostGate();
-				if (nextGate == null)
-					break;
+				if (currentVoxel == null) return true; 
+				NavVoxelData nextVoxel = currentVoxel.GetMinimalCostNeighbour();
+				if (nextVoxel == null) return true;
 
-				Vector3 localPoint = nextGate.inCellPosition;
-				Vector3 worldPoint = t.TransformPoint(currentIndexPoint + half + localPoint);
+				indexPoint = nextVoxel.indexPoint;
+				Vector3 worldPoint = t.TransformPoint(indexPoint + half);
 				path.Add(worldPoint);
 
-				currentVoxel = nextGate.connectedVoxel;
-				if (currentVoxel == null)
-					break;
+				currentVoxel = nextVoxel;
 			}
-
-		}
-
-		class NavVoxelData
-		{
-			public Vector3Int indexPoint;
-			public List<VoxelGate> outputPoints;
-
-			public NavVoxelData(Vector3Int index, bool isTarget)
-			{ 
-				indexPoint = index;
-				outputPoints = new List<VoxelGate>();
-
-				if (isTarget)
-				{
-					outputPoints.Add(new VoxelGate()
-					{
-						connectedVoxel = null,
-						distanceLeft = 0,
-						inCellPosition = Vector3.zero,
-					});
-				}
-			}
-
-			public void TryAddConnection(NavVoxelData neighbour, GeneralDirection3D neighbourDirection)
-			{
-				if (neighbour == null)
-					return;
-
-				VoxelGate neighbourMinCostGate = neighbour.GetMinimalCostGate();
-				if (neighbourMinCostGate == null)
-					return;
-
-				Vector3 dirVector = neighbourDirection.ToVector();
-				Vector3 inCellPosition = dirVector * 0.5f;
-
-				float inNeighbourGateCost =
-					Vector3.Distance(neighbourMinCostGate.inCellPosition + dirVector, inCellPosition);
-
-				float fullDistanceLeft = neighbourMinCostGate.distanceLeft + inNeighbourGateCost;
-
-				VoxelGate toNeighbour = new()
-				{
-					connectedVoxel = neighbour,
-					distanceLeft = fullDistanceLeft,
-					inCellPosition = inCellPosition,
-				};
-				outputPoints.Add(toNeighbour);
-			}
-
-			public VoxelGate GetMinimalCostGate()
-			{
-				float minCost = float.MaxValue;
-				VoxelGate minCostGate = null;
-				for (int i = 0; i < outputPoints.Count; i++)
-				{
-					VoxelGate gate = outputPoints[i];
-					if (gate == null)
-						continue;
-					if (gate.distanceLeft < minCost)
-					{
-						minCost = gate.distanceLeft;
-						minCostGate = gate;
-					}
-				}
-				return minCostGate;
-			}
-		}
-
-		class VoxelGate
-		{
-			public NavVoxelData connectedVoxel;
-			public float distanceLeft;
-			public Vector3 inCellPosition;
+			return true;
 		}
 	}
 }

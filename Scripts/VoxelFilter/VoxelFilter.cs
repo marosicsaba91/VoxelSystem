@@ -1,7 +1,6 @@
 ﻿using MUtility;
 using System.IO;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace VoxelSystem
 {
@@ -9,7 +8,7 @@ namespace VoxelSystem
 	class VoxelFilter : MonoBehaviour
 	{
 		[SerializeField, HideInInspector] ArrayVoxelMap innerMap = null;
-		[SerializeField, HideInInspector, FormerlySerializedAs("connectedMapHolder")] SharedVoxelMap sharedVoxelMap = null;
+		[SerializeField, HideInInspector] SharedVoxelMap sharedVoxelMap = null;
 
 		[SerializeField] DisplayMember sharedMap = new(nameof(SharedVoxelMap));
 		[SerializeField, DisableIf(nameof(HasSharedMap))] DisplayMember exportVoxelMap = new(nameof(ExportVoxelMap));

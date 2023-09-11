@@ -8,7 +8,7 @@ namespace VoxelSystem
 	[Serializable]
 	public class CubeVoxelPaletteItem : IVoxelPaletteItem
 	{
-		public Vector2Int textureIndex;
+		// public Vector2Int textureIndex;
 		public string name;
 		public Color color;
 

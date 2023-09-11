@@ -46,15 +46,15 @@ namespace VoxelSystem
 			voxelEditor.RecordForUndo("FloodFill Voxel", RecordType.Map);
 
 			int voxel = map.GetVoxel(hit.voxelIndex);
-			if (voxel == voxelEditor.SelectedPaletteIndex)
+			if (voxel == voxelEditor.SelectedMaterialIndex)
 				return MapChange.None;
-			if (voxel == IntVoxelUtility.emptyValue && voxelEditor.SelectedAction == VoxelAction.Erase)
+			if (voxel.IsEmpty() && voxelEditor.SelectedAction == VoxelAction.Erase)
 				return MapChange.None;
 			map.SearchChunk(chunk, hit.voxelIndex, voxelEditor.SelectedAction != VoxelAction.Overwrite);
 
 			bool changed = false;
 			foreach (Vector3Int voxelI in chunk)
-				changed |= map.SetVoxel(voxelI, voxelEditor.SelectedAction, voxelEditor.SelectedPaletteIndex);
+				changed |= map.SetVoxel(voxelI, voxelEditor.SelectedAction, voxelEditor.SelectedMaterialIndex);
 			return changed ? MapChange.Quick : MapChange.None;
 		}
 

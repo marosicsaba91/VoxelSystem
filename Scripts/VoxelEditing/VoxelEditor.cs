@@ -24,9 +24,11 @@ namespace VoxelSystem
 		static ToolState toolState = ToolState.None;
 		static int selectedPaletteIndex = 0;
 
+		[SerializeField] MaterialPalette materialPalette;
+
 		[SerializeField, HideInInspector] internal VoxelFilter voxelFilter;
 		[SerializeField, HideInInspector] internal VoxelMeshGenerator meshGenerator;
-
+		[SerializeField, HideInInspector] internal MeshRenderer meshRenderer;
 		[SerializeField, HideInInspector] internal TransformLock transformLock = new();
 		[SerializeField, HideInInspector] internal BoundsInt selection = new(Vector3Int.zero, Vector3Int.one * -1);
 
@@ -45,21 +47,32 @@ namespace VoxelSystem
 
 		private void OnValidate()
 		{
-			voxelFilter = GetComponent<VoxelFilter>();
-			meshGenerator = GetComponent<VoxelMeshGenerator>();
+			if (voxelFilter == null)
+				voxelFilter = GetComponent<VoxelFilter>();
+
+			if (meshGenerator == null)
+				meshGenerator = GetComponent<VoxelMeshGenerator>();
+
+			if (meshRenderer == null)
+				meshRenderer = GetComponent<MeshRenderer>();
+
+			FreshRendererMaterialPalette();
 		}
 
-		public int PaletteLength => meshGenerator == null ? 1 : meshGenerator.PaletteLength;
-		public IEnumerable<IVoxelPaletteItem> PaletteItems
+		void FreshRendererMaterialPalette()
 		{
-			get
-			{
-				if (meshGenerator == null)
-					yield break;
-				foreach (IVoxelPaletteItem item in meshGenerator.PaletteItems)
-					yield return item;
-			}
+			if (meshRenderer == null || materialPalette == null) return;
+
+			List<Material> materials = new();
+
+			for (int i = 0; i < materialPalette.Count; i++)
+				materials.Add(materialPalette[i].Material);
+
+			meshRenderer.SetMaterials(materials);
 		}
+
+		public int MaterialPaletteLength => materialPalette == null ? 1 : materialPalette.Count;
+		public IReadOnlyList<MaterialSetup> MaterialPaletteItems => materialPalette != null ? materialPalette.Items : null;
 
 		public string MapName => voxelFilter == null ? "-" : voxelFilter.MapName;
 		public VoxelTool SelectedTool { get => selectedTool; set => selectedTool = value; }
@@ -71,7 +84,7 @@ namespace VoxelSystem
 		}
 
 		// --- Palette ---
-		public int SelectedPaletteIndex
+		public int SelectedMaterialIndex
 		{
 			get => selectedPaletteIndex;
 			set => selectedPaletteIndex = value;
@@ -121,6 +134,5 @@ namespace VoxelSystem
 
 			Gizmos.matrix = Matrix4x4.identity;
 		}
-
 	}
 }

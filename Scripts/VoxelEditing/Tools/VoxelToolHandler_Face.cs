@@ -29,9 +29,6 @@ namespace VoxelSystem
 				Drawable side = GetDrawableVoxelSide(lastValidHit);
 				Draw(side, actionColor);
 
-				//if (voxelEditor.Map.GetVoxel(hit.voxelIndex) == IntVoxelUtility.emptyValue)
-				//	return;
-
 				voxelEditor.Map.SearchPlane(_originalSide, hit.voxelIndex, hit.side, voxelEditor.SelectedAction == VoxelAction.Repaint);
 			}
 

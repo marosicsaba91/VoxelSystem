@@ -195,7 +195,7 @@ namespace VoxelSystem
 			if (GUI.Button(position, "Fill Map"))
 			{
 				voxelEditor.RecordForUndo("Map Filled", RecordType.Map);
-				change = voxelEditor.Map.SetWhole(voxelEditor.SelectedPaletteIndex);
+				change = voxelEditor.Map.SetWhole(voxelEditor.SelectedMaterialIndex);
 			}
 			position.x += width + _spacing;
 			GUI.enabled = VoxelClipboard.HaveContent && _enableEdit;
@@ -454,13 +454,13 @@ namespace VoxelSystem
 			rect.x += colorPickerWidth + _spacing;
 			rect.width = position.width - colorPickerWidth + _spacing;
 
-			int paletteLength = voxelEditor.PaletteLength;
-			int selected = voxelEditor.SelectedPaletteIndex;
+			int paletteLength = voxelEditor.MaterialPaletteLength;
+			int selected = voxelEditor.SelectedMaterialIndex;
 
 			// IntField Flexing
 			GUIContent content = (selected > 0 && selected >= paletteLength)
 				? new("Voxel Material Index:", warningIcon, "This index is over the current voxel palette's range!")
-				: new("Color Index:", "The index of the voxel type in the voxel palette");
+				: new("Material Index:", "The index of the voxel type in the voxel palette");
 
 			int newValue = EditorGUI.IntField(rect, content, selected);
 			newValue = Mathf.Max(newValue, 0);
@@ -472,7 +472,8 @@ namespace VoxelSystem
 			const int itemsInARow = 6;
 			const float colorSpacing = 6;
 			float itemWidth = (position.width - (itemsInARow - 1) * _spacing) / itemsInARow;
-			foreach (IVoxelPaletteItem item in voxelEditor.PaletteItems)
+			if(voxelEditor.MaterialPaletteItems != null)
+			foreach (MaterialSetup item in voxelEditor.MaterialPaletteItems)
 			{
 				if (i % itemsInARow == 0)
 				{
@@ -481,12 +482,12 @@ namespace VoxelSystem
 				}
 
 				GUI.color = i == selected ? Color.white : new Color(1, 1, 1, 0.5f);
-				bool click = GUI.Button(position, item.Name);
+				bool click = GUI.Button(position, item.DisplayName);
 				Rect colorRect = new(position.x + colorSpacing, position.y + colorSpacing, position.width - 2 * colorSpacing, position.height - 2 * colorSpacing);
 				GUI.color = i == selected ? Color.white : new Color(1, 1, 1, 0.65f);
-				EditorHelper.DrawBox(colorRect, item.Color);
-				GUI.color = Color.Lerp(Color.black, item.Color, 0.25f);
-				GUI.Label(position, item.Name, paletteStyle);
+				EditorHelper.DrawBox(colorRect, item.DisplayColor);
+				GUI.color = Color.Lerp(Color.black, item.DisplayColor, 0.25f);
+				GUI.Label(position, item.DisplayName, paletteStyle);
 				if (click)
 					newValue = i;
 
@@ -500,7 +501,7 @@ namespace VoxelSystem
 				Undo.RecordObject(voxelEditor.EditorObject, "Selected Voxel Type Changed");
 				if (voxelEditor.SelectedAction == VoxelAction.Erase)
 					voxelEditor.SelectedAction = VoxelAction.Attach;
-				voxelEditor.SelectedPaletteIndex = newValue;
+				voxelEditor.SelectedMaterialIndex = newValue;
 			}
 		}
 	}

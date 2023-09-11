@@ -16,21 +16,15 @@ MonoBehaviour:
   - type: 0
     palette: {fileID: 0}
     voxelSetting:
-      textureIndex: {x: 0, y: 0}
-      material: {fileID: 2100000, guid: d02ba6665376cc84bbee93a9d6d117c9, type: 2}
       name: Sand
       color: {r: 1, g: 0.72678566, b: 0.21226418, a: 1}
   - type: 0
     palette: {fileID: 0}
     voxelSetting:
-      textureIndex: {x: 0, y: 0}
-      material: {fileID: 2100000, guid: 41059e89a753bc140b2471fd177752d0, type: 2}
       name: Blue
-      color: {r: 0, g: 0.508142, b: 1, a: 1}
+      color: {r: 0, g: 0.66610146, b: 1, a: 1}
   - type: 0
     palette: {fileID: 0}
     voxelSetting:
-      textureIndex: {x: 0, y: 0}
-      material: {fileID: 2100000, guid: cff7319fc0831c5419d983a6bcace865, type: 2}
       name: Red
       color: {r: 1, g: 0, b: 0, a: 1}

@@ -80,7 +80,7 @@ namespace VoxelSystem
 		{
 			if (guiEvent.keyCode.TryGetValue(out int number))
 			{
-				editor.SelectedPaletteIndex = number;
+				editor.SelectedMaterialIndex = number;
 				guiEvent.Use();
 			}
 		}

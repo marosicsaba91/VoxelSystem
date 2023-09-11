@@ -21,11 +21,11 @@ namespace VoxelSystem
 		}
 
 		void Update()
-		{
+		{			
 			if (Application.isPlaying && path.Count > 1)
 				Move();
 			else
-				RecalculatePath();
+				RecalculatePath();			
 		}
 
 		void Move()
@@ -46,7 +46,7 @@ namespace VoxelSystem
 		{
 			if (navMap != null)
 			{
-				navMap.GetPath(transform.position, path);
+				navMap.TryGetPath(transform.position, path);
 				currentPathIndex = 0;
 			}
 		}
