@@ -77,7 +77,7 @@ namespace VoxelSystem
 				int voxel = map.GetVoxel(voxelIndex);
 
 				if (voxel.IsEmpty()) continue;
-				if (voxel.GetShapeIndex() != voxelTypeIndex) continue;
+				if (voxel.GetVoxelTypeIndex() != voxelTypeIndex) continue;
 
 				int materialIndex = voxel.GetMaterialIndex();
 

@@ -15,7 +15,7 @@ namespace VoxelSystem
 		//      Z: 6, 7
 
 		// Second 8 bits are not used yet
-		// Third 8 bits are shape index
+		// Third 8 bits are voxelType index
 		// Fourth 8 bits are the material index.
 
 
@@ -99,12 +99,12 @@ namespace VoxelSystem
 
 		// ------------------------------------------------------------------------------------------------
 
-		// Bits 16-23 are the Shape Index
+		// Bits 16-23 are the VoxelType Index
 
-		internal static byte GetShapeIndex(this int i) =>
+		internal static byte GetVoxelTypeIndex(this int i) =>
 			(byte)((i >> 8) & 0xFF);
 
-		internal static void SetShapeIndex(this ref int i, byte materialIndex) =>
+		internal static void SetVoxelTypeIndex(this ref int i, byte materialIndex) =>
 			i = (i & ~(0xFF << 8)) | (materialIndex << 8);
 
 		// ------------------------------------------------------------------------------------------------

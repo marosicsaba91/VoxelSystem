@@ -20,12 +20,19 @@ namespace VoxelSystem
 		VoxelAction SelectedAction { get; set; }
 
 		// Material Palette
-		int SelectedMaterialIndex { get; set; }
-		int MaterialPaletteLength { get; }
+		int SelectedMaterialIndex { get; set; } 
 		IReadOnlyList<MaterialSetup> MaterialPaletteItems { get; }
+		IPalette MaterialPalette { get; }
+
+		// VoxelType Palette
+		int SelectedVoxelTypeIndex { get; set; } 
+		IReadOnlyList<UniversalVoxelPaletteItem> VoxelTypePaletteItems { get; }
+		IPalette VoxelTypePalette { get; }
+
+		// VoxelValue
+		int SelectedVoxelValue { get; }
 
 		// Selection
-
 		BoundsInt Selection { get; set; }
 		ToolState ToolState { get; set; }
 	}

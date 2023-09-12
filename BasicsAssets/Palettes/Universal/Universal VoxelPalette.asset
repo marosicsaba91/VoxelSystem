@@ -13,4 +13,6 @@ MonoBehaviour:
   m_Name: Universal VoxelPalette
   m_EditorClassIdentifier: 
   _items:
+  - {fileID: 11400000, guid: b9086327e93f7ff41bb9063fd9f17659, type: 2}
+  - {fileID: 11400000, guid: 89a45963a2460314c889884d0580c270, type: 2}
   - {fileID: 11400000, guid: eeb58c13da264de40ab5b74e2857dfae, type: 2}

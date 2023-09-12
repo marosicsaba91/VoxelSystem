@@ -47,7 +47,7 @@ namespace VoxelSystem
 			value.SetFlipped(isFlipped);
 			value.SetRotation(rotation.x, rotation.y, rotation.z);
 			value.SetMaterialIndex(materialIndex);
-			value.SetShapeIndex(shapeIndex);
+			value.SetVoxelTypeIndex(shapeIndex);
 
 			return value;
 		}
@@ -79,7 +79,7 @@ namespace VoxelSystem
 			isFilled = value.IsFilled();
 			isFlipped = value.IsFlipped();
 			rotation = value.GetRotation();
-			shapeIndex = value.GetShapeIndex();
+			shapeIndex = value.GetVoxelTypeIndex();
 			materialIndex = value.GetMaterialIndex();
 			
 		}

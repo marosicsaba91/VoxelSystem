@@ -78,11 +78,18 @@ namespace VoxelSystem
 
 		void HandleFastKeys(VoxelEditor editor, Event guiEvent) 
 		{
-			if (guiEvent.keyCode.TryGetValue(out int number))
+			if (guiEvent.control && guiEvent.keyCode.TryGetValue(out int number))
 			{
 				editor.SelectedMaterialIndex = number;
 				guiEvent.Use();
 			}
+			else if (guiEvent.keyCode.TryGetValue(out number))
+			{
+				editor.SelectedVoxelTypeIndex = number;
+				guiEvent.Use();
+			}
+
+
 		}
 
 		void UpdateEnableEdit(VoxelEditor editor) => _enableEdit =

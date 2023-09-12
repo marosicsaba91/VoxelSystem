@@ -22,12 +22,15 @@ namespace VoxelSystem
 		static VoxelAction selectedAction = VoxelAction.Attach;
 		static VoxelTool selectedTool = VoxelTool.None;
 		static ToolState toolState = ToolState.None;
-		static int selectedPaletteIndex = 0;
+		// static int selectedMaterialIndex = 0;
+		// static int selectedVoxelTypeIndex = 0;
+		static int selectedVoxelValue = 0;
 
 		[SerializeField] MaterialPalette materialPalette;
 
 		[SerializeField, HideInInspector] internal VoxelObject voxelFilter;
 		[SerializeField, HideInInspector] internal VoxelMeshGenerator meshGenerator;
+		[SerializeField, HideInInspector] internal UniversalMeshGenerator universalMeshGenerator;
 		[SerializeField, HideInInspector] internal MeshRenderer meshRenderer;
 		[SerializeField, HideInInspector] internal TransformLock transformLock = new();
 		[SerializeField, HideInInspector] internal BoundsInt selection = new(Vector3Int.zero, Vector3Int.one * -1);
@@ -53,6 +56,9 @@ namespace VoxelSystem
 			if (meshGenerator == null)
 				meshGenerator = GetComponent<VoxelMeshGenerator>();
 
+			if (universalMeshGenerator == null)
+				universalMeshGenerator = GetComponent<UniversalMeshGenerator>();
+
 			if (meshRenderer == null)
 				meshRenderer = GetComponent<MeshRenderer>();
 
@@ -71,8 +77,10 @@ namespace VoxelSystem
 			meshRenderer.SetMaterials(materials);
 		}
 
-		public int MaterialPaletteLength => materialPalette == null ? 1 : materialPalette.Count;
-		public IReadOnlyList<MaterialSetup> MaterialPaletteItems => materialPalette != null ? materialPalette.Items : null;
+		public IReadOnlyList<MaterialSetup> MaterialPaletteItems => materialPalette != null ? materialPalette.Materials : null;
+		public IPalette MaterialPalette => universalMeshGenerator.MaterialPalette;
+
+		public IPalette VoxelTypePalette => universalMeshGenerator.VoxelTypePalette;
 
 		public string MapName => voxelFilter == null ? "-" : voxelFilter.MapName;
 		public VoxelTool SelectedTool { get => selectedTool; set => selectedTool = value; }
@@ -83,12 +91,27 @@ namespace VoxelSystem
 			set => toolState = value;
 		}
 
-		// --- Palette ---
+		public int SelectedVoxelValue => selectedVoxelValue;
+
+		// --- Material Palette ---
 		public int SelectedMaterialIndex
 		{
-			get => selectedPaletteIndex;
-			set => selectedPaletteIndex = value;
+			get => selectedVoxelValue.GetMaterialIndex();
+			set => selectedVoxelValue.SetMaterialIndex((byte)value);
 		}
+
+		// --- VoxelType Palette ---
+
+		public int SelectedVoxelTypeIndex
+		{
+			get => selectedVoxelValue.GetVoxelTypeIndex();
+			set => selectedVoxelValue.SetVoxelTypeIndex((byte)value);
+		}
+
+		public int VoxelTypePaletteLength => throw new NotImplementedException();
+
+		public IReadOnlyList<UniversalVoxelPaletteItem> VoxelTypePaletteItems => throw new NotImplementedException();
+
 
 		// --------------------------------------
 		void Update()

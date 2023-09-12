@@ -19,9 +19,9 @@ MonoBehaviour:
     displayTexture: {fileID: 2800000, guid: 3b6a8bdbe48a28a48947ba1612fd659b, type: 3}
   - material: {fileID: 2100000, guid: 6d4577dc6dcd1484fb344d988cde3c19, type: 2}
     displayName: Concrete
-    displayColor: {r: 0.51041293, g: 0.5380413, b: 0.5849056, a: 0.19607843}
+    displayColor: {r: 0.51041293, g: 0.5380413, b: 0.5849056, a: 1}
     displayTexture: {fileID: 2800000, guid: c75fceadedc339947b00aeb77842cc6d, type: 3}
   - material: {fileID: 2100000, guid: 31d8d855872d111478e3f5874ccd2eca, type: 2}
     displayName: White Brick
-    displayColor: {r: 0.6603774, g: 0.62371916, b: 0.5762727, a: 0.19607843}
+    displayColor: {r: 0.6603774, g: 0.62371916, b: 0.5762727, a: 1}
     displayTexture: {fileID: 2800000, guid: ba244eee18f6fe04b86d39046f8a2c2f, type: 3}

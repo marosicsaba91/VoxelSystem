@@ -20,7 +20,7 @@ namespace VoxelSystem
 			voxelEditor.RecordForUndo("BoxTool used on VoxelMap", recordType);
 			_lastBound = new (hit.voxelIndex, Vector3Int.one);
 
-			_lastTimeMapChanged = map.SetVoxel(hit.voxelIndex, voxelEditor.SelectedAction, voxelEditor.SelectedMaterialIndex);
+			_lastTimeMapChanged = map.SetVoxel(hit.voxelIndex, voxelEditor.SelectedAction, voxelEditor.SelectedVoxelValue);
 			return _lastTimeMapChanged ? MapChange.Quick : MapChange.None;
 		}
 
@@ -36,7 +36,7 @@ namespace VoxelSystem
 			map.CopyFrom(originalMap, _lastBound.min, _lastBound.min, _lastBound.size, VoxelAction.Overwrite); 
 			voxelEditor.RecordForUndo("BoxTool used on VoxelMap", recordType);
 
-			bool mapChanged = map.SetRange(min, max, voxelEditor.SelectedAction, voxelEditor.SelectedMaterialIndex);
+			bool mapChanged = map.SetRange(min, max, voxelEditor.SelectedAction, voxelEditor.SelectedVoxelValue);
 
 			bool updateMap = mapChanged || _lastTimeMapChanged;
 			_lastTimeMapChanged = mapChanged;

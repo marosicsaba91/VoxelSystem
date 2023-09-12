@@ -12,49 +12,49 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b4220bd297412541a0761cd84013a80, type: 3}
   m_Name: 3Side
   m_EditorClassIdentifier: 
-  niceName: 
-  color: {r: 1, g: 0, b: 0, a: 1}
+  niceName: 3 Side
+  color: {r: 0.5, g: 0.36084905, b: 0.36084905, a: 1}
   cubeTextureCoordinates:
-    gridSize: 2
-    right: {x: 1, y: 1}
-    left: {x: 1, y: 1}
-    top: {x: 0, y: 1}
-    bottom: {x: 0, y: 0}
-    front: {x: 1, y: 1}
-    back: {x: 1, y: 1}
+    gridSize: 4
+    right: {x: 2, y: 1}
+    left: {x: 2, y: 1}
+    top: {x: 1, y: 2}
+    bottom: {x: 1, y: 0}
+    front: {x: 2, y: 1}
+    back: {x: 2, y: 1}
     rightRect:
       serializedVersion: 2
       x: 0.5
-      y: 0.5
-      width: 0.5
-      height: 0.5
+      y: 0.25
+      width: 0.25
+      height: 0.25
     leftRect:
       serializedVersion: 2
       x: 0.5
-      y: 0.5
-      width: 0.5
-      height: 0.5
+      y: 0.25
+      width: 0.25
+      height: 0.25
     topRect:
       serializedVersion: 2
-      x: 0
+      x: 0.25
       y: 0.5
-      width: 0.5
-      height: 0.5
+      width: 0.25
+      height: 0.25
     bottomRect:
       serializedVersion: 2
-      x: 0
+      x: 0.25
       y: 0
-      width: 0.5
-      height: 0.5
+      width: 0.25
+      height: 0.25
     frontRect:
       serializedVersion: 2
       x: 0.5
-      y: 0.5
-      width: 0.5
-      height: 0.5
+      y: 0.25
+      width: 0.25
+      height: 0.25
     backRect:
       serializedVersion: 2
       x: 0.5
-      y: 0.5
-      width: 0.5
-      height: 0.5
+      y: 0.25
+      width: 0.25
+      height: 0.25

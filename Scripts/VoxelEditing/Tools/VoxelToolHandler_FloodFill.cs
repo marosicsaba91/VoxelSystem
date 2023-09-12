@@ -46,7 +46,7 @@ namespace VoxelSystem
 			voxelEditor.RecordForUndo("FloodFill Voxel", RecordType.Map);
 
 			int voxel = map.GetVoxel(hit.voxelIndex);
-			if (voxel == voxelEditor.SelectedMaterialIndex)
+			if (voxel == voxelEditor.SelectedVoxelValue)
 				return MapChange.None;
 			if (voxel.IsEmpty() && voxelEditor.SelectedAction == VoxelAction.Erase)
 				return MapChange.None;
@@ -54,7 +54,7 @@ namespace VoxelSystem
 
 			bool changed = false;
 			foreach (Vector3Int voxelI in chunk)
-				changed |= map.SetVoxel(voxelI, voxelEditor.SelectedAction, voxelEditor.SelectedMaterialIndex);
+				changed |= map.SetVoxel(voxelI, voxelEditor.SelectedAction, voxelEditor.SelectedVoxelValue);
 			return changed ? MapChange.Quick : MapChange.None;
 		}
 

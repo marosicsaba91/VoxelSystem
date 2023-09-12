@@ -13,7 +13,7 @@ namespace VoxelSystem
 	public class UniversalMeshGenerator : MonoBehaviour
 	{
 		[SerializeField] MaterialPalette materialPalette;
-		[SerializeField] UniversalVoxelPalette voxelPalette;
+		[SerializeField] UniversalVoxelPalette voxelTypePalette;
 
 		[SerializeField, HideInInspector] VoxelObject voxelFilter;
 
@@ -30,6 +30,9 @@ namespace VoxelSystem
 		[SerializeField] TMP_Text benchmarkOutput;
 
 		VoxelMap Map => voxelFilter == null ? null : voxelFilter.GetVoxelMap();
+
+		public IPalette MaterialPalette => materialPalette;
+		public IPalette VoxelTypePalette => voxelTypePalette;
 
 		public void CreateMeshFile()
 		{
@@ -133,13 +136,13 @@ namespace VoxelSystem
 		// Runs only once.
 		void BeforeMeshGeneration(VoxelMap map, UniversalVoxelPalette palette)
 		{
-			for (int voxelTypeIndex = 0; voxelTypeIndex < palette.ItemsList.Count; voxelTypeIndex++)
+			for (int voxelTypeIndex = 0; voxelTypeIndex < palette.VoxelTypes.Count; voxelTypeIndex++)
 			{
-				UniversalVoxelPaletteItem item = palette.ItemsList[voxelTypeIndex];
+				UniversalVoxelPaletteItem item = palette.VoxelTypes[voxelTypeIndex];
 				item.BeforeMeshGeneration(map, palette, voxelTypeIndex);
 			}
 
-			ClearDictionary(materialPalette.Count, voxelPalette.ItemsList.Count);
+			ClearDictionary(materialPalette.Count, voxelTypePalette.VoxelTypes.Count);
 			BuildVoxelPositionDictionary(map);
 		}
 
@@ -166,7 +169,7 @@ namespace VoxelSystem
 
 						if (voxel.IsEmpty()) continue;
 
-						int shapeIndex = voxel.GetShapeIndex();
+						int shapeIndex = voxel.GetVoxelTypeIndex();
 						int materialIndex = voxel.GetMaterialIndex();
 
 						VoxelType voxelType = new() { materialIndex = materialIndex, shapeIndex = shapeIndex };
@@ -196,7 +199,7 @@ namespace VoxelSystem
 			benchmarkTimer?.StartModule("Clear Lists");
 
 			benchmarkTimer?.StartModule("Build Voxel Position Dictionary");
-			BeforeMeshGeneration(Map, voxelPalette);
+			BeforeMeshGeneration(Map, voxelTypePalette);
 
 			benchmarkTimer?.StartModule("Calculate Vertex Data");
 			CalculateAllVertexData();
@@ -252,9 +255,9 @@ namespace VoxelSystem
 			int _currentTriangleIndex = 0;
 			for (int materialIndex = 0; materialIndex < materialPalette.Count; materialIndex++)
 			{
-				for (int voxelTypeIndex = 0; voxelTypeIndex < voxelPalette.ItemsList.Count; voxelTypeIndex++)
+				for (int voxelTypeIndex = 0; voxelTypeIndex < voxelTypePalette.VoxelTypes.Count; voxelTypeIndex++)
 				{
-					UniversalVoxelPaletteItem item = voxelPalette.ItemsList[voxelTypeIndex];
+					UniversalVoxelPaletteItem item = voxelTypePalette.VoxelTypes[voxelTypeIndex];
 					List<Vector3Int> voxelIndexes = voxelsByType[new VoxelType() { materialIndex = materialIndex, shapeIndex = voxelTypeIndex }];
 					item.GenerateMeshData(Map, voxelIndexes, voxelTypeIndex, _vertices, _normals, _uv, _triangles);
 
@@ -271,7 +274,7 @@ namespace VoxelSystem
 		{
 			UniversalMeshGenerator generator = newGO.AddComponent<UniversalMeshGenerator>();
 			generator.materialPalette = materialPalette;
-			generator.voxelPalette = voxelPalette;
+			generator.voxelTypePalette = voxelTypePalette;
 
 			generator.destinationMesh = destinationMesh;
 
