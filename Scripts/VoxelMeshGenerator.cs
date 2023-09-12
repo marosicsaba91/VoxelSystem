@@ -111,8 +111,6 @@ namespace VoxelSystem
 			RegenerateMeshes();
 		}
 
-
-
 		void OnValidate()
 		{
 			voxelFilter = GetComponent<VoxelObject>();
@@ -120,15 +118,15 @@ namespace VoxelSystem
 
 		protected static BenchmarkTimer benchmarkTimer;
 
-		protected static readonly List<Vector3> _vertices = new();
-		protected static readonly List<Vector3> _normals = new();
-		protected static readonly List<Vector2> _uv = new();
-		protected static readonly List<int> _triangles = new();
-		protected static readonly List<SubMeshDescriptor> _descriptors = new();
-		 
-		protected static int _currentTriangleIndex = 0;
-		 
-		protected const int vertexLimitOf16Bit = 65536;
+		static readonly List<Vector3> _vertices = new();
+		static readonly List<Vector3> _normals = new();
+		static readonly List<Vector2> _uv = new();
+		static readonly List<int> _triangles = new();
+		static readonly List<SubMeshDescriptor> _descriptors = new();
+
+		static int _currentTriangleIndex = 0;
+
+		const int vertexLimitOf16Bit = 65536;
 
 		public override void RegenerateMeshes()
 		{
@@ -212,11 +210,6 @@ namespace VoxelSystem
 				destinationMeshFilter.sharedMesh = destinationMesh;
 		}
 
-
-		protected abstract void BeforeMeshGeneration(VoxelMap map, TVoxelPalette palette);
-
-		protected abstract void GenerateMeshData(int paletteIndex, TPaletteItem paletteItem, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles);
-
 		internal override VoxelMeshGenerator CreateACopy(GameObject newGO)
 		{
 			VoxelMeshGenerator<TVoxelPalette, TPaletteItem> copy = AddACopy(newGO);
@@ -224,6 +217,11 @@ namespace VoxelSystem
 			copy.RegenerateMeshes();
 			return copy;
 		}
+
+		protected abstract void BeforeMeshGeneration(VoxelMap map, TVoxelPalette palette);
+
+		protected abstract void GenerateMeshData(int paletteIndex, TPaletteItem paletteItem, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles);
+
 
 		internal abstract VoxelMeshGenerator<TVoxelPalette, TPaletteItem> AddACopy(GameObject newGO);
 	}

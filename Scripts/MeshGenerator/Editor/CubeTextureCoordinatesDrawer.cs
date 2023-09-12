@@ -5,8 +5,7 @@ using UnityEngine;
 
 namespace VoxelSystem
 {
-	// PropertyDrawer for CubeTextureCoordinates2
-	[CustomPropertyDrawer(typeof(CubeTextureCoordinates2))]
+	[CustomPropertyDrawer(typeof(CubeTextureCoordinates))]
 
 	public class CubeTextureCoordinatesDrawer : PropertyDrawer
 	{
@@ -22,7 +21,7 @@ namespace VoxelSystem
 			// SerializedProperty front = property.FindPropertyRelative("front");
 			// SerializedProperty back = property.FindPropertyRelative("back");
 
-			CubeTextureCoordinates2 coordinates = property.GetObjectOfProperty() as CubeTextureCoordinates2;
+			CubeTextureCoordinates coordinates = property.GetObjectOfProperty() as CubeTextureCoordinates;
 
 			//Draw default property field
 			EditorGUI.PropertyField(position, property, label, true);

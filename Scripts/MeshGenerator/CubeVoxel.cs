@@ -1,5 +1,4 @@
 using MUtility;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,7 +7,7 @@ namespace VoxelSystem
 	[CreateAssetMenu(fileName = "Cube Voxel", menuName = "Voxel System/Cube Voxel")]
 	public class CubeVoxel : UniversalVoxelPaletteItem
 	{
-		[SerializeField] CubeTextureCoordinates2 cubeTextureCoordinates;
+		[SerializeField] CubeTextureCoordinates cubeTextureCoordinates;
 
 		private void OnValidate() => cubeTextureCoordinates.OnValidate();
 
@@ -131,7 +130,6 @@ namespace VoxelSystem
 
 	}
 
-
 	struct CubeSide
 	{
 		public GeneralDirection3D direction;
@@ -139,51 +137,4 @@ namespace VoxelSystem
 		public int materialIndex;
 		public Rect textureCoordinates;
 	}
-
-	[Serializable]
-	struct CubeTextureCoordinates
-	{
-		enum TextureType { SameSides, TopSideBottom, SixSide }
-
-		[SerializeField] TextureType textureType;
-
-		[SerializeField, ShowIf(nameof(ShowOneOnly))] Rect everySide;
-		[SerializeField, ShowIf(nameof(ShowTopAndBottom))] Rect top;
-		[SerializeField, ShowIf(nameof(ShowSide))] Rect side;
-		[SerializeField, ShowIf(nameof(ShowTopAndBottom))] Rect bottom;
-		[SerializeField, ShowIf(nameof(ShowDifferentSide))] Rect right;
-		[SerializeField, ShowIf(nameof(ShowDifferentSide))] Rect left;
-		[SerializeField, ShowIf(nameof(ShowDifferentSide))] Rect front;
-		[SerializeField, ShowIf(nameof(ShowDifferentSide))] Rect back;
-
-		bool ShowOneOnly => textureType == TextureType.SameSides;
-		bool ShowSide => textureType == TextureType.TopSideBottom;
-		bool ShowDifferentSide => textureType == TextureType.SixSide;
-		bool ShowTopAndBottom => textureType is TextureType.TopSideBottom or TextureType.SixSide;
-
-		public Rect GetRect(GeneralDirection3D direction)
-		{
-			if (textureType == TextureType.SameSides)
-				return everySide;
-
-			if (direction == GeneralDirection3D.Up)
-				return top;
-			if (direction == GeneralDirection3D.Down)
-				return bottom;
-			if (textureType == TextureType.TopSideBottom)
-				return side;
-
-			if (direction == GeneralDirection3D.Left)
-				return left;
-			if (direction == GeneralDirection3D.Right)
-				return right;
-			if (direction == GeneralDirection3D.Forward)
-				return front;
-			if (direction == GeneralDirection3D.Back)
-				return back;
-
-			throw new Exception("Invalid direction");
-		}
-	}
-
 }

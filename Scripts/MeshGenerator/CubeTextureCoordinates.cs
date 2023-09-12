@@ -5,7 +5,7 @@ using UnityEngine;
 namespace VoxelSystem
 {
 	[Serializable]
-	class CubeTextureCoordinates2
+	class CubeTextureCoordinates
 	{
 		enum TextureType { SameSides, TopSideBottom, SixSide }
 
