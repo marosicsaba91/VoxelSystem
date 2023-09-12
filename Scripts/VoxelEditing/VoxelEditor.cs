@@ -15,7 +15,7 @@ namespace VoxelSystem
 		public bool scale;
 	}
 
-	[RequireComponent(typeof(VoxelFilter))]
+	[RequireComponent(typeof(VoxelObject))]
 	[ExecuteAlways]
 	class VoxelEditor : MonoBehaviour, IVoxelEditor
 	{
@@ -26,7 +26,7 @@ namespace VoxelSystem
 
 		[SerializeField] MaterialPalette materialPalette;
 
-		[SerializeField, HideInInspector] internal VoxelFilter voxelFilter;
+		[SerializeField, HideInInspector] internal VoxelObject voxelFilter;
 		[SerializeField, HideInInspector] internal VoxelMeshGenerator meshGenerator;
 		[SerializeField, HideInInspector] internal MeshRenderer meshRenderer;
 		[SerializeField, HideInInspector] internal TransformLock transformLock = new();
@@ -48,7 +48,7 @@ namespace VoxelSystem
 		private void OnValidate()
 		{
 			if (voxelFilter == null)
-				voxelFilter = GetComponent<VoxelFilter>();
+				voxelFilter = GetComponent<VoxelObject>();
 
 			if (meshGenerator == null)
 				meshGenerator = GetComponent<VoxelMeshGenerator>();
@@ -117,7 +117,7 @@ namespace VoxelSystem
 		void OnDrawGizmosSelected()
 		{
 			if (voxelFilter == null)
-				voxelFilter = GetComponent<VoxelFilter>();
+				voxelFilter = GetComponent<VoxelObject>();
 
 			if (Map == null)
 				return;

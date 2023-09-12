@@ -118,7 +118,7 @@ namespace VoxelSystem
 			newGO.transform.localRotation = original.rotation;
 			newGO.transform.localScale = original.localScale;
 
-			VoxelFilter newMapFilter = newGO.AddComponent<VoxelFilter>();
+			VoxelObject newMapFilter = newGO.AddComponent<VoxelObject>();
 			ArrayVoxelMap map = voxelEditor.SeparateSelection();
 			newMapFilter.SetVoxelMap(map);
 			VoxelEditor newEditor = newGO.AddComponent<VoxelEditor>();

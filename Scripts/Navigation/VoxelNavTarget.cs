@@ -6,11 +6,11 @@ namespace VoxelSystem
 	[ExecuteAlways]
 	public class VoxelNavTarget : MonoBehaviour
 	{
-		[SerializeField] VoxelFilter filter;
+		[SerializeField] VoxelObject filter;
 		[SerializeField] Vector3Int targetPoint;
 		[SerializeField] Color color = Color.cyan;
 
-		static readonly Dictionary<VoxelFilter, VoxelNavTarget> allTargets = new();
+		static readonly Dictionary<VoxelObject, VoxelNavTarget> allTargets = new();
 
 		public Vector3Int TargetPoint => targetPoint;
 

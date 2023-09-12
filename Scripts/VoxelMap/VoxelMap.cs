@@ -32,8 +32,8 @@ namespace VoxelSystem
 				}
 			}
 
-			VoxelFilter[] filters = Object.FindObjectsByType<VoxelFilter>(FindObjectsSortMode.None);
-			foreach (VoxelFilter filter in filters)
+			VoxelObject[] filters = Object.FindObjectsByType<VoxelObject>(FindObjectsSortMode.None);
+			foreach (VoxelObject filter in filters)
 			{
 				VoxelMap vMap = filter.GetVoxelMap();
 				mapDictionary.TryAdd(vMap.UniqueID, vMap);

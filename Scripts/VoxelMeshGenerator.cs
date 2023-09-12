@@ -12,8 +12,8 @@ namespace VoxelSystem
 
 	public abstract class VoxelMeshGenerator : MonoBehaviour
 	{
-		internal abstract int PaletteLength { get; }
-		internal abstract IEnumerable<IVoxelPaletteItem> PaletteItems { get; }
+		internal abstract int VoxelPaletteLength { get; }
+		internal abstract IEnumerable<IVoxelPaletteItem> voxelPaletteItems { get; }
 
 		internal abstract VoxelMeshGenerator CreateACopy(GameObject newGO);
 		public abstract void RegenerateMeshes();
@@ -21,27 +21,26 @@ namespace VoxelSystem
 
 	public abstract class VoxelMeshGenerator<TVoxelPalette, TPaletteItem> : VoxelMeshGenerator where TVoxelPalette : IVoxelPalette<TPaletteItem>
 	{
+		[SerializeField, HideInInspector] protected VoxelObject voxelFilter;
+		[SerializeField] protected TVoxelPalette voxelPalette;
 
-		[SerializeField, HideInInspector] VoxelFilter voxelFilter;
-		[SerializeField] TVoxelPalette voxelPalette;
-
-		[SerializeField] Mesh destinationMesh;
-		[SerializeField] MeshFilter destinationMeshFilter;
-		[SerializeField] MeshCollider destinationMeshCollider;
+		[SerializeField] protected Mesh destinationMesh;
+		[SerializeField] protected MeshFilter destinationMeshFilter;
+		[SerializeField] protected MeshCollider destinationMeshCollider;
 
 		[SerializeField] ChangeOn autoRegenerateMeshes = ChangeOn.Never;
 		[SerializeField, Min(0)] float regenDelay;
 		[SerializeField] DisplayMember regenerateMesh = new(nameof(RegenerateMeshes));
 		[SerializeField] DisplayMember createMeshFile = new(nameof(CreateMeshFile));
 
-		[SerializeField] bool doBenchmark;
-		[SerializeField] TMP_Text benchmarkOutput;
+		[SerializeField] protected bool doBenchmark;
+		[SerializeField] protected TMP_Text benchmarkOutput;
 
 
-		VoxelMap Map => voxelFilter == null ? null : voxelFilter.GetVoxelMap();
+		protected VoxelMap Map => voxelFilter == null ? null : voxelFilter.GetVoxelMap();
 
-		internal sealed override int PaletteLength => voxelPalette == null ? 1 : voxelPalette.Length;
-		internal sealed override IEnumerable<IVoxelPaletteItem> PaletteItems
+		internal sealed override int VoxelPaletteLength => voxelPalette == null ? 1 : voxelPalette.Length;
+		internal sealed override IEnumerable<IVoxelPaletteItem> voxelPaletteItems
 		{
 			get
 			{
@@ -72,7 +71,7 @@ namespace VoxelSystem
 #endif
 		}
 
-		VoxelFilter _lastFilter;
+		VoxelObject _lastFilter;
 		void Update()
 		{
 			if (voxelFilter != null)
@@ -116,22 +115,22 @@ namespace VoxelSystem
 
 		void OnValidate()
 		{
-			voxelFilter = GetComponent<VoxelFilter>();
+			voxelFilter = GetComponent<VoxelObject>();
 		}
 
 		protected static BenchmarkTimer benchmarkTimer;
 
-		static readonly List<Vector3> _vertices = new();
-		static readonly List<Vector3> _normals = new();
-		static readonly List<Vector2> _uv = new();
-		static readonly List<int> _triangles = new();
-		static readonly List<SubMeshDescriptor> _descriptors = new();
+		protected static readonly List<Vector3> _vertices = new();
+		protected static readonly List<Vector3> _normals = new();
+		protected static readonly List<Vector2> _uv = new();
+		protected static readonly List<int> _triangles = new();
+		protected static readonly List<SubMeshDescriptor> _descriptors = new();
+		 
+		protected static int _currentTriangleIndex = 0;
+		 
+		protected const int vertexLimitOf16Bit = 65536;
 
-		static int _currentTriangleIndex = 0;
-
-		const int vertexLimitOf16Bit = 65536;
-
-		public sealed override void RegenerateMeshes()
+		public override void RegenerateMeshes()
 		{
 			if (!isActiveAndEnabled)
 				return;
@@ -212,6 +211,8 @@ namespace VoxelSystem
 			if (destinationMeshFilter != null)
 				destinationMeshFilter.sharedMesh = destinationMesh;
 		}
+
+
 		protected abstract void BeforeMeshGeneration(VoxelMap map, TVoxelPalette palette);
 
 		protected abstract void GenerateMeshData(int paletteIndex, TPaletteItem paletteItem, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles);

@@ -1,21 +1,12 @@
 using MUtility;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using VoxelSystem;
 
 [ExecuteAlways]
-[RequireComponent(typeof(VoxelFilter))]
+[RequireComponent(typeof(VoxelObject))]
 public class CubeMeshGenerator : VoxelMeshGenerator<CubeVoxelPalette, CubeVoxelPaletteItem>
 {
-	[Serializable]
-	public struct SideGenerationSetting
-	{
-		public bool mergeCloseEdges;
-		public bool openOnSides;
-		public bool continueSidesAndEdgesBetweenMaterials;
-		public bool showFacesBetweenMaterials;
-	}
 
 
 	struct Side
@@ -67,6 +58,7 @@ public class CubeMeshGenerator : VoxelMeshGenerator<CubeVoxelPalette, CubeVoxelP
 					}
 				}
 	}
+
 	protected sealed override void GenerateMeshData(int paletteIndex, CubeVoxelPaletteItem paletteItem, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles)
 	{
 		paletteItem.FreshMeshes();

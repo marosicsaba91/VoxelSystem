@@ -19,6 +19,7 @@ namespace VoxelSystem
 		public bool isFilled;
 	}
 
+
 	public static class BlockMapGenerator
 	{
 		public static BlockGenerationSetting blockSetup = new();

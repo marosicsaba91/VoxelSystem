@@ -5,7 +5,7 @@ using VoxelSystem;
 using System.Linq;
 
 [ExecuteAlways]
-[RequireComponent(typeof(VoxelFilter))]
+[RequireComponent(typeof(VoxelObject))]
 public class BlockMeshGenerator : VoxelMeshGenerator<BlockVoxelPalette, BlockVoxelPaletteItem>
 {
 	[SerializeField] BlockGenerationSetting blockGenerationSetting;

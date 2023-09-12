@@ -10,7 +10,7 @@ namespace VoxelSystem
 	[ExecuteAlways]
 	public class VoxelNavMap : MonoBehaviour
 	{
-		[SerializeField] VoxelFilter voxelFilter;
+		[SerializeField] VoxelObject voxelFilter;
 		[SerializeField] VoxelNavAgentSetting agentSetting;
 
 		[SerializeField] VoxelNavTarget[] targets;
@@ -45,7 +45,7 @@ namespace VoxelSystem
 
 
 		readonly Dictionary<Vector3Int, NavVoxelData> navMap = new();
-		VoxelFilter _lastFilter;
+		VoxelObject _lastFilter;
 
 		//--------------------------------------------------------------------
 
