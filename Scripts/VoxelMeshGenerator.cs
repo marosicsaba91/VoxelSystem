@@ -74,7 +74,6 @@ namespace VoxelSystem
 		VoxelObject _lastFilter;
 		void Update()
 		{
-			Debug.Log(voxelFilter);
 			if (voxelFilter != null)
 			{
 				voxelFilter.MapChanged -= OnMapChanged;
@@ -99,7 +98,6 @@ namespace VoxelSystem
 			if ((quick && autoRegenerateMeshes == ChangeOn.OnQuickChange) ||
 				autoRegenerateMeshes == ChangeOn.EveryChange)
 			{
-				Debug.Log("!!!");
 				RegenerateMeshes();
 
 			}

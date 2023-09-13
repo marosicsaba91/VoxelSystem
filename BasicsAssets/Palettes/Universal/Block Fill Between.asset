@@ -10,10 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83706a07632c8604aa59abd921143d3f, type: 3}
-  m_Name: DrawEverywhereBlock Voxel
+  m_Name: Block Fill Between
   m_EditorClassIdentifier: 
   niceName: Fill
   color: {r: 0.4371557, g: 0.8490566, b: 0.3724635, a: 1}
+  quickVersion: {fileID: 11400000, guid: 89a45963a2460314c889884d0580c270, type: 2}
   mergeCloseEdges: 1
   connectionOnMapEdge: 0
   drawBetweenVoxelChange: 1

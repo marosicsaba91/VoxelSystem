@@ -110,7 +110,7 @@ namespace VoxelSystem
 
 		public int VoxelTypePaletteLength => throw new NotImplementedException();
 
-		public IReadOnlyList<UniversalVoxelPaletteItem> VoxelTypePaletteItems => throw new NotImplementedException();
+		public IReadOnlyList<UniversalVoxelBuilder> VoxelTypePaletteItems => throw new NotImplementedException();
 
 
 		// --------------------------------------

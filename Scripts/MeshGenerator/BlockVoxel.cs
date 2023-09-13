@@ -14,7 +14,7 @@ namespace VoxelSystem
 	}
 
 	[CreateAssetMenu(fileName = "Block Voxel", menuName = "Voxel System/Block Voxel")]
-	public class BlockVoxel : UniversalVoxelPaletteItem
+	public class BlockVoxel : UniversalVoxelBuilder
 	{
 		[SerializeField] bool mergeCloseEdges;
 		[SerializeField] VoxelConnectionType connectionOnMapEdge = VoxelConnectionType.CloseFully;
@@ -41,9 +41,9 @@ namespace VoxelSystem
 		static readonly List<Vector3> _breakPoints = new();
 
 
-		internal override void BeforeMeshGeneration(VoxelMap map, UniversalVoxelPalette palette, int voxelTypeIndex) { }
+		protected override void BeforeMeshGeneration(VoxelMap map, UniversalVoxelPalette palette, int voxelTypeIndex) { }
 
-		internal override void GenerateMeshData(
+		protected override void GenerateMeshData(
 			VoxelMap map,
 			List<Vector3Int> voxelPositions,
 			int voxelTypeIndex,

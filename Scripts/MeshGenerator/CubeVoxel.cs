@@ -5,8 +5,10 @@ using UnityEngine;
 namespace VoxelSystem
 {
 	[CreateAssetMenu(fileName = "Cube Voxel", menuName = "Voxel System/Cube Voxel")]
-	public class CubeVoxel : UniversalVoxelPaletteItem
+	public class CubeVoxel : UniversalVoxelBuilder
 	{
+		[SerializeField] bool drawOnMapEdge = true;
+		[SerializeField] bool drawBetweenVoxelChange = false;
 		[SerializeField] CubeTextureCoordinates cubeTextureCoordinates;
 
 		private void OnValidate() => cubeTextureCoordinates.OnValidate();
@@ -18,9 +20,10 @@ namespace VoxelSystem
 		static readonly int[] negativeWinding = { 0, 2, 1, 0, 3, 2 };
 		static readonly GeneralDirection3D[] directions = DirectionUtility.generalDirection3DValues;
 
-		internal override void BeforeMeshGeneration(VoxelMap map, UniversalVoxelPalette palette, int voxelTypeIndex) => GenerateMeshesCache();
+		protected override void BeforeMeshGeneration(VoxelMap map, UniversalVoxelPalette palette, int voxelTypeIndex) =>
+			GenerateMeshesCache();
 
-		internal override void GenerateMeshData(
+		protected override void GenerateMeshData(
 			VoxelMap map,
 			List<Vector3Int> voxelPositions,
 			int voxelTypeIndex,
@@ -91,8 +94,15 @@ namespace VoxelSystem
 						if (voxelExists)
 						{
 							int neighbour = map.GetVoxel(ni);
-							if (neighbour.IsFilled()) continue;
+							if (drawBetweenVoxelChange)
+							{
+								if (neighbour == voxel) continue;
+							}
+							else if (neighbour.IsFilled()) continue;
 						}
+						else if (!drawOnMapEdge) continue;
+
+
 						allSides.Add(new CubeSide
 						{
 							direction = direction,

@@ -2,7 +2,7 @@ using MUtility;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
-using Unity.EditorCoroutines.Editor;
+// using Unity.EditorCoroutines.Editor;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -21,8 +21,7 @@ namespace VoxelSystem
 		[SerializeField] MeshFilter destinationMeshFilter;
 		[SerializeField] MeshCollider destinationMeshCollider;
 
-		[SerializeField] ChangeOn autoRegenerateMeshes = ChangeOn.Never;
-		[SerializeField, Min(0)] float regenDelay;
+		[SerializeField] bool autoRegenerateMeshes = true;
 		[SerializeField] DisplayMember regenerateMesh = new(nameof(RegenerateMeshes));
 		[SerializeField] DisplayMember createMeshFile = new(nameof(CreateMeshFile));
 
@@ -79,34 +78,11 @@ namespace VoxelSystem
 				voxelFilter.MapChanged += OnMapChanged;
 		}
 
-		EditorCoroutine _delayedGeneration = null;
-
 		void OnMapChanged(bool quick)
 		{
-			Debug.Log("!!!");
-
-			if (autoRegenerateMeshes == ChangeOn.Never) return;
-
-			if (_delayedGeneration != null)
-				EditorCoroutineUtility.StopCoroutine(_delayedGeneration);
-
-			if ((quick && autoRegenerateMeshes == ChangeOn.OnQuickChange) ||
-				autoRegenerateMeshes == ChangeOn.EveryChange)
-				RegenerateMeshes();
-
-			else if (!quick && autoRegenerateMeshes is ChangeOn.OnFinalChange)
-				_delayedGeneration = EditorCoroutineUtility.StartCoroutine(RegenerateMeshesAfterDelay(), this);
+			if (autoRegenerateMeshes)
+				RegenerateMeshes2(quick);
 		}
-
-		IEnumerator RegenerateMeshesAfterDelay()
-		{
-			float time = Time.realtimeSinceStartup;
-			while (Time.realtimeSinceStartup - time < regenDelay)
-				yield return null;
-			RegenerateMeshes();
-		}
-
-
 
 		void OnValidate()
 		{
@@ -136,12 +112,12 @@ namespace VoxelSystem
 		static readonly Dictionary<VoxelType, List<Vector3Int>> voxelsByType = new();
 
 		// Runs only once.
-		void BeforeMeshGeneration(VoxelMap map, UniversalVoxelPalette palette)
+		void BeforeMeshGeneration(VoxelMap map, UniversalVoxelPalette palette, bool quick)
 		{
 			for (int voxelTypeIndex = 0; voxelTypeIndex < palette.VoxelTypes.Count; voxelTypeIndex++)
 			{
-				UniversalVoxelPaletteItem item = palette.VoxelTypes[voxelTypeIndex];
-				item.BeforeMeshGeneration(map, palette, voxelTypeIndex);
+				UniversalVoxelBuilder item = palette.VoxelTypes[voxelTypeIndex];
+				item.BeforeMeshGeneration(map, palette, voxelTypeIndex, quick);
 			}
 
 			ClearDictionary(materialPalette.Count, voxelTypePalette.VoxelTypes.Count);
@@ -182,7 +158,8 @@ namespace VoxelSystem
 
 		// ----------------------------------------
 
-		public void RegenerateMeshes()
+		public void RegenerateMeshes() => RegenerateMeshes2(false);
+		public void RegenerateMeshes2(bool quick)
 		{
 			if (!isActiveAndEnabled)
 				return;
@@ -201,10 +178,10 @@ namespace VoxelSystem
 			benchmarkTimer?.StartModule("Clear Lists");
 
 			benchmarkTimer?.StartModule("Build Voxel Position Dictionary");
-			BeforeMeshGeneration(Map, voxelTypePalette);
+			BeforeMeshGeneration(Map, voxelTypePalette, quick);
 
 			benchmarkTimer?.StartModule("Calculate Vertex Data");
-			CalculateAllVertexData();
+			CalculateAllVertexData(quick);
 
 			if (destinationMesh == null)
 				destinationMesh = new() { name = voxelFilter.MapName };
@@ -246,7 +223,7 @@ namespace VoxelSystem
 				destinationMeshFilter.sharedMesh = destinationMesh;
 		}
 
-		void CalculateAllVertexData()
+		void CalculateAllVertexData(bool quick)
 		{
 			_vertices.Clear();
 			_normals.Clear();
@@ -259,9 +236,9 @@ namespace VoxelSystem
 			{
 				for (int voxelTypeIndex = 0; voxelTypeIndex < voxelTypePalette.VoxelTypes.Count; voxelTypeIndex++)
 				{
-					UniversalVoxelPaletteItem item = voxelTypePalette.VoxelTypes[voxelTypeIndex];
+					UniversalVoxelBuilder item = voxelTypePalette.VoxelTypes[voxelTypeIndex];
 					List<Vector3Int> voxelIndexes = voxelsByType[new VoxelType() { materialIndex = materialIndex, shapeIndex = voxelTypeIndex }];
-					item.GenerateMeshData(Map, voxelIndexes, voxelTypeIndex, _vertices, _normals, _uv, _triangles);
+					item.GenerateMeshData(Map, voxelIndexes, voxelTypeIndex, _vertices, _normals, _uv, _triangles, quick);
 
 				}
 				int triangleCount = _triangles.Count - _currentTriangleIndex;

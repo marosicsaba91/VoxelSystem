@@ -26,7 +26,7 @@ namespace VoxelSystem
 
 		// VoxelType Palette
 		int SelectedVoxelTypeIndex { get; set; } 
-		IReadOnlyList<UniversalVoxelPaletteItem> VoxelTypePaletteItems { get; }
+		IReadOnlyList<UniversalVoxelBuilder> VoxelTypePaletteItems { get; }
 		IPalette VoxelTypePalette { get; }
 
 		// VoxelValue
