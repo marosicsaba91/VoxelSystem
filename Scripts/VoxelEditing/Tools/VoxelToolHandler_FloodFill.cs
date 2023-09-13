@@ -46,7 +46,7 @@ namespace VoxelSystem
 			voxelEditor.RecordForUndo("FloodFill Voxel", RecordType.Map);
 
 			int voxel = map.GetVoxel(hit.voxelIndex);
-			if (voxel == voxelEditor.SelectedVoxelValue)
+			if (voxel == voxelEditor.SelectedVoxelValue && voxelEditor.SelectedAction != VoxelAction.Erase)
 				return MapChange.None;
 			if (voxel.IsEmpty() && voxelEditor.SelectedAction == VoxelAction.Erase)
 				return MapChange.None;
