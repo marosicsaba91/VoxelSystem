@@ -124,8 +124,8 @@ namespace VoxelSystem
 			VoxelEditor newEditor = newGO.AddComponent<VoxelEditor>();
 			newEditor.voxelFilter = newMapFilter;
 
-			foreach (VoxelMeshGenerator generator in newGO.GetComponents<VoxelMeshGenerator>())
-				newEditor.meshGenerator = generator.CreateACopy(newGO);
+			foreach (MeshGenerator generator in newGO.GetComponents<MeshGenerator>())
+				newEditor.universalMeshGenerator = generator.CreateACopy(newGO);
 
 #if UNITY_EDITOR
 			UnityEditor.Undo.RegisterCreatedObjectUndo(newGO, "VoxelMap Separated"); 

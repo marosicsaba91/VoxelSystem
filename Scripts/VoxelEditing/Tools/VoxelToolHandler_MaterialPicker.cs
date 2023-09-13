@@ -14,7 +14,7 @@ namespace VoxelSystem
 		{
 			int paletteIndex = voxelEditor.SelectedVoxelValue;
 			paletteIndex = Mathf.Clamp(paletteIndex, 0, voxelEditor.MaterialPalette.Count - 1);
-			Color color = voxelEditor.MaterialPaletteItems[paletteIndex].DisplayColor;
+			Color color = voxelEditor.MaterialPalette.PaletteItems[paletteIndex].DisplayColor;
 			base.OnDrawCursor(voxelEditor, color, hit);
 		}
 

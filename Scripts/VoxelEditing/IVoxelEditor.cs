@@ -20,13 +20,11 @@ namespace VoxelSystem
 		VoxelAction SelectedAction { get; set; }
 
 		// Material Palette
-		int SelectedMaterialIndex { get; set; } 
-		IReadOnlyList<MaterialSetup> MaterialPaletteItems { get; }
+		int SelectedMaterialIndex { get; set; }  
 		IPalette MaterialPalette { get; }
 
 		// VoxelType Palette
-		int SelectedVoxelTypeIndex { get; set; } 
-		IReadOnlyList<UniversalVoxelBuilder> VoxelTypePaletteItems { get; }
+		int SelectedVoxelTypeIndex { get; set; }  
 		IPalette VoxelTypePalette { get; }
 
 		// VoxelValue

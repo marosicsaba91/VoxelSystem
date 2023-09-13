@@ -21,17 +21,11 @@ namespace VoxelSystem
 	{
 		static VoxelAction selectedAction = VoxelAction.Attach;
 		static VoxelTool selectedTool = VoxelTool.None;
-		static ToolState toolState = ToolState.None;
-		// static int selectedMaterialIndex = 0;
-		// static int selectedVoxelTypeIndex = 0;
+		static ToolState toolState = ToolState.None; 
 		static int selectedVoxelValue = 0;
 
-		[SerializeField] MaterialPalette materialPalette;
-
 		[SerializeField, HideInInspector] internal VoxelObject voxelFilter;
-		[SerializeField, HideInInspector] internal VoxelMeshGenerator meshGenerator;
-		[SerializeField, HideInInspector] internal UniversalMeshGenerator universalMeshGenerator;
-		[SerializeField, HideInInspector] internal MeshRenderer meshRenderer;
+		[SerializeField, HideInInspector] internal MeshGenerator universalMeshGenerator; 
 		[SerializeField, HideInInspector] internal TransformLock transformLock = new();
 		[SerializeField, HideInInspector] internal BoundsInt selection = new(Vector3Int.zero, Vector3Int.one * -1);
 
@@ -53,31 +47,10 @@ namespace VoxelSystem
 			if (voxelFilter == null)
 				voxelFilter = GetComponent<VoxelObject>();
 
-			if (meshGenerator == null)
-				meshGenerator = GetComponent<VoxelMeshGenerator>();
-
 			if (universalMeshGenerator == null)
-				universalMeshGenerator = GetComponent<UniversalMeshGenerator>();
-
-			if (meshRenderer == null)
-				meshRenderer = GetComponent<MeshRenderer>();
-
-			FreshRendererMaterialPalette();
+				universalMeshGenerator = GetComponent<MeshGenerator>();
 		}
 
-		void FreshRendererMaterialPalette()
-		{
-			if (meshRenderer == null || materialPalette == null) return;
-
-			List<Material> materials = new();
-
-			for (int i = 0; i < materialPalette.Count; i++)
-				materials.Add(materialPalette[i].Material);
-
-			meshRenderer.SetMaterials(materials);
-		}
-
-		public IReadOnlyList<MaterialSetup> MaterialPaletteItems => materialPalette != null ? materialPalette.Materials : null;
 		public IPalette MaterialPalette => universalMeshGenerator.MaterialPalette;
 
 		public IPalette VoxelTypePalette => universalMeshGenerator.VoxelTypePalette;
@@ -109,9 +82,6 @@ namespace VoxelSystem
 		}
 
 		public int VoxelTypePaletteLength => throw new NotImplementedException();
-
-		public IReadOnlyList<UniversalVoxelBuilder> VoxelTypePaletteItems => throw new NotImplementedException();
-
 
 		// --------------------------------------
 		void Update()

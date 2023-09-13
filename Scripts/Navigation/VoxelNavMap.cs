@@ -10,6 +10,8 @@ namespace VoxelSystem
 	[ExecuteAlways]
 	public class VoxelNavMap : MonoBehaviour
 	{
+		enum ChangeOn { Never, OnQuickChange, OnFinalChange, EveryChange }
+
 		[SerializeField] VoxelObject voxelFilter;
 		[SerializeField] VoxelNavAgentSetting agentSetting;
 

@@ -55,7 +55,7 @@ namespace VoxelSystem
 			bool changed = false;
 			foreach (Vector3Int voxelI in chunk)
 				changed |= map.SetVoxel(voxelI, voxelEditor.SelectedAction, voxelEditor.SelectedVoxelValue);
-			return changed ? MapChange.Quick : MapChange.None;
+			return changed ? MapChange.Final : MapChange.None;
 		}
 
 	}

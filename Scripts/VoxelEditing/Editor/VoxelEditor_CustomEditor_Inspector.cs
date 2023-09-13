@@ -474,7 +474,7 @@ namespace VoxelSystem
 			rect.x += colorPickerWidth + _spacing;
 			rect.width = position.width - colorPickerWidth + _spacing;
 
-			if (selectedIndex > 0 && selectedIndex >= voxelEditor.MaterialPaletteItems.Count) 
+			if (selectedIndex > 0 && selectedIndex >= palette.Count) 
 			{
 				title.tooltip = "This index is over the palette's range!";
 				title.image = warningIcon;
