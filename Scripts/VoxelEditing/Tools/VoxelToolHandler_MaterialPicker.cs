@@ -32,6 +32,7 @@ namespace VoxelSystem
 
 		void Pick(IVoxelEditor voxelEditor, Vector3Int index)
 		{ 
+			Debug.Log(index);
 			voxelEditor.SelectedMaterialIndex = voxelEditor.Map.GetVoxel(index).GetMaterialIndex();
 		}
 	}

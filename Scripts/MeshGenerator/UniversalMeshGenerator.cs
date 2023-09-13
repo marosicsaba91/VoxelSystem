@@ -83,6 +83,8 @@ namespace VoxelSystem
 
 		void OnMapChanged(bool quick)
 		{
+			Debug.Log("!!!");
+
 			if (autoRegenerateMeshes == ChangeOn.Never) return;
 
 			if (_delayedGeneration != null)

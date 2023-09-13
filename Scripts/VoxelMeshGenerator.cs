@@ -74,6 +74,7 @@ namespace VoxelSystem
 		VoxelObject _lastFilter;
 		void Update()
 		{
+			Debug.Log(voxelFilter);
 			if (voxelFilter != null)
 			{
 				voxelFilter.MapChanged -= OnMapChanged;
@@ -97,7 +98,11 @@ namespace VoxelSystem
 
 			if ((quick && autoRegenerateMeshes == ChangeOn.OnQuickChange) ||
 				autoRegenerateMeshes == ChangeOn.EveryChange)
+			{
+				Debug.Log("!!!");
 				RegenerateMeshes();
+
+			}
 
 			else if (!quick && autoRegenerateMeshes is ChangeOn.OnFinalChange)
 				_delayedGeneration = EditorCoroutineUtility.StartCoroutine(RegenerateMeshesAfterDelay(), this);
