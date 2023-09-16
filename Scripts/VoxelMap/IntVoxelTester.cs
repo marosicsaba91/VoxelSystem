@@ -15,9 +15,9 @@ namespace VoxelSystem
 		[Space]
 		[SerializeField] string binaryValue;
 		[Space]
-		[SerializeField] bool isFilled;
-		[SerializeField] bool isFlipped;
 		[SerializeField] Vector3Int rotation;
+		[SerializeField] Flip fliping;
+		
 		[SerializeField] byte shapeIndex;
 		[SerializeField] byte materialIndex;
 
@@ -40,21 +40,19 @@ namespace VoxelSystem
 		int GetDecimalFromComposite()
 		{
 			int value = 0;
-
-			value.SetFilled(isFilled);
-			//string binary = Convert.ToString(value, 2).PadLeft(32, '0');
-			//Debug.Log($"value:  {isFilled}  {binary}");
-			value.SetFlipped(isFlipped);
-			value.SetRotation(rotation.x, rotation.y, rotation.z);
+			 
 			value.SetMaterialIndex(materialIndex);
-			value.SetVoxelTypeIndex(shapeIndex);
+			value.SetShapeIndex(shapeIndex);
+			value.SetFlip(fliping);
+			value.SetRotation(rotation.x, rotation.y, rotation.z);
 
 			return value;
 		}
 
-		int GetDecimalFromBinary(string binaryValue) 
+		int GetDecimalFromBinary(string binaryValue)
 		{
 			binaryValue = binaryValue.Replace(" ", "");
+			binaryValue = binaryValue.Replace("\t", "");
 
 			//Replace every character that is not 0 or 1 with 0
 			binaryValue = System.Text.RegularExpressions.Regex.Replace(binaryValue, "[^0-1]", "0");
@@ -75,13 +73,11 @@ namespace VoxelSystem
 
 			binaryValue = Convert.ToString(value, 2).PadLeft(32, '0');
 			binaryValue = System.Text.RegularExpressions.Regex.Replace(binaryValue, ".{8}", "$0\t");
-						
-			isFilled = value.IsFilled();
-			isFlipped = value.IsFlipped();
-			rotation = value.GetRotation();
-			shapeIndex = value.GetVoxelTypeIndex();
+
 			materialIndex = value.GetMaterialIndex();
-			
+			shapeIndex = value.GetShapeIndex();
+			fliping = value.GetFlip();
+			rotation = value.GetRotation();
 		}
 	}
 }

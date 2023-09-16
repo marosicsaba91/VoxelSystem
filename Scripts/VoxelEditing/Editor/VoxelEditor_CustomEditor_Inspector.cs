@@ -174,11 +174,13 @@ namespace VoxelSystem
 
 			DrawPalette(
 				voxelEditor,
-				voxelEditor.VoxelTypePalette,
-				voxelEditor.SelectedVoxelTypeIndex,
-				newSelectedIndex => voxelEditor.SelectedVoxelTypeIndex = newSelectedIndex,
-				VoxelTool.VoxelTypePicker,
-				new("Voxel Type Index:", "The selected index of the Voxel Type palette"));
+				voxelEditor.ShapePalette,
+				voxelEditor.SelectedShapeIndex,
+				newSelectedIndex => voxelEditor.SelectedShapeIndex = newSelectedIndex,
+				VoxelTool.ShapePicker,
+				new("Shape Index:", "The selected index of the Shape palette"));
+
+			DrawVoxelTransformation(voxelEditor);
 
 			serializedObject.ApplyModifiedProperties();
 		}
@@ -518,6 +520,33 @@ namespace VoxelSystem
 					voxelEditor.SelectedAction = VoxelAction.Attach;
 
 				onSelect(newValue);
+			}
+			GUI.color = Color.white;
+		}
+
+		void DrawVoxelTransformation(VoxelEditor voxelEditor) 
+		{  
+			int voxelValue = voxelEditor.SelectedVoxelValue;
+			Vector3Int rotation = voxelValue.GetRotation();
+			Flip flip = voxelValue.GetFlip();
+
+			bool enableFlip = voxelEditor.EnableFlip;
+			bool enableRotate = voxelEditor.EnableRotations;
+
+
+			if (enableRotate)
+				rotation = EditorGUILayout.Vector3IntField("Rotation", rotation);
+			if (enableFlip)
+				flip = (Flip)EditorGUILayout.EnumPopup("Flip", flip);
+
+			int newVoxelValue = voxelValue;
+			newVoxelValue.SetFlip(flip);
+			newVoxelValue.SetRotation(rotation);
+
+			if (newVoxelValue != voxelValue)
+			{
+				Undo.RecordObject(voxelEditor.EditorObject, "Selected Value Changed");
+				voxelEditor.SelectedVoxelValue = newVoxelValue;
 			}
 		}
 	}

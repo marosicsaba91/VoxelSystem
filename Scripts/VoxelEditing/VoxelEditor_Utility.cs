@@ -103,6 +103,9 @@ namespace VoxelSystem
 			return size.x >= 0 && size.y >= 0 && size.z >= 0;
 		}
 
+		public static Vector3Int GetMapOrSelectionSize(this IVoxelEditor editor) =>
+			editor.HasSelection() ? editor.Selection.size : editor.Map.FullSize;
+
 		public static void Deselect(this IVoxelEditor editor) =>
 			editor.Selection = new BoundsInt(Vector3Int.zero, Vector3Int.one * -1);
 
@@ -125,7 +128,7 @@ namespace VoxelSystem
 			newEditor.voxelFilter = newMapFilter;
 
 			foreach (MeshGenerator generator in newGO.GetComponents<MeshGenerator>())
-				newEditor.universalMeshGenerator = generator.CreateACopy(newGO);
+				newEditor.meshGenerator = generator.CreateACopy(newGO);
 
 #if UNITY_EDITOR
 			UnityEditor.Undo.RegisterCreatedObjectUndo(newGO, "VoxelMap Separated"); 

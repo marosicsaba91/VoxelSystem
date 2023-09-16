@@ -5,7 +5,7 @@ using UnityEngine;
 namespace VoxelSystem
 {
 	[CreateAssetMenu(fileName = "Cube Voxel", menuName = "Voxel System/Cube Voxel")]
-	public class CubeVoxel : UniversalVoxelBuilder
+	public class CubeVoxel : VoxelShape
 	{
 		[SerializeField] bool drawOnMapEdge = true;
 		[SerializeField] bool drawBetweenVoxelChange = false;
@@ -20,23 +20,7 @@ namespace VoxelSystem
 		static readonly int[] negativeWinding = { 0, 2, 1, 0, 3, 2 };
 		static readonly GeneralDirection3D[] directions = DirectionUtility.generalDirection3DValues;
 
-		protected override void BeforeMeshGeneration(VoxelMap map, VoxelPalette palette, int voxelTypeIndex) =>
-			GenerateMeshesCache();
-
-		protected override void GenerateMeshData(
-			VoxelMap map,
-			List<Vector3Int> voxelPositions,
-			int voxelTypeIndex,
-			List<Vector3> vertices,
-			List<Vector3> normals,
-			List<Vector2> uv,
-			List<int> triangles)
-		{
-			GenerateSideList(map, voxelPositions, voxelTypeIndex);
-			UpdateMeshData(vertices, normals, uv, triangles);
-		}
-
-		void GenerateMeshesCache()
+		protected override void BeforeMeshGeneration(VoxelMap map, VoxelShapePalette palette, int shapeIndex) 
 		{
 			GeneralDirection3D[] directions = DirectionUtility.generalDirection3DValues;
 			for (int dirIndex = 0; dirIndex < directions.Length; dirIndex++)
@@ -70,7 +54,21 @@ namespace VoxelSystem
 				sideMeshCache.AddOrChangeValue(direction, customMesh);
 			}
 		}
-		void GenerateSideList(VoxelMap map, List<Vector3Int> voxelIndices, int voxelTypeIndex)
+
+		protected override void GenerateMeshData(
+			VoxelMap map,
+			List<Vector3Int> voxelPositions,
+			int shapeIndex,
+			List<Vector3> vertices,
+			List<Vector3> normals,
+			List<Vector2> uv,
+			List<int> triangles)
+		{
+			GenerateSideList(map, voxelPositions, shapeIndex);
+			UpdateMeshData(vertices, normals, uv, triangles);
+		}
+
+		void GenerateSideList(VoxelMap map, List<Vector3Int> voxelIndices, int shapeIndex)
 		{
 			allSides.Clear();
 			Vector3Int mapSize = map.FullSize;
@@ -80,7 +78,7 @@ namespace VoxelSystem
 				int voxel = map.GetVoxel(voxelIndex);
 
 				if (voxel.IsEmpty()) continue;
-				if (voxel.GetVoxelTypeIndex() != voxelTypeIndex) continue;
+				if (voxel.GetShapeIndex() != shapeIndex) continue;
 
 				int materialIndex = voxel.GetMaterialIndex();
 
@@ -113,6 +111,7 @@ namespace VoxelSystem
 				}
 			}
 		}
+
 		void UpdateMeshData(List<Vector3> vertices, List<Vector3> normals, List<Vector2> uv, List<int> triangles)
 		{
 			int vertexIndex = vertices.Count;
@@ -137,7 +136,6 @@ namespace VoxelSystem
 				vertexIndex += 4;
 			}
 		}
-
 	}
 
 	struct CubeSide

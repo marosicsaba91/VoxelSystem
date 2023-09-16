@@ -329,27 +329,27 @@ namespace VoxelSystem
 
 		// ------------------ Static Methods -----------------------------
 
-		protected static bool IsMapSideVisible(IVoxelEditor voxelEditor, Vector3 size, GeneralDirection3D side)
+		protected static bool IsMapSideVisible(IVoxelEditor voxelEditor, Vector3 size, GeneralDirection3D side, float angleAllowed = 5)
 		{
-			// TODO: Simplify 
-			Vector3 sideNormal = side.ToVectorInt();
-			Vector3 halfSize = new(size.x / 2f, size.y / 2f, size.z / 2f);
-			Vector3 halfNormalInSize = new(halfSize.x * sideNormal.x, halfSize.y * sideNormal.y, halfSize.z * sideNormal.z);
+			Vector3 direction = side.ToVectorInt();
+			Vector3 halfSize = size / 2f;
+			Vector3 halfNormalInSize = direction.MultiplyAllAxis(halfSize);
 			Vector3 planeOrigin = halfSize + halfNormalInSize;
 
 			// Transform points
-			sideNormal = voxelEditor.transform.TransformDirection(sideNormal);
+			direction = voxelEditor.transform.TransformDirection(direction);
 			planeOrigin = voxelEditor.transform.TransformPoint(planeOrigin);
 
 			Camera cam = Camera.current;
+
 			Vector3 cameraDir =
 					cam.orthographic ?
 					cam.transform.forward :
 					planeOrigin - cam.transform.position;
-			float angle = Vector3.Angle(cameraDir, sideNormal);
 
-			const float epsilon = 0.1f;
-			return angle > 90 - epsilon;
+			float angle = Vector3.Angle(cameraDir, direction);
+			 
+			return angle > 90 - angleAllowed;
 		}
 
 		protected static void Translate(IVoxelEditor voxelEditor, GeneralDirection3D direction, int steps)

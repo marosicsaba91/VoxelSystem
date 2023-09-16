@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83706a07632c8604aa59abd921143d3f, type: 3}
+  m_Name: Block Fill Between
+  m_EditorClassIdentifier: 
+  niceName: Fill
+  color: {r: 0.4371557, g: 0.8490566, b: 0.3724635, a: 1}
+  simpleVersion: {fileID: 11400000, guid: b9086327e93f7ff41bb9063fd9f17659, type: 2}
+  mergeCloseEdges: 1
+  connectionOnMapEdge: 0
+  drawBetweenVoxelChange: 1
+  blockLibrary: {fileID: 11400000, guid: 4c24023c5defe25419efcfad6000ab4b, type: 2}

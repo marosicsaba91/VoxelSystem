@@ -25,3 +25,7 @@ MonoBehaviour:
     displayName: White Brick
     displayColor: {r: 0.6603774, g: 0.62371916, b: 0.5762727, a: 1}
     displayTexture: {fileID: 2800000, guid: ba244eee18f6fe04b86d39046f8a2c2f, type: 3}
+  - material: {fileID: 2100000, guid: 3239dc0c1cbd8124d97a9ada770d8391, type: 2}
+    displayName: Yellow
+    displayColor: {r: 1, g: 0.7365496, b: 0.2216981, a: 1}
+    displayTexture: {fileID: 0}

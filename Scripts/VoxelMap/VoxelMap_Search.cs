@@ -94,7 +94,7 @@ namespace VoxelSystem
 						int nextVoxel = map.GetVoxel(nextIndex);
 						bool isDifferent = sameColorOnly
 							? nextVoxel != searchValue
-							: nextVoxel.IsFilled() != searchValue.IsFilled();
+							: nextVoxel.GetFlip() != searchValue.GetFlip();
 
 						if (isDifferent)
 						{

@@ -10,7 +10,8 @@ namespace VoxelSystem
 		{
 			// Try Find the entry point
 			if (FindEntryPointToVoxelMap(localRay, out VoxelHit voxelMapEntry, FullSize))
-				return RaycastInside(voxelMapEntry, out hit, localRay.direction, this, returnOutsideVoxel);
+				return RaycastInside(voxelMapEntry, out hit, localRay, this, returnOutsideVoxel);
+
 
 			hit = default;
 			return false;
@@ -72,9 +73,10 @@ namespace VoxelSystem
 
 		static bool RaycastInside(
 			VoxelHit entry, out VoxelHit hit,
-			Vector3 rayDirection, ArrayVoxelMap map,
+			Ray ray, ArrayVoxelMap map,
 			bool returnOutsideVoxel)
-		{			 
+		{
+			Vector3 rayDirection = ray.direction;
 			Vector3Int voxelIndex = entry.voxelIndex;
 			
 			if (!map.IsValidCoord(voxelIndex))
@@ -83,8 +85,8 @@ namespace VoxelSystem
 				return false;
 			}
 
-			if (map.GetVoxel(voxelIndex).IsFilled())
-			{
+			if (map.GetVoxel(voxelIndex).IsFilled() && IsBeforeOrigin(ray, voxelIndex))
+			{ 
 				hit = entry;
 				return true;
 			}
@@ -146,7 +148,7 @@ namespace VoxelSystem
 					return true;
 				}
 
-				if (map.GetVoxel(lastFoundVoxel.x, lastFoundVoxel.y, lastFoundVoxel.z).IsFilled())
+				if (map.GetVoxel(lastFoundVoxel).IsFilled() && IsBeforeOrigin(ray, lastFoundVoxel))
 				{
 					cursor.voxelIndex = returnOutsideVoxel ? cursor.voxelIndex : cursor.voxelIndex + cursor.side.ToVectorInt();
 					cursor.side = returnOutsideVoxel ? cursor.side : cursor.side.Opposite();
@@ -159,6 +161,12 @@ namespace VoxelSystem
 			hit = default;
 			return false;
 
+		}
+
+		static bool IsBeforeOrigin(Ray ray, Vector3 point) 
+		{
+			Vector3 originToPoint = point - ray.origin;
+			return Vector3.Dot(ray.direction, originToPoint) > 0;		
 		}
 
 		static int Ceil(float f)

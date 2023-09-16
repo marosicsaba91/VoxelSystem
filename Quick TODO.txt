@@ -1,11 +1,9 @@
-Raycast Problems
+Prevent to Delete Non Visible Information
+	No Data On Empty,
+	No Transformes Cube & Block Shapes
 
------- PALETTE SUPPORT -------
+Material Only Action
 
------- NEW TOOLS -------
-
-Face Tool
-Brush Tool
-Flood Fill
-
------- BETTER BLOCK Library & LibraryEditor SUPORT -------
+Physical Shape of a Voxel
+	-> Collider
+	-> Mesh

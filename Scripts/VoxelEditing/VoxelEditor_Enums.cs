@@ -12,7 +12,7 @@ namespace VoxelSystem
 		Repaint,   // Set all NON-EMPTY voxels to fix Value
 	}
 
-	public enum VoxelTool { None, Box, Face, FloodFill, Move, Turn, Resize, Mirror, Repeat, ResizeCanvas, Select, MaterialPicker, VoxelTypePicker }
+	public enum VoxelTool { None, Box, Face, FloodFill, Move, Turn, Resize, Mirror, Repeat, ResizeCanvas, Select, MaterialPicker, ShapePicker }
 
 	public static class VoxelEditor_EnumHelper
 	{
@@ -62,7 +62,7 @@ namespace VoxelSystem
 				VoxelTool.ResizeCanvas => typeof(VoxelToolHandler_ResizeCanvas),
 				VoxelTool.FloodFill => typeof(VoxelToolHandler_FloodFill),
 				VoxelTool.MaterialPicker => typeof(VoxelToolHandler_MaterialPicker),
-				VoxelTool.VoxelTypePicker => typeof(VoxelToolHandler_VoxelTypePicker),
+				VoxelTool.ShapePicker => typeof(VoxelToolHandler_VoxelShapePicker),
 				_ => throw new ArgumentOutOfRangeException($"No handler for tool: {nameof(tool)}", tool, null)
 			};
 

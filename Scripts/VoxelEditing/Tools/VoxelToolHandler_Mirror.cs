@@ -9,12 +9,12 @@ namespace VoxelSystem
 		public override VoxelAction[] GetSupportedActions(IVoxelEditor voxelEditor) => GetTransformActions(voxelEditor);
 
 		protected override IEnumerable<VoxelHandelInfo> GetHandeles(IVoxelEditor voxelEditor)
-		{ 
-			Vector3Int mapSize = voxelEditor.Map.FullSize;
+		{
+			Vector3Int size = voxelEditor.GetMapOrSelectionSize();
 			for (int i = 0; i < DirectionUtility.generalDirection3DValues.Length; i++)
 			{
 				GeneralDirection3D side = DirectionUtility.generalDirection3DValues[i];
-				if (!IsMapSideVisible(voxelEditor, mapSize, side)) continue;
+				if (!IsMapSideVisible(voxelEditor, size, side)) continue;
 				 
 				Vector3 position = GetMapSidePosition(voxelEditor, side);
 

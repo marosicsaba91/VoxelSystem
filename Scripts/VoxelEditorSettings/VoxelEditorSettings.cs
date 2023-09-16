@@ -96,7 +96,7 @@ internal class VoxelEditorSettings : ScriptableObject
 		VoxelTool.Repeat => repeatVoxelToolIcon,
 		VoxelTool.ResizeCanvas => resizeCanvasVoxelToolIcon,
 		VoxelTool.MaterialPicker => colorPickerVoxelToolIcon,
-		VoxelTool.VoxelTypePicker => colorPickerVoxelToolIcon,
+		VoxelTool.ShapePicker => colorPickerVoxelToolIcon,
 		VoxelTool.Select => selectVoxelToolIcon,
 
 		VoxelTool.Box => overWriteBoxVoxelToolIcon,
@@ -166,7 +166,7 @@ internal class VoxelEditorSettings : ScriptableObject
 
 		VoxelTool.ResizeCanvas => resizeCanvasVoxelToolIcon,
 		VoxelTool.MaterialPicker => colorPickerVoxelToolIcon,
-		VoxelTool.VoxelTypePicker => colorPickerVoxelToolIcon,
+		VoxelTool.ShapePicker => colorPickerVoxelToolIcon,
 		VoxelTool.Select => selectVoxelToolIcon,
 		VoxelTool.None => null,
 		_ => null,

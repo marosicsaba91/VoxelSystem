@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System;
 using Object = UnityEngine.Object;
-using System.Collections.Generic;
 
 namespace VoxelSystem
 {
@@ -21,11 +20,11 @@ namespace VoxelSystem
 	{
 		static VoxelAction selectedAction = VoxelAction.Attach;
 		static VoxelTool selectedTool = VoxelTool.None;
-		static ToolState toolState = ToolState.None; 
+		static ToolState toolState = ToolState.None;
 		static int selectedVoxelValue = 0;
 
 		[SerializeField, HideInInspector] internal VoxelObject voxelFilter;
-		[SerializeField, HideInInspector] internal MeshGenerator universalMeshGenerator; 
+		[SerializeField, HideInInspector] internal MeshGenerator meshGenerator;
 		[SerializeField, HideInInspector] internal TransformLock transformLock = new();
 		[SerializeField, HideInInspector] internal BoundsInt selection = new(Vector3Int.zero, Vector3Int.one * -1);
 
@@ -47,13 +46,13 @@ namespace VoxelSystem
 			if (voxelFilter == null)
 				voxelFilter = GetComponent<VoxelObject>();
 
-			if (universalMeshGenerator == null)
-				universalMeshGenerator = GetComponent<MeshGenerator>();
+			if (meshGenerator == null)
+				meshGenerator = GetComponent<MeshGenerator>();
 		}
 
-		public IPalette MaterialPalette => universalMeshGenerator.MaterialPalette;
+		public IPalette MaterialPalette => meshGenerator.MaterialPalette;
 
-		public IPalette VoxelTypePalette => universalMeshGenerator.VoxelTypePalette;
+		public IPalette ShapePalette => meshGenerator.ShapePalette;
 
 		public string MapName => voxelFilter == null ? "-" : voxelFilter.MapName;
 		public VoxelTool SelectedTool { get => selectedTool; set => selectedTool = value; }
@@ -64,7 +63,11 @@ namespace VoxelSystem
 			set => toolState = value;
 		}
 
-		public int SelectedVoxelValue => selectedVoxelValue;
+		public int SelectedVoxelValue
+		{
+			get => selectedVoxelValue;
+			set => selectedVoxelValue = value;
+		}
 
 		// --- Material Palette ---
 		public int SelectedMaterialIndex
@@ -73,15 +76,82 @@ namespace VoxelSystem
 			set => selectedVoxelValue.SetMaterialIndex((byte)value);
 		}
 
-		// --- VoxelType Palette ---
-
-		public int SelectedVoxelTypeIndex
+		public MaterialSetup SelectedMaterial
 		{
-			get => selectedVoxelValue.GetVoxelTypeIndex();
-			set => selectedVoxelValue.SetVoxelTypeIndex((byte)value);
+			get
+			{
+				if (meshGenerator == null) return null;
+				if (meshGenerator.MaterialPalette == null) return null;
+				return meshGenerator.MaterialPalette.Materials[SelectedMaterialIndex];
+			}
 		}
 
-		public int VoxelTypePaletteLength => throw new NotImplementedException();
+		// --- Shape Palette ---
+		public int SelectedShapeIndex
+		{
+			get => selectedVoxelValue.GetShapeIndex();
+			set => selectedVoxelValue.SetShapeIndex((byte)value);
+		}
+		VoxelShape SelectedVoxelShape
+		{
+			get
+			{
+				if (meshGenerator == null) return null;
+				if (meshGenerator.ShapePalette == null) return null;
+				return meshGenerator.ShapePalette.Shapes[SelectedShapeIndex];
+			}
+		}
+
+		public int ShapePaletteLength => throw new NotImplementedException();
+
+		public Flip GetFlipped
+		{
+			get => selectedVoxelValue.GetFlip();
+			internal set => selectedVoxelValue.SetFlip(value);
+		}
+
+		public Vector3Int VoxelRotation
+		{
+			get => selectedVoxelValue.GetRotation();
+			internal set => selectedVoxelValue.SetRotation(value);
+		}
+
+		public bool EnableFlip
+		{
+			get
+			{
+				VoxelShape selectedVoxelShape = SelectedVoxelShape;
+				if (selectedVoxelShape == null)
+					return false;
+				return selectedVoxelShape.IsFlipEnabled;
+			}
+
+			internal set
+			{
+				VoxelShape selectedShape = SelectedVoxelShape;
+				if (selectedShape != null)
+					SelectedVoxelShape.IsFlipEnabled = value;
+			}
+		}
+
+		public bool EnableRotations
+		{
+			get
+			{
+				VoxelShape selectedShape = SelectedVoxelShape;
+				if (selectedShape == null)
+					return false;
+
+				return SelectedVoxelShape.IsRotationEnabled;
+			}
+
+			internal set
+			{
+				VoxelShape selectedVoxelBuilder = SelectedVoxelShape;
+				if (selectedVoxelBuilder != null)
+					SelectedVoxelShape.IsRotationEnabled = value;
+			}
+		}
 
 		// --------------------------------------
 		void Update()

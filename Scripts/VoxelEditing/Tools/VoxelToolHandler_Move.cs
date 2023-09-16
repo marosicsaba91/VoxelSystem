@@ -13,11 +13,11 @@ namespace VoxelSystem
 
 		protected override IEnumerable<VoxelHandelInfo> GetHandeles(IVoxelEditor voxelEditor)
 		{
-			Vector3Int mapSize = voxelEditor.Map.FullSize;
+			Vector3Int size = voxelEditor.GetMapOrSelectionSize();
 			for (int i = 0; i < DirectionUtility.generalDirection3DValues.Length; i++)
 			{
 				GeneralDirection3D side = DirectionUtility.generalDirection3DValues[i];
-				if (!IsMapSideVisible(voxelEditor, mapSize, side)) continue;
+				if (!IsMapSideVisible(voxelEditor, size, side)) continue;
 				Vector3 position = GetMapSidePosition(voxelEditor, side);
 
 				string text = voxelEditor.HasSelection() ? null :
@@ -61,6 +61,7 @@ namespace VoxelSystem
 			Vector3Int offset = direction.ToVectorInt() * steps;
 			offset = Vector3Int.Max(offset, Vector3Int.zero - selection.min);
 			offset = Vector3Int.Min(offset, originalMapSize - selection.max);
+
 			if (offset == _lastOffset)
 				return MapChange.None;
 

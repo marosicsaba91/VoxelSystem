@@ -71,7 +71,6 @@ namespace VoxelSystem
 			HandleUtility.AddDefaultControl(GUIUtility.GetControlID(FocusType.Passive));
 			VoxelToolHandler hander = editor.SelectedTool.GetHandler();
 			Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
-			// Debug.Log(guiEvent.type);
 			hander?.ExecuteEditorControl(editor, guiEvent, ray);
 
 		}
@@ -85,7 +84,7 @@ namespace VoxelSystem
 			}
 			else if (guiEvent.keyCode.TryGetValue(out number))
 			{
-				editor.SelectedVoxelTypeIndex = number;
+				editor.SelectedShapeIndex = number;
 				guiEvent.Use();
 			}
 

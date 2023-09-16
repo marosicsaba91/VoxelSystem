@@ -1,6 +1,7 @@
 using MUtility;
+using System;
 using System.Collections.Generic;
-using TMPro; 
+using TMPro;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -11,7 +12,7 @@ namespace VoxelSystem
 	public class MeshGenerator : MonoBehaviour
 	{
 		[SerializeField] MaterialPalette materialPalette;
-		[SerializeField] VoxelPalette voxelTypePalette;
+		[SerializeField] VoxelShapePalette shapePalette;
 
 		[SerializeField, HideInInspector] VoxelObject voxelFilter;
 
@@ -21,7 +22,7 @@ namespace VoxelSystem
 		[SerializeField] MeshCollider destinationMeshCollider;
 
 		[SerializeField] bool autoRegenerateMeshes = true;
-		[SerializeField] DisplayMember regenerateMesh = new(nameof(RegenerateMeshes));
+		[SerializeField] DisplayMember regenerateMesh = new(nameof(RegenerateMeshesFull));
 		[SerializeField] DisplayMember createMeshFile = new(nameof(CreateMeshFile));
 
 		[SerializeField] bool doBenchmark;
@@ -29,14 +30,14 @@ namespace VoxelSystem
 
 		VoxelMap Map => voxelFilter == null ? null : voxelFilter.GetVoxelMap();
 
-		public IPalette MaterialPalette => materialPalette;
-		public IPalette VoxelTypePalette => voxelTypePalette;
+		public MaterialPalette MaterialPalette => materialPalette;
+		public VoxelShapePalette ShapePalette => shapePalette;
 
 		public void CreateMeshFile()
 		{
 #if UNITY_EDITOR
 			if (destinationMesh == null)
-				RegenerateMeshes();
+				RegenerateMeshesFull();
 
 			string path = UnityEditor.EditorUtility.SaveFilePanel(
 				"Save Voxel Mesh",
@@ -70,6 +71,12 @@ namespace VoxelSystem
 			}
 
 			FreshRendererMaterialPalette();
+
+			//Get GUID of the shape palette
+
+			//Get GUID of the material palette
+
+			Guid guid = Guid.NewGuid();
 		}
 
 		void Start()
@@ -94,7 +101,7 @@ namespace VoxelSystem
 		void OnMapChanged(bool quick)
 		{
 			if (autoRegenerateMeshes)
-				RegenerateMeshes2(quick);
+				RegenerateMeshes(quick);
 		}
 
 		void OnValidate()
@@ -116,36 +123,39 @@ namespace VoxelSystem
 
 		const int vertexLimitOf16Bit = 65536;
 
-		struct VoxelType
+		struct VoxelInfo
 		{
 			public int materialIndex;
 			public int shapeIndex;
 		}
 
-		static readonly Dictionary<VoxelType, List<Vector3Int>> voxelsByType = new();
+		static readonly Dictionary<VoxelInfo, List<Vector3Int>> voxelsByType = new();
+
+
+
 
 		// Runs only once.
-		void BeforeMeshGeneration(VoxelMap map, VoxelPalette palette, bool quick)
+		void BeforeMeshGeneration(VoxelMap map, VoxelShapePalette palette, bool quick)
 		{
-			for (int voxelTypeIndex = 0; voxelTypeIndex < palette.VoxelTypes.Count; voxelTypeIndex++)
+			for (int shapeIndex = 0; shapeIndex < palette.Shapes.Count; shapeIndex++)
 			{
-				UniversalVoxelBuilder item = palette.VoxelTypes[voxelTypeIndex];
-				item.BeforeMeshGeneration(map, palette, voxelTypeIndex, quick);
+				VoxelShape item = palette.Shapes[shapeIndex];
+				item.BeforeMeshGeneration(map, palette, shapeIndex, quick);
 			}
 
-			ClearDictionary(materialPalette.Count, voxelTypePalette.VoxelTypes.Count);
+			ClearDictionary(materialPalette.Count, shapePalette.Shapes.Count);
 			BuildVoxelPositionDictionary(map);
 		}
 
-		void ClearDictionary(int materialCount, int voxelTypeCount)
+		void ClearDictionary(int materialCount, int shapeCount)
 		{
-			for (int i = 0; i < voxelTypeCount; i++)
+			for (int i = 0; i < shapeCount; i++)
 				for (int j = 0; j < materialCount; j++)
 				{
-					if (voxelsByType.TryGetValue(new VoxelType() { materialIndex = j, shapeIndex = i }, out List<Vector3Int> list))
+					if (voxelsByType.TryGetValue(new VoxelInfo() { materialIndex = j, shapeIndex = i }, out List<Vector3Int> list))
 						list.Clear();
 					else
-						voxelsByType.Add(new VoxelType() { materialIndex = j, shapeIndex = i }, new List<Vector3Int>());
+						voxelsByType.Add(new VoxelInfo() { materialIndex = j, shapeIndex = i }, new List<Vector3Int>());
 				}
 		}
 
@@ -160,26 +170,26 @@ namespace VoxelSystem
 
 						if (voxel.IsEmpty()) continue;
 
-						int shapeIndex = voxel.GetVoxelTypeIndex();
+						int shapeIndex = voxel.GetShapeIndex();
 						int materialIndex = voxel.GetMaterialIndex();
 
-						VoxelType voxelType = new() { materialIndex = materialIndex, shapeIndex = shapeIndex };
+						VoxelInfo voxelInfo = new() { materialIndex = materialIndex, shapeIndex = shapeIndex };
 
-						voxelsByType[voxelType].Add(new Vector3Int(x, y, z));
+						voxelsByType[voxelInfo].Add(new Vector3Int(x, y, z));
 					}
 		}
 
 		// ----------------------------------------
 
-		public void RegenerateMeshes() => RegenerateMeshes2(false);
-		public void RegenerateMeshes2(bool quick)
+		public void RegenerateMeshesFull() => RegenerateMeshes(false);
+		public void RegenerateMeshes(bool quick)
 		{
 			if (!isActiveAndEnabled)
 				return;
 
 			if (materialPalette == null)
 			{
-				Debug.LogWarning("Material palette is null. Please assign a material palette to the UniversalMeshGenerator component.");
+				Debug.LogWarning("Material palette is null. Please assign a material palette to the MeshGenerator component.");
 				return;
 			}
 
@@ -191,7 +201,7 @@ namespace VoxelSystem
 			benchmarkTimer?.StartModule("Clear Lists");
 
 			benchmarkTimer?.StartModule("Build Voxel Position Dictionary");
-			BeforeMeshGeneration(Map, voxelTypePalette, quick);
+			BeforeMeshGeneration(Map, shapePalette, quick);
 
 			benchmarkTimer?.StartModule("Calculate Vertex Data");
 			CalculateAllVertexData(quick);
@@ -247,11 +257,11 @@ namespace VoxelSystem
 			int _currentTriangleIndex = 0;
 			for (int materialIndex = 0; materialIndex < materialPalette.Count; materialIndex++)
 			{
-				for (int voxelTypeIndex = 0; voxelTypeIndex < voxelTypePalette.VoxelTypes.Count; voxelTypeIndex++)
+				for (int shapeIndex = 0; shapeIndex < shapePalette.Shapes.Count; shapeIndex++)
 				{
-					UniversalVoxelBuilder item = voxelTypePalette.VoxelTypes[voxelTypeIndex];
-					List<Vector3Int> voxelIndexes = voxelsByType[new VoxelType() { materialIndex = materialIndex, shapeIndex = voxelTypeIndex }];
-					item.GenerateMeshData(Map, voxelIndexes, voxelTypeIndex, _vertices, _normals, _uv, _triangles, quick);
+					VoxelShape item = shapePalette.Shapes[shapeIndex];
+					List<Vector3Int> voxelIndexes = voxelsByType[new VoxelInfo() { materialIndex = materialIndex, shapeIndex = shapeIndex }];
+					item.GenerateMeshData(Map, voxelIndexes, shapeIndex, _vertices, _normals, _uv, _triangles, quick);
 
 				}
 				int triangleCount = _triangles.Count - _currentTriangleIndex;
@@ -264,7 +274,7 @@ namespace VoxelSystem
 		{
 			MeshGenerator newGen = go.AddComponent<MeshGenerator>();
 			newGen.materialPalette = materialPalette;
-			newGen.voxelTypePalette = voxelTypePalette;
+			newGen.shapePalette = shapePalette;
 
 			return newGen;
 		}
@@ -273,7 +283,7 @@ namespace VoxelSystem
 		{
 			MeshGenerator generator = newGO.AddComponent<MeshGenerator>();
 			generator.materialPalette = materialPalette;
-			generator.voxelTypePalette = voxelTypePalette;
+			generator.shapePalette = shapePalette;
 
 			generator.destinationMesh = destinationMesh;
 
