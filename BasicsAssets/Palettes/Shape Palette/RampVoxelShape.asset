@@ -1,0 +1,90 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 316e6f6508abc044c81adfbb109e0fa9, type: 3}
+  m_Name: RampVoxelShape
+  m_EditorClassIdentifier: 
+  niceName: TestRamp
+  color: {r: 0, g: 0, b: 0, a: 0}
+  previewMaterial: {fileID: -3661639628750336703, guid: 7e0223e1d3e1733499accfa5ebffb67e,
+    type: 3}
+  meshPreview:
+    textureSize: {x: 200, y: 200}
+    materials:
+    - {fileID: -3661639628750336703, guid: 7e0223e1d3e1733499accfa5ebffb67e, type: 3}
+    backgroundType: 1
+    backgroundColor: {r: 0, g: 0, b: 0, a: 0}
+    cameraAngle: {x: -387.1295, y: 4.2999916}
+    lightAngle: {x: 45, y: 55}
+    rotateMesh: {x: 0, y: 0, z: 0, w: 0}
+    fieldOfView: 30
+    zoom: 0.94000006
+    isExpandable: 0
+    areChangesLogged: 0
+    previewTexture: {fileID: 0}
+  quickVersion: {fileID: 0}
+  rampShape:
+    isNodeSet: 000100000000000100
+    heightMap:
+    - 0
+    - 0
+    - 0
+    - 0.5
+    - 0.5
+    - 0.5
+    - 1
+    - 1
+    - 1
+  uvCoordinates:
+    gridSize: 1
+    right: {x: 0, y: 0}
+    left: {x: 0, y: 0}
+    top: {x: 0, y: 0}
+    bottom: {x: 0, y: 0}
+    front: {x: 0, y: 0}
+    back: {x: 0, y: 0}
+    rightRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    leftRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    topRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    bottomRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    frontRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    backRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+  sides: []

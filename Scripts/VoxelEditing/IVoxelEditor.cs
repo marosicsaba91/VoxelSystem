@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using MUtility;
+using UnityEngine;
 
 namespace VoxelSystem
 {
@@ -6,28 +7,30 @@ namespace VoxelSystem
 	{
 		Object MapContainer { get; }
 		Object EditorObject { get; }
-		Transform transform { get; }
+
+		Transform Transform { get; }
 
 		// Map
 		VoxelMap Map { get; }
 		string MapName { get; }
 
 		// Edit
-		bool EnableEdit { get; }
 		TransformLock TransformLock { get; set; }
 		VoxelTool SelectedTool { get; set; }
 		VoxelAction SelectedAction { get; set; }
 
 		// Material Palette
 		int SelectedMaterialIndex { get; set; }  
-		IPalette MaterialPalette { get; }
+		MaterialPalette MaterialPalette { get; }
 
 		// Shape Palette
 		int SelectedShapeIndex { get; set; }  
-		IPalette ShapePalette { get; }
+		VoxelShapePalette ShapePalette { get; }
 
 		// VoxelValue
 		int SelectedVoxelValue { get; set; }
+		Flip3D SelectedFlip { get; set; }
+		Vector3Int SelectedRotation { get; set; }
 
 		// Selection
 		BoundsInt Selection { get; set; }

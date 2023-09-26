@@ -29,7 +29,7 @@ namespace VoxelSystem
 				Drawable side = GetDrawableVoxelSide(lastValidHit);
 				Draw(side, actionColor);
 
-				voxelEditor.Map.SearchPlane(_originalSide, hit.voxelIndex, hit.side, voxelEditor.SelectedAction == VoxelAction.Repaint);
+				voxelEditor.Map.SearchPlane(_originalSide, hit.voxelIndex, hit.side, voxelEditor.SelectedAction.GetEqualityTestFunction());
 			}
 
 			Drawable d = VoxelMap_DrawingUtilities.GetContourDrawable(_originalSide);
@@ -63,7 +63,7 @@ namespace VoxelSystem
 			// if (voxelEditor.Map.GetVoxel(hit.voxelIndex) == IntVoxelUtility.emptyValue)
 			//	return false;
 
-			voxelEditor.Map.SearchPlane(_originalSide, hit.voxelIndex, hit.side, voxelEditor.SelectedAction == VoxelAction.Repaint);
+			voxelEditor.Map.SearchPlane(_originalSide, hit.voxelIndex, hit.side, voxelEditor.SelectedAction.GetEqualityTestFunction());
 			surfaceDirection = hit.side;
 			surfaceNormal = hit.side.ToVectorInt();
 			 
@@ -121,11 +121,11 @@ namespace VoxelSystem
 			return isChanged ? MapChange.Quick : MapChange.None;
 		}
 
-		private int GetOffset(IVoxelEditor voxelEditor)
+		int GetOffset(IVoxelEditor voxelEditor)
 		{
 			Vector3 hitPosition = mouseDownHit.hitWorldPosition;
 			Vector3Int hitIndex = mouseDownHit.voxelIndex;
-			Ray localRay = globalRay.Transform(voxelEditor.transform.worldToLocalMatrix);
+			Ray localRay = globalRay.Transform(voxelEditor.Transform.worldToLocalMatrix);
 			Vector3 paneRight = Vector3.Cross(localRay.direction, surfaceNormal);
 			Vector3 paneNormal = Vector3.Cross(paneRight, surfaceNormal);
 			Plain plane = new(hitPosition, paneNormal);

@@ -44,7 +44,7 @@ namespace VoxelSystem
 			if (recordMap)
 				objects[index++] = editor.MapContainer;
 			if (recordTransform)
-				objects[index++] = editor.transform;
+				objects[index++] = editor.Transform;
 			if (RecordSelection)
 				objects[index] = editor.EditorObject;
 
@@ -57,13 +57,13 @@ namespace VoxelSystem
 		{
 			VoxelMap map = editor.Map;
 			Vector3 center = map.FullSize / 2;
-			Vector3 worldCenter = editor.transform.TransformPoint(center);
+			Vector3 worldCenter = editor.Transform.TransformPoint(center);
 
 			editor.Map.Turn(axis, leftHandPositive);
 
-			Vector3 newWorldCenter = editor.transform.TransformPoint(center);
+			Vector3 newWorldCenter = editor.Transform.TransformPoint(center);
 			Vector3Int delta = (newWorldCenter - worldCenter).RoundToInt();
-			editor.transform.position -= delta;
+			editor.Transform.position -= delta;
 		}
 
 		// Selection
@@ -111,7 +111,7 @@ namespace VoxelSystem
 
 		public static void SeparateSelectionToGameObject(this IVoxelEditor voxelEditor)
 		{
-			Transform original = voxelEditor.transform;
+			Transform original = voxelEditor.Transform;
 			string name = $"{original.name} - Separated - {voxelEditor.Selection.min}{voxelEditor.Selection.max}";
 			GameObject newGO = new(name);
 			newGO.transform.SetParent(original.parent);
@@ -127,7 +127,7 @@ namespace VoxelSystem
 			VoxelEditor newEditor = newGO.AddComponent<VoxelEditor>();
 			newEditor.voxelFilter = newMapFilter;
 
-			foreach (MeshGenerator generator in newGO.GetComponents<MeshGenerator>())
+			foreach (VoxelMeshGenerator generator in newGO.GetComponents<VoxelMeshGenerator>())
 				newEditor.meshGenerator = generator.CreateACopy(newGO);
 
 #if UNITY_EDITOR
@@ -138,8 +138,8 @@ namespace VoxelSystem
 		public static void MergeInto(this IVoxelEditor source, IVoxelEditor destination)
 		{
 			RecordForUndo(destination, "Merge Voxel Maps", RecordType.Map);
-			Vector3 sourcePosition = source.transform.position;
-			Vector3 offset = destination.transform.transform.InverseTransformPoint(sourcePosition);
+			Vector3 sourcePosition = source.Transform.position;
+			Vector3 offset = destination.Transform.transform.InverseTransformPoint(sourcePosition);
 			Vector3Int offsetInt = offset.RoundToInt();
 
 			destination.Map.CopyFrom(source.Map, Vector3Int.zero, offsetInt, source.Map.FullSize);

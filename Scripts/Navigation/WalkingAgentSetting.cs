@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using VoxelSystem;
 
-[CreateAssetMenu(fileName = "WalkingAgentSetting", menuName = "Voxel System/Walking Agent Setting")]
+[CreateAssetMenu(fileName = "WalkingAgentSetting", menuName = EditorConstants.categoryPath + "AgentSetting: Walking", order = EditorConstants.soOrder_Navigation)]
 public class WalkingAgentSetting : VoxelNavAgentSetting
 {
 	[SerializeField] DirectionType allowedDirections = DirectionType.General;

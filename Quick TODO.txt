@@ -1,9 +1,17 @@
-Prevent to Delete Non Visible Information
-	No Data On Empty,
-	No Transformes Cube & Block Shapes
+RampShape (VoxelShapeBuilder)
 
-Material Only Action
+BlockShape & RampShape use side information
+
+
+VoxelTypes are indexed by ID;
+Switch values of VoxelMap
+	Material Index
+	VoxelID
 
 Physical Shape of a Voxel
 	-> Collider
 	-> Mesh
+
+RuleMeshVoxel
+
+Better OctoBlock Setup

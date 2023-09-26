@@ -1,4 +1,5 @@
 ﻿using MUtility;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -15,7 +16,7 @@ namespace VoxelSystem
 		static readonly List<Vector3Int> _searchDirections = new ();
 		static bool _planeOnly;
 		static Vector3Int _normal;
-		public static void SearchChunk(this VoxelMap map, HashSet<Vector3Int> result, Vector3Int startIndex, bool sameColorOnly)
+		public static void SearchChunk(this VoxelMap map, HashSet<Vector3Int> result, Vector3Int startIndex, Func<int, int, bool> isSameFunction)
 		{
 			int searchValue = map.GetVoxel(startIndex);
 			result.Clear();
@@ -31,9 +32,10 @@ namespace VoxelSystem
 			for (int i = 0; i < DirectionUtility.generalDirection3DValues.Length; i++)
 				_searchDirections.Add(DirectionUtility.generalDirection3DValues[i].ToVectorInt());
 
-			map.Search(result, searchValue, sameColorOnly);
+			map.Search(result, searchValue, isSameFunction);
 		}
-		public static void SearchPlane(this VoxelMap map, HashSet<Vector3Int> result, Vector3Int startIndex, GeneralDirection3D side, bool sameColorOnly)
+
+		public static void SearchPlane(this VoxelMap map, HashSet<Vector3Int> result, Vector3Int startIndex, GeneralDirection3D side, Func<int, int, bool> isSameFunction)
 		{
 			int searchValue = map.GetVoxel(startIndex);
 			result.Clear();
@@ -62,10 +64,10 @@ namespace VoxelSystem
 			_searchDirections.Add(d3.ToVectorInt());
 			_searchDirections.Add(d4.ToVectorInt());
 			 
-			Search(map, result, searchValue, sameColorOnly);
+			Search(map, result, searchValue, isSameFunction);
 		}
 
-		static void Search(this VoxelMap map, HashSet<Vector3Int> result, int searchValue, bool sameColorOnly)
+		static void Search(this VoxelMap map, HashSet<Vector3Int> result, int searchValue, Func<int, int , bool> isSameFunction)
 		{
 			HashSet<Vector3Int> current, next;
 			do
@@ -92,11 +94,10 @@ namespace VoxelSystem
 							continue;
 						}
 						int nextVoxel = map.GetVoxel(nextIndex);
-						bool isDifferent = sameColorOnly
-							? nextVoxel != searchValue
-							: nextVoxel.GetFlip() != searchValue.GetFlip();
 
-						if (isDifferent)
+						bool isSame = isSameFunction(nextVoxel, searchValue);
+
+						if (!isSame)
 						{
 							_alreadyChecked.Add(nextIndex);
 							continue;

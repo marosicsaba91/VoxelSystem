@@ -1,4 +1,5 @@
 
+using MUtility;
 using System;
 using UnityEngine;
 
@@ -16,7 +17,7 @@ namespace VoxelSystem
 		[SerializeField] string binaryValue;
 		[Space]
 		[SerializeField] Vector3Int rotation;
-		[SerializeField] Flip fliping;
+		[SerializeField] Flip3D fliping;
 		
 		[SerializeField] byte shapeIndex;
 		[SerializeField] byte materialIndex;
@@ -67,7 +68,7 @@ namespace VoxelSystem
 			return Convert.ToInt32(binaryValue, 2);
 		}
 
-		private void SetValues(int value)
+		void SetValues(int value)
 		{
 			decimalValue = value;
 

@@ -26,7 +26,7 @@ namespace VoxelSystem
 			targetPoint = Vector3Int.RoundToInt(indexF);
 		}
 
-		private void OnEnable()
+		void OnEnable()
 		{
 			if (filter == null) return;
 

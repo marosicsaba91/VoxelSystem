@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using VoxelSystem;
 
-[CreateAssetMenu(fileName = "FlyingAgentSetting", menuName = "Voxel System/Flying Agent Setting")]
+[CreateAssetMenu(fileName = "FlyingAgentSetting", menuName = EditorConstants.categoryPath + "AgentSetting: Flying", order = EditorConstants.soOrder_Navigation)]
 public class FlyingAgentSetting : VoxelNavAgentSetting
 {
 	[SerializeField] DirectionType allowedDirections = DirectionType.General; 

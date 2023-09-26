@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
+using MUtility;
 using System;
 using Object = UnityEngine.Object;
+
+
 
 namespace VoxelSystem
 {
@@ -14,7 +17,7 @@ namespace VoxelSystem
 		public bool scale;
 	}
 
-	[RequireComponent(typeof(VoxelObject))]
+	[RequireComponent(typeof(VoxelObject), typeof(VoxelMeshGenerator))]
 	[ExecuteAlways]
 	class VoxelEditor : MonoBehaviour, IVoxelEditor
 	{
@@ -24,11 +27,13 @@ namespace VoxelSystem
 		static int selectedVoxelValue = 0;
 
 		[SerializeField, HideInInspector] internal VoxelObject voxelFilter;
-		[SerializeField, HideInInspector] internal MeshGenerator meshGenerator;
+		[SerializeField, HideInInspector] internal VoxelMeshGenerator meshGenerator;
 		[SerializeField, HideInInspector] internal TransformLock transformLock = new();
 		[SerializeField, HideInInspector] internal BoundsInt selection = new(Vector3Int.zero, Vector3Int.one * -1);
 
 		public TransformLock TransformLock { get => transformLock; set => transformLock = value; }
+
+		public Transform Transform => transform;
 
 		public VoxelMap Map => voxelFilter == null ? null : voxelFilter.GetVoxelMap();
 
@@ -39,24 +44,27 @@ namespace VoxelSystem
 
 		public Object EditorObject => this;
 
-		public bool EnableEdit => enabled;
-
-		private void OnValidate()
+		void OnValidate()
 		{
 			if (voxelFilter == null)
 				voxelFilter = GetComponent<VoxelObject>();
 
 			if (meshGenerator == null)
-				meshGenerator = GetComponent<MeshGenerator>();
+				meshGenerator = GetComponent<VoxelMeshGenerator>();
+
 		}
 
-		public IPalette MaterialPalette => meshGenerator.MaterialPalette;
+		public MaterialPalette MaterialPalette => meshGenerator.MaterialPalette;
 
-		public IPalette ShapePalette => meshGenerator.ShapePalette;
+		public VoxelShapePalette ShapePalette => meshGenerator.ShapePalette;
 
 		public string MapName => voxelFilter == null ? "-" : voxelFilter.MapName;
 		public VoxelTool SelectedTool { get => selectedTool; set => selectedTool = value; }
 		public VoxelAction SelectedAction { get => selectedAction; set => selectedAction = value; }
+
+		Flip3D selectedFlip = Flip3D.None;
+		Vector3Int selectedRotation = Vector3Int.zero;
+
 		public ToolState ToolState
 		{
 			get => toolState;
@@ -90,9 +98,23 @@ namespace VoxelSystem
 		public int SelectedShapeIndex
 		{
 			get => selectedVoxelValue.GetShapeIndex();
-			set => selectedVoxelValue.SetShapeIndex((byte)value);
+			set
+			{
+
+				selectedVoxelValue.SetShapeIndex((byte)value);
+				if (SelectedVoxelShape.IsTransformEnabled)
+				{
+					selectedVoxelValue.SetFlip(selectedFlip);
+					selectedVoxelValue.SetRotation(selectedRotation);
+				}
+				else
+				{
+					selectedVoxelValue.SetFlip(Flip3D.None);
+					selectedVoxelValue.SetRotation(Vector3Int.zero);
+				}
+			}
 		}
-		VoxelShape SelectedVoxelShape
+		VoxelShapeBuilder SelectedVoxelShape
 		{
 			get
 			{
@@ -104,52 +126,43 @@ namespace VoxelSystem
 
 		public int ShapePaletteLength => throw new NotImplementedException();
 
-		public Flip GetFlipped
+		public Flip3D SelectedFlip
 		{
 			get => selectedVoxelValue.GetFlip();
-			internal set => selectedVoxelValue.SetFlip(value);
+			set
+			{
+				selectedFlip = value;
+				if (SelectedVoxelShape.IsTransformEnabled)
+					selectedVoxelValue.SetFlip(value);
+			}
 		}
 
-		public Vector3Int VoxelRotation
+		public Vector3Int SelectedRotation
 		{
 			get => selectedVoxelValue.GetRotation();
-			internal set => selectedVoxelValue.SetRotation(value);
+			set
+			{
+				selectedRotation = value;
+				if (SelectedVoxelShape.IsTransformEnabled)
+					selectedVoxelValue.SetRotation(value);
+			}
 		}
 
-		public bool EnableFlip
+		public bool EnableVoxelTransform
 		{
 			get
 			{
-				VoxelShape selectedVoxelShape = SelectedVoxelShape;
+				VoxelShapeBuilder selectedVoxelShape = SelectedVoxelShape;
 				if (selectedVoxelShape == null)
 					return false;
-				return selectedVoxelShape.IsFlipEnabled;
+				return selectedVoxelShape.IsTransformEnabled;
 			}
 
 			internal set
 			{
-				VoxelShape selectedShape = SelectedVoxelShape;
+				VoxelShapeBuilder selectedShape = SelectedVoxelShape;
 				if (selectedShape != null)
-					SelectedVoxelShape.IsFlipEnabled = value;
-			}
-		}
-
-		public bool EnableRotations
-		{
-			get
-			{
-				VoxelShape selectedShape = SelectedVoxelShape;
-				if (selectedShape == null)
-					return false;
-
-				return SelectedVoxelShape.IsRotationEnabled;
-			}
-
-			internal set
-			{
-				VoxelShape selectedVoxelBuilder = SelectedVoxelShape;
-				if (selectedVoxelBuilder != null)
-					SelectedVoxelShape.IsRotationEnabled = value;
+					SelectedVoxelShape.IsTransformEnabled = value;
 			}
 		}
 
@@ -158,6 +171,7 @@ namespace VoxelSystem
 		{
 			DoLockTransform();
 		}
+
 		void DoLockTransform()
 		{
 			if (TransformLock.position)
@@ -198,4 +212,14 @@ namespace VoxelSystem
 			Gizmos.matrix = Matrix4x4.identity;
 		}
 	}
+
+	static class VoxelEditorHelper 
+	{
+		public static bool IsEditingEnabled(this VoxelEditor editor) =>
+			!Equals(editor, null) &&
+			editor != null &&
+			editor.enabled &&
+			!Equals(editor.Map, null);
+	}
+
 }

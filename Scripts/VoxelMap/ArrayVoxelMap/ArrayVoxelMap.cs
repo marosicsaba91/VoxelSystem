@@ -115,8 +115,21 @@ namespace VoxelSystem
 						v = value;
 					break;
 				case VoxelAction.Erase:
-					v.SetEmpty();
+					v = emptyValue;
 					break;
+				case VoxelAction.RepaintMaterialOnly:
+					if (v.IsFilled())
+						v.SetMaterialIndex(value.GetMaterialIndex());
+					break;
+				case VoxelAction.RepaintShapeOnly:
+					if (v.IsFilled())
+					{
+						v.SetShapeIndex(value.GetShapeIndex());
+						v.SetFlip(value.GetFlip());
+						v.SetRotation(value.GetRotation());
+					}
+					break;
+
 			}
 			if (oldVal == v)
 				return false;
@@ -201,7 +214,41 @@ namespace VoxelSystem
 							int originalValue = intVoxelData[index];
 							if (originalValue.IsFilled())
 							{
-								intVoxelData[index].SetEmpty();
+								intVoxelData[index] = emptyValue;
+								changed |= true;
+							}
+						}
+			}
+			else if (action == VoxelAction.RepaintMaterialOnly)
+			{
+				for (int x = minX; x <= maxX; x++)
+					for (int y = minY; y <= maxY; y++)
+						for (int z = minZ; z <= maxZ; z++)
+						{
+							int index = x + (y * size.x) + (z * size.x * size.y);
+							int originalValue = intVoxelData[index];
+							if (originalValue.IsFilled())
+							{
+								intVoxelData[index].SetMaterialIndex(value.GetMaterialIndex());
+								changed |= true;
+							}
+						}
+			}
+			else if (action == VoxelAction.RepaintShapeOnly)
+			{
+				for (int x = minX; x <= maxX; x++)
+					for (int y = minY; y <= maxY; y++)
+						for (int z = minZ; z <= maxZ; z++)
+						{
+							int index = x + (y * size.x) + (z * size.x * size.y);
+							int originalValue = intVoxelData[index];
+							if (originalValue.IsFilled())
+							{
+								int v = intVoxelData[index];
+								v.SetShapeIndex(value.GetShapeIndex());
+								v.SetFlip(value.GetFlip());
+								v.SetRotation(value.GetRotation());
+								intVoxelData[index] = v;
 								changed |= true;
 							}
 						}
@@ -210,5 +257,20 @@ namespace VoxelSystem
 			return changed;
 		}
 
+		static ArrayVoxelMap oneVoxelMap;
+
+		internal static ArrayVoxelMap OneVoxelMap
+		{
+			get
+			{
+				if (oneVoxelMap == null)
+				{
+					oneVoxelMap = new ArrayVoxelMap();
+					oneVoxelMap.Setup(Vector3Int.one);
+					oneVoxelMap.SetVoxel(0, 0, 0, 0);
+				}
+				return oneVoxelMap;
+			}
+		}
 	}
 }

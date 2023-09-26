@@ -7,7 +7,7 @@ using Utility.SerializableCollection;
 namespace VoxelSystem
 {
 	[Serializable]
-	class BlockColorDictionary : SerializableDictionary<BlockType, Color> { }
+	class BlockColorDictionary : SerializableDictionary<OctoBlockType, Color> { }
 
 	[Serializable]
 	class BlockDrawingSettings
@@ -27,7 +27,7 @@ namespace VoxelSystem
 
 		static System.Random _gizmoRandom;
 
-		public void DrawGizmos(VoxelMap map, List<(Vector3Int,Block)> _blocks)
+		public void DrawGizmos(VoxelMap map, List<(Vector3Int,OctoBlock)> _blocks)
 		{
 			// Draw whole voxel map
 			if (drawingSettings.drawVoxels)
@@ -47,7 +47,7 @@ namespace VoxelSystem
 			if (drawingSettings.drawBlocks)
 			{
 				_gizmoRandom = new System.Random(randomSeed);
-				foreach ((Vector3Int, Block) block in _blocks)
+				foreach ((Vector3Int, OctoBlock) block in _blocks)
 				{
 					Gizmos.color = drawingSettings.blockColors.TryGetValue(block.Item2.blockType, out Color color)
 						? color
@@ -58,19 +58,19 @@ namespace VoxelSystem
 		}
 
 
-		public void DrawBlock(Block block, Vector3Int subVoxelIndex, float margin, System.Random random)
+		public void DrawBlock(OctoBlock block, Vector3Int subVoxelIndex, float margin, System.Random random)
 		{
-			if (block.blockType == BlockType.SidePositive)
+			if (block.blockType == OctoBlockType.SidePositive)
 				DrawSide(block, subVoxelIndex, margin);
-			else if (block.blockType == BlockType.EdgePositive)
+			else if (block.blockType == OctoBlockType.EdgePositive)
 				DrawEdge(block, subVoxelIndex, margin);
-			else if (block.blockType == BlockType.CornerPositive)
+			else if (block.blockType == OctoBlockType.CornerPositive)
 				DrawCorner(block, subVoxelIndex, margin);
 			else
 				DrawAnything(block, subVoxelIndex, random);
 		}
 
-		void DrawCorner(Block block, Vector3Int subVoxelIndex, float margin)
+		void DrawCorner(OctoBlock block, Vector3Int subVoxelIndex, float margin)
 		{
 			Vector3 center = block.Center(subVoxelIndex);
 			Vector3 realSize = block.RealSize - margin * Vector3.one;
@@ -94,7 +94,7 @@ namespace VoxelSystem
 			DrawRect(c3, realSize, n3);
 		}
 
-		void DrawEdge(Block block, Vector3Int subVoxelIndex, float margin)
+		void DrawEdge(OctoBlock block, Vector3Int subVoxelIndex, float margin)
 		{
 			// DrawAnything();
 			// return;
@@ -143,7 +143,7 @@ namespace VoxelSystem
 			DrawRect(c2, realSize, n2);
 		}
 
-		void DrawSide(Block block, Vector3Int subVoxelIndex, float margin)
+		void DrawSide(OctoBlock block, Vector3Int subVoxelIndex, float margin)
 		{
 			Vector3 normal = block.axis.ToVector();
 			Vector3 offset = normal.MultiplyAllAxis(block.subVoxel);
@@ -181,7 +181,7 @@ namespace VoxelSystem
 			Gizmos.DrawLine(center + d1 + d2, center + d1 - d2);
 		}
 
-		void DrawAnything(Block block, Vector3Int subVoxelIndex, System.Random random)
+		void DrawAnything(OctoBlock block, Vector3Int subVoxelIndex, System.Random random)
 		{
 			Vector3 center = block.Center(subVoxelIndex);
 			float rand = (float)random.NextDouble();
@@ -199,7 +199,7 @@ namespace VoxelSystem
 				Gizmos.DrawLine(center - axisVector * 0.25f, center + axisVector * 0.25f);
 			}
 
-			if (block.blockType == BlockType.EdgeToEdge)
+			if (block.blockType == OctoBlockType.EdgeToEdge)
 			{
 				Axis3D connectedAxis = block.axis switch
 				{

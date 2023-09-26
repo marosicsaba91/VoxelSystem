@@ -22,8 +22,8 @@ namespace VoxelSystem
 			Draw(side, actionColor);
 
 			VoxelMap map = voxelEditor.Map;
-			VoxelMap_Search._roundLimit = 5;
-			map.SearchChunk(chunk, hit.voxelIndex, voxelEditor.SelectedAction != VoxelAction.Overwrite);
+			VoxelMap_Search._roundLimit = 5; 
+			map.SearchChunk(chunk, hit.voxelIndex, voxelEditor.SelectedAction.GetEqualityTestFunction());
 			VoxelMap_Search._roundLimit = 1000;
 
 			Vector3 half = Vector3.one * 0.5f;
@@ -50,7 +50,7 @@ namespace VoxelSystem
 				return MapChange.None;
 			if (voxel.IsEmpty() && voxelEditor.SelectedAction == VoxelAction.Erase)
 				return MapChange.None;
-			map.SearchChunk(chunk, hit.voxelIndex, voxelEditor.SelectedAction != VoxelAction.Overwrite);
+			map.SearchChunk(chunk, hit.voxelIndex, voxelEditor.SelectedAction.GetEqualityTestFunction());
 
 			bool changed = false;
 			foreach (Vector3Int voxelI in chunk)

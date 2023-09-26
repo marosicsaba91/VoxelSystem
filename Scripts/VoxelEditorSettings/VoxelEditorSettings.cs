@@ -2,6 +2,7 @@ using MUtility;
 using System;
 using UnityEngine;
 using VoxelSystem;
+using static System.Collections.Specialized.BitVector32;
 
 // [CreateAssetMenu]
 internal class VoxelEditorSettings : ScriptableObject
@@ -14,7 +15,7 @@ internal class VoxelEditorSettings : ScriptableObject
 		{
 			if (instance == null)
 				instance = ScriptableObjectUtility.GetFromResources<VoxelEditorSettings>();
-			
+
 			return instance;
 		}
 	}
@@ -23,12 +24,12 @@ internal class VoxelEditorSettings : ScriptableObject
 	public Texture eraseVoxelActionIcon;
 	public Texture recolorVoxelActionIcon;
 	public Texture overWriteVoxelActionIcon;
-	
+
 	public Texture attachBoxVoxelToolIcon;
 	public Texture eraseBoxVoxelToolIcon;
 	public Texture recolorBox_VoxelToolIcon;
 	public Texture overWriteBoxVoxelToolIcon;
-	
+
 	public Texture attachFaceVoxelToolIcon;
 	public Texture eraseFaceVoxelToolIcon;
 	public Texture recolorFaceVoxelToolIcon;
@@ -46,7 +47,7 @@ internal class VoxelEditorSettings : ScriptableObject
 	public Texture overWriteSelectVoxelToolIcon;
 
 	public Texture selectVoxelToolIcon;
-	
+
 	public Texture moveVoxelToolIcon;
 	public Texture rotateVoxelToolIcon;
 	public Texture mirrorVoxelToolIcon;
@@ -80,10 +81,12 @@ internal class VoxelEditorSettings : ScriptableObject
 
 	internal Texture GetActionIcon(VoxelAction action) => action switch
 	{
+		VoxelAction.Overwrite => overWriteVoxelActionIcon,
 		VoxelAction.Attach => attachVoxelActionIcon,
 		VoxelAction.Erase => eraseVoxelActionIcon,
 		VoxelAction.Repaint => recolorVoxelActionIcon,
-		VoxelAction.Overwrite => overWriteVoxelActionIcon,
+		VoxelAction.RepaintMaterialOnly => recolorVoxelActionIcon,
+		VoxelAction.RepaintShapeOnly => recolorVoxelActionIcon,
 		_ => throw new ArgumentOutOfRangeException(nameof(action), action, null)
 	};
 
@@ -107,69 +110,77 @@ internal class VoxelEditorSettings : ScriptableObject
 		_ => null,
 	};
 
-	internal Texture GetToolIcon(VoxelTool tool, VoxelAction action) => tool switch
+	internal Texture GetToolIcon(VoxelTool tool, VoxelAction action)
 	{
-		VoxelTool.Box => action switch
-		{
-			VoxelAction.Attach => attachBoxVoxelToolIcon,
-			VoxelAction.Erase => eraseBoxVoxelToolIcon,
-			VoxelAction.Repaint => recolorBox_VoxelToolIcon,
-			VoxelAction.Overwrite => overWriteBoxVoxelToolIcon,
-			_ => null
-		},
-		VoxelTool.Face => action switch
-		{
-			VoxelAction.Attach => attachFaceVoxelToolIcon,
-			VoxelAction.Erase => eraseFaceVoxelToolIcon,
-			VoxelAction.Repaint => recolorFaceVoxelToolIcon,
-			VoxelAction.Overwrite => overWriteFaceVoxelToolIcon,
-			_ => null
-		},
-		VoxelTool.FloodFill => action switch
-		{
-			VoxelAction.Attach => attachPaintBucketVoxelToolIcon,
-			VoxelAction.Erase => erasePaintBucketVoxelToolIcon,
-			VoxelAction.Repaint => recolorPaintBucketVoxelToolIcon,
-			VoxelAction.Overwrite => overWritePaintBucketVoxelToolIcon,
-			_ => null
-		},
-		VoxelTool.Move => action switch
-		{
-			VoxelAction.Attach => moveAttachVoxelToolIcon,
-			VoxelAction.Overwrite => moveOverWriteVoxelToolIcon,
-			_ => null,
-		},
-		VoxelTool.Turn => action switch
-		{
-			VoxelAction.Attach => rotateAttachVoxelToolIcon,
-			VoxelAction.Overwrite => rotateOverWriteVoxelToolIcon,
-			_ => null,
-		},
-		VoxelTool.Mirror => action switch
-		{
-			VoxelAction.Attach => mirrorAttachVoxelToolIcon,
-			VoxelAction.Overwrite => mirrorOverWriteVoxelToolIcon,
-			_ => null,
-		},
-		VoxelTool.Resize => action switch
-		{
-			VoxelAction.Attach => resizeAttachVoxelToolIcon,
-			VoxelAction.Overwrite => resizeOverWriteVoxelToolIcon,
-			_ => null,
-		},
-		VoxelTool.Repeat => action switch
-		{
-			VoxelAction.Attach => repeatAttachVoxelToolIcon,
-			VoxelAction.Overwrite => repeatOverWriteVoxelToolIcon,
-			_ => null,
-		},
 
-		VoxelTool.ResizeCanvas => resizeCanvasVoxelToolIcon,
-		VoxelTool.MaterialPicker => colorPickerVoxelToolIcon,
-		VoxelTool.ShapePicker => colorPickerVoxelToolIcon,
-		VoxelTool.Select => selectVoxelToolIcon,
-		VoxelTool.None => null,
-		_ => null,
+		if (action is VoxelAction.RepaintShapeOnly or VoxelAction.RepaintMaterialOnly)
+			action = VoxelAction.Repaint;
 
-	};
+
+		return tool switch
+		{
+			VoxelTool.Box => action switch
+			{
+				VoxelAction.Attach => attachBoxVoxelToolIcon,
+				VoxelAction.Erase => eraseBoxVoxelToolIcon,
+				VoxelAction.Repaint => recolorBox_VoxelToolIcon,
+				VoxelAction.Overwrite => overWriteBoxVoxelToolIcon,
+				_ => null
+			},
+			VoxelTool.Face => action switch
+			{
+				VoxelAction.Attach => attachFaceVoxelToolIcon,
+				VoxelAction.Erase => eraseFaceVoxelToolIcon,
+				VoxelAction.Repaint => recolorFaceVoxelToolIcon,
+				VoxelAction.Overwrite => overWriteFaceVoxelToolIcon,
+				_ => null
+			},
+			VoxelTool.FloodFill => action switch
+			{
+				VoxelAction.Attach => attachPaintBucketVoxelToolIcon,
+				VoxelAction.Erase => erasePaintBucketVoxelToolIcon,
+				VoxelAction.Repaint => recolorPaintBucketVoxelToolIcon,
+				VoxelAction.Overwrite => overWritePaintBucketVoxelToolIcon,
+				_ => null
+			},
+			VoxelTool.Move => action switch
+			{
+				VoxelAction.Attach => moveAttachVoxelToolIcon,
+				VoxelAction.Overwrite => moveOverWriteVoxelToolIcon,
+				_ => null,
+			},
+			VoxelTool.Turn => action switch
+			{
+				VoxelAction.Attach => rotateAttachVoxelToolIcon,
+				VoxelAction.Overwrite => rotateOverWriteVoxelToolIcon,
+				_ => null,
+			},
+			VoxelTool.Mirror => action switch
+			{
+				VoxelAction.Attach => mirrorAttachVoxelToolIcon,
+				VoxelAction.Overwrite => mirrorOverWriteVoxelToolIcon,
+				_ => null,
+			},
+			VoxelTool.Resize => action switch
+			{
+				VoxelAction.Attach => resizeAttachVoxelToolIcon,
+				VoxelAction.Overwrite => resizeOverWriteVoxelToolIcon,
+				_ => null,
+			},
+			VoxelTool.Repeat => action switch
+			{
+				VoxelAction.Attach => repeatAttachVoxelToolIcon,
+				VoxelAction.Overwrite => repeatOverWriteVoxelToolIcon,
+				_ => null,
+			},
+
+			VoxelTool.ResizeCanvas => resizeCanvasVoxelToolIcon,
+			VoxelTool.MaterialPicker => colorPickerVoxelToolIcon,
+			VoxelTool.ShapePicker => colorPickerVoxelToolIcon,
+			VoxelTool.Select => selectVoxelToolIcon,
+			VoxelTool.None => null,
+			_ => null,
+
+		};
+	}
 }

@@ -7,6 +7,8 @@ using Object = UnityEngine.Object;
 namespace VoxelSystem
 {
 	public enum MapChange { None, Quick, Final }
+
+	[Serializable]
 	public struct VoxelHit
 	{
 		public Vector3Int voxelIndex;
@@ -145,16 +147,28 @@ namespace VoxelSystem
 				case VoxelAction.Overwrite:
 					v = value;
 					break;
-				case VoxelAction.Repaint:
-					if (oldV.IsFilled())
-						v = value;
-					break;
 				case VoxelAction.Attach:
 					if (oldV.IsEmpty())
 						v = value;
 					break;
 				case VoxelAction.Erase:
 					v.SetEmpty();
+					break;
+				case VoxelAction.Repaint:
+					if (oldV.IsFilled())
+						v = value;
+					break;
+				case VoxelAction.RepaintMaterialOnly:
+					if (oldV.IsFilled())
+						v.SetMaterialIndex(value.GetMaterialIndex());
+					break;
+				case VoxelAction.RepaintShapeOnly:
+					if (oldV.IsFilled())
+					{
+						v.SetShapeIndex(value.GetShapeIndex());
+						v.SetFlip(value.GetFlip());
+						v.SetRotation(value.GetRotation());
+					}
 					break;
 			}
 

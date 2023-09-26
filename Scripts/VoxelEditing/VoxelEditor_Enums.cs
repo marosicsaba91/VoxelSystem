@@ -10,16 +10,18 @@ namespace VoxelSystem
 		Attach,    // Set all EMPTY voxels to fix Value
 		Erase,     // Set all voxels to EMPTY
 		Repaint,   // Set all NON-EMPTY voxels to fix Value
+		RepaintMaterialOnly,   // Set all NON-EMPTY voxels to fix Value
+		RepaintShapeOnly,   // Set all NON-EMPTY voxels to fix Value
 	}
 
 	public enum VoxelTool { None, Box, Face, FloodFill, Move, Turn, Resize, Mirror, Repeat, ResizeCanvas, Select, MaterialPicker, ShapePicker }
 
 	public static class VoxelEditor_EnumHelper
 	{
-		public static readonly VoxelAction[] _allVoxelActions = Enum.GetValues(typeof(VoxelAction)).Cast<VoxelAction>().ToArray();
-		public static readonly VoxelTool[] _allVoxelTools = Enum.GetValues(typeof(VoxelTool)).Cast<VoxelTool>().ToArray();
+		public static readonly VoxelAction[] allVoxelActions = Enum.GetValues(typeof(VoxelAction)).Cast<VoxelAction>().ToArray();
+		public static readonly VoxelTool[] allVoxelTools = Enum.GetValues(typeof(VoxelTool)).Cast<VoxelTool>().ToArray();
 
-		public static readonly VoxelAction[] _transformActions = new VoxelAction[] {  VoxelAction.Overwrite, VoxelAction.Attach };
+		public static readonly VoxelAction[] transformActions = new VoxelAction[] {  VoxelAction.Overwrite, VoxelAction.Attach };
 
 		public static bool IsTransformTool(this VoxelTool tool) => tool is
 			VoxelTool.Move or VoxelTool.Turn or VoxelTool.Mirror or
@@ -35,6 +37,17 @@ namespace VoxelSystem
 			VoxelTool.Box or VoxelTool.Face or VoxelTool.FloodFill;
 
 		public static bool IsAdditive(this VoxelAction action) => action is VoxelAction.Attach;
+
+		public static Func<int, int, bool> GetEqualityTestFunction(this VoxelAction action) => action switch
+		{
+			VoxelAction.Attach => (a, b) => b.IsEmpty(),
+			VoxelAction.RepaintShapeOnly => (a, b) => a.GetShapeIndex() == b.GetShapeIndex(),
+			VoxelAction.Erase => (a, b) => a.GetMaterialIndex() == b.GetMaterialIndex(),
+			VoxelAction.RepaintMaterialOnly => (a, b) => a.GetMaterialIndex() == b.GetMaterialIndex(),
+			_ => (a, b) =>
+				a.GetMaterialIndex() == b.GetMaterialIndex() &&
+				a.GetShapeIndex() == b.GetShapeIndex(),
+		};
 
 		// --------------------- Voxel Tool Handlers ---------------------
 
@@ -72,12 +85,22 @@ namespace VoxelSystem
 		}
 
 		public static VoxelAction ToTransformAction(this VoxelAction voxelAction) => voxelAction == VoxelAction.Overwrite ? VoxelAction.Overwrite : VoxelAction.Attach;
-		public static string GetTooltip(this VoxelAction voxelAction) => voxelAction switch { 
+		public static string GetTooltip(this VoxelAction voxelAction) => voxelAction switch
+		{
 			VoxelAction.Overwrite => "Overwrite all voxels with the selected value",
 			VoxelAction.Attach => "Attach just to empty space",
 			VoxelAction.Erase => "Erase all non-empty voxels",
-			VoxelAction.Repaint => "Repaint all non-empty voxels",
+			VoxelAction.Repaint => "Repaint all non-empty voxels material & shape",
+			VoxelAction.RepaintMaterialOnly => "Repaint all non-empty voxels MATERIAL only",
+			VoxelAction.RepaintShapeOnly => "Repaint all non-empty voxels SHAPES only",
 			_ => throw new ArgumentOutOfRangeException(nameof(voxelAction), voxelAction, null)
+		};
+		
+		public static string GetLabel(this VoxelAction voxelAction) => voxelAction switch
+		{
+			VoxelAction.RepaintMaterialOnly => " M",
+			VoxelAction.RepaintShapeOnly => " Sh",
+			_ => null
 		};
 	}
 }

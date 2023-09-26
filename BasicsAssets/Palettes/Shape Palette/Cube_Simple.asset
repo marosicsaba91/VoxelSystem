@@ -1,0 +1,156 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b4220bd297412541a0761cd84013a80, type: 3}
+  m_Name: Cube_Simple
+  m_EditorClassIdentifier: 
+  niceName: Simple
+  color: {r: 0.9528302, g: 0.37962982, b: 0.35506406, a: 1}
+  previewMaterial: {fileID: 2100000, guid: d585155c379713f47816b9f3b20f5784, type: 2}
+  meshPreview:
+    textureSize: {x: 200, y: 200}
+    mesh: {fileID: 0}
+    materials:
+    - {fileID: 2100000, guid: d585155c379713f47816b9f3b20f5784, type: 2}
+    useSkybox: 0
+    backgroundColor: {r: 0.9528302, g: 0.37962982, b: 0.35506406, a: 1}
+    isExpandable: 0
+    cameraAngle: {x: 22.345098, y: 18.700003}
+    lightAngle: {x: 45, y: 55}
+    rotateMesh: {x: 0, y: 0, z: 0, w: 0}
+    fieldOfView: 30
+    zoom: 1
+    logChanges: 0
+    previewTexture: {fileID: 0}
+  serializedPreviewMesh:
+    vertices:
+    - {x: 1, y: 0, z: 0}
+    - {x: 1, y: 1, z: 0}
+    - {x: 1, y: 1, z: 1}
+    - {x: 1, y: 0, z: 1}
+    - {x: 0, y: 0, z: 0}
+    - {x: 0, y: 0, z: 1}
+    - {x: 1, y: 0, z: 1}
+    - {x: 1, y: 0, z: 0}
+    - {x: 0, y: 0, z: 0}
+    - {x: 0, y: 1, z: 0}
+    - {x: 0, y: 1, z: 1}
+    - {x: 0, y: 0, z: 1}
+    - {x: 0, y: 1, z: 0}
+    - {x: 0, y: 1, z: 1}
+    - {x: 1, y: 1, z: 1}
+    - {x: 1, y: 1, z: 0}
+    - {x: 0, y: 0, z: 1}
+    - {x: 1, y: 0, z: 1}
+    - {x: 1, y: 1, z: 1}
+    - {x: 0, y: 1, z: 1}
+    - {x: 0, y: 0, z: 0}
+    - {x: 1, y: 0, z: 0}
+    - {x: 1, y: 1, z: 0}
+    - {x: 0, y: 1, z: 0}
+    normals:
+    - {x: 1, y: 0, z: 0}
+    - {x: 1, y: 0, z: 0}
+    - {x: 1, y: 0, z: 0}
+    - {x: 1, y: 0, z: 0}
+    - {x: 0, y: -1, z: 0}
+    - {x: 0, y: -1, z: 0}
+    - {x: 0, y: -1, z: 0}
+    - {x: 0, y: -1, z: 0}
+    - {x: -1, y: 0, z: 0}
+    - {x: -1, y: 0, z: 0}
+    - {x: -1, y: 0, z: 0}
+    - {x: -1, y: 0, z: 0}
+    - {x: 0, y: 1, z: 0}
+    - {x: 0, y: 1, z: 0}
+    - {x: 0, y: 1, z: 0}
+    - {x: 0, y: 1, z: 0}
+    - {x: 0, y: 0, z: 1}
+    - {x: 0, y: 0, z: 1}
+    - {x: 0, y: 0, z: 1}
+    - {x: 0, y: 0, z: 1}
+    - {x: 0, y: 0, z: -1}
+    - {x: 0, y: 0, z: -1}
+    - {x: 0, y: 0, z: -1}
+    - {x: 0, y: 0, z: -1}
+    uv:
+    - {x: 0.25, y: 0.25}
+    - {x: 0.25, y: 0.5}
+    - {x: 0.5, y: 0.5}
+    - {x: 0.5, y: 0.25}
+    - {x: 0.25, y: 0.25}
+    - {x: 0.25, y: 0.5}
+    - {x: 0.5, y: 0.5}
+    - {x: 0.5, y: 0.25}
+    - {x: 0.25, y: 0.25}
+    - {x: 0.25, y: 0.5}
+    - {x: 0.5, y: 0.5}
+    - {x: 0.5, y: 0.25}
+    - {x: 0.25, y: 0.25}
+    - {x: 0.25, y: 0.5}
+    - {x: 0.5, y: 0.5}
+    - {x: 0.5, y: 0.25}
+    - {x: 0.25, y: 0.25}
+    - {x: 0.25, y: 0.5}
+    - {x: 0.5, y: 0.5}
+    - {x: 0.5, y: 0.25}
+    - {x: 0.25, y: 0.25}
+    - {x: 0.25, y: 0.5}
+    - {x: 0.5, y: 0.5}
+    - {x: 0.5, y: 0.25}
+    triangles: 000000000100000002000000000000000200000003000000040000000600000005000000040000000700000006000000080000000a00000009000000080000000b0000000a0000000c0000000d0000000e0000000c0000000e0000000f000000100000001100000012000000100000001200000013000000140000001600000015000000140000001700000016000000
+  quickVersion: {fileID: 0}
+  drawOnMapEdge: 1
+  drawBetweenVoxelChange: 1
+  cubeTextureCoordinates:
+    gridSize: 4
+    right: {x: 1, y: 1}
+    left: {x: 1, y: 1}
+    top: {x: 1, y: 1}
+    bottom: {x: 1, y: 1}
+    front: {x: 1, y: 1}
+    back: {x: 1, y: 1}
+    rightRect:
+      serializedVersion: 2
+      x: 0.25
+      y: 0.25
+      width: 0.25
+      height: 0.25
+    leftRect:
+      serializedVersion: 2
+      x: 0.25
+      y: 0.25
+      width: 0.25
+      height: 0.25
+    topRect:
+      serializedVersion: 2
+      x: 0.25
+      y: 0.25
+      width: 0.25
+      height: 0.25
+    bottomRect:
+      serializedVersion: 2
+      x: 0.25
+      y: 0.25
+      width: 0.25
+      height: 0.25
+    frontRect:
+      serializedVersion: 2
+      x: 0.25
+      y: 0.25
+      width: 0.25
+      height: 0.25
+    backRect:
+      serializedVersion: 2
+      x: 0.25
+      y: 0.25
+      width: 0.25
+      height: 0.25

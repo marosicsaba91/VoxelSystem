@@ -12,20 +12,21 @@ namespace VoxelSystem
 
 		[SerializeField] DisplayMember sharedMap = new(nameof(SharedVoxelMap));
 		[SerializeField, DisableIf(nameof(HasSharedMap))] DisplayMember exportVoxelMap = new(nameof(ExportVoxelMap));
+		[SerializeField] DisplayMember clearVoxelTransforms = new(nameof(ClearWrongVoxelTransforms));
 
 		[SerializeField, HideInInspector] SharedVoxelMap _lastFrameSharedMap = null;
 
-		public event MapChangedDelegate MapChanged; 
+		public event MapChangedDelegate MapChanged;
 
 
 		void OnMapChanged(bool quick)
 		{
-			MapChanged?.Invoke(quick); 
+			MapChanged?.Invoke(quick);
 		}
 
 		public string MapName => HasSharedMap ? SharedVoxelMap.name : name;
-		
-		public bool HasSharedMap => sharedVoxelMap != null; 
+
+		public bool HasSharedMap => sharedVoxelMap != null;
 
 		public SharedVoxelMap SharedVoxelMap
 		{
@@ -38,13 +39,13 @@ namespace VoxelSystem
 				{
 					innerMap ??= new();
 					innerMap.SetupFrom(sharedVoxelMap.Map);
-					sharedVoxelMap = null; 
+					sharedVoxelMap = null;
 				}
 				else
 				{
 					sharedVoxelMap = value;
 					OnMapChanged(false);
-				} 
+				}
 			}
 		}
 
@@ -69,7 +70,7 @@ namespace VoxelSystem
 		}
 
 		void OnEnable()
-		{ 
+		{
 			if (innerMap == null)
 			{
 				innerMap = new();
@@ -132,7 +133,7 @@ namespace VoxelSystem
 		}
 
 		void OnDrawGizmosSelected()
-		{ 
+		{
 			Gizmos.matrix = transform.localToWorldMatrix;
 
 			VoxelMap map = GetVoxelMap();
@@ -142,8 +143,68 @@ namespace VoxelSystem
 
 			Gizmos.color = new Color(1f, 1f, 1f, 0.2f);
 			Vector3 mapSize = map.FullSize;
-			Gizmos.DrawWireCube(mapSize / 2f, mapSize); 
+			Gizmos.DrawWireCube(mapSize / 2f, mapSize);
 			Gizmos.matrix = Matrix4x4.identity;
+		}
+
+		public bool Raycast(Ray globalRay, out VoxelHit hit, bool returnOutsideVoxel = false)
+		{
+			VoxelMap map = GetVoxelMap();
+			if (map == null)
+			{
+				hit = default;
+				return false;
+			}
+
+			return map.Raycast(globalRay, out hit, transform, returnOutsideVoxel);
+		}
+
+
+		public void ClearWrongVoxelTransforms()
+		{
+			VoxelMap map = GetVoxelMap();
+			BoundsInt bounds = map.VoxelBoundaries;
+			if (!TryGetComponent(out VoxelMeshGenerator meshGenerator)) return;
+
+			VoxelShapePalette palette = meshGenerator.ShapePalette;
+			if (palette == null) return;
+
+
+			int faultyVoxelCount = 0;
+			foreach (Vector3Int index in bounds.WalkThrough())
+			{
+				int voxelValue = map.GetVoxel(index);
+
+				Flip3D flip = voxelValue.GetFlip();
+				Vector3Int rotation = voxelValue.GetRotation();
+				if (flip == Flip3D.None && rotation == Vector3Int.zero) continue;
+
+				if (voxelValue.IsEmpty())
+					RepairVoxel(map, ref faultyVoxelCount, index, ref voxelValue);
+
+				int shapeIndex = voxelValue.GetShapeIndex();
+				VoxelShapeBuilder shape = palette.Shapes[shapeIndex];
+
+
+				if (!shape.IsTransformEnabled)
+					RepairVoxel(map, ref faultyVoxelCount, index, ref voxelValue);
+			}
+
+			if (faultyVoxelCount == 0)
+				Debug.Log("No faulty voxel transforms found");
+			else
+			{
+				Debug.Log($"Cleared {faultyVoxelCount} faulty voxel transforms");
+				
+			}
+
+			static void RepairVoxel(VoxelMap map, ref int faultyVoxelCount, Vector3Int index, ref int voxelValue)
+			{
+				voxelValue.SetFlip(Flip3D.None);
+				voxelValue.SetRotation(Vector3Int.zero);
+				map.SetVoxel(index, voxelValue);
+				faultyVoxelCount++;
+			}
 		}
 	}
 }

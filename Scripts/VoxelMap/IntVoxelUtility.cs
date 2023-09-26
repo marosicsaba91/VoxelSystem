@@ -1,8 +1,8 @@
-﻿using UnityEngine;
+﻿using MUtility;
+using UnityEngine;
 
 namespace VoxelSystem
 {
-	enum Flip {	None, X, Y, Z }
 
 	static class IntVoxelUtility
 	{
@@ -67,8 +67,8 @@ namespace VoxelSystem
 		static void SetZRotationIndex(this ref int i, int rotationIndex) => SetTwoBits(ref i, rotationIndex, 2);
 
 		//     Flip: Bits 22, 23
-		internal static Flip GetFlip(this int i) => (Flip)(i & 0b11);
-		internal static void SetFlip(this ref int i, Flip value) => SetTwoBits(ref i, (int)value, 0);
+		internal static Flip3D GetFlip(this int i) => (Flip3D)(i & 0b11);
+		internal static void SetFlip(this ref int i, Flip3D value) => SetTwoBits(ref i, (int)value, 0);
 
 
 		static void SetTwoBits(this ref int i, int newValue, int shift)

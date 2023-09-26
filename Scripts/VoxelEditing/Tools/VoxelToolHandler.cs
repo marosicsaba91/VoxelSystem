@@ -48,7 +48,7 @@ namespace VoxelSystem
 		{
 #if UNITY_EDITOR
 			Matrix4x4 matrix4X4 = UnityEditor.Handles.matrix;
-			UnityEditor.Handles.matrix = voxelEditor.transform.localToWorldMatrix;
+			UnityEditor.Handles.matrix = voxelEditor.Transform.localToWorldMatrix;
 			globalRay = ray;
 
 			if (voxelEditor.ToolState == ToolState.None)
@@ -120,7 +120,7 @@ namespace VoxelSystem
 		{
 			if (!guiEvent.isMouse || guiEvent.button is not 0) return;
 
-			Transform transform = voxelEditor.transform;
+			Transform transform = voxelEditor.Transform;
 			VoxelMap map = isMouseDown ? originalMap : voxelEditor.Map;
 			isLastRayHit = map.Raycast(ray, out VoxelHit hit, transform, raycastOutside);
 
@@ -252,11 +252,11 @@ namespace VoxelSystem
 					originalSelection = voxelEditor.Selection;
 					voxelEditor.ToolState = ToolState.Down;
 					lastHandleVector = Vector3Int.zero;
-					clickPositionGlobal = voxelEditor.transform.TransformPoint(handleResult.clickPosition);
+					clickPositionGlobal = voxelEditor.Transform.TransformPoint(handleResult.clickPosition);
 					originalMap ??= new ArrayVoxelMap();
 					originalMap.SetupFrom(map);
 					originalMapSize = map.FullSize;
-					originalTransformPosition = voxelEditor.transform.position;
+					originalTransformPosition = voxelEditor.Transform.position;
 
 					change = OnHandleDown(voxelEditor, handleInfo);
 					voxelEditor.Map.MapChanged(change);
@@ -309,7 +309,7 @@ namespace VoxelSystem
 		{
 			Vector3 normal = directionVector;
 
-			Ray localRay = globalRay.Transform(editor.transform.worldToLocalMatrix);
+			Ray localRay = globalRay.Transform(editor.Transform.worldToLocalMatrix);
 			Vector3 paneRight = Vector3.Cross(localRay.direction, normal);
 			Vector3 paneNormal = Vector3.Cross(paneRight, normal);
 			Plain plane = new(startPoint, paneNormal);
@@ -323,7 +323,7 @@ namespace VoxelSystem
 		protected void Reset(IVoxelEditor voxelEditor)
 		{
 			voxelEditor.Map.SetupFrom(originalMap);
-			voxelEditor.transform.position = originalTransformPosition;
+			voxelEditor.Transform.position = originalTransformPosition;
 			voxelEditor.Selection = originalSelection;
 		}
 
@@ -337,8 +337,8 @@ namespace VoxelSystem
 			Vector3 planeOrigin = halfSize + halfNormalInSize;
 
 			// Transform points
-			direction = voxelEditor.transform.TransformDirection(direction);
-			planeOrigin = voxelEditor.transform.TransformPoint(planeOrigin);
+			direction = voxelEditor.Transform.TransformDirection(direction);
+			planeOrigin = voxelEditor.Transform.TransformPoint(planeOrigin);
 
 			Camera cam = Camera.current;
 
@@ -355,8 +355,8 @@ namespace VoxelSystem
 		protected static void Translate(IVoxelEditor voxelEditor, GeneralDirection3D direction, int steps)
 		{
 			Vector3 localShift = direction.ToVector() * steps;
-			Vector3 globalShift = voxelEditor.transform.TransformVector(localShift);
-			voxelEditor.transform.position = originalTransformPosition + globalShift;
+			Vector3 globalShift = voxelEditor.Transform.TransformVector(localShift);
+			voxelEditor.Transform.position = originalTransformPosition + globalShift;
 		}
 
 		protected static Vector3 GetMapSidePosition(IVoxelEditor voxelEditor, GeneralDirection3D direction)
@@ -421,11 +421,11 @@ namespace VoxelSystem
 		// ------------------ Supported Actions -----------------------------
 
 		protected static readonly VoxelAction[] noVoxelAction = new VoxelAction[0];
-		protected static readonly VoxelAction[] allVoxelActions = VoxelEditor_EnumHelper._allVoxelActions;
+		protected static readonly VoxelAction[] allVoxelActions = VoxelEditor_EnumHelper.allVoxelActions;
 		public virtual VoxelAction[] GetSupportedActions(IVoxelEditor voxelEditor) => noVoxelAction;
 
 		protected static VoxelAction[] GetTransformActions(IVoxelEditor voxelEditor) =>
-			voxelEditor.HasSelection() ? VoxelEditor_EnumHelper._transformActions : noVoxelAction;
+			voxelEditor.HasSelection() ? VoxelEditor_EnumHelper.transformActions : noVoxelAction;
 
 		// ------------------ Virtual Methods: Cursor Voxel -----------------------------
 

@@ -37,7 +37,7 @@ namespace VoxelSystem
 			meshCollider.sharedMesh = mesh;
 		}
 
-		private void LateUpdate()
+		void LateUpdate()
 		{
 			if (_putBackToPool)
 				manager.PutBack(this);

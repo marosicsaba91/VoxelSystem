@@ -51,7 +51,7 @@ namespace VoxelSystem
 			}
 		}
 
-		private void OnDrawGizmos()
+		void OnDrawGizmos()
 		{
 			Gizmos.color = color;
 			for (int i = 0; i < path.Count - 1; i++)

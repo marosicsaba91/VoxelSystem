@@ -12,9 +12,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83706a07632c8604aa59abd921143d3f, type: 3}
   m_Name: Block Fill Between
   m_EditorClassIdentifier: 
-  niceName: Fill
-  color: {r: 0.4371557, g: 0.8490566, b: 0.3724635, a: 1}
-  simpleVersion: {fileID: 11400000, guid: b9086327e93f7ff41bb9063fd9f17659, type: 2}
+  niceName: Filled
+  color: {r: 1, g: 0.11792451, b: 0.11792451, a: 1}
+  previewMaterial: {fileID: -3661639628750336703, guid: 7e0223e1d3e1733499accfa5ebffb67e,
+    type: 3}
+  meshPreview:
+    textureSize: {x: 200, y: 200}
+    materials:
+    - {fileID: -3661639628750336703, guid: 7e0223e1d3e1733499accfa5ebffb67e, type: 3}
+    backgroundType: 1
+    backgroundColor: {r: 1, g: 0.11792451, b: 0.11792451, a: 1}
+    cameraAngle: {x: -21.740332, y: 60.100006}
+    lightAngle: {x: 45, y: 55}
+    rotateMesh: {x: 0, y: 0, z: 0, w: 0}
+    fieldOfView: 30
+    zoom: 0.94000006
+    isExpandable: 0
+    areChangesLogged: 0
+    previewTexture: {fileID: 0}
+  quickVersion: {fileID: 11400000, guid: b9086327e93f7ff41bb9063fd9f17659, type: 2}
+  previewMesh: {fileID: 0}
   mergeCloseEdges: 1
   connectionOnMapEdge: 0
   drawBetweenVoxelChange: 1
