@@ -29,31 +29,31 @@ namespace VoxelSystem
 			}
 		}
 
-		public static Drawable GetSidesDrawable(HashSet<Vector3Int> indexes, float offset = 0)
+		public static WireShape GetSidesDrawable(HashSet<Vector3Int> indexes, float offset = 0)
 		{
 			HashSet<(Vector3Int, Axis3D)> sides = GetSides(indexes);
 
-			Drawable drawable = SidesToDrawable(sides, offset);
+			WireShape drawable = SidesToDrawable(sides, offset);
 
 			return drawable;
 		}
 
-		public static Drawable GetContourDrawable(HashSet<Vector3Int> indices)
+		public static WireShape GetContourDrawable(HashSet<Vector3Int> indices)
 		{
 			HashSet<(Vector3Int, Axis3D)> sides = GetSides(indices);
 			HashSet<(Vector3Int, Vector3Int)> lines = GetLines(sides);  
-			Drawable edgesDrawable = EdgesToDrawable(lines);
+			WireShape edgesDrawable = EdgesToDrawable(lines);
 			return edgesDrawable;
 		}
 
-		public static Drawable GetIndicesDrawable(HashSet<Vector3Int> indices)
+		public static WireShape GetIndicesDrawable(HashSet<Vector3Int> indices)
 		{
 			Vector3 half = Vector3.one * 0.5f;
-			Drawable drawable = new(new List<Vector3[]>());
+			WireShape drawable = new(new List<Vector3[]>());
 			foreach (Vector3Int index in indices)
 			{ 
 				Cuboid c = new(Vector3.one * 0.2f);
-				Drawable d = c.ToDrawable();
+				WireShape d = c.ToDrawable();
 				d.Translate(index + half);
 				drawable.Merge(d); 
 			}
@@ -112,17 +112,17 @@ namespace VoxelSystem
 			 
 		}
 
-		static Drawable EdgesToDrawable(HashSet<(Vector3Int, Vector3Int)> lines)
+		static WireShape EdgesToDrawable(HashSet<(Vector3Int, Vector3Int)> lines)
 		{
-			Drawable drawable = new(new List<Vector3[]>());
+			WireShape drawable = new(new List<Vector3[]>());
 			foreach ((Vector3Int a, Vector3Int b) in lines)
 				drawable.AddPolygon(new Vector3[] { a, b });
 			return drawable;
 		}
 
-		static Drawable SidesToDrawable(HashSet<(Vector3Int, Axis3D)> sides, float offset = 0)
+		static WireShape SidesToDrawable(HashSet<(Vector3Int, Axis3D)> sides, float offset = 0)
 		{
-			Drawable drawable = new(new List<Vector3[]>());
+			WireShape drawable = new(new List<Vector3[]>());
 			Vector3 half = Vector3.one * 0.5f;
 			foreach ((Vector3Int index, Axis3D axis) in sides)
 			{

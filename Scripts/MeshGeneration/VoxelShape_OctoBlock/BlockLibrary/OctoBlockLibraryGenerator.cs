@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using MUtility;
 using JetBrains.Annotations;
 using UnityEngine;
+using EasyInspector;
+using Benchmark;
 
 namespace VoxelSystem
 {
@@ -53,21 +55,7 @@ namespace VoxelSystem
 		[SerializeField] OctoBlockLibrary voxelBlockLibrary;
 		[SerializeField] OctoBlockSetup[] blockSetups;
 		[SerializeField] Material material;
-
-		/*
-		[Header("Settings")]
-		[SerializeField] BlockSetupNew corners;
-		[SerializeField] BlockSetupNew edges;
-		[SerializeField] BlockSetupNew sides;
-		[SerializeField] BlockSetupNew negativeCorners;
-		[SerializeField] BlockSetupNew negativeSides;
-		[SerializeField] BlockSetupNew negativeEdges;
-		[SerializeField] BlockSetupNew cross;
-		[SerializeField] BlockSetupNew sideMeetsEdge;
-		[SerializeField] BlockSetupNew sideMeetsNegativeEdge;
-		[SerializeField] BlockSetupNew sideMeetsCorner;
-		*/
-
+		 
 		// BUTTONS
 		[Header("Actions")]
 		[SerializeField, UsedImplicitly] EasyMember clearLibrary = new(nameof(Clear));

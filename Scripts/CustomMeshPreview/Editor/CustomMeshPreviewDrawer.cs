@@ -1,5 +1,5 @@
 ﻿#if UNITY_EDITOR
-using MUtility;
+using EasyInspector;
 using UnityEditor;
 using UnityEngine;
 

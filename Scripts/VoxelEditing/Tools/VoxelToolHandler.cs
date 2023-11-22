@@ -69,7 +69,7 @@ namespace VoxelSystem
 		}
 
 		// In the future, this method will work not just for handle drawing
-		public static void Draw(Drawable d, Color c) => d.DrawHandle(c);
+		public static void Draw(WireShape d, Color c) => d.DrawHandle(c);
 
 		// --------------------- Raycast ---------------------
 
@@ -99,11 +99,11 @@ namespace VoxelSystem
 		{
 			Color fadedColor = new(actionColor.r, actionColor.g, actionColor.b, actionColor.a / 4f);
 			Vector3 voxelCenter = (Vector3)hit.voxelIndex + Vector3.one * 0.5f;
-			Drawable cube = new Cuboid(Vector3.one).ToDrawable();
+			WireShape cube = new Cuboid(Vector3.one).ToDrawable();
 			cube.Translate(voxelCenter);
 			Draw(cube, fadedColor);
 
-			Drawable side = GetDrawableVoxelSide(hit);
+			WireShape side = GetDrawableVoxelSide(hit);
 			Draw(side, actionColor);
 		}
 
@@ -379,7 +379,7 @@ namespace VoxelSystem
 			return center + (dir.MultiplyAllAxis(size) / 2f) + dir * standardSpacing;
 		}
 
-		protected static Drawable GetDrawableVoxelSide(VoxelHit hit)
+		protected static WireShape GetDrawableVoxelSide(VoxelHit hit)
 		{
 			List<Vector3[]> polygons = new()
 			{
@@ -388,7 +388,7 @@ namespace VoxelSystem
 				GetVoxelSide(hit.voxelIndex, hit.side, 0.5f),
 				GetVoxelSide(hit.voxelIndex, hit.side, 0.25f)
 			};
-			return new Drawable(polygons);
+			return new WireShape(polygons);
 		}
 		protected static Vector3[] GetVoxelSide(Vector3Int localCoordinate, GeneralDirection3D side, float sizeMultiplier)
 		{

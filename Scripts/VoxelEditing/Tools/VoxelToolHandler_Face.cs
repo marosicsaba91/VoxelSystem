@@ -26,13 +26,13 @@ namespace VoxelSystem
 			{
 				offsetValue = 0;
 				lastOffsetValue = 0;
-				Drawable side = GetDrawableVoxelSide(lastValidHit);
+				WireShape side = GetDrawableVoxelSide(lastValidHit);
 				Draw(side, actionColor);
 
 				voxelEditor.Map.SearchPlane(_originalSide, hit.voxelIndex, hit.side, voxelEditor.SelectedAction.GetEqualityTestFunction());
 			}
 
-			Drawable d = VoxelMap_DrawingUtilities.GetContourDrawable(_originalSide);
+			WireShape d = VoxelMap_DrawingUtilities.GetContourDrawable(_originalSide);
 			if (offsetValue > 0 ^ !surfaceDirection.IsPositive())
 			{
 				Vector3 off = mouseDownHit.voxelIndex.MultiplyAllAxis(surfaceNormal.Abs());

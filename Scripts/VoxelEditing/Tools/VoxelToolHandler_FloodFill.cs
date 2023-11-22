@@ -18,7 +18,7 @@ namespace VoxelSystem
 
 		protected sealed override void OnDrawCursor(IVoxelEditor voxelEditor, Color actionColor, VoxelHit hit)
 		{
-			Drawable side = GetDrawableVoxelSide(lastValidHit);
+			WireShape side = GetDrawableVoxelSide(lastValidHit);
 			Draw(side, actionColor);
 
 			VoxelMap map = voxelEditor.Map;
@@ -34,7 +34,7 @@ namespace VoxelSystem
 				float distance = Vector3.Distance(index, hit.voxelIndex);
 				actionColor.a = 1 - Mathf.Clamp01(distance / maxDistance);
 				Cuboid cube = new(Vector3.one * 0.1f);
-				Drawable drawable = cube.ToDrawable();
+				WireShape drawable = cube.ToDrawable();
 				drawable.Translate(center);
 				Draw(drawable, actionColor);
 			}

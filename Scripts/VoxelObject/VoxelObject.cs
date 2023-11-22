@@ -1,4 +1,5 @@
-﻿using MUtility;
+﻿using EasyInspector;
+using MUtility;
 using System.IO;
 using UnityEngine;
 

@@ -1,4 +1,5 @@
 ﻿#if UNITY_EDITOR
+using EasyInspector;
 using MUtility;
 using UnityEditor;
 using UnityEngine;

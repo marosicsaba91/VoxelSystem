@@ -6,6 +6,7 @@ using System.Linq;
 using System;
 using UnityEditor;
 using UnityEngine;
+using EasyInspector;
 
 namespace VoxelSystem
 {

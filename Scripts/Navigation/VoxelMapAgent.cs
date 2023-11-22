@@ -1,4 +1,4 @@
-using MUtility;
+using EasyInspector;
 using System.Collections.Generic;
 using UnityEngine;
 
