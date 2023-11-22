@@ -1,5 +1,5 @@
-﻿using JetBrains.Annotations;
-using MUtility;
+﻿using MUtility;
+using JetBrains.Annotations;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
@@ -47,7 +47,7 @@ namespace VoxelSystem
 		}
 
 		[SerializeField, UsedImplicitly]
-		readonly DisplayMessage warning = new(nameof(WarningMessage), true)
+		EasyMessage warning = new(nameof(WarningMessage))
 		{ messageType = MessageType.Warning, messageSize = MessageSize.Normal };
 
 		public string WarningMessage

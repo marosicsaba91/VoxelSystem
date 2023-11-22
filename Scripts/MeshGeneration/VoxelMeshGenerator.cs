@@ -22,8 +22,8 @@ namespace VoxelSystem
 		[SerializeField] MeshCollider destinationMeshCollider;
 
 		[SerializeField] bool autoRegenerateMeshes = true;
-		[SerializeField] DisplayMember regenerateMesh = new(nameof(RegenerateMeshesFull));
-		[SerializeField] DisplayMember createMeshFile = new(nameof(CreateMeshFile));
+		[SerializeField] EasyMember regenerateMesh = new(nameof(RegenerateMeshesFull));
+		[SerializeField] EasyMember createMeshFile = new(nameof(CreateMeshFile));
 
 		[SerializeField] bool doBenchmark;
 		[SerializeField] TMP_Text benchmarkOutput;

@@ -2,7 +2,6 @@ using MUtility;
 using System;
 using UnityEngine;
 using VoxelSystem;
-using static System.Collections.Specialized.BitVector32;
 
 // [CreateAssetMenu]
 internal class VoxelEditorSettings : ScriptableObject

@@ -22,14 +22,14 @@ namespace VoxelSystem
 		[SerializeField] float regenDelay;
 
 		[Header("Commands")]
-		[SerializeField] DisplayMember clearNavData = new(nameof(ClearNavData));
-		[SerializeField] DisplayMember calculateVoxels = new(nameof(CalculatePossibleVoxels));
-		[SerializeField] DisplayMember calculateConnections = new(nameof(SetupConnections));
-		[SerializeField] DisplayMember setupWeightWaves = new(nameof(SetupWave));
-		[SerializeField] DisplayMember calculateNextDistanceLevel = new(nameof(CalculateNextDistanceLevel));
+		[SerializeField] EasyMember clearNavData = new(nameof(ClearNavData));
+		[SerializeField] EasyMember calculateVoxels = new(nameof(CalculatePossibleVoxels));
+		[SerializeField] EasyMember calculateConnections = new(nameof(SetupConnections));
+		[SerializeField] EasyMember setupWeightWaves = new(nameof(SetupWave));
+		[SerializeField] EasyMember calculateNextDistanceLevel = new(nameof(CalculateNextDistanceLevel));
 
 		[Space]
-		[SerializeField] DisplayMember recalculateNavDataQuick = new(nameof(RecalculateNavDataQuick));
+		[SerializeField] EasyMember recalculateNavDataQuick = new(nameof(RecalculateNavDataQuick));
 
 		[Space]
 

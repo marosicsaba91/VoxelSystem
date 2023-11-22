@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using JetBrains.Annotations;
 using MUtility;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace VoxelSystem
@@ -70,8 +70,8 @@ namespace VoxelSystem
 
 		// BUTTONS
 		[Header("Actions")]
-		[SerializeField, UsedImplicitly] DisplayMember clearLibrary = new(nameof(Clear));
-		[SerializeField, UsedImplicitly] DisplayMember regenerateLibrary = new(nameof(RegenerateLibrary));
+		[SerializeField, UsedImplicitly] EasyMember clearLibrary = new(nameof(Clear));
+		[SerializeField, UsedImplicitly] EasyMember regenerateLibrary = new(nameof(RegenerateLibrary));
 
 		// -------------------------------------------------------------------------------------------------------------
 

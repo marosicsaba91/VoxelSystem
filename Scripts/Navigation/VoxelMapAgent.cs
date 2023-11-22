@@ -10,7 +10,7 @@ namespace VoxelSystem
 		[SerializeField] VoxelNavMap navMap;
 		[SerializeField] float speed;
 		[SerializeField] Color color = Color.cyan;
-		[SerializeField] DisplayMember recalculatePath = new(nameof(RecalculatePath));
+		[SerializeField] EasyMember recalculatePath = new(nameof(RecalculatePath));
 
 		int currentPathIndex;
 		readonly List<Vector3> path = new();

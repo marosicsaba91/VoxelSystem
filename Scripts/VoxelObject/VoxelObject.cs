@@ -10,9 +10,9 @@ namespace VoxelSystem
 		[SerializeField, HideInInspector] ArrayVoxelMap innerMap = null;
 		[SerializeField, HideInInspector] SharedVoxelMap sharedVoxelMap = null;
 
-		[SerializeField] DisplayMember sharedMap = new(nameof(SharedVoxelMap));
-		[SerializeField, DisableIf(nameof(HasSharedMap))] DisplayMember exportVoxelMap = new(nameof(ExportVoxelMap));
-		[SerializeField] DisplayMember clearVoxelTransforms = new(nameof(ClearWrongVoxelTransforms));
+		[SerializeField] EasyMember sharedMap = new(nameof(SharedVoxelMap));
+		[SerializeField, DisableIf(nameof(HasSharedMap))] EasyMember exportVoxelMap = new(nameof(ExportVoxelMap));
+		[SerializeField] EasyMember clearVoxelTransforms = new(nameof(ClearWrongVoxelTransforms));
 
 		[SerializeField, HideInInspector] SharedVoxelMap _lastFrameSharedMap = null;
 

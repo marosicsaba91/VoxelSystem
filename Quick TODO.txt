@@ -1,12 +1,23 @@
-RampShape (VoxelShapeBuilder)
-
-BlockShape & RampShape use side information
-
-
-VoxelTypes are indexed by ID;
-Switch values of VoxelMap
+VoxelType Switcher Window
 	Material Index
 	VoxelID
+
+RampShape improvements
+	2x2 Ramp
+	UV support
+	Transformable
+	
+Optimisation:
+	1. MoxelType(Shape & Material) Sorting By GPU
+	2. Premake VoxelSide Map by GPU
+
+BlockShape & RampShape use side information to build.
+
+
+//-------------------------------------------
+
+	
+
 
 Physical Shape of a Voxel
 	-> Collider
