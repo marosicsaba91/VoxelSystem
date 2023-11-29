@@ -2,8 +2,7 @@
 using MUtility;
 using System;
 using Object = UnityEngine.Object;
-
-
+using System.Collections.Generic;
 
 namespace VoxelSystem
 {
@@ -21,10 +20,10 @@ namespace VoxelSystem
 	[ExecuteAlways]
 	class VoxelEditor : MonoBehaviour, IVoxelEditor
 	{
-		static VoxelAction selectedAction = VoxelAction.Attach;
-		static VoxelTool selectedTool = VoxelTool.None;
-		static ToolState toolState = ToolState.None;
-		static int selectedVoxelValue = 0;
+		[SerializeField, HideInInspector] VoxelAction selectedAction = VoxelAction.Attach;
+		[SerializeField, HideInInspector] VoxelTool selectedTool = VoxelTool.None;
+		[SerializeField, HideInInspector] ToolState toolState = ToolState.None;
+		[SerializeField, HideInInspector] int selectedVoxelValue = 0;
 
 		[SerializeField, HideInInspector] internal VoxelObject voxelFilter;
 		[SerializeField, HideInInspector] internal VoxelMeshGenerator meshGenerator;
@@ -62,9 +61,6 @@ namespace VoxelSystem
 		public VoxelTool SelectedTool { get => selectedTool; set => selectedTool = value; }
 		public VoxelAction SelectedAction { get => selectedAction; set => selectedAction = value; }
 
-		Flip3D selectedFlip = Flip3D.None;
-		Vector3Int selectedRotation = Vector3Int.zero;
-
 		public ToolState ToolState
 		{
 			get => toolState;
@@ -90,7 +86,7 @@ namespace VoxelSystem
 			{
 				if (meshGenerator == null) return null;
 				if (meshGenerator.MaterialPalette == null) return null;
-				return meshGenerator.MaterialPalette.Materials[SelectedMaterialIndex];
+				return meshGenerator.MaterialPalette.Materials.IndexClamped(SelectedMaterialIndex);
 			}
 		}
 
@@ -98,75 +94,22 @@ namespace VoxelSystem
 		public int SelectedShapeIndex
 		{
 			get => selectedVoxelValue.GetShapeIndex();
-			set
-			{
-
-				selectedVoxelValue.SetShapeIndex((byte)value);
-				if (SelectedVoxelShape.IsTransformEnabled)
-				{
-					selectedVoxelValue.SetFlip(selectedFlip);
-					selectedVoxelValue.SetRotation(selectedRotation);
-				}
-				else
-				{
-					selectedVoxelValue.SetFlip(Flip3D.None);
-					selectedVoxelValue.SetRotation(Vector3Int.zero);
-				}
-			}
+			set => selectedVoxelValue.SetShapeIndex((byte)value);
 		}
-		VoxelShapeBuilder SelectedVoxelShape
+		// --- Shape Palette ---
+		public VoxelShapeBuilder SelectedShape
 		{
 			get
 			{
-				if (meshGenerator == null) return null;
-				if (meshGenerator.ShapePalette == null) return null;
-				return meshGenerator.ShapePalette.Shapes[SelectedShapeIndex];
+				VoxelShapePalette palette = ShapePalette;
+				if (palette == null) return null;
+				IReadOnlyList<VoxelShapeBuilder> shapes = palette.Shapes;
+				if (palette == null) return null;
+				byte index = selectedVoxelValue.GetShapeIndex();
+			    return shapes.IndexClamped(index);
 			}
-		}
+		} 
 
-		public int ShapePaletteLength => throw new NotImplementedException();
-
-		public Flip3D SelectedFlip
-		{
-			get => selectedVoxelValue.GetFlip();
-			set
-			{
-				selectedFlip = value;
-				if (SelectedVoxelShape.IsTransformEnabled)
-					selectedVoxelValue.SetFlip(value);
-			}
-		}
-
-		public Vector3Int SelectedRotation
-		{
-			get => selectedVoxelValue.GetRotation();
-			set
-			{
-				selectedRotation = value;
-				if (SelectedVoxelShape.IsTransformEnabled)
-					selectedVoxelValue.SetRotation(value);
-			}
-		}
-
-		public bool EnableVoxelTransform
-		{
-			get
-			{
-				VoxelShapeBuilder selectedVoxelShape = SelectedVoxelShape;
-				if (selectedVoxelShape == null)
-					return false;
-				return selectedVoxelShape.IsTransformEnabled;
-			}
-
-			internal set
-			{
-				VoxelShapeBuilder selectedShape = SelectedVoxelShape;
-				if (selectedShape != null)
-					SelectedVoxelShape.IsTransformEnabled = value;
-			}
-		}
-
-		// --------------------------------------
 		void Update()
 		{
 			DoLockTransform();

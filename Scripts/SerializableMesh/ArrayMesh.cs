@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MUtility;
+using System;
 using UnityEngine;
 
 namespace VoxelSystem
@@ -10,6 +11,8 @@ namespace VoxelSystem
 		public Vector3[] normals;
 		public Vector2[] uv;
 		public int[] triangles;
+
+		public bool IsEmpty => vertices.IsNullOrEmpty();
 
 		public void RecalculateWindings()
 		{
@@ -41,7 +44,7 @@ namespace VoxelSystem
 
 		public static ArrayMesh CreateFromMesh(Mesh mesh, Matrix4x4 transformation)
 		{
-			// Get the mesh vertices
+			// Get the previewMesh vertices
 			Vector3[] vertices = mesh.vertices;
 			Vector3[] normals = mesh.normals;
 

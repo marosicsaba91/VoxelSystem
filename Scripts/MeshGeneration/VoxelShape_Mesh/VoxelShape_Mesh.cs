@@ -1,17 +1,14 @@
-using MUtility;
+using MUtility; 
 using System.Collections.Generic;
 using UnityEngine;
 using VoxelSystem;
 
-[CreateAssetMenu(fileName = "MeshVoxelShape", menuName = EditorConstants.categoryPath+ "VoxelShape: Mesh", order = EditorConstants.soOrder_VoxelShape)]
+[CreateAssetMenu(fileName = "MeshVoxelShape", menuName = EditorConstants.categoryPath + "VoxelShape: Mesh", order = EditorConstants.soOrder_VoxelShape)]
 public class VoxelShape_Mesh : VoxelShapeBuilder
 {
 	[SerializeField] Mesh mesh; 
-	[SerializeField] bool enableTransform = true;
 	[SerializeField] bool autoConvertFromRightHanded = true;
 	[SerializeField] SideFlags isSideFilled = new(false);
-
-	public override bool IsTransformEnabled => enableTransform;
 
 	static readonly Matrix4x4 rightToLeftHanded = Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(-90, 0, 0), new Vector3(-1, -1, 1));
 	readonly Dictionary<(Vector3Int, Flip3D), ArrayMesh> transformedMeshes = new();
@@ -34,32 +31,19 @@ public class VoxelShape_Mesh : VoxelShapeBuilder
 			MeshBuilder meshBuilder)
 	{
 		RegenerateMatrixDictionary();
-		int vertexIndex = meshBuilder.VertexCount;
 
 		for (int voxelIndex = 0; voxelIndex < voxelPositions.Count; voxelIndex++)
 		{
 			Vector3Int position = voxelPositions[voxelIndex];
 			int vertexValue = map.GetVoxel(position);
 
-			Flip3D flip = vertexValue.GetFlip();
-			Vector3Int rotation = vertexValue.GetRotation();
+			ushort extraVoxelData = vertexValue.GetExtraVoxelData();
+			Flip3D flip = extraVoxelData.GetFlip();
+			Vector3Int rotation = extraVoxelData.GetRotation();
 			ArrayMesh transformedMesh = transformedMeshes[(rotation, flip)];
 
-			int vertexCount = transformedMesh.vertices.Length;
 			Vector3 center = position + half;
-
-			for (int verticesIndex = 0; verticesIndex < vertexCount; verticesIndex++)
-			{
-				Vector3 local = transformedMesh.vertices[verticesIndex];
-				Vector3 global = center + local;
-
-				meshBuilder.AddVertex(global,transformedMesh.normals[verticesIndex],transformedMesh.uv[verticesIndex]);
-			}
-
-			for (int triangleIndex = 0; triangleIndex < transformedMesh.triangles.Length; triangleIndex++)
-				meshBuilder.triangles.Add(transformedMesh.triangles[triangleIndex] + vertexIndex);
-
-			vertexIndex += vertexCount;
+			meshBuilder.Add(transformedMesh, center);
 		}
 	}
 
@@ -83,5 +67,48 @@ public class VoxelShape_Mesh : VoxelShapeBuilder
 					}
 	}
 
-	protected override bool IsSideFilled(GeneralDirection3D dir) => isSideFilled[dir];
+	public override bool IsSideFilled(GeneralDirection3D dir) => isSideFilled[dir];
+
+	public bool IsSideFilled(GeneralDirection3D dir, Flip3D flip, Vector3Int rotation)
+	{
+		GeneralDirection3D transformedDir = dir.InverseTransform(flip, rotation);
+		return IsSideFilled(transformedDir);
+	}
+
+	public bool IsSideFilled(GeneralDirection3D dir, int voxelValue)
+	{
+		ushort extraVoxelData = voxelValue.GetExtraVoxelData();
+		Flip3D flip = extraVoxelData.GetFlip();
+		Vector3Int rotation = extraVoxelData.GetRotation();
+		GeneralDirection3D transformedDir = dir.InverseTransform(flip, rotation);
+		return IsSideFilled(transformedDir);
+	}
+
+
+
+	List<ExtraControl> controls;
+	public override IReadOnlyList<ExtraControl> GetExtraControls()
+	{
+		controls ??= new List<ExtraControl>()
+		{
+			new ExtraControl<Vector3Int> () 
+			{
+				name = "Rotation",
+				getValue = GetRotation,
+				setValue = SetRotation
+			},
+			new ExtraControl<Flip3D>() 
+			{
+				name = "Flip",
+				getValue = GetFlip,
+				setValue = SetFlip
+			},
+		};
+		return controls;
+	}
+
+	static ushort SetFlip(ushort originalExtraValue, Flip3D value) => originalExtraValue.SetFlip(value);
+	static Flip3D GetFlip(ushort extraVoxelData) => extraVoxelData.GetFlip();
+	static ushort SetRotation(ushort originalExtraValue, Vector3Int value) => originalExtraValue.SetRotation(value);
+	static Vector3Int GetRotation(ushort extraVoxelData) => extraVoxelData.GetRotation();
 }

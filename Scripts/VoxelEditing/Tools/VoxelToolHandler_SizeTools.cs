@@ -179,14 +179,13 @@ namespace VoxelSystem
 	{
 		protected override void DoResizeMap(VoxelMap map, GeneralDirection3D direction, int steps)
 		{
-			Debug.Log(steps);
 			map.Resize(direction, steps);
 		}
 		protected override bool DoResizeSelection(IVoxelEditor voxelEditor, GeneralDirection3D direction, int steps)
 		{
 			Reset(voxelEditor);
-			Action<VoxelMap> mapActon = (map) => map.Resize(direction, steps);
 			ResizeSelectionContent(voxelEditor, direction, steps, mapActon);
+			void mapActon(VoxelMap map) => map.Resize(direction, steps);
 			return true;
 		}
 	}

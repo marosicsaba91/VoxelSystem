@@ -43,7 +43,7 @@ namespace VoxelSystem
 			//	return;
 
 			//Matrix4x4 matrix4X4 = blockLibrary.LocalToWorldMatrix;
-			//Graphics.DrawMesh(mesh, matrix4X4, material, 0, sceneView.camera);
+			//Graphics.DrawMesh(previewMesh, matrix4X4, material, 0, sceneView.camera);
 		}
 	}
 }

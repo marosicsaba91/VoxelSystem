@@ -1,6 +1,7 @@
 ﻿#if UNITY_EDITOR
 
 using MUtility;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -36,6 +37,8 @@ namespace VoxelSystem
 			EditorGUILayout.LabelField("Select a GameObject with a VoxelEditor component", paletteDarkStyle);
 		}
 
+		Vector2 scrollPos = Vector2.zero;
+
 		void DrawEditor(VoxelEditor voxelEditor)
 		{
 			if (voxelEditor == null) return;
@@ -44,26 +47,56 @@ namespace VoxelSystem
 			VoxelEditorGUI.SetupGuiContentAndStyle();
 			if (voxelEditor.Map == null)
 			{
-				EditorGUILayout.HelpBox("No Map to Edit. Use VoxelFilter", UnityEditor.MessageType.Warning);
+				EditorGUILayout.HelpBox("No Map to Edit. Use VoxelFilter", MessageType.Warning);
 				return;
 			}
 
-			Rect rect = position;
-			rect.position = Vector2.zero;
-			rect.x = EditorGUIUtility.standardVerticalSpacing;
-			rect.y = EditorGUIUtility.standardVerticalSpacing;
-			rect.width -= 2 * EditorGUIUtility.standardVerticalSpacing;
-			rect.height -= 2 * EditorGUIUtility.standardVerticalSpacing;
-
-			VoxelEditorGUI.DrawHeader(voxelEditor, ref rect);
-			VoxelEditorGUI.DrawMapActions(voxelEditor, ref rect);
-			VoxelEditorGUI.DrawControlPanel(voxelEditor, ref rect);
-			VoxelEditorGUI.DrawPalettes(voxelEditor, ref rect);
+			Rect windowRect = position;
+			windowRect.position = Vector2.zero;
+			windowRect.x = EditorGUIUtility.standardVerticalSpacing;
+			windowRect.y = EditorGUIUtility.standardVerticalSpacing;
+			windowRect.width -= 2 * EditorGUIUtility.standardVerticalSpacing;
+			windowRect.height -= 2 * EditorGUIUtility.standardVerticalSpacing;
 			
-			VoxelEditorGUI.DrawVoxelPreview(voxelEditor, ref rect, GeneralDirection2D.Down);
-			VoxelEditorGUI.DrawVoxelTransformation(voxelEditor, ref rect, GeneralDirection2D.Down);
+			const float minWith = 250f;
+			const float scrollbarWidth = 14f;
 
-			EditorGUILayout.GetControlRect(false, rect.y);
+			Rect contentRect = windowRect;
+			contentRect.height += 100;
+
+			VoxelShapeBuilder selectedShape = voxelEditor.SelectedShape;
+			IReadOnlyList<ExtraControl> extraControls = selectedShape == null ? null : selectedShape.GetExtraControls();
+			int extraControlCount = extraControls == null ? 0: extraControls.Count;
+
+			float contentHeight = 490f
+				+ VoxelEditorGUI.GetPaletteHeight(voxelEditor.MaterialPalette)
+				+ VoxelEditorGUI.GetPaletteHeight(voxelEditor.ShapePalette)
+				+ VoxelEditorGUI.GetPanelHeight(extraControlCount);
+
+			float verticalScrollbarWidth = contentHeight > windowRect.height ? scrollbarWidth : 0;
+			contentRect.height = contentHeight;
+			contentRect.width = Mathf.Max(contentRect.width - verticalScrollbarWidth, minWith);
+
+
+			scrollPos = GUI.BeginScrollView(windowRect, scrollPos, contentRect);
+
+			VoxelEditorGUI.DrawHeader(voxelEditor, ref contentRect);
+			VoxelEditorGUI.DrawMapActions(voxelEditor, ref contentRect);
+
+			contentRect.y += 6;
+			contentRect.height -= 6;
+			VoxelEditorGUI.DrawControlPanel(voxelEditor, ref contentRect);
+			contentRect.y += 6;
+			contentRect.height -= 6;
+			VoxelEditorGUI.DrawPalettes(voxelEditor, ref contentRect); 
+			
+			//VoxelEditorGUI.DrawVoxelTransformation(voxelEditor, ref contentRect, GeneralDirection2D.Up);
+			VoxelEditorGUI.DrawExtraControls(voxelEditor, ref contentRect);
+			
+			VoxelEditorGUI.DrawVoxelPreview(voxelEditor, ref contentRect, GeneralDirection2D.Up);
+
+			EditorGUILayout.GetControlRect(false, contentRect.y);
+			GUI.EndScrollView();
 
 			serializedObject.ApplyModifiedProperties();
 		}

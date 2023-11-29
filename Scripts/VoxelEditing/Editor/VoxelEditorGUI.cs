@@ -146,8 +146,9 @@ namespace VoxelSystem
 
 				EditorGUI.LabelField(position.SliceOutLine(), "Enable the VoxelEditor component to edit voxel map.", EditorStyles.centeredGreyMiniLabel);
 				GUI.color = Color.white;
-			}	
+			}
 		}
+
 		public static void DrawControlPanel(VoxelEditor voxelEditor, ref Rect position)
 		{
 			bool tempEnabled = GUI.enabled;
@@ -391,7 +392,6 @@ namespace VoxelSystem
 			GUI.color = Color.white;
 		}
 
-
 		static void DrawVoxelTool(IVoxelEditor voxelEditor, VoxelTool selectedTool, VoxelAction selectedAction, Rect rect, VoxelTool drawnTool)
 		{
 			bool isActionSupported = false;
@@ -418,7 +418,6 @@ namespace VoxelSystem
 					? VoxelTool.None : drawnTool;
 			}
 		}
-
 
 		static void DrawVoxelActions(VoxelEditor voxelEditor, VoxelAction selectedAction, VoxelTool selectedTool, ref Rect position)
 		{
@@ -484,12 +483,19 @@ namespace VoxelSystem
 			GUI.enabled = tempEnabled;
 		}
 
+		const int itemsInARow = 3;
+		public static float GetPaletteHeight(IPalette palette)
+		{ 
+			if (palette == null) return 0;
+			int count = palette?.Count ?? 0; 
+			int rows = Mathf.CeilToInt(count / (float)itemsInARow);
+			return rows * _paletteButtonSize + (rows - 1) * vSpacing;
+		}
+
 		static void DrawPalette(
 			IVoxelEditor voxelEditor, IPalette palette, int selectedIndex,
 			Action<int> onSelect, VoxelTool voxel, GUIContent title, ref Rect position)
 		{
-			if (palette == null) return;
-
 			GUI.color = Color.white;
 			Rect oneRowRect = position.SliceOutLine();
 
@@ -511,7 +517,6 @@ namespace VoxelSystem
 			newValue = Mathf.Max(newValue, 0);
 
 			int i = 0;
-			const int itemsInARow = 3;
 			const float colorSpacing = 4;
 			float itemWidth = (oneRowRect.width - (itemsInARow - 1) * vSpacing) / itemsInARow;
 			if (palette != null)
@@ -556,16 +561,58 @@ namespace VoxelSystem
 			GUI.color = Color.white;
 		}
 
+		public static void DrawExtraControls(VoxelEditor voxelEditor, ref Rect position) 
+		{
+
+			VoxelShapeBuilder selectedShape = voxelEditor.SelectedShape;
+
+			IReadOnlyList<ExtraControl> extraControls = selectedShape == null ? null : selectedShape.GetExtraControls();
+			if(extraControls == null || extraControls.Count == 0) return;
+
+			int controlCount = extraControls.Count;
+				 
+			Rect fullRect = position.SliceOut(GetPanelHeight(controlCount));
+
+			Undo.RecordObject(voxelEditor.EditorObject, "Selected Value Changed");
+			int voxelData = voxelEditor.SelectedVoxelValue;
+			ushort extraVoxelData = voxelData.GetExtraVoxelData();
+
+
+			foreach (ExtraControl control in extraControls)
+			{
+				Rect controlRect = fullRect.SliceOutLine();
+				EditorGUI.LabelField(controlRect, control.name);
+				controlRect = EditorHelper.ContentRect(controlRect);
+
+				object oldValue = control.GetExtraData(extraVoxelData);
+				bool isExpanded = true;
+				object newValue = EditorHelper.AnythingField(controlRect, control.DataType, oldValue, GUIContent.none, ref isExpanded);
+
+				extraVoxelData = control.SetExtraData(extraVoxelData, newValue);
+			}
+			voxelData.SetExtraVoxelData(extraVoxelData);
+			voxelEditor.SelectedVoxelValue = voxelData; 
+		}
+
+		// Voxel Transformation
+
+		public static float GetVoxelTransformationPanelHeight() => GetPanelHeight(2);
+
+		public static float GetPanelHeight(int standardLineCount) => 
+			standardLineCount * singleLineHeight + (standardLineCount - 1) * vSpacing;
+
+		/*
 		public static void DrawVoxelTransformation(VoxelEditor voxelEditor, ref Rect position, GeneralDirection2D drawTo)
 		{
 			bool tempEnabled = GUI.enabled;
-			GUI.enabled = voxelEditor.IsEditingEnabled() && voxelEditor.EnableVoxelTransform;
+			GUI.enabled = voxelEditor.IsEditingEnabled();
 			int voxelValue = voxelEditor.SelectedVoxelValue;
 			Vector3Int rotation = voxelValue.GetRotation();
 			Flip3D flip = voxelValue.GetFlip();
 
-			Rect fullRect = position.SliceOut(singleLineHeight * 2 + vSpacing, drawTo);
-			Rect rotationRect = fullRect.SliceOutLine();
+			float panelHeight = GetVoxelTransformationPanelHeight();
+			Rect fullRect = position.SliceOut(panelHeight, drawTo);
+			Rect rotationRect = fullRect.SliceOutLine(); 
 
 			EditorGUI.LabelField(rotationRect, "Rotation");
 			rotationRect = EditorHelper.ContentRect(rotationRect);
@@ -575,66 +622,65 @@ namespace VoxelSystem
 			if (GUI.enabled)
 			{
 				if (flip != newFlip || rotation != newRotation)
-				{
+				{ 
 					Undo.RecordObject(voxelEditor.EditorObject, "Selected Value Changed");
 					voxelEditor.SelectedRotation = newRotation;
 					voxelEditor.SelectedFlip = newFlip;
 				}
 			}
-			GUI.enabled = tempEnabled;
+			GUI.enabled = tempEnabled; 
 		}
+		*/
+
+		// Draw Preview
 
 		static readonly CustomMeshPreview customMeshPreview = new();
 		static readonly MeshBuilder previewMeshBuilder = new();
-		static Mesh mesh;
-		static Mesh GetMesh() => mesh;
-		static VoxelShapeBuilder lastPreviewedShape = null;
-		static Flip3D lastPreviewedFlip = Flip3D.None;
-		static Vector3Int lastPreviewedRotation = Vector3Int.zero;
+		static Mesh previewMesh;
+		static Mesh GetPreviewMesh() => previewMesh;
+		static int lastPreviewedShapeIndex = -1;
+		static ushort lastExtraVoxelData = 0;
 
 		public static void DrawVoxelPreview(VoxelEditor voxelEditor, ref Rect position, GeneralDirection2D drawTo)
 		{
 			if (voxelEditor.ShapePalette == null) return;
 			if (voxelEditor.SelectedShapeIndex >= voxelEditor.ShapePalette.Shapes.Count) return;
 			if (Event.current.type != EventType.Repaint) return;
-
+			
 			Rect rect = position.SliceOut(150, drawTo);
 
 			customMeshPreview.TextureSize = new Vector2(rect.width, rect.height);
 			customMeshPreview.BackgroundType = CameraClearFlags.Skybox;
 			Vector3 cameraEulerAngles = SceneView.lastActiveSceneView.camera.transform.eulerAngles;
 			customMeshPreview.CameraAngle = new Vector2(-cameraEulerAngles.y, cameraEulerAngles.x);
-			customMeshPreview.Material = voxelEditor.SelectedMaterial.Material;
+			customMeshPreview.Material = voxelEditor.SelectedMaterial?.Material;
+			customMeshPreview.meshGetter = GetPreviewMesh;
 			customMeshPreview.SetDirty();
 
-			VoxelShapeBuilder shape = voxelEditor.ShapePalette.Shapes[voxelEditor.SelectedShapeIndex];
-			Flip3D flip = voxelEditor.SelectedFlip;
-			Vector3Int rotation = voxelEditor.SelectedRotation;
-			if (shape != lastPreviewedShape || lastPreviewedFlip != flip || rotation != lastPreviewedRotation)
+			int shapeIndex = voxelEditor.SelectedShapeIndex;
+			ushort extraVoxelData = voxelEditor.SelectedVoxelValue.GetExtraVoxelData();
+ 
+			if (shapeIndex != lastPreviewedShapeIndex || lastExtraVoxelData != extraVoxelData )
 			{
-				lastPreviewedShape = shape;
-				lastPreviewedFlip = flip;
-				lastPreviewedRotation = rotation;
+				lastPreviewedShapeIndex = shapeIndex;
+				lastExtraVoxelData = extraVoxelData;
 
-				previewMeshBuilder.ClearAndCopyFrom(shape.GetSerializedPreviewMesh());
-				Vector3 scale = flip.ToScale();
-				previewMeshBuilder.ApplyScale(scale);
-				Quaternion rotationQ = Quaternion.Euler(rotation * 90);
-				previewMeshBuilder.ApplyRotation(rotationQ);
+				VoxelShapeBuilder shape = voxelEditor.ShapePalette.Shapes[voxelEditor.SelectedShapeIndex];
+				ArrayVoxelMap map = new (Vector3Int.one);
+				map.SetVoxel(Vector3Int.zero, voxelEditor.SelectedVoxelValue);
+				previewMeshBuilder.Clear();
+				shape.GenerateMeshData(map, new() { Vector3Int.zero }, 0, previewMeshBuilder, false);
 
-				if (mesh == null)
-					mesh = new Mesh();
+				if (previewMesh == null)
+					previewMesh = new Mesh();
 				else
-					mesh.Clear();
+					previewMesh.Clear();
 
-				previewMeshBuilder.CopyToMesh(mesh);
-				customMeshPreview.meshGetter = GetMesh;
+				previewMeshBuilder.CopyToMesh(previewMesh);
 			}
 
 			EditorGUI.DrawPreviewTexture(rect, customMeshPreview.PreviewTexture);
 		}
-
-		internal static void DrawPreview(VoxelEditor voxelEditor, Rect rect) => throw new NotImplementedException();
 	}
 }
 #endif

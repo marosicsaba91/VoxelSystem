@@ -29,8 +29,6 @@ namespace VoxelSystem
 
 		// VoxelValue
 		int SelectedVoxelValue { get; set; }
-		Flip3D SelectedFlip { get; set; }
-		Vector3Int SelectedRotation { get; set; }
 
 		// Selection
 		BoundsInt Selection { get; set; }

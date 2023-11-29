@@ -36,8 +36,7 @@ namespace VoxelSystem
 			int picked = voxelEditor.Map.GetVoxel(index);
 
 			selected.SetShapeIndex(picked.GetShapeIndex());
-			selected.SetRotation(picked.GetRotation());
-			selected.SetFlip(picked.GetFlip());
+			selected.SetExtraVoxelData(picked.GetExtraVoxelData());
 
 			voxelEditor.SelectedVoxelValue = selected;
 		}

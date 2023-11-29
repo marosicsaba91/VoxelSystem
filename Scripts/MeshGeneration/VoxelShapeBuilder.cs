@@ -1,7 +1,9 @@
 ﻿using MUtility;
+using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace VoxelSystem
 {
@@ -25,16 +27,15 @@ namespace VoxelSystem
 			AssemblyReloadEvents.beforeAssemblyReload += Dispose;
 		}
 
-
 		void Dispose()
-		{			
+		{
 			if (previewMesh != null)
 			{
 				DestroyImmediate(previewMesh);
 				previewMesh = null;
 			}
 
-			meshPreview.Dispose();			
+			meshPreview.Dispose();
 		}
 
 		void ValidateQuickVersion()
@@ -77,47 +78,22 @@ namespace VoxelSystem
 			List<Vector3Int> voxelPositions,
 			int shapeIndex,
 			MeshBuilder meshBuilder);
+		
 
-		public virtual bool IsTransformEnabled
-		{
-			get => false;
-			internal set { }
-		}
-
-		protected abstract bool IsSideFilled(GeneralDirection3D dir);
-
-		public bool IsSideFilled(GeneralDirection3D dir, Flip3D flip, Vector3Int rotation)
-		{
-			if (!IsTransformEnabled)
-				return IsSideFilled(dir);
-
-			GeneralDirection3D transformedDir = dir.InverseTransform(flip, rotation);
-			return IsSideFilled(transformedDir);
-		}
-
-		public bool IsSideFilled(GeneralDirection3D dir, int voxelValue)
-		{
-			if (!IsTransformEnabled)
-				return IsSideFilled(dir);
-
-			Flip3D flip = voxelValue.GetFlip();
-			Vector3Int rotation = voxelValue.GetRotation();
-			GeneralDirection3D transformedDir = dir.InverseTransform(flip, rotation);
-			return IsSideFilled(transformedDir);
-		}
-
+		public abstract bool IsSideFilled(GeneralDirection3D dir);
 
 
 		// Preview -----------------------
-		 
+
 		[SerializeField, HideInInspector] MeshBuilder previewMeshBuilder = new();
-		protected Mesh previewMesh = null; 
+		protected Mesh previewMesh = null;
 		protected readonly List<Vector3Int> oneVoxelList = new() { Vector3Int.zero };
 
 		public MeshBuilder GetSerializedPreviewMesh() => previewMeshBuilder;
-		public Mesh GetPreviewMesh() 
+
+		public Mesh GetPreviewMesh()
 		{
-			if(previewMeshBuilder.VertexCount == 0)
+			if (previewMeshBuilder.VertexCount == 0)
 				RecalculatePreviewMeshBuilder();
 
 			if (previewMesh == null)
@@ -126,11 +102,11 @@ namespace VoxelSystem
 			}
 			else
 			{
-				previewMesh.Clear(); 
+				previewMesh.Clear();
 			}
 
 			previewMeshBuilder.CopyToMesh(previewMesh);
-			
+
 			return previewMesh;
 		}
 
@@ -141,7 +117,7 @@ namespace VoxelSystem
 			meshPreview.BackgroundType = CameraClearFlags.Skybox;
 			meshPreview.BackgroundColor = color;
 			meshPreview.isExpandable = false;
-			if(previewMaterial != null)
+			if (previewMaterial != null)
 				meshPreview.SetMaterials(previewMaterial);
 			else
 				meshPreview.SetMaterials();
@@ -161,6 +137,28 @@ namespace VoxelSystem
 			previewMeshBuilder.CopyToMesh(previewMesh);
 
 		}
+		
+		public virtual IReadOnlyList<ExtraControl> GetExtraControls() => null;
 
+	}
+
+	public abstract class ExtraControl
+	{ 
+		public string name;
+		public abstract Type DataType { get; }
+		public abstract object GetExtraData(ushort extraVoxelData);
+		public abstract ushort SetExtraData(ushort originalExtraVoxelData, object newValue);
+	}
+
+	public class ExtraControl<T> : ExtraControl
+	{
+		public delegate T GetValueDel(ushort voxelData);
+		public delegate ushort SetValueDel(ushort originalExtraVoxelData, T newValue);
+
+		public GetValueDel getValue;
+		public SetValueDel setValue;
+		public sealed override object GetExtraData(ushort extraVoxelData) => getValue(extraVoxelData);
+		public sealed override ushort SetExtraData(ushort originalExtraVoxelData, object newValue) => setValue(originalExtraVoxelData, (T)newValue);
+		public sealed override Type DataType => typeof(T);
 	}
 }

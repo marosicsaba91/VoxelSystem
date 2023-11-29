@@ -131,8 +131,9 @@ public class VoxelTester : MonoBehaviour
 			text.Append(" (" + shapePalette.PaletteItems[shapeIndex].DisplayName + ")");
 		text.AppendLine();
 
-		text.AppendLine("Flip: " + voxelValue.GetFlip());
-		text.AppendLine("Rotation: " + voxelValue.GetRotation());
+		ushort extraVoxelData = voxelValue.GetExtraVoxelData();
+		text.AppendLine("Flip: " + extraVoxelData.GetFlip());
+		text.AppendLine("Rotation: " + extraVoxelData.GetRotation());
 
 		Handles.Label(position, text.ToString());
 #endif
@@ -146,8 +147,9 @@ public class VoxelTester : MonoBehaviour
 		if (map == null) return;
 
 		int voxelValue = map.GetVoxel(index);
-		Flip3D flip= voxelValue.GetFlip();
-		Vector3Int rotation = voxelValue.GetRotation();
+		ushort extraVoxelData = voxelValue.GetExtraVoxelData();
+		Flip3D flip= extraVoxelData.GetFlip();
+		Vector3Int rotation = extraVoxelData.GetRotation();
 
 		Vector3 center = index + Vector3.one * 0.5f;
 
@@ -184,13 +186,14 @@ public class VoxelTester : MonoBehaviour
 		VoxelShapeBuilder shape = shapePalette.PaletteItems[shapeIndex] as VoxelShapeBuilder;
 
 		Vector3 center = index + Vector3.one * 0.5f;
-		Flip3D flip = voxelValue.GetFlip();
-		Vector3Int rotation = voxelValue.GetRotation();
+		// ushort extraVoxelData = voxelValue.GetExtraVoxelData();
+		// Flip3D flip = extraVoxelData.GetFlip();
+		// Vector3Int rotation = extraVoxelData.GetRotation();
 
 
 		foreach (GeneralDirection3D dir in DirectionUtility.generalDirection3DValues)
 		{
-			bool filled = shape.IsSideFilled(dir, flip, rotation);
+			bool filled = shape.IsSideFilled(dir);
 			Gizmos.color = filled ? Color.black : Color.white;
 			Vector3 position = center + dir.ToVector() * 0.5f;
 			if(filled)

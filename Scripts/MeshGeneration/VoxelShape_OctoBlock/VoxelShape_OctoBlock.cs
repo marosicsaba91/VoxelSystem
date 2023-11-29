@@ -32,7 +32,7 @@ namespace VoxelSystem
 
 		static readonly List<Vector3> _breakPoints = new();
 
-		protected sealed override bool IsSideFilled(GeneralDirection3D dir) => true;
+		public sealed override bool IsSideFilled(GeneralDirection3D dir) => true;
 
 		protected sealed override void GenerateMeshData(
 			VoxelMap map,

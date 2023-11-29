@@ -139,52 +139,86 @@ namespace VoxelSystem
 			}
 		}
 
-		internal void ClearAndCopyFrom(MeshBuilder customMesh)
+		internal void ClearAndCopyFrom(MeshBuilder mesh)
 		{
 			Clear();
 
-			for (int i = 0; i < customMesh.vertices.Count; i++)
+			for (int i = 0; i < mesh.vertices.Count; i++)
 			{
-				vertices.Add(customMesh.vertices[i]);
-				normals.Add(customMesh.normals[i]);
-				uv.Add(customMesh.uv[i]);
+				vertices.Add(mesh.vertices[i]);
+				normals.Add(mesh.normals[i]);
+				uv.Add(mesh.uv[i]);
 			}
 
-			for (int i = 0; i < customMesh.triangles.Count; i++)
-				triangles.Add(customMesh.triangles[i]);
+			for (int i = 0; i < mesh.triangles.Count; i++)
+				triangles.Add(mesh.triangles[i]);
 		}
 
-		public void Add(MeshBuilder listMesh) 
+		public void Add(MeshBuilder mesh) 
 		{
 			int startIndex = vertices.Count;
 
-			for (int i = 0; i < listMesh.vertices.Count; i++)
+			for (int i = 0; i < mesh.vertices.Count; i++)
 			{
-				vertices.Add(listMesh.vertices[i]);
-				normals.Add(listMesh.normals[i]);
-				uv.Add(listMesh.uv[i]);
+				vertices.Add(mesh.vertices[i]);
+				normals.Add(mesh.normals[i]);
+				uv.Add(mesh.uv[i]);
 			}
 
-			for (int i = 0; i < listMesh.triangles.Count; i++)
+			for (int i = 0; i < mesh.triangles.Count; i++)
 			{
-				triangles.Add(listMesh.triangles[i] + startIndex);
+				triangles.Add(mesh.triangles[i] + startIndex);
 			}
 		}
 
-		public void Add(MeshBuilder listMesh, Vector3 translate)
+		public void Add(ArrayMesh mesh)
 		{
 			int startIndex = vertices.Count;
 
-			for (int i = 0; i < listMesh.vertices.Count; i++)
+			for (int i = 0; i < mesh.vertices.Length; i++)
 			{
-				vertices.Add(listMesh.vertices[i] + translate);
-				normals.Add(listMesh.normals[i]);
-				uv.Add(listMesh.uv[i]);
+				vertices.Add(mesh.vertices[i]);
+				normals.Add(mesh.normals[i]);
+				uv.Add(mesh.uv[i]);
 			}
 
-			for (int i = 0; i < listMesh.triangles.Count; i++)
+			for (int i = 0; i < mesh.triangles.Length; i++)
 			{
-				triangles.Add(listMesh.triangles[i] + startIndex);
+				triangles.Add(mesh.triangles[i] + startIndex);
+			}
+		}
+
+		public void Add(MeshBuilder mesh, Vector3 translate)
+		{
+			int startIndex = vertices.Count;
+
+			for (int i = 0; i < mesh.vertices.Count; i++)
+			{
+				vertices.Add(mesh.vertices[i] + translate);
+				normals.Add(mesh.normals[i]);
+				uv.Add(mesh.uv[i]);
+			}
+
+			for (int i = 0; i < mesh.triangles.Count; i++)
+			{
+				triangles.Add(mesh.triangles[i] + startIndex);
+			}
+		}
+
+		public void Add(ArrayMesh mesh, Vector3 translate)
+		{
+			int startIndex = vertices.Count;
+
+			for (int i = 0; i < mesh.vertices.Length; i++)
+			{
+				vertices.Add(mesh.vertices[i] + translate);
+				normals.Add(mesh.normals[i]);
+				uv.Add(mesh.uv[i]);
+			}
+
+			for (int i = 0; i < mesh.triangles.Length; i++)
+			{
+				triangles.Add(mesh.triangles[i] + startIndex);
 			}
 		}
 

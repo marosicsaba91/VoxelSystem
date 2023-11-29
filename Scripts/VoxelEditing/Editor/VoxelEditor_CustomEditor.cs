@@ -107,7 +107,7 @@ namespace VoxelSystem
 			if (voxelEditor == null) return;
 
 			VoxelEditorGUI.SetupGuiContentAndStyle();
-			// UpdateEnableEdit(voxelEditor);
+
 			if (voxelEditor.Map == null)
 			{
 				EditorGUILayout.HelpBox("No Map to Edit. Use VoxelFilter", UnityEditor.MessageType.Warning);
@@ -116,31 +116,34 @@ namespace VoxelSystem
 
 			const float margin = 4;
 			const float startY = 28;
-			Rect rect = new(margin, startY, EditorHelper.FullWith - 2 * margin, 0);
+			Rect contentRect = new(margin, startY, EditorHelper.FullWith - 2 * margin, 0);
 
-			VoxelEditorGUI.DrawHeader(voxelEditor, ref rect);
-			VoxelEditorGUI.DrawMapActions(voxelEditor, ref rect);
+			VoxelEditorGUI.DrawHeader(voxelEditor, ref contentRect);
+			VoxelEditorGUI.DrawMapActions(voxelEditor, ref contentRect);
 
 			bool isWindowOpen = EditorWindow.HasOpenInstances<VoxelEditorWindow>();
 
 
 			if (!isWindowOpen)
 			{
-				if (GUI.Button(rect.SliceOut(24), "Open Editor Window"))
+				if (GUI.Button(contentRect.SliceOut(24), "Open Editor Window"))
 					VoxelEditorWindow.ShowExample();
 
-				rect.RemoveOneSpace();
+				contentRect.RemoveOneSpace();
 
-				VoxelEditorGUI.DrawControlPanel(voxelEditor, ref rect);
-				VoxelEditorGUI.DrawPalettes(voxelEditor, ref rect);
-				VoxelEditorGUI.DrawVoxelTransformation(voxelEditor, ref rect, GeneralDirection2D.Up);
-				VoxelEditorGUI.DrawVoxelPreview(voxelEditor, ref rect, GeneralDirection2D.Up);
+				VoxelEditorGUI.DrawControlPanel(voxelEditor, ref contentRect);
+				VoxelEditorGUI.DrawPalettes(voxelEditor, ref contentRect);
+
+				// VoxelEditorGUI.DrawVoxelTransformation(voxelEditor, ref contentRect, GeneralDirection2D.Up);
+				VoxelEditorGUI.DrawExtraControls(voxelEditor, ref contentRect);
+
+				VoxelEditorGUI.DrawVoxelPreview(voxelEditor, ref contentRect, GeneralDirection2D.Up);
 
 				EditorGUILayout.GetControlRect(false, 150); // ???
 			}
 
 
-			EditorGUILayout.GetControlRect(false, rect.y - startY);
+			EditorGUILayout.GetControlRect(false, contentRect.y - startY);
 
 			serializedObject.ApplyModifiedProperties();
 		}

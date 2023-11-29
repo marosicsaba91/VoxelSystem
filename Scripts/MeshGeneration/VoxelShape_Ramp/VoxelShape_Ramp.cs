@@ -56,8 +56,6 @@ namespace VoxelSystem
 			}
 		}
 
-		protected sealed override bool IsSideFilled(GeneralDirection3D dir) => rampShape.IsSideFilled(dir);
-
-		public sealed override bool IsTransformEnabled => false;
+		public sealed override bool IsSideFilled(GeneralDirection3D dir) => rampShape.IsSideFilled(dir);
 	}
 }

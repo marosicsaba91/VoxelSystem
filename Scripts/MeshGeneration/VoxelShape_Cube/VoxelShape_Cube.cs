@@ -20,7 +20,7 @@ namespace VoxelSystem
 		static readonly int[] negativeWinding = { 0, 2, 1, 0, 3, 2 };
 		static readonly GeneralDirection3D[] directions = DirectionUtility.generalDirection3DValues;
 
-		protected sealed override bool IsSideFilled(GeneralDirection3D dir) => true;
+		public sealed override bool IsSideFilled(GeneralDirection3D dir) => true;	
 
 		protected override void ValidateInternal()
 		{

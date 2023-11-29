@@ -175,20 +175,20 @@ namespace VoxelSystem
 			foreach (Vector3Int index in bounds.WalkThrough())
 			{
 				int voxelValue = map.GetVoxel(index);
-
-				Flip3D flip = voxelValue.GetFlip();
-				Vector3Int rotation = voxelValue.GetRotation();
+				ushort extraVoxelData = voxelValue.GetExtraVoxelData();
+				Flip3D flip = extraVoxelData.GetFlip();
+				Vector3Int rotation = extraVoxelData.GetRotation();
 				if (flip == Flip3D.None && rotation == Vector3Int.zero) continue;
 
 				if (voxelValue.IsEmpty())
-					RepairVoxel(map, ref faultyVoxelCount, index, ref voxelValue);
+					RepairVoxel(ref faultyVoxelCount, ref voxelValue);
 
 				int shapeIndex = voxelValue.GetShapeIndex();
 				VoxelShapeBuilder shape = palette.Shapes[shapeIndex];
 
 
-				if (!shape.IsTransformEnabled)
-					RepairVoxel(map, ref faultyVoxelCount, index, ref voxelValue);
+				//if (!shape.IsTransformEnabled)
+				//	RepairVoxel(map, ref faultyVoxelCount, index, ref voxelValue);
 			}
 
 			if (faultyVoxelCount == 0)
@@ -199,13 +199,12 @@ namespace VoxelSystem
 				
 			}
 
-			static void RepairVoxel(VoxelMap map, ref int faultyVoxelCount, Vector3Int index, ref int voxelValue)
-			{
-				voxelValue.SetFlip(Flip3D.None);
-				voxelValue.SetRotation(Vector3Int.zero);
-				map.SetVoxel(index, voxelValue);
+			static void RepairVoxel(ref int faultyVoxelCount, ref int voxelValue)
+			{ 
+				voxelValue.SetExtraVoxelData(0);
 				faultyVoxelCount++;
 			}
+			
 		}
 	}
 }

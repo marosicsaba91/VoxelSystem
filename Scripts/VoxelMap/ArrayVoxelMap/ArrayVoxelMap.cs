@@ -125,8 +125,7 @@ namespace VoxelSystem
 					if (v.IsFilled())
 					{
 						v.SetShapeIndex(value.GetShapeIndex());
-						v.SetFlip(value.GetFlip());
-						v.SetRotation(value.GetRotation());
+						v.SetExtraVoxelData(value.GetExtraVoxelData());
 					}
 					break;
 
@@ -246,8 +245,7 @@ namespace VoxelSystem
 							{
 								int v = intVoxelData[index];
 								v.SetShapeIndex(value.GetShapeIndex());
-								v.SetFlip(value.GetFlip());
-								v.SetRotation(value.GetRotation());
+								v.SetExtraVoxelData(value.GetExtraVoxelData());
 								intVoxelData[index] = v;
 								changed |= true;
 							}

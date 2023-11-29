@@ -1,4 +1,3 @@
-
 using MUtility;
 using System;
 using UnityEngine;
@@ -22,6 +21,8 @@ namespace VoxelSystem
 		[SerializeField] byte shapeIndex;
 		[SerializeField] byte materialIndex;
 
+		[SerializeField] ushort extraData;
+
 		void OnValidate()
 		{
 			switch (inputSource)
@@ -44,8 +45,10 @@ namespace VoxelSystem
 			 
 			value.SetMaterialIndex(materialIndex);
 			value.SetShapeIndex(shapeIndex);
-			value.SetFlip(fliping);
-			value.SetRotation(rotation.x, rotation.y, rotation.z);
+			ushort extraData = value.GetExtraVoxelData();
+			extraData.SetFlip(fliping);
+			extraData.SetRotation(rotation.x, rotation.y, rotation.z); 
+			value.SetExtraVoxelData(extraData);
 
 			return value;
 		}
@@ -62,7 +65,7 @@ namespace VoxelSystem
 			binaryValue = binaryValue.PadRight(32, '0');
 
 			// Cut off the first 32 characters
-			binaryValue = binaryValue[..32];
+			binaryValue = binaryValue[..32]; 
 
 			//Get the decimal value
 			return Convert.ToInt32(binaryValue, 2);
@@ -77,8 +80,9 @@ namespace VoxelSystem
 
 			materialIndex = value.GetMaterialIndex();
 			shapeIndex = value.GetShapeIndex();
-			fliping = value.GetFlip();
-			rotation = value.GetRotation();
+			extraData = value.GetExtraVoxelData();
+			fliping = extraData.GetFlip();
+			rotation = extraData.GetRotation();
 		}
 	}
 }
