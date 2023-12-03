@@ -469,7 +469,7 @@ namespace VoxelSystem
 				voxelEditor.SelectedMaterialIndex,
 				newSelectedIndex => voxelEditor.SelectedMaterialIndex = newSelectedIndex,
 				VoxelTool.MaterialPicker,
-				new("Material Index:", "The selected index of the Material names"),
+				new("Material GetCoordiante:", "The selected index of the Material names"),
 				ref position);
 
 			DrawPalette(
@@ -478,7 +478,7 @@ namespace VoxelSystem
 				voxelEditor.SelectedShapeIndex,
 				newSelectedIndex => voxelEditor.SelectedShapeIndex = newSelectedIndex,
 				VoxelTool.ShapePicker,
-				new("Shape Index:", "The selected index of the Shape names"),
+				new("Shape GetCoordiante:", "The selected index of the Shape names"),
 				ref position);
 			GUI.enabled = tempEnabled;
 		}

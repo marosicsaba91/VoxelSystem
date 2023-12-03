@@ -24,7 +24,7 @@ namespace VoxelSystem
 
 			for (int i = 0; i < intVoxelData.Length; i++)
 			{
-				Vector3Int original = Index(i);
+				Vector3Int original = GetCoordinate(i);
 				int nx =
 					axis == Axis3D.X ? original.x :
 					axis == Axis3D.Y ? (leftHandPositive ? size.z - original.z - 1 : original.z) :
@@ -53,7 +53,7 @@ namespace VoxelSystem
 
 			for (int i = 0; i < intVoxelData.Length; i++)
 			{
-				Vector3Int o = Index(i);
+				Vector3Int o = GetCoordinate(i);
 				if (axis == Axis3D.X)
 					o.x = size.x - o.x - 1;
 				if (axis == Axis3D.Y)

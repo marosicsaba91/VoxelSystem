@@ -33,10 +33,6 @@ namespace VoxelSystem
 
 		protected override bool IsInitialized => sideMeshCache[0] != null && sideMeshCache[0].Count > 0;
 
-		public sealed override bool IsSideFilled(GeneralDirection3D dir) => true;
-
-
-
 		readonly List<CubeSide> allSides = new();
 		static readonly int[] positiveWinding = { 0, 1, 2, 0, 2, 3 };
 		static readonly int[] negativeWinding = { 0, 2, 1, 0, 3, 2 };

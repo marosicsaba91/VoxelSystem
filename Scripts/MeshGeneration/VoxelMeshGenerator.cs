@@ -213,22 +213,49 @@ namespace VoxelSystem
 				destinationMeshFilter.sharedMesh = destinationMesh;
 		}
 
+
+		byte[] sideClosedMap;
+		void ClearOpenedSideMap()
+		{
+			if (sideClosedMap == null || sideClosedMap.Length != Map.Length)
+				sideClosedMap = new byte[Map.Length];
+			else
+				for (int i = 0; i < sideClosedMap.Length; i++)
+					sideClosedMap[i] = 0;
+		}
+
 		void CalculateAllMeshData(bool quick)
 		{
-			int _currentTriangleIndex = 0;
+			VoxelMap map = Map; 
+
+			// Pre-calculate VoxelData if needed
+			foreach (KeyValuePair<VoxelInfo, List<Vector3Int>> chunks in voxelsByType)
+			{
+				int shapeIndex = chunks.Key.shapeIndex;
+				VoxelShapeBuilder shapeBuilder = shapePalette.Shapes[shapeIndex];
+				shapeBuilder.SetupVoxelData(map, chunks.Value, shapeIndex, quick);
+			}
+
+			// Calculate openness for every direction
+			ClearOpenedSideMap(); 
+			foreach (KeyValuePair<VoxelInfo, List<Vector3Int>> chunks in voxelsByType)
+			{
+				int shapeIndex = chunks.Key.shapeIndex;
+				VoxelShapeBuilder shapeBuilder = shapePalette.Shapes[shapeIndex];
+				List<Vector3Int> voxels = chunks.Value;
+				shapeBuilder.SetupClosedSides(map, voxels, sideClosedMap, quick);
+			}
+
+			// SetupMesh for every direction
 			for (int materialIndex = 0; materialIndex < MaterialPalette.Count; materialIndex++)
 			{
 				for (int shapeIndex = 0; shapeIndex < shapePalette.Shapes.Count; shapeIndex++)
 				{
 					VoxelShapeBuilder item = shapePalette.Shapes[shapeIndex];
 					List<Vector3Int> voxelIndexes = voxelsByType[new VoxelInfo() { materialIndex = materialIndex, shapeIndex = shapeIndex }];
-					item.GenerateMeshData(Map, voxelIndexes, shapeIndex, meshBuilder, quick);
-
+					item.GenerateMeshData(map, voxelIndexes, shapeIndex, meshBuilder, quick);
 				}
-				// Make a function for this:
-				int triangleCount = meshBuilder.TriangleCount - _currentTriangleIndex;
-				meshBuilder.descriptors.Add(new SubMeshDescriptor(_currentTriangleIndex, triangleCount));
-				_currentTriangleIndex = meshBuilder.TriangleCount;
+				meshBuilder.NextMaterial();
 			}
 		}
 

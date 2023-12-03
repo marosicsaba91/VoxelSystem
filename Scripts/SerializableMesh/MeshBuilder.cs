@@ -14,6 +14,7 @@ namespace VoxelSystem
 		public List<int> triangles = new();
 		public List<SubMeshDescriptor> descriptors = new();
 
+		[SerializeField] int _lastMaterialStartTriangleIndex = 0;
 		public int VertexCount => vertices.Count;
 		public int TriangleCount => triangles.Count;
 
@@ -78,6 +79,7 @@ namespace VoxelSystem
 			uv.Clear();
 			triangles.Clear();
 			descriptors.Clear();
+			_lastMaterialStartTriangleIndex = 0;
 		}
 
 		public Mesh ToMesh()
@@ -235,6 +237,13 @@ namespace VoxelSystem
 			triangles.Add(v1);
 			triangles.Add(v2);
 			triangles.Add(v3);
+		}
+
+		public void NextMaterial() 
+		{ 
+			int triangleCount = TriangleCount - _lastMaterialStartTriangleIndex;
+			descriptors.Add(new SubMeshDescriptor(_lastMaterialStartTriangleIndex, triangleCount));
+			_lastMaterialStartTriangleIndex = TriangleCount;
 		}
 	}
 }

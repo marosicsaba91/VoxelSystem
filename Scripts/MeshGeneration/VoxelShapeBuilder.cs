@@ -79,6 +79,30 @@ namespace VoxelSystem
 
 		VoxelShapeBuilder GetVoxelVersion(bool quick) => (quick && quickVersion != null) ? quickVersion : this;
 
+		internal void SetupVoxelData(
+			VoxelMap map,
+			List<Vector3Int> voxelPositions,
+			int shapeIndex,
+			bool quick)
+		{ 
+			GetVoxelVersion(quick).SetupVoxelData(map, voxelPositions, shapeIndex);
+		}
+
+		protected virtual void SetupVoxelData(VoxelMap map, List<Vector3Int> voxelPositions, int shapeIndex) { }
+
+		internal void SetupClosedSides(VoxelMap map, List<Vector3Int> voxelPositions, byte[] sideClosedness, bool quick) =>
+
+			GetVoxelVersion(quick).SetupClosedSides(map, voxelPositions, sideClosedness);
+
+		protected virtual void SetupClosedSides(VoxelMap map, List<Vector3Int> voxelPositions, byte[] sideClosedness) 
+		{
+			for (int i = 0; i < voxelPositions.Count; i++)
+			{
+				int index = ArrayVoxelMap.GetIndex(voxelPositions[i], map.FullSize);
+				sideClosedness[index].SetAllSidesClosed();
+			}
+		}
+
 		internal void GenerateMeshData(
 			VoxelMap map,
 			List<Vector3Int> voxelPositions,
@@ -102,10 +126,6 @@ namespace VoxelSystem
 			List<Vector3Int> voxelPositions,
 			int shapeIndex,
 			MeshBuilder meshBuilder);
-		
-
-		public abstract bool IsSideFilled(GeneralDirection3D dir);
-
 
 		// ---------- Preview -----------------------
 
@@ -153,7 +173,6 @@ namespace VoxelSystem
 		}
 				
 		public virtual IReadOnlyList<ExtraControl> GetExtraControls() => null;
-
 	}
 
 	// ---------- ExtraControl ------------------------

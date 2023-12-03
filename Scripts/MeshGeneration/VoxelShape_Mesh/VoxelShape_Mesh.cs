@@ -54,17 +54,22 @@ public class VoxelShape_Mesh : VoxelShapeBuilder
 		}
 	}
 
-	public override bool IsSideFilled(GeneralDirection3D dir) => isSideFilled[dir];
-
-
-	public bool IsSideFilled(GeneralDirection3D dir, int voxelValue)
+	protected override void SetupClosedSides(VoxelMap map, List<Vector3Int> voxelPositions, byte[] sideClosedness)
 	{
-		ushort extraVoxelData = voxelValue.GetExtraVoxelData();
-		CubicTransformation cubicTransformation = new(extraVoxelData); 
-		return IsSideFilledNoTransformation(cubicTransformation.TransformDirection(dir));
+		for (int i = 0; i < voxelPositions.Count; i++)
+		{
+			int index = ArrayVoxelMap.GetIndex(voxelPositions[i], map.FullSize);
+			sideClosedness[index] = 0; // TODO: Implement this properly
+		} 
+		// Use IsSideFilled(dir, voxelValue);
 	}
 
-	public bool IsSideFilledNoTransformation(GeneralDirection3D dir) => IsSideFilled(dir);
+	public bool IsSideFilled(GeneralDirection3D dir, int voxelValue)
+	{ 
+		ushort extraVoxelData = voxelValue.GetExtraVoxelData();
+		CubicTransformation cubicTransformation = new(extraVoxelData); 
+		return isSideFilled[cubicTransformation.TransformDirection(dir)];
+	}
 
 
 	List<ExtraControl> controls;

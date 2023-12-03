@@ -57,15 +57,15 @@ namespace VoxelSystem
 		// GET Voxels ----------------------------
 
 		public int Index(Vector3Int coordinate) => Index(coordinate.x, coordinate.y, coordinate.z, size);
-		public static int Index(Vector3Int coordinate, Vector3Int size) =>
+		public static int GetIndex(Vector3Int coordinate, Vector3Int size) =>
 			Index(coordinate.x, coordinate.y, coordinate.z, size);
 
 		public int Index(int x, int y, int z) => Index(x, y, z, size);
 		public static int Index(int x, int y, int z, Vector3Int size) =>
 			x + (y * size.x) + (z * size.x * size.y);
 
-		Vector3Int Index(int i) => Index(i, size);
-		public static Vector3Int Index(int i, Vector3Int size)
+		Vector3Int GetCoordinate(int i) => GetCoordinate(i, size);
+		public static Vector3Int GetCoordinate(int i, Vector3Int size)
 		{
 			int z = i / (size.x * size.y);
 			i -= z * size.x * size.y;

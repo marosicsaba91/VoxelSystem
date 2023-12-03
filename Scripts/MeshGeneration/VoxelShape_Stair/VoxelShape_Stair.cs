@@ -79,7 +79,7 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 		if (bottomSide != null)
 		{
 			ArrayMesh result = ArrayMesh.CreateFromMesh(bottomSide, autoConvertFromRightHanded ? rightToLeftHanded : Matrix4x4.identity);
-			if(useTextureSettingOnCustomMeshes)
+			if (useTextureSettingOnCustomMeshes)
 				result.ProjectUV(cubeTextureCoordinates.GetRect(GeneralDirection3D.Down), Axis3D.Y);
 			return result;
 		}
@@ -218,15 +218,21 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 		return VoxelShape_Cube.GenerateDefaultSide(GeneralDirection3D.Forward, cubeTextureCoordinates);
 	}
 
+	protected sealed override void SetupClosedSides(VoxelMap map, List<Vector3Int> voxelPositions, byte[] sideClosedness)
+	{
+		for (int i = 0; i < voxelPositions.Count; i++)
+		{
+			int index = ArrayVoxelMap.GetIndex(voxelPositions[i], map.FullSize);
+			sideClosedness[index].SetAllSidesClosed(false); // TODO: Implement this properly
+		}
+	}
+
 	protected sealed override void GenerateMeshData(
 		VoxelMap map,
 		List<Vector3Int> voxelPositions,
 		int shapeIndex,
 		MeshBuilder meshBuilder)
 	{
-		for (int i = 0; i < voxelPositions.Count; i++)
-			SetupVoxelTypeAndRotation(map, voxelPositions[i], shapeIndex);
-
 		for (int i = 0; i < voxelPositions.Count; i++)
 			BuildMesh(map, voxelPositions[i], meshBuilder);
 	}
@@ -264,6 +270,12 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 	const int extraInfo_stairType = 1;
 	const int extraInfo_rotation = 2;
 	const int extraInfo_level = 3;
+
+	protected override void SetupVoxelData(VoxelMap map, List<Vector3Int> voxelPositions, int shapeIndex)
+	{
+		for (int i = 0; i < voxelPositions.Count; i++)
+			SetupVoxelTypeAndRotation(map, voxelPositions[i], shapeIndex);
+	}
 
 	void SetupVoxelTypeAndRotation(VoxelMap map, Vector3Int position, int shapeIndex)
 	{
@@ -487,8 +499,6 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 		}
 
 	}
-
-	public override bool IsSideFilled(GeneralDirection3D dir) => false; // TODO
 
 	// ROTATION HELPER METHODSS ------------
 

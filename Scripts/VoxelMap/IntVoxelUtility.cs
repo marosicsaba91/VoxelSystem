@@ -35,7 +35,7 @@ namespace VoxelSystem
 
 		// ------------------------------------------------------------------------------------------------
 
-		// Bits 0-7 are Material Index
+		// Bits 0-7 are Material GetCoordiante
 		internal static byte GetMaterialIndex(this int i) =>
 			(byte)((i >> 24) & 0xFF);
 
@@ -44,7 +44,7 @@ namespace VoxelSystem
 
 		// ------------------------------------------------------------------------------------------------
 
-		// Bits 8-15 are the Shape Index
+		// Bits 8-15 are the Shape GetCoordiante
 
 		internal static byte GetShapeIndex(this int i) =>
 			(byte)((i >> 16) & 0xFF);

@@ -34,7 +34,6 @@ namespace VoxelSystem
 
 		static readonly List<Vector3> _breakPoints = new();
 		protected override void InitializeMeshCache() { }
-		public sealed override bool IsSideFilled(GeneralDirection3D dir) => true;
 
 		protected sealed override void GenerateMeshData(
 			VoxelMap map,

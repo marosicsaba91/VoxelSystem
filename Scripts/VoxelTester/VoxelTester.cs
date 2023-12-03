@@ -112,7 +112,7 @@ public class VoxelTester : MonoBehaviour
 
 
 		StringBuilder text = new();
-		text.AppendLine("Index: " + index);
+		text.AppendLine("GetCoordiante: " + index);
 		text.AppendLine("Value: " + voxelValue);
 		if (voxelValue.IsEmpty())
 		{
@@ -190,7 +190,7 @@ public class VoxelTester : MonoBehaviour
 		// Flip3D flip = extraVoxelData.GetFlip();
 		// Vector3Int rotation = extraVoxelData.GetRotation();
 
-
+		/*
 		foreach (GeneralDirection3D dir in DirectionUtility.generalDirection3DValues)
 		{
 			bool filled = shape.IsSideFilled(dir);
@@ -201,6 +201,7 @@ public class VoxelTester : MonoBehaviour
 			else
 				Gizmos.DrawWireSphere(position, 0.1f);
 		}
+		*/
 	}
 
 }

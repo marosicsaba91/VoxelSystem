@@ -263,7 +263,7 @@ namespace VoxelSystem
 			Vector3 localPosInMap = t.InverseTransformPoint(position);
 			Vector3Int indexPoint = Vector3Int.RoundToInt(localPosInMap);
 			path.Add(t.TransformPoint(indexPoint + half));
-			Debug.Log($"LocalPos: {localPosInMap} Index: {indexPoint}");
+			Debug.Log($"LocalPos: {localPosInMap} GetCoordiante: {indexPoint}");
 			if (!navMap.TryGetValue(indexPoint, out NavVoxelData currentVoxel))
 				return false;
 
