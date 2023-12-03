@@ -53,7 +53,7 @@ namespace VoxelSystem
 
 		}
 
-		public MaterialPalette MaterialPalette => meshGenerator.MaterialPalette;
+		public List<Material> MaterialPalette => meshGenerator.MaterialPalette;
 
 		public VoxelShapePalette ShapePalette => meshGenerator.ShapePalette;
 
@@ -80,13 +80,13 @@ namespace VoxelSystem
 			set => selectedVoxelValue.SetMaterialIndex((byte)value);
 		}
 
-		public MaterialSetup SelectedMaterial
+		public Material SelectedMaterial
 		{
 			get
 			{
 				if (meshGenerator == null) return null;
 				if (meshGenerator.MaterialPalette == null) return null;
-				return meshGenerator.MaterialPalette.Materials.IndexClamped(SelectedMaterialIndex);
+				return MaterialPalette.IndexClamped(SelectedMaterialIndex);
 			}
 		}
 

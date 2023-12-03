@@ -23,6 +23,8 @@ namespace VoxelSystem
 
 		[SerializeField] OctoBlockLibrary blockLibrary;
 
+		protected override bool IsInitialized => blockLibrary != null;
+
 		readonly Dictionary<Vector3Int, OctoBlock> blocks = new();
 
 		static Dictionary<Vector3Int, OctoBlock> _block = new();
@@ -31,7 +33,7 @@ namespace VoxelSystem
 		static VoxelMap _currentVoxelMap;
 
 		static readonly List<Vector3> _breakPoints = new();
-
+		protected override void InitializeMeshCache() { }
 		public sealed override bool IsSideFilled(GeneralDirection3D dir) => true;
 
 		protected sealed override void GenerateMeshData(
@@ -58,7 +60,6 @@ namespace VoxelSystem
 				meshBuilder.triangles.AddRange(mesh.triangles.Select(t => t + meshBuilder.VertexCount - mesh.vertices.Length));
 			}
 		}
-
 
 		public void CalculateBlocks(Dictionary<Vector3Int, OctoBlock> blocks, List<Vector3Int> indexes, VoxelMap map)
 		{
@@ -90,7 +91,6 @@ namespace VoxelSystem
 							SubVoxelToBlock(index.x, index.y, index.z, dX, dY, dZ);
 			}
 		}
-
 
 		NeighbourType GetAnyNeighbour(int currentValue, int x, int y, int z, int dX, int dY, int dZ)
 		{
@@ -334,6 +334,5 @@ namespace VoxelSystem
 			float z = v.z == 0 ? 1 : 0;
 			return new Vector3(x, y, z).ToAxis();
 		}
-
 	}
 }

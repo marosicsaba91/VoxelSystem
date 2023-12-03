@@ -105,6 +105,7 @@ namespace VoxelSystem
 			destinationMesh.normals = normals.ToArray();
 			destinationMesh.uv = uv.ToArray();
 			destinationMesh.triangles = triangles.ToArray();
+		
 
 			if (descriptors.Count > 0)
 			{

@@ -109,6 +109,7 @@ namespace VoxelSystem
 
 		//     X rotation is coded in bits: 16, 17
 		
+		/*
 		internal static int GetXRotation(this ushort extraData) => extraData.Get2Bit(3);
 		internal static ushort SetXRotation(this ref ushort extraData, int rotation) =>
 			extraData.Set2Bit(3, rotation);
@@ -145,7 +146,7 @@ namespace VoxelSystem
 			extraData.SetZRotation(z);
 			return extraData;
 		}
-		
+		*/
 
 	}
 }

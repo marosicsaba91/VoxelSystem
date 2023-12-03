@@ -1,5 +1,4 @@
 ﻿using EasyInspector;
-using MUtility;
 using System.IO;
 using UnityEngine;
 
@@ -13,7 +12,7 @@ namespace VoxelSystem
 
 		[SerializeField] EasyMember sharedMap = new(nameof(SharedVoxelMap));
 		[SerializeField, DisableIf(nameof(HasSharedMap))] EasyMember exportVoxelMap = new(nameof(ExportVoxelMap));
-		[SerializeField] EasyMember clearVoxelTransforms = new(nameof(ClearWrongVoxelTransforms));
+		// [SerializeField] EasyMember clearVoxelTransforms = new(nameof(ClearWrongVoxelTransforms));
 
 		[SerializeField, HideInInspector] SharedVoxelMap _lastFrameSharedMap = null;
 
@@ -160,7 +159,7 @@ namespace VoxelSystem
 			return map.Raycast(globalRay, out hit, transform, returnOutsideVoxel);
 		}
 
-
+		/*
 		public void ClearWrongVoxelTransforms()
 		{
 			VoxelMap map = GetVoxelMap();
@@ -204,7 +203,7 @@ namespace VoxelSystem
 				voxelValue.SetExtraVoxelData(0);
 				faultyVoxelCount++;
 			}
-			
 		}
+		*/
 	}
 }

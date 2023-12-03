@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using MUtility;
+using MUtility; 
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -17,7 +17,7 @@ namespace VoxelSystem
 		[SerializeField] Color backgroundColor = new(0.3f, 0.3f, 0.3f);
 
 		[SerializeField] Vector2 cameraAngle = new(25, 25);
-		[SerializeField] Vector2 lightAngle = new(45, 55);
+		[SerializeField] Vector2 lightAngle = new(45, 55); 
 		[SerializeField] Quaternion rotateMesh;
 
 		[SerializeField] float fieldOfView = 30;
@@ -40,6 +40,7 @@ namespace VoxelSystem
 			{
 				if (textureSize == value) return;
 				textureSize = value;
+
 				isDirty = true;
 			}
 		}
@@ -174,6 +175,7 @@ namespace VoxelSystem
 				{
 					renderer ??= new PreviewRenderUtility();
 					Render();
+					isDirty = false;
 				}
 
 				return previewTexture;
@@ -203,7 +205,6 @@ namespace VoxelSystem
 				UnityEngine.Object.DestroyImmediate(previewTexture);
 			previewTexture = Render(this, renderer);
 			isDirty = false;
-
 #endif
 		}
 
@@ -230,13 +231,21 @@ namespace VoxelSystem
 			Rect position = new(0, 0, preview.textureSize.x, preview.textureSize.y);
 			renderer.BeginPreview(position, GUIStyle.none);
 
-			Camera cam = renderer.camera;
-			Light light = renderer.lights[0];
+			Camera cam = renderer.camera; 
+			Light light1 = renderer.lights[0];
+			Light light2 = renderer.lights[1];
 
 			cam.backgroundColor = preview.backgroundColor;
 			cam.clearFlags = preview.backgroundType;
-			light.intensity = 1;
-			light.transform.rotation = ToQuaternion(preview.lightAngle);
+			light1.intensity = 2f;
+
+			Quaternion lightDir = ToQuaternion(preview.lightAngle);
+			light1.transform.rotation = lightDir;
+
+			light2.intensity = 4f;
+			light2.type = LightType.Directional;
+			light2.transform.rotation = Quaternion.LookRotation(lightDir * Vector3.back);
+			
 
 			Mesh mesh = preview.meshGetter?.Invoke();
 			Bounds bounds = mesh != null ? mesh.bounds : new Bounds(Vector3.zero, Vector3.one);
@@ -269,13 +278,12 @@ namespace VoxelSystem
 			}
 
 			cam.Render();
-			return renderer.EndPreview();
-
+			Texture prev = renderer.EndPreview();
+			return prev;
 		}
 
 
 #endif
-
 		static Quaternion ToQuaternion(Vector2 rotation)
 		{
 			rotation.x = MathHelper.Mod(rotation.x, 360);

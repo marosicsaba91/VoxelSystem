@@ -1,28 +1,30 @@
-VoxelType Switcher Window
-	Material Index
-	VoxelID
+Draw Compass on the preview
+use side information to build.
+StairShape Levels
 
-RampShape improvements
-	2x2 Ramp
-	UV support
-	Transformable
-	
-Optimisation:
-	1. MoxelType(Shape & Material) Sorting By GPU
-	2. Premake VoxelSide Map by GPU
+//-----------------
 
-BlockShape & RampShape use side information to build.
 
+
+//------------------
+
+RoadShape
+BigShape
+Columb Shape
 
 //-------------------------------------------
-
-	
-
 
 Physical Shape of a Voxel
 	-> Collider
 	-> Mesh
+	
+//-------------------------------------------
 
-RuleMeshVoxel
+Optimisation:
+	1. VoxelType(Shape & Material) Sorting By GPU
+	2. Premake VoxelSide Map by GPU
 
-Better OctoBlock Setup
+//-------------------------------------------
+
+- Better OctoBlock Setup - 
+- VoxelShape Index (Every VoxelShape has an index) -

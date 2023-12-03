@@ -1,5 +1,6 @@
 ﻿#if UNITY_EDITOR
 
+using EasyInspector;
 using MUtility;
 using System.Collections.Generic;
 using UnityEditor;
@@ -47,7 +48,7 @@ namespace VoxelSystem
 			VoxelEditorGUI.SetupGuiContentAndStyle();
 			if (voxelEditor.Map == null)
 			{
-				EditorGUILayout.HelpBox("No Map to Edit. Use VoxelFilter", MessageType.Warning);
+				EditorGUILayout.HelpBox("No Map to Edit. Use VoxelFilter", UnityEditor.MessageType.Warning);
 				return;
 			}
 
@@ -69,9 +70,9 @@ namespace VoxelSystem
 			int extraControlCount = extraControls == null ? 0: extraControls.Count;
 
 			float contentHeight = 490f
-				+ VoxelEditorGUI.GetPaletteHeight(voxelEditor.MaterialPalette)
-				+ VoxelEditorGUI.GetPaletteHeight(voxelEditor.ShapePalette)
-				+ VoxelEditorGUI.GetPanelHeight(extraControlCount);
+				+ VoxelEditorGUI.GetPaletteHeight(voxelEditor.MaterialPalette.Count)
+				+ VoxelEditorGUI.GetPaletteHeight(voxelEditor.ShapePalette.Shapes.Count)
+				+ EditorHelper.GetStandardPanelHeight(extraControlCount);
 
 			float verticalScrollbarWidth = contentHeight > windowRect.height ? scrollbarWidth : 0;
 			contentRect.height = contentHeight;
@@ -88,11 +89,8 @@ namespace VoxelSystem
 			VoxelEditorGUI.DrawControlPanel(voxelEditor, ref contentRect);
 			contentRect.y += 6;
 			contentRect.height -= 6;
-			VoxelEditorGUI.DrawPalettes(voxelEditor, ref contentRect); 
-			
-			//VoxelEditorGUI.DrawVoxelTransformation(voxelEditor, ref contentRect, GeneralDirection2D.Up);
-			VoxelEditorGUI.DrawExtraControls(voxelEditor, ref contentRect);
-			
+			VoxelEditorGUI.DrawPalettes(voxelEditor, ref contentRect);			
+			VoxelEditorGUI.DrawExtraControls(voxelEditor, ref contentRect);			
 			VoxelEditorGUI.DrawVoxelPreview(voxelEditor, ref contentRect, GeneralDirection2D.Up);
 
 			EditorGUILayout.GetControlRect(false, contentRect.y);

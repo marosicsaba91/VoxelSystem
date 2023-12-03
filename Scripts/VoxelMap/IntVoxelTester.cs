@@ -14,13 +14,10 @@ namespace VoxelSystem
 		[SerializeField] int decimalValue = 0;
 		[Space]
 		[SerializeField] string binaryValue;
-		[Space]
-		[SerializeField] Vector3Int rotation;
-		[SerializeField] Flip3D fliping;
+		[Space] 
 		
 		[SerializeField] byte shapeIndex;
 		[SerializeField] byte materialIndex;
-
 		[SerializeField] ushort extraData;
 
 		void OnValidate()
@@ -44,10 +41,7 @@ namespace VoxelSystem
 			int value = 0;
 			 
 			value.SetMaterialIndex(materialIndex);
-			value.SetShapeIndex(shapeIndex);
-			ushort extraData = value.GetExtraVoxelData();
-			extraData.SetFlip(fliping);
-			extraData.SetRotation(rotation.x, rotation.y, rotation.z); 
+			value.SetShapeIndex(shapeIndex); 
 			value.SetExtraVoxelData(extraData);
 
 			return value;
@@ -81,8 +75,6 @@ namespace VoxelSystem
 			materialIndex = value.GetMaterialIndex();
 			shapeIndex = value.GetShapeIndex();
 			extraData = value.GetExtraVoxelData();
-			fliping = extraData.GetFlip();
-			rotation = extraData.GetRotation();
 		}
 	}
 }

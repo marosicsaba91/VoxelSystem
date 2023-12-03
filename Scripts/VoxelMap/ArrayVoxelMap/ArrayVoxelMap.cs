@@ -257,18 +257,16 @@ namespace VoxelSystem
 
 		static ArrayVoxelMap oneVoxelMap;
 
-		internal static ArrayVoxelMap OneVoxelMap
+		internal static ArrayVoxelMap GetTestOneVoxelMap(int value)
 		{
-			get
+			if (oneVoxelMap == null)
 			{
-				if (oneVoxelMap == null)
-				{
-					oneVoxelMap = new ArrayVoxelMap();
-					oneVoxelMap.Setup(Vector3Int.one);
-					oneVoxelMap.SetVoxel(0, 0, 0, 0);
-				}
-				return oneVoxelMap;
+				oneVoxelMap = new ArrayVoxelMap();
+				oneVoxelMap.Setup(Vector3Int.one);
 			}
+
+			oneVoxelMap.SetVoxel(Vector3Int.zero, value);
+			return oneVoxelMap;
 		}
 	}
 }

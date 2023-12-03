@@ -1,4 +1,4 @@
-﻿using MUtility;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace VoxelSystem
@@ -20,8 +20,8 @@ namespace VoxelSystem
 		VoxelAction SelectedAction { get; set; }
 
 		// Material Palette
-		int SelectedMaterialIndex { get; set; }  
-		MaterialPalette MaterialPalette { get; }
+		int SelectedMaterialIndex { get; set; }
+		List<Material> MaterialPalette { get; }
 
 		// Shape Palette
 		int SelectedShapeIndex { get; set; }  

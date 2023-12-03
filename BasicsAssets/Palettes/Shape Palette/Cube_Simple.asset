@@ -13,34 +13,16 @@ MonoBehaviour:
   m_Name: Cube_Simple
   m_EditorClassIdentifier: 
   niceName: Simple
-  color: {r: 0.9528302, g: 0.37962982, b: 0.35506406, a: 1}
-  previewMaterial: {fileID: 2100000, guid: d585155c379713f47816b9f3b20f5784, type: 2}
-  meshPreview:
-    textureSize: {x: 200, y: 200}
-    mesh: {fileID: 0}
-    materials:
-    - {fileID: 2100000, guid: d585155c379713f47816b9f3b20f5784, type: 2}
-    useSkybox: 0
-    backgroundColor: {r: 0.9528302, g: 0.37962982, b: 0.35506406, a: 1}
-    isExpandable: 0
-    cameraAngle: {x: 22.345098, y: 18.700003}
-    lightAngle: {x: 45, y: 55}
-    rotateMesh: {x: 0, y: 0, z: 0, w: 0}
-    fieldOfView: 30
-    zoom: 1
-    logChanges: 0
-    previewTexture: {fileID: 0}
-  serializedPreviewMesh:
+  previewMaterial: {fileID: 2100000, guid: 31d8d855872d111478e3f5874ccd2eca, type: 2}
+  previewExtraSetting: 1
+  quickVersion: {fileID: 0}
+  previewMeshBuilder:
     vertices:
     - {x: 1, y: 0, z: 0}
     - {x: 1, y: 1, z: 0}
     - {x: 1, y: 1, z: 1}
     - {x: 1, y: 0, z: 1}
     - {x: 0, y: 0, z: 0}
-    - {x: 0, y: 0, z: 1}
-    - {x: 1, y: 0, z: 1}
-    - {x: 1, y: 0, z: 0}
-    - {x: 0, y: 0, z: 0}
     - {x: 0, y: 1, z: 0}
     - {x: 0, y: 1, z: 1}
     - {x: 0, y: 0, z: 1}
@@ -48,6 +30,10 @@ MonoBehaviour:
     - {x: 0, y: 1, z: 1}
     - {x: 1, y: 1, z: 1}
     - {x: 1, y: 1, z: 0}
+    - {x: 0, y: 0, z: 0}
+    - {x: 0, y: 0, z: 1}
+    - {x: 1, y: 0, z: 1}
+    - {x: 1, y: 0, z: 0}
     - {x: 0, y: 0, z: 1}
     - {x: 1, y: 0, z: 1}
     - {x: 1, y: 1, z: 1}
@@ -61,10 +47,6 @@ MonoBehaviour:
     - {x: 1, y: 0, z: 0}
     - {x: 1, y: 0, z: 0}
     - {x: 1, y: 0, z: 0}
-    - {x: 0, y: -1, z: 0}
-    - {x: 0, y: -1, z: 0}
-    - {x: 0, y: -1, z: 0}
-    - {x: 0, y: -1, z: 0}
     - {x: -1, y: 0, z: 0}
     - {x: -1, y: 0, z: 0}
     - {x: -1, y: 0, z: 0}
@@ -73,6 +55,10 @@ MonoBehaviour:
     - {x: 0, y: 1, z: 0}
     - {x: 0, y: 1, z: 0}
     - {x: 0, y: 1, z: 0}
+    - {x: 0, y: -1, z: 0}
+    - {x: 0, y: -1, z: 0}
+    - {x: 0, y: -1, z: 0}
+    - {x: 0, y: -1, z: 0}
     - {x: 0, y: 0, z: 1}
     - {x: 0, y: 0, z: 1}
     - {x: 0, y: 0, z: 1}
@@ -82,69 +68,73 @@ MonoBehaviour:
     - {x: 0, y: 0, z: -1}
     - {x: 0, y: 0, z: -1}
     uv:
+    - {x: 0.75, y: 0.25}
+    - {x: 0.75, y: 0.5}
+    - {x: 1, y: 0.5}
+    - {x: 1, y: 0.25}
+    - {x: 0, y: 0.25}
+    - {x: 0, y: 0.5}
+    - {x: 0.25, y: 0.5}
+    - {x: 0.25, y: 0.25}
+    - {x: 0.25, y: 0.5}
+    - {x: 0.25, y: 0.75}
+    - {x: 0.5, y: 0.75}
+    - {x: 0.5, y: 0.5}
+    - {x: 0.25, y: 0}
+    - {x: 0.25, y: 0.25}
+    - {x: 0.5, y: 0.25}
+    - {x: 0.5, y: 0}
+    - {x: 0.5, y: 0.25}
+    - {x: 0.5, y: 0.5}
+    - {x: 0.75, y: 0.5}
+    - {x: 0.75, y: 0.25}
     - {x: 0.25, y: 0.25}
     - {x: 0.25, y: 0.5}
     - {x: 0.5, y: 0.5}
     - {x: 0.5, y: 0.25}
-    - {x: 0.25, y: 0.25}
-    - {x: 0.25, y: 0.5}
-    - {x: 0.5, y: 0.5}
-    - {x: 0.5, y: 0.25}
-    - {x: 0.25, y: 0.25}
-    - {x: 0.25, y: 0.5}
-    - {x: 0.5, y: 0.5}
-    - {x: 0.5, y: 0.25}
-    - {x: 0.25, y: 0.25}
-    - {x: 0.25, y: 0.5}
-    - {x: 0.5, y: 0.5}
-    - {x: 0.5, y: 0.25}
-    - {x: 0.25, y: 0.25}
-    - {x: 0.25, y: 0.5}
-    - {x: 0.5, y: 0.5}
-    - {x: 0.5, y: 0.25}
-    - {x: 0.25, y: 0.25}
-    - {x: 0.25, y: 0.5}
-    - {x: 0.5, y: 0.5}
-    - {x: 0.5, y: 0.25}
-    triangles: 000000000100000002000000000000000200000003000000040000000600000005000000040000000700000006000000080000000a00000009000000080000000b0000000a0000000c0000000d0000000e0000000c0000000e0000000f000000100000001100000012000000100000001200000013000000140000001600000015000000140000001700000016000000
-  quickVersion: {fileID: 0}
-  drawOnMapEdge: 1
-  drawBetweenVoxelChange: 1
-  cubeTextureCoordinates:
+    triangles: 00000000010000000200000000000000020000000300000004000000060000000500000004000000070000000600000008000000090000000a000000080000000a0000000b0000000c0000000e0000000d0000000c0000000f0000000e000000100000001100000012000000100000001200000013000000140000001600000015000000140000001700000016000000
+  topSide: []
+  bottomSide: []
+  rightSide: []
+  leftSide: []
+  forwardSide: []
+  backSide: []
+  transformFromRightHanded: 1
+  textureUvCoordinates:
     gridSize: 4
-    right: {x: 1, y: 1}
-    left: {x: 1, y: 1}
-    top: {x: 1, y: 1}
-    bottom: {x: 1, y: 1}
-    front: {x: 1, y: 1}
+    right: {x: 3, y: 1}
+    left: {x: 0, y: 1}
+    top: {x: 1, y: 2}
+    bottom: {x: 1, y: 0}
+    front: {x: 2, y: 1}
     back: {x: 1, y: 1}
     rightRect:
       serializedVersion: 2
-      x: 0.25
+      x: 0.75
       y: 0.25
       width: 0.25
       height: 0.25
     leftRect:
       serializedVersion: 2
-      x: 0.25
+      x: 0
       y: 0.25
       width: 0.25
       height: 0.25
     topRect:
       serializedVersion: 2
       x: 0.25
-      y: 0.25
+      y: 0.5
       width: 0.25
       height: 0.25
     bottomRect:
       serializedVersion: 2
       x: 0.25
-      y: 0.25
+      y: 0
       width: 0.25
       height: 0.25
     frontRect:
       serializedVersion: 2
-      x: 0.25
+      x: 0.5
       y: 0.25
       width: 0.25
       height: 0.25
@@ -154,3 +144,108 @@ MonoBehaviour:
       y: 0.25
       width: 0.25
       height: 0.25
+  drawSidesOnTheMapEdge: 1
+  drawSidesBetweenDifferentVoxelTypes: 0
+  sideMeshCache:
+  - meshes:
+    - vertices:
+      - {x: 0.5, y: -0.5, z: -0.5}
+      - {x: 0.5, y: 0.5, z: -0.5}
+      - {x: 0.5, y: 0.5, z: 0.5}
+      - {x: 0.5, y: -0.5, z: 0.5}
+      normals:
+      - {x: 1, y: 0, z: 0}
+      - {x: 1, y: 0, z: 0}
+      - {x: 1, y: 0, z: 0}
+      - {x: 1, y: 0, z: 0}
+      uv:
+      - {x: 0.75, y: 0.25}
+      - {x: 0.75, y: 0.5}
+      - {x: 1, y: 0.5}
+      - {x: 1, y: 0.25}
+      triangles: 000000000100000002000000000000000200000003000000
+  - meshes:
+    - vertices:
+      - {x: -0.5, y: -0.5, z: -0.5}
+      - {x: -0.5, y: 0.5, z: -0.5}
+      - {x: -0.5, y: 0.5, z: 0.5}
+      - {x: -0.5, y: -0.5, z: 0.5}
+      normals:
+      - {x: -1, y: 0, z: 0}
+      - {x: -1, y: 0, z: 0}
+      - {x: -1, y: 0, z: 0}
+      - {x: -1, y: 0, z: 0}
+      uv:
+      - {x: 0, y: 0.25}
+      - {x: 0, y: 0.5}
+      - {x: 0.25, y: 0.5}
+      - {x: 0.25, y: 0.25}
+      triangles: 000000000200000001000000000000000300000002000000
+  - meshes:
+    - vertices:
+      - {x: -0.5, y: 0.5, z: -0.5}
+      - {x: -0.5, y: 0.5, z: 0.5}
+      - {x: 0.5, y: 0.5, z: 0.5}
+      - {x: 0.5, y: 0.5, z: -0.5}
+      normals:
+      - {x: 0, y: 1, z: 0}
+      - {x: 0, y: 1, z: 0}
+      - {x: 0, y: 1, z: 0}
+      - {x: 0, y: 1, z: 0}
+      uv:
+      - {x: 0.25, y: 0.5}
+      - {x: 0.25, y: 0.75}
+      - {x: 0.5, y: 0.75}
+      - {x: 0.5, y: 0.5}
+      triangles: 000000000100000002000000000000000200000003000000
+  - meshes:
+    - vertices:
+      - {x: -0.5, y: -0.5, z: -0.5}
+      - {x: -0.5, y: -0.5, z: 0.5}
+      - {x: 0.5, y: -0.5, z: 0.5}
+      - {x: 0.5, y: -0.5, z: -0.5}
+      normals:
+      - {x: 0, y: -1, z: 0}
+      - {x: 0, y: -1, z: 0}
+      - {x: 0, y: -1, z: 0}
+      - {x: 0, y: -1, z: 0}
+      uv:
+      - {x: 0.25, y: 0}
+      - {x: 0.25, y: 0.25}
+      - {x: 0.5, y: 0.25}
+      - {x: 0.5, y: 0}
+      triangles: 000000000200000001000000000000000300000002000000
+  - meshes:
+    - vertices:
+      - {x: -0.5, y: -0.5, z: 0.5}
+      - {x: 0.5, y: -0.5, z: 0.5}
+      - {x: 0.5, y: 0.5, z: 0.5}
+      - {x: -0.5, y: 0.5, z: 0.5}
+      normals:
+      - {x: 0, y: 0, z: 1}
+      - {x: 0, y: 0, z: 1}
+      - {x: 0, y: 0, z: 1}
+      - {x: 0, y: 0, z: 1}
+      uv:
+      - {x: 0.5, y: 0.25}
+      - {x: 0.5, y: 0.5}
+      - {x: 0.75, y: 0.5}
+      - {x: 0.75, y: 0.25}
+      triangles: 000000000100000002000000000000000200000003000000
+  - meshes:
+    - vertices:
+      - {x: -0.5, y: -0.5, z: -0.5}
+      - {x: 0.5, y: -0.5, z: -0.5}
+      - {x: 0.5, y: 0.5, z: -0.5}
+      - {x: -0.5, y: 0.5, z: -0.5}
+      normals:
+      - {x: 0, y: 0, z: -1}
+      - {x: 0, y: 0, z: -1}
+      - {x: 0, y: 0, z: -1}
+      - {x: 0, y: 0, z: -1}
+      uv:
+      - {x: 0.25, y: 0.25}
+      - {x: 0.25, y: 0.5}
+      - {x: 0.5, y: 0.5}
+      - {x: 0.5, y: 0.25}
+      triangles: 000000000200000001000000000000000300000002000000

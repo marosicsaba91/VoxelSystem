@@ -2,31 +2,37 @@
 using System;
 using System.Collections.Generic;
 using UnityEditor;
+
+# if UNITY_EDITOR
 using UnityEngine;
-using UnityEngine.UIElements;
+# endif
 
 namespace VoxelSystem
 {
-	public abstract class VoxelShapeBuilder : ScriptableObject, IPaletteItem
+	public abstract class VoxelShapeBuilder : ScriptableObject
 	{
 		[SerializeField] string niceName;
-		[SerializeField] Color color;
-		[SerializeField] Material previewMaterial;
-		[SerializeField] CustomMeshPreview meshPreview = new();
-		[SerializeField] VoxelShapeBuilder quickVersion;
+
+		[HideInInspector] public Material previewMaterial;
+		[HideInInspector] public int previewExtraSetting; 
+		[HideInInspector] public VoxelShapeBuilder quickVersion;
+		 
+
+		public static readonly CustomMeshPreview meshPreview = new();
+
+		public Material PreviewMaterial => previewMaterial;
+		public int PreviewExtraSetting => previewExtraSetting;
 
 		protected void OnValidate()
-		{
+		{ 
 			ValidateQuickVersion();
-			ValidateInternal();
-			RecalculatePreviewMeshBuilder();
-
+			OnValidateInternal();
 			SetupMeshPreview();
 
 			AssemblyReloadEvents.beforeAssemblyReload -= Dispose;
 			AssemblyReloadEvents.beforeAssemblyReload += Dispose;
 		}
-
+		
 		void Dispose()
 		{
 			if (previewMesh != null)
@@ -55,11 +61,21 @@ namespace VoxelSystem
 			}
 		}
 
-		protected virtual void ValidateInternal() { }
+		public void InitializeAndSetupPreview()
+		{
+			InitializeMeshCache();
+			RecalculatePreviewMesh();
+
+#if UNITY_EDITOR
+			EditorUtility.SetDirty(this);
+#endif
+		}
+
+		protected abstract void InitializeMeshCache();
+
+		protected virtual void OnValidateInternal() { }
 
 		public string DisplayName => niceName.IsNullOrEmpty() ? name : niceName;
-
-		public Color DisplayColor => color;
 
 		VoxelShapeBuilder GetVoxelVersion(bool quick) => (quick && quickVersion != null) ? quickVersion : this;
 
@@ -70,8 +86,16 @@ namespace VoxelSystem
 			MeshBuilder meshBuilder,
 			bool quick)
 		{
+			if (!IsInitialized)
+			{
+				Debug.LogWarning($"Mesh Can not built. The ShapeBuilder is NOT initialized yet: {name}", this);
+				return;
+			}
+
 			GetVoxelVersion(quick).GenerateMeshData(map, voxelPositions, shapeIndex, meshBuilder);
 		}
+		
+		protected abstract bool IsInitialized { get; }
 
 		protected abstract void GenerateMeshData(
 			VoxelMap map,
@@ -83,7 +107,7 @@ namespace VoxelSystem
 		public abstract bool IsSideFilled(GeneralDirection3D dir);
 
 
-		// Preview -----------------------
+		// ---------- Preview -----------------------
 
 		[SerializeField, HideInInspector] MeshBuilder previewMeshBuilder = new();
 		protected Mesh previewMesh = null;
@@ -91,31 +115,10 @@ namespace VoxelSystem
 
 		public MeshBuilder GetSerializedPreviewMesh() => previewMeshBuilder;
 
-		public Mesh GetPreviewMesh()
-		{
-			if (previewMeshBuilder.VertexCount == 0)
-				RecalculatePreviewMeshBuilder();
-
-			if (previewMesh == null)
-			{
-				previewMesh = new Mesh();
-			}
-			else
-			{
-				previewMesh.Clear();
-			}
-
-			previewMeshBuilder.CopyToMesh(previewMesh);
-
-			return previewMesh;
-		}
-
-
 		void SetupMeshPreview()
 		{
 			meshPreview.meshGetter = GetPreviewMesh;
 			meshPreview.BackgroundType = CameraClearFlags.Skybox;
-			meshPreview.BackgroundColor = color;
 			meshPreview.isExpandable = false;
 			if (previewMaterial != null)
 				meshPreview.SetMaterials(previewMaterial);
@@ -123,11 +126,23 @@ namespace VoxelSystem
 				meshPreview.SetMaterials();
 		}
 
-		protected virtual void RecalculatePreviewMeshBuilder()
+		public Mesh GetPreviewMesh()
 		{
-			ArrayVoxelMap map = ArrayVoxelMap.OneVoxelMap;
+			if (previewMesh == null)
+			{
+				previewMesh = new Mesh();
+				previewMeshBuilder?.CopyToMesh(previewMesh);
+			}
+			return previewMesh;
+		}
+
+		protected virtual void RecalculatePreviewMesh()
+		{
+			int voxelValue = 0;
+			voxelValue.SetExtraVoxelData((ushort)previewExtraSetting);
+			ArrayVoxelMap map = ArrayVoxelMap.GetTestOneVoxelMap(voxelValue);
 			previewMeshBuilder.Clear();
-			GenerateMeshData(map, oneVoxelList, 0, previewMeshBuilder, false);
+			GenerateMeshData(map, oneVoxelList, voxelValue, previewMeshBuilder, false);
 
 			if (previewMesh == null)
 				previewMesh = new Mesh();
@@ -135,12 +150,13 @@ namespace VoxelSystem
 				previewMesh.Clear();
 
 			previewMeshBuilder.CopyToMesh(previewMesh);
-
 		}
-		
+				
 		public virtual IReadOnlyList<ExtraControl> GetExtraControls() => null;
 
 	}
+
+	// ---------- ExtraControl ------------------------
 
 	public abstract class ExtraControl
 	{ 

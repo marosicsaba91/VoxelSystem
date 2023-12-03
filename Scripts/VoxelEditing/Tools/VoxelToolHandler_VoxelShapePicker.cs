@@ -12,10 +12,10 @@ namespace VoxelSystem
 
 		protected override void OnDrawCursor(IVoxelEditor voxelEditor, Color actionColor, VoxelHit hit)
 		{
-			int paletteIndex = voxelEditor.SelectedShapeIndex;
-			paletteIndex = Mathf.Clamp(paletteIndex, 0, voxelEditor.MaterialPalette.Count - 1);
-			Color color = voxelEditor.MaterialPalette.PaletteItems[paletteIndex].DisplayColor;
-			base.OnDrawCursor(voxelEditor, color, hit);
+			//int paletteIndex = voxelEditor.SelectedShapeIndex;
+			//paletteIndex = Mathf.Clamp(paletteIndex, 0, voxelEditor.MaterialPalette.Count - 1);
+			//Color color = voxelEditor.MaterialPalette.PaletteItems[paletteIndex].DisplayColor;
+			base.OnDrawCursor(voxelEditor, Color.white, hit);
 		}
 
 		protected override MapChange OnVoxelCursorDown(IVoxelEditor voxelEditor, VoxelHit hit)

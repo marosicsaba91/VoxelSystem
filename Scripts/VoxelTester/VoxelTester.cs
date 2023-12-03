@@ -2,6 +2,7 @@ using UnityEngine;
 using VoxelSystem;
 using System.Text;
 using MUtility;
+using System.Collections.Generic;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -73,7 +74,7 @@ public class VoxelTester : MonoBehaviour
 			DrawCube(testedVoxelIndex);
 			
 			DrawVoxelInfo(testedVoxelObject, testedVoxelIndex);
-			DrawVoxelTransform(testedVoxelObject, testedVoxelIndex);
+			// DrawVoxelTransform(testedVoxelObject, testedVoxelIndex);
 			DrawVoxelSides(testedVoxelObject, testedVoxelIndex);
 		}
 
@@ -96,7 +97,7 @@ public class VoxelTester : MonoBehaviour
 		VoxelMap map = obj.GetVoxelMap();
 		if (map == null) return;
 
-		MaterialPalette materialPalette = null;
+		List<Material> materialPalette = null;
 		VoxelShapePalette shapePalette = null;
 		if (obj.TryGetComponent(out VoxelMeshGenerator meshGenerator))
 		{
@@ -122,23 +123,23 @@ public class VoxelTester : MonoBehaviour
 			int materialIndex = voxelValue.GetMaterialIndex();
 			text.Append("Material: " + materialIndex);
 			if (materialPalette != null && materialPalette.Count > materialIndex)
-				text.Append(" (" + materialPalette[materialIndex].Material.name + ")");
+				text.Append(" (" + materialPalette[materialIndex].name + ")");
 			text.AppendLine();
 		}
 		int shapeIndex = voxelValue.GetShapeIndex();
 		text.Append("Shape: " + shapeIndex);
-		if (shapePalette != null && shapePalette.PaletteItems.Count > shapeIndex)
-			text.Append(" (" + shapePalette.PaletteItems[shapeIndex].DisplayName + ")");
+		if (shapePalette != null && shapePalette.Shapes.Count > shapeIndex)
+			text.Append(" (" + shapePalette.Shapes[shapeIndex].DisplayName + ")");
 		text.AppendLine();
 
 		ushort extraVoxelData = voxelValue.GetExtraVoxelData();
-		text.AppendLine("Flip: " + extraVoxelData.GetFlip());
-		text.AppendLine("Rotation: " + extraVoxelData.GetRotation());
+		text.AppendLine("ExtraVoxelData: " + extraVoxelData);
 
 		Handles.Label(position, text.ToString());
 #endif
 	}
 
+	/*
 	void DrawVoxelTransform(VoxelObject obj, Vector3Int index)
 	{
 		if (!showVoxelTransformation) return;
@@ -148,8 +149,6 @@ public class VoxelTester : MonoBehaviour
 
 		int voxelValue = map.GetVoxel(index);
 		ushort extraVoxelData = voxelValue.GetExtraVoxelData();
-		Flip3D flip= extraVoxelData.GetFlip();
-		Vector3Int rotation = extraVoxelData.GetRotation();
 
 		Vector3 center = index + Vector3.one * 0.5f;
 
@@ -168,6 +167,7 @@ public class VoxelTester : MonoBehaviour
 
 		Gizmos.color = originalColor;
 	}
+	*/
 
 	void DrawVoxelSides(VoxelObject obj, Vector3Int index)
 	{
@@ -181,9 +181,9 @@ public class VoxelTester : MonoBehaviour
 
 		int voxelValue = map.GetVoxel(index); 
 		int shapeIndex = voxelValue.GetShapeIndex();
-		if (shapePalette.PaletteItems.Count <= shapeIndex) return;
+		if (shapePalette.Shapes.Count <= shapeIndex) return;
 
-		VoxelShapeBuilder shape = shapePalette.PaletteItems[shapeIndex] as VoxelShapeBuilder;
+		VoxelShapeBuilder shape = shapePalette.Shapes[shapeIndex];
 
 		Vector3 center = index + Vector3.one * 0.5f;
 		// ushort extraVoxelData = voxelValue.GetExtraVoxelData();
