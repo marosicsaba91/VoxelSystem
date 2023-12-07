@@ -81,12 +81,12 @@ namespace VoxelSystem
 		{
 			if (guiEvent.control && guiEvent.keyCode.TryGetValue(out int number))
 			{
-				editor.SelectedMaterialIndex = number;
+				editor.SelectedMaterialIndex = (byte)number;
 				guiEvent.Use();
 			}
 			else if (guiEvent.keyCode.TryGetValue(out number))
 			{
-				editor.SelectedShapeIndex = number;
+				editor.SelectedShapeId = (uint)number;
 				guiEvent.Use();
 			}
 

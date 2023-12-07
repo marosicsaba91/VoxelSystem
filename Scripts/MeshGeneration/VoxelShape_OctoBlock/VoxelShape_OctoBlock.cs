@@ -13,15 +13,18 @@ namespace VoxelSystem
 		CloseEdge
 	}
 
-	[CreateAssetMenu(fileName = "OctoBlockVoxelShape",menuName = EditorConstants.categoryPath + "VoxelShape: OctoBlock", order = EditorConstants.soOrder_VoxelShape)]
+	[CreateAssetMenu(fileName = "OctoBlockVoxelShape", menuName = EditorConstants.categoryPath + "VoxelShape: OctoBlock", order = EditorConstants.soOrder_VoxelShape)]
 
 	public class VoxelShape_OctoBlock : VoxelShapeBuilder
 	{
-		[SerializeField] bool mergeCloseEdges;
-		[SerializeField] VoxelConnectionType connectionOnMapEdge = VoxelConnectionType.CloseFully;
-		[SerializeField] bool drawBetweenVoxelChange = false;
-
 		[SerializeField] OctoBlockLibrary blockLibrary;
+
+		[Header("Other Setup")]
+		[SerializeField] bool mergeCloseEdges;
+		[SerializeField] VoxelConnectionType onMapEdge = VoxelConnectionType.CloseFully;
+		[SerializeField] bool drawBetwenVoxelChange = false;
+		[SerializeField] bool isTransparent = false;
+
 
 		protected override bool IsInitialized => blockLibrary != null;
 
@@ -38,7 +41,7 @@ namespace VoxelSystem
 		protected sealed override void GenerateMeshData(
 			VoxelMap map,
 			List<Vector3Int> voxelPositions,
-			int shapeIndex,
+			uint shapeIndex,
 			MeshBuilder meshBuilder)
 		{
 			CalculateBlocks(blocks, voxelPositions, map);
@@ -71,7 +74,7 @@ namespace VoxelSystem
 			for (int i = 0; i < indexes.Count; i++)
 			{
 				Vector3Int index = indexes[i];
-				int voxelValue = map.GetVoxel(index);
+				Voxel voxelValue = map.GetVoxel(index);
 				if (voxelValue.IsEmpty()) continue;
 
 				for (int dX = -1; dX <= 1; dX += 1) // Sub-Voxels
@@ -91,49 +94,38 @@ namespace VoxelSystem
 			}
 		}
 
-		NeighbourType GetAnyNeighbour(int currentValue, int x, int y, int z, int dX, int dY, int dZ)
+		NeighbourType GetAnyNeighbour(Voxel voxel, int x, int y, int z, int dX, int dY, int dZ)
 		{
-			Vector3Int size = _currentVoxelMap.FullSize;
+			Vector3Int voxelCoordinate = new(x, y, z);
+			Vector3Int neighbourVector = new(dX, dY, dZ);
+			Vector3Int neighbourCoordinate = voxelCoordinate + neighbourVector;
 
-			int neighbourValue;
-
-			int nx = x + dX;
-			int ny = y + dY;
-			int nz = z + dZ;
-
-			bool voxelExists =
-				nx >= 0 && nx < size.x &&
-				ny >= 0 && ny < size.y &&
-				nz >= 0 && nz < size.z;
-
-			if (voxelExists)
+			if (_currentVoxelMap.TryGetVoxel(neighbourCoordinate, out Voxel neighbour))
 			{
-				neighbourValue = _currentVoxelMap.GetVoxel(nx, ny, nz);
-				if (neighbourValue == currentValue)
+				if (neighbour.shapeId == voxel.shapeId && neighbour.materialIndex == voxel.materialIndex)
 					return NeighbourType.SameFilled;
 
-				if (neighbourValue.IsFilled())
-					return NeighbourType.DifferentFilled;
-				else
+				GeneralDirection3D testedSide = DirectionUtility.GeneralDirection3DFromVector(neighbourVector);
+				if (!neighbour.IsFilled(testedSide))
 					return NeighbourType.EmptyInMap;
-
-
+				 
+				return NeighbourType.DifferentFilled; 
 			}
 
 
 			// Neighbour Do NOT Exists:
-			if (connectionOnMapEdge != VoxelConnectionType.Continue)
+			if (onMapEdge != VoxelConnectionType.Continue)
 				return NeighbourType.EmptyOutOfMap;
 
-			int xin = Mathf.Clamp(x, 0, size.x - 1);
-			int yin = Mathf.Clamp(y, 0, size.y - 1);
-			int zin = Mathf.Clamp(z, 0, size.z - 1);
-			neighbourValue = _currentVoxelMap.GetVoxel(xin, yin, zin);
+			Vector3Int clamped = _currentVoxelMap.ClampCoordinate(neighbourCoordinate);
+			neighbour = _currentVoxelMap.GetVoxel(clamped);
 
-			return
-				neighbourValue == currentValue ? NeighbourType.SameFilled :
-				neighbourValue.IsFilled() ? NeighbourType.DifferentFilled :
-				NeighbourType.EmptyInMap;
+			if (neighbour.shapeId == voxel.shapeId && neighbour.materialIndex == voxel.materialIndex)
+				return NeighbourType.SameFilled;
+			if (neighbour.IsFilled())
+				return NeighbourType.DifferentFilled;
+			else
+				return NeighbourType.EmptyInMap;
 		}
 
 		void SubVoxelToBlock(int vXi, int vYi, int vZi, int dX, int dY, int dZ)
@@ -150,12 +142,14 @@ namespace VoxelSystem
 			// ---------------------------------------------------------------------------------------------
 
 			// Between Two Different Type
-			if (!drawBetweenVoxelChange && nX.IsFilled() && nY.IsFilled() && nZ.IsFilled() && nXY.IsFilled() && nYZ.IsFilled() && nZX.IsFilled() && nXYZ.IsFilled())
+			if (!drawBetwenVoxelChange &&
+				nX.IsFilled() && nY.IsFilled() && nZ.IsFilled() &&
+				nXY.IsFilled() && nYZ.IsFilled() && nZX.IsFilled() &&
+				nXYZ.IsFilled())
 				return;
 
-
 			//On The Edge of the Map
-			if (connectionOnMapEdge == VoxelConnectionType.CloseEdge &&
+			if (onMapEdge == VoxelConnectionType.CloseEdge &&
 				nX.SameOrOut() && nY.SameOrOut() && nZ.SameOrOut() && nXY.SameOrOut() && nYZ.SameOrOut() && nZX.SameOrOut() && nXYZ.SameOrOut())
 				return;
 
@@ -252,7 +246,14 @@ namespace VoxelSystem
 
 				if (crossNeighbourCount == 0) // EDGE
 				{
-					_block.Add(subVoxelIndex, new OctoBlock(OctoBlockType.EdgePositive, subVoxel, axis));
+					OctoBlock newSubVoxel = new (OctoBlockType.EdgePositive, subVoxel, axis);
+					if (_block.ContainsKey(subVoxelIndex)) 
+					{
+						_block[subVoxel] = newSubVoxel;
+						Debug.LogWarning("Something ain't right! Subvoxel: " + subVoxel);
+					}
+					else
+						_block.Add(subVoxelIndex, newSubVoxel);
 					return;
 				}
 
@@ -325,6 +326,12 @@ namespace VoxelSystem
 				b = new Vector3Int(0, vector.y, 0);
 			}
 		}
+		static void SeparateVector(Vector3Int vector, out Vector3Int a, out Vector3Int b, out Vector3Int c)
+		{
+			a = new Vector3Int(vector.x, vector.y, 0);
+			b = new Vector3Int(0, vector.y, vector.z);
+			c = new Vector3Int(vector.x, 0, vector.z);
+		}
 
 		static Axis3D Negate(Vector3 v)
 		{
@@ -332,6 +339,18 @@ namespace VoxelSystem
 			float y = v.y == 0 ? 1 : 0;
 			float z = v.z == 0 ? 1 : 0;
 			return new Vector3(x, y, z).ToAxis();
+		}
+
+		protected override void SetupClosedSides(VoxelMap map, List<Vector3Int> voxelPositions)
+		{
+			bool close = !isTransparent;
+			for (int i = 0; i < voxelPositions.Count; i++)
+			{
+				Vector3Int voxelPosition = voxelPositions[i];
+				Voxel v = map.GetVoxel(voxelPosition);
+				v.SetAllSideClose(close);
+				map.SetVoxel(voxelPosition, v);
+			}
 		}
 	}
 }

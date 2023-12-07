@@ -1,17 +1,35 @@
 using System;
-using System.Linq;
 using UnityEngine;
-using MUtility;
 
 namespace VoxelSystem
 {
+
 	[Serializable]
-	public partial class ArrayVoxelMap : VoxelMap
+	public partial class ArrayVoxelMap : VoxelMap,  ISerializationCallbackReceiver
 	{
 		public const int defaultMapSize = 8;
 
 		[SerializeField] Vector3Int size;
-		[SerializeField] int[] intVoxelData;
+		[SerializeField] long[] longVoxelData;
+		Voxel[] voxelData;
+		 
+		public void OnBeforeSerialize() 
+		{
+			longVoxelData = new long[voxelData.Length];
+			for (int i = 0; i < voxelData.Length; i++)
+			{
+				longVoxelData[i] = voxelData[i].ToLong();
+			}
+		}
+
+		public void OnAfterDeserialize()
+		{
+			voxelData = new Voxel[longVoxelData.Length];
+			for (int i = 0; i < voxelData.Length; i++)
+			{
+				voxelData[i] = new Voxel(longVoxelData[i]);
+			} 
+		}
 
 		public sealed override Vector3Int FullSize
 		{
@@ -21,10 +39,10 @@ namespace VoxelSystem
 				bool isSizeInvalid = value.x <= 0 || value.y <= 0 || value.z <= 0;
 				if (isSizeInvalid)
 					throw new ArgumentException("Size must be positive");
-				if (intVoxelData != null && size == value) return;
+				if (voxelData != null && size == value) return;
 
 				size = value;
-				intVoxelData = new int[Length];
+				voxelData = new Voxel[Length];
 			}
 		}
 
@@ -34,15 +52,14 @@ namespace VoxelSystem
 
 		public ArrayVoxelMap() { SetupUniqueID(); }
 
-		public ArrayVoxelMap(Vector3Int size, int value = emptyValue)
+		public ArrayVoxelMap(Vector3Int size) => Setup(size, emptyValue);
+		public ArrayVoxelMap(Vector3Int size, Voxel value)
 		{
 			SetupUniqueID();
 			Setup(size, value);
 		}
-
-		public sealed override void Setup() => Setup(defaultMapSize * Vector3Int.one);
-
-		public sealed override void Setup(Vector3Int size, int value = emptyValue)
+				 
+		public sealed override void Setup(Vector3Int size, Voxel value)
 		{
 			FullSize = size;
 			SetWhole(value);
@@ -78,29 +95,28 @@ namespace VoxelSystem
 			return new Vector3Int(x, y, z);
 		}
 
-
-		public int GetHighestValue() => intVoxelData.Prepend(-1).Max();
+		// public Voxel GetHighestValue() => voxelData.Prepend(-1).Max();
 
 		// GET Voxels ----------------------------
 
-		public sealed override int GetVoxel(int x, int y, int z) => intVoxelData[Index(x, y, z)];
+		public sealed override Voxel GetVoxel(int x, int y, int z) => voxelData[Index(x, y, z)];
 
 		// SET Voxels ----------------------------
 
-		public sealed override bool SetVoxel(int x, int y, int z, int voxel)
+		public sealed override bool SetVoxel(int x, int y, int z, Voxel voxel)
 		{
 			int index = Index(x, y, z);
-			if (intVoxelData[index] == voxel) return false;
-			intVoxelData[index] = voxel;
+			if (voxelData[index] == voxel) return false;
+			voxelData[index] = voxel;
 			return true;
 		}
 
-		public sealed override bool SetVoxel(int x, int y, int z, VoxelAction action, int value)
+		public sealed override bool SetVoxel(int x, int y, int z, VoxelAction action, Voxel value)
 		{
 			int index = Index(x, y, z);
-			if (index < 0 || index >= intVoxelData.Length) return false;
-			int v = intVoxelData[index];
-			int oldVal = v;
+			if (index < 0 || index >= voxelData.Length) return false;
+			Voxel v = voxelData[index];
+			Voxel oldVal = v;
 			switch (action)
 			{
 				case VoxelAction.Overwrite:
@@ -119,13 +135,13 @@ namespace VoxelSystem
 					break;
 				case VoxelAction.RepaintMaterialOnly:
 					if (v.IsFilled())
-						v.SetMaterialIndex(value.GetMaterialIndex());
+						v.materialIndex = value.materialIndex;
 					break;
 				case VoxelAction.RepaintShapeOnly:
 					if (v.IsFilled())
 					{
-						v.SetShapeIndex(value.GetShapeIndex());
-						v.SetExtraVoxelData(value.GetExtraVoxelData());
+						v.shapeId = value.shapeId;
+						v.extraVoxelData = value.extraVoxelData;
 					}
 					break;
 
@@ -133,21 +149,29 @@ namespace VoxelSystem
 			if (oldVal == v)
 				return false;
 
-			intVoxelData[index] = v;
+			voxelData[index] = v;
 			return true;
 		}
 
-		public sealed override bool SetWhole(int value)
+		public sealed override bool SetWhole(Voxel value)
 		{
-			for (int i = 0; i < intVoxelData.Length; i++)
+			for (int i = 0; i < voxelData.Length; i++)
 			{
-				intVoxelData[i] = value;
+				voxelData[i] = value;
 			}
 			return true;  // Faster to say, it is always changed.
 		}
 
+		public sealed override bool ClearWhole()
+		{
+			voxelData = new Voxel[Length];
+			Array.Fill(voxelData, emptyValue);
+
+			return true; 
+		}
+
 		public sealed override bool SetRange
-			(Vector3Int startCoordinate, Vector3Int endCoordinate, VoxelAction action, int value)
+			(Vector3Int startCoordinate, Vector3Int endCoordinate, VoxelAction action, Voxel value)
 		{
 			Vector3Int size = FullSize;
 			int minX = Mathf.Max(0, Mathf.Min(startCoordinate.x, endCoordinate.x, size.x));
@@ -166,9 +190,9 @@ namespace VoxelSystem
 						{
 							int index = x + (y * size.x) + (z * size.x * size.y);
 
-							if (intVoxelData[index] != value)
+							if (voxelData[index] != value)
 							{
-								intVoxelData[index] = value;
+								voxelData[index] = value;
 								changed |= true;
 							}
 						}
@@ -180,10 +204,10 @@ namespace VoxelSystem
 						for (int z = minZ; z <= maxZ; z++)
 						{
 							int index = x + (y * size.x) + (z * size.x * size.y);
-							int originalValue = intVoxelData[index];
+							Voxel originalValue = voxelData[index];
 							if (originalValue.IsFilled() && originalValue != value)
 							{
-								intVoxelData[index] = value;
+								voxelData[index] = value;
 								changed |= true;
 							}
 						}
@@ -195,10 +219,10 @@ namespace VoxelSystem
 						for (int z = minZ; z <= maxZ; z++)
 						{
 							int index = x + (y * size.x) + (z * size.x * size.y);
-							int originalValue = intVoxelData[index];
+							Voxel originalValue = voxelData[index];
 							if (originalValue.IsEmpty() && originalValue != value)
 							{
-								intVoxelData[index] = value;
+								voxelData[index] = value;
 								changed |= true;
 							}
 						}
@@ -210,10 +234,10 @@ namespace VoxelSystem
 						for (int z = minZ; z <= maxZ; z++)
 						{
 							int index = x + (y * size.x) + (z * size.x * size.y);
-							int originalValue = intVoxelData[index];
+							Voxel originalValue = voxelData[index];
 							if (originalValue.IsFilled())
 							{
-								intVoxelData[index] = emptyValue;
+								voxelData[index] = emptyValue;
 								changed |= true;
 							}
 						}
@@ -225,10 +249,10 @@ namespace VoxelSystem
 						for (int z = minZ; z <= maxZ; z++)
 						{
 							int index = x + (y * size.x) + (z * size.x * size.y);
-							int originalValue = intVoxelData[index];
+							Voxel originalValue = voxelData[index];
 							if (originalValue.IsFilled())
 							{
-								intVoxelData[index].SetMaterialIndex(value.GetMaterialIndex());
+								voxelData[index].materialIndex = value.materialIndex;
 								changed |= true;
 							}
 						}
@@ -240,13 +264,13 @@ namespace VoxelSystem
 						for (int z = minZ; z <= maxZ; z++)
 						{
 							int index = x + (y * size.x) + (z * size.x * size.y);
-							int originalValue = intVoxelData[index];
+							Voxel originalValue = voxelData[index];
 							if (originalValue.IsFilled())
 							{
-								int v = intVoxelData[index];
-								v.SetShapeIndex(value.GetShapeIndex());
-								v.SetExtraVoxelData(value.GetExtraVoxelData());
-								intVoxelData[index] = v;
+								Voxel v = voxelData[index];
+								v.shapeId = value.shapeId;
+								v.extraVoxelData = value.extraVoxelData;
+								voxelData[index] = v;
 								changed |= true;
 							}
 						}
@@ -257,7 +281,7 @@ namespace VoxelSystem
 
 		static ArrayVoxelMap oneVoxelMap;
 
-		internal static ArrayVoxelMap GetTestOneVoxelMap(int value)
+		internal static ArrayVoxelMap GetTestOneVoxelMap(Voxel value)
 		{
 			if (oneVoxelMap == null)
 			{

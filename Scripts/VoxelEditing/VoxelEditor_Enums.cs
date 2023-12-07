@@ -21,7 +21,7 @@ namespace VoxelSystem
 		public static readonly VoxelAction[] allVoxelActions = Enum.GetValues(typeof(VoxelAction)).Cast<VoxelAction>().ToArray();
 		public static readonly VoxelTool[] allVoxelTools = Enum.GetValues(typeof(VoxelTool)).Cast<VoxelTool>().ToArray();
 
-		public static readonly VoxelAction[] transformActions = new VoxelAction[] {  VoxelAction.Overwrite, VoxelAction.Attach };
+		public static readonly VoxelAction[] transformActions = new VoxelAction[] { VoxelAction.Overwrite, VoxelAction.Attach };
 
 		public static bool IsTransformTool(this VoxelTool tool) => tool is
 			VoxelTool.Move or VoxelTool.Turn or VoxelTool.Mirror or
@@ -38,22 +38,20 @@ namespace VoxelSystem
 
 		public static bool IsAdditive(this VoxelAction action) => action is VoxelAction.Attach;
 
-		public static Func<int, int, bool> GetEqualityTestFunction(this VoxelAction action) => action switch
+		public static Func<Voxel, Voxel, bool> GetEqualityTestFunction(this VoxelAction action) => action switch
 		{
 			VoxelAction.Attach => (a, b) => b.IsEmpty(),
-			VoxelAction.RepaintShapeOnly => (a, b) => a.GetShapeIndex() == b.GetShapeIndex(),
-			VoxelAction.Erase => (a, b) => a.GetMaterialIndex() == b.GetMaterialIndex(),
-			VoxelAction.RepaintMaterialOnly => (a, b) => a.GetMaterialIndex() == b.GetMaterialIndex(),
-			_ => (a, b) =>
-				a.GetMaterialIndex() == b.GetMaterialIndex() &&
-				a.GetShapeIndex() == b.GetShapeIndex(),
+			VoxelAction.RepaintShapeOnly => (a, b) => a.shapeId == b.shapeId,
+			VoxelAction.Erase => (a, b) => a.materialIndex == b.materialIndex && a.shapeId == b.shapeId,
+			VoxelAction.RepaintMaterialOnly => (a, b) => a.materialIndex == b.materialIndex && a.IsFilled() && b.IsFilled(),
+			_ => (a, b) => a.materialIndex == b.materialIndex && a.shapeId == b.shapeId,
 		};
 
 		// --------------------- Voxel Tool Handlers ---------------------
 
 		static readonly Dictionary<VoxelTool, VoxelToolHandler> handlers = new();
 
-		public static VoxelToolHandler GetHandler(this VoxelTool tool) 
+		public static VoxelToolHandler GetHandler(this VoxelTool tool)
 		{
 			if (tool == VoxelTool.None)
 				return null;
@@ -95,7 +93,7 @@ namespace VoxelSystem
 			VoxelAction.RepaintShapeOnly => "Repaint all non-empty voxels SHAPES only",
 			_ => throw new ArgumentOutOfRangeException(nameof(voxelAction), voxelAction, null)
 		};
-		
+
 		public static string GetLabel(this VoxelAction voxelAction) => voxelAction switch
 		{
 			VoxelAction.RepaintMaterialOnly => " M",

@@ -13,7 +13,7 @@ namespace VoxelSystem
 		protected override void OnDrawCursor(IVoxelEditor voxelEditor, Color actionColor, VoxelHit hit)
 		{
 			//int paletteIndex = voxelEditor.SelectedVoxelValue;
-			//paletteIndex = Mathf.Clamp(paletteIndex, 0, voxelEditor.MaterialPalette.Count - 1);
+			//paletteIndex = Mathf.ClampSame(paletteIndex, 0, voxelEditor.MaterialPalette.Count - 1);
 			// Color color = voxelEditor.MaterialPalette.PaletteItems[paletteIndex].DisplayColor;
 			base.OnDrawCursor(voxelEditor, Color.white, hit);
 		}
@@ -33,7 +33,7 @@ namespace VoxelSystem
 		void Pick(IVoxelEditor voxelEditor, Vector3Int index)
 		{ 
 			Debug.Log(index);
-			voxelEditor.SelectedMaterialIndex = voxelEditor.Map.GetVoxel(index).GetMaterialIndex();
+			voxelEditor.SelectedMaterialIndex = voxelEditor.Map.GetVoxel(index).materialIndex;
 		}
 	}
 }

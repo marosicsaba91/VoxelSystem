@@ -68,11 +68,11 @@ namespace VoxelSystem
 
 		// Selection
 
-		public static bool ClearInsideSelection(this IVoxelEditor editor) => FillInsideSelection(editor, IntVoxelUtility.emptyValue);
+		public static bool ClearInsideSelection(this IVoxelEditor editor) => FillInsideSelection(editor, Voxel.emptyValue);
 
-		public static bool FillInsideSelection(this IVoxelEditor editor) => FillInsideSelection(editor, editor.SelectedMaterialIndex);
+		public static bool FillInsideSelection(this IVoxelEditor editor) => FillInsideSelection(editor, editor.SelectedVoxelValue);
 
-		public static bool FillInsideSelection(this IVoxelEditor editor, int paletteIndex)
+		public static bool FillInsideSelection(this IVoxelEditor editor, Voxel paletteIndex)
 		{
 			VoxelMap map = editor.Map;
 			if (!editor.HasSelection())

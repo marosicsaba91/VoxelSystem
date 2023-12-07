@@ -71,7 +71,7 @@ namespace VoxelSystem
 
 			float contentHeight = 490f
 				+ VoxelEditorGUI.GetPaletteHeight(voxelEditor.MaterialPalette.Count)
-				+ VoxelEditorGUI.GetPaletteHeight(voxelEditor.ShapePalette.Shapes.Count)
+				+ VoxelEditorGUI.GetPaletteHeight(voxelEditor.ShapePalette.ItemCount)
 				+ EditorHelper.GetStandardPanelHeight(extraControlCount);
 
 			float verticalScrollbarWidth = contentHeight > windowRect.height ? scrollbarWidth : 0;

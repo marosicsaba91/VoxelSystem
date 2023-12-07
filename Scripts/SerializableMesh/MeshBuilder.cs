@@ -239,7 +239,7 @@ namespace VoxelSystem
 			triangles.Add(v3);
 		}
 
-		public void NextMaterial() 
+		public void EndMaterialDescriptor() 
 		{ 
 			int triangleCount = TriangleCount - _lastMaterialStartTriangleIndex;
 			descriptors.Add(new SubMeshDescriptor(_lastMaterialStartTriangleIndex, triangleCount));

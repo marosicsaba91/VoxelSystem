@@ -22,9 +22,9 @@ namespace VoxelSystem
 			Draw(side, actionColor);
 
 			VoxelMap map = voxelEditor.Map;
-			VoxelMap_Search._roundLimit = 5; 
+			VoxelMap_Search.roundLimit = 5; 
 			map.SearchChunk(chunk, hit.voxelIndex, voxelEditor.SelectedAction.GetEqualityTestFunction());
-			VoxelMap_Search._roundLimit = 1000;
+			VoxelMap_Search.roundLimit = 1000;
 
 			Vector3 half = Vector3.one * 0.5f;
 			float maxDistance = 3;
@@ -45,7 +45,7 @@ namespace VoxelSystem
 			VoxelMap map = voxelEditor.Map;
 			voxelEditor.RecordForUndo("FloodFill Voxel", RecordType.Map);
 
-			int voxel = map.GetVoxel(hit.voxelIndex);
+			Voxel voxel = map.GetVoxel(hit.voxelIndex);
 			if (voxel == voxelEditor.SelectedVoxelValue && voxelEditor.SelectedAction != VoxelAction.Erase)
 				return MapChange.None;
 			if (voxel.IsEmpty() && voxelEditor.SelectedAction == VoxelAction.Erase)

@@ -36,7 +36,7 @@ public struct CubicTransformation
 		set => upDirectionIndex = GetUpDirectionIndex(value);
 	}
 
-	public static GeneralDirection3D GetUpDirection(int upDirectionIndex) => upDirectionIndex switch
+	static GeneralDirection3D GetUpDirection(int upDirectionIndex) => upDirectionIndex switch
 	{
 		0 => GeneralDirection3D.Up,
 		1 => GeneralDirection3D.Right,
@@ -46,6 +46,7 @@ public struct CubicTransformation
 		5 => GeneralDirection3D.Back,
 		_ => 0
 	};
+
 	static int GetUpDirectionIndex(GeneralDirection3D upDirection) => upDirection switch
 	{
 		GeneralDirection3D.Up => 0,
@@ -58,7 +59,7 @@ public struct CubicTransformation
 	};
 
 
-	Vector3 GetForwardVector() => upDirectionIndex switch
+	static Vector3 GetUpVector(int upDirectionIndex) => upDirectionIndex switch
 	{
 		0 => Vector3.up,        // Up
 		1 => Vector3.right,     // Right
@@ -69,7 +70,7 @@ public struct CubicTransformation
 		_ => Vector3.up
 	};
 
-	Vector3 GetForwardDirection() => upDirectionIndex switch
+	static Vector3 GetForwardVector(int upDirectionIndex) => upDirectionIndex switch
 	{
 		0 => Vector3.forward,   // Up
 		1 => Vector3.forward,   // Right
@@ -80,13 +81,38 @@ public struct CubicTransformation
 		_ => Vector3.forward
 	};
 
+	static GeneralDirection3D GetForwardDirection(int upDirectionIndex) => upDirectionIndex switch
+	{
+		0 => GeneralDirection3D.Forward,   // Up
+		1 => GeneralDirection3D.Forward,   // Right
+		2 => GeneralDirection3D.Down,      // Forward
+		3 => GeneralDirection3D.Back,      // Down
+		4 => GeneralDirection3D.Forward,   // Left
+		5 => GeneralDirection3D.Up,        // Back
+		_ => GeneralDirection3D.Forward
+	};
+
+	static GeneralDirection3D GetRightDirection(int upDirectionIndex) => upDirectionIndex switch
+	{
+		0 => GeneralDirection3D.Right,     // Up
+		1 => GeneralDirection3D.Down,      // Right
+		2 => GeneralDirection3D.Right,     // Forward
+		3 => GeneralDirection3D.Right,     // Down
+		4 => GeneralDirection3D.Up,        // Left
+		5 => GeneralDirection3D.Right,     // Back
+		_ => GeneralDirection3D.Forward
+	};
+
 
 	public int GetIndex() => upDirectionIndex * 8 + verticalRotation * 2 + (verticalFlip ? 1 : 0);
 
-	public Matrix4x4 GetTransformation()
+	static readonly Matrix4x4 rightToLeftHanded =
+		Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(-90, 0, 0), new(-1, -1, 1));
+
+	public Matrix4x4 GetTransformation(bool fromRightHanded = false)
 	{
-		Vector3 upVector = GetForwardVector();
-		Vector3 forwardVector = GetForwardDirection();
+		Vector3 upVector = GetUpVector(upDirectionIndex);
+		Vector3 forwardVector = GetForwardVector(upDirectionIndex);
 
 		verticalRotation %= 4;
 		Quaternion rotation = Quaternion.LookRotation(forwardVector, upVector);
@@ -94,14 +120,62 @@ public struct CubicTransformation
 
 
 		Vector3Int scale = verticalFlip ? new Vector3Int(1, -1, 1) : Vector3Int.one;
-		return Matrix4x4.TRS(Vector3.zero, rotation, scale);
+
+		Matrix4x4 result = Matrix4x4.TRS(Vector3.zero, rotation, scale);
+		if (fromRightHanded)
+			result *= rightToLeftHanded;
+		return result;
 	}
 
-	internal GeneralDirection3D TransformDirection(GeneralDirection3D dir)   // NEED OPTIMISATION
+	internal GeneralDirection3D TransformDirection(GeneralDirection3D localDir)
 	{
-		Vector3 vec = dir.ToVector();
+		if (localDir == GeneralDirection3D.Up)
+			return verticalFlip ? UpDirection.Opposite() : UpDirection;
+		if (localDir == GeneralDirection3D.Down)
+			return verticalFlip ? UpDirection : UpDirection.Opposite();
+
+
+		GeneralDirection3D localForward = GetForwardDirection(upDirectionIndex);
+		GeneralDirection3D localRight = GetRightDirection(upDirectionIndex);
+
+		if (verticalRotation == 1)
+		{
+			GeneralDirection3D f = localForward;
+			localForward = localRight;
+			localRight = f.Opposite();
+
+		}
+		else if (verticalRotation == 2)
+		{
+			localForward = localForward.Opposite();
+			localRight = localRight.Opposite();
+		}
+		else if (verticalRotation == 3)
+		{ 
+			GeneralDirection3D f = localForward;
+			localForward = localRight.Opposite();
+			localRight = f;
+		}
+
+		if (localDir == GeneralDirection3D.Forward)
+			return localForward;
+		if (localDir == GeneralDirection3D.Back)
+			return localForward.Opposite();
+		if (localDir == GeneralDirection3D.Right)
+			return localRight;
+		if (localDir == GeneralDirection3D.Left)
+			return localRight.Opposite();
+
+		return localDir;
+	}
+
+	/*
+	internal GeneralDirection3D TransformDirectionSlow(GeneralDirection3D localDir)   // NEED OPTIMISATION
+	{
+		Vector3 vec = localDir.ToVector();
 		Matrix4x4 transformation = GetTransformation();
 		vec = transformation.MultiplyVector(vec);
 		return DirectionUtility.GeneralDirection3DFromVector(vec);
 	}
+	*/
 }

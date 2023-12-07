@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b4220bd297412541a0761cd84013a80, type: 3}
   m_Name: Cube_Simple
   m_EditorClassIdentifier: 
+  voxelId: 10
   niceName: Simple
   previewMaterial: {fileID: 2100000, guid: 31d8d855872d111478e3f5874ccd2eca, type: 2}
   previewExtraSetting: 1
@@ -93,13 +94,14 @@ MonoBehaviour:
     - {x: 0.5, y: 0.5}
     - {x: 0.5, y: 0.25}
     triangles: 00000000010000000200000000000000020000000300000004000000060000000500000004000000070000000600000008000000090000000a000000080000000a0000000b0000000c0000000e0000000d0000000c0000000f0000000e000000100000001100000012000000100000001200000013000000140000001600000015000000140000001700000016000000
+    _lastMaterialStartTriangleIndex: 0
   topSide: []
   bottomSide: []
   rightSide: []
   leftSide: []
   forwardSide: []
   backSide: []
-  transformFromRightHanded: 1
+  autoConvertFromRightHanded: 1
   textureUvCoordinates:
     gridSize: 4
     right: {x: 3, y: 1}
@@ -144,8 +146,10 @@ MonoBehaviour:
       y: 0.25
       width: 0.25
       height: 0.25
+  useTextureSettingOnCustomMeshes: 1
   drawSidesOnTheMapEdge: 1
   drawSidesBetweenDifferentVoxelTypes: 0
+  isTransparent: 0
   sideMeshCache:
   - meshes:
     - vertices:

@@ -12,8 +12,8 @@ namespace VoxelSystem
 
 		protected override void OnDrawCursor(IVoxelEditor voxelEditor, Color actionColor, VoxelHit hit)
 		{
-			//int paletteIndex = voxelEditor.SelectedShapeIndex;
-			//paletteIndex = Mathf.Clamp(paletteIndex, 0, voxelEditor.MaterialPalette.Count - 1);
+			//int paletteIndex = voxelEditor.SelectedShapeId;
+			//paletteIndex = Mathf.ClampSame(paletteIndex, 0, voxelEditor.MaterialPalette.Count - 1);
 			//Color color = voxelEditor.MaterialPalette.PaletteItems[paletteIndex].DisplayColor;
 			base.OnDrawCursor(voxelEditor, Color.white, hit);
 		}
@@ -32,11 +32,11 @@ namespace VoxelSystem
 
 		void Pick(IVoxelEditor voxelEditor, Vector3Int index)
 		{
-			int selected = voxelEditor.SelectedVoxelValue;
-			int picked = voxelEditor.Map.GetVoxel(index);
+			Voxel selected = voxelEditor.SelectedVoxelValue;
+			Voxel picked = voxelEditor.Map.GetVoxel(index);
 
-			selected.SetShapeIndex(picked.GetShapeIndex());
-			selected.SetExtraVoxelData(picked.GetExtraVoxelData());
+			selected.shapeId = picked.shapeId;
+			selected.extraVoxelData = picked.extraVoxelData;
 
 			voxelEditor.SelectedVoxelValue = selected;
 		}

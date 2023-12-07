@@ -49,13 +49,9 @@ namespace VoxelSystem
 			serializedObject.ApplyModifiedProperties();
 
 			// Extra Controls
-			
-			int voxelValue = 0;
-			voxelValue.SetExtraVoxelData((ushort)builder.previewExtraSetting); 
 			int lines = builder.GetExtraControls()?.Count ?? 0;
 			Rect extraControlsRect = EditorGUILayout.GetControlRect(false, EditorHelper.GetStandardPanelHeight(lines));
-			int newVoxelValue = DrawExtraControls(builder, voxelValue, builder, ref extraControlsRect);
-			builder.previewExtraSetting = newVoxelValue.GetExtraVoxelData(); 
+			builder.previewExtraSetting = DrawExtraControls(builder, (ushort) builder.previewExtraSetting, builder, ref extraControlsRect);
 
 			// Preview
 
@@ -74,17 +70,16 @@ namespace VoxelSystem
 			}
 		}
 
-		public static int DrawExtraControls(VoxelShapeBuilder selectedShape, int voxelData, Object recordedObj, ref Rect position)
+		public static ushort DrawExtraControls(VoxelShapeBuilder selectedShape, ushort extraVoxelData, Object recordedObj, ref Rect position)
 		{
 			IReadOnlyList<ExtraControl> extraControls = selectedShape == null ? null : selectedShape.GetExtraControls();
-			if (extraControls == null || extraControls.Count == 0) return voxelData;
+			if (extraControls == null || extraControls.Count == 0) return extraVoxelData;
 
 			int controlCount = extraControls.Count;
 
 			Rect fullRect = position.SliceOut(EditorHelper.GetStandardPanelHeight(controlCount));
 
-			Undo.RecordObject(recordedObj, "Selected Value Changed");
-			ushort extraVoxelData = voxelData.GetExtraVoxelData();
+			Undo.RecordObject(recordedObj, "Selected Value Changed"); 
 
 
 			foreach (ExtraControl control in extraControls)
@@ -98,9 +93,8 @@ namespace VoxelSystem
 				object newValue = EditorHelper.AnythingField(controlRect, control.DataType, oldValue, GUIContent.none, ref isExpanded);
 
 				extraVoxelData = control.SetExtraData(extraVoxelData, newValue);
-			}
-			voxelData.SetExtraVoxelData(extraVoxelData);
-			return voxelData;
+			} 
+			return extraVoxelData;
 		}
 	}
 }

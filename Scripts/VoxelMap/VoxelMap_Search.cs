@@ -7,7 +7,7 @@ namespace VoxelSystem
 {
 	public static class VoxelMap_Search
 	{
-		public static int _roundLimit = 1000;
+		public static int roundLimit = 1000;
 
 		static readonly HashSet<Vector3Int> _alreadyChecked = new();
 		static readonly HashSet<Vector3Int> _tempIndices1 = new();
@@ -16,9 +16,9 @@ namespace VoxelSystem
 		static readonly List<Vector3Int> _searchDirections = new ();
 		static bool _planeOnly;
 		static Vector3Int _normal;
-		public static void SearchChunk(this VoxelMap map, HashSet<Vector3Int> result, Vector3Int startIndex, Func<int, int, bool> isSameFunction)
+		public static void SearchChunk(this VoxelMap map, HashSet<Vector3Int> result, Vector3Int startIndex, Func<Voxel, Voxel, bool> isSameFunction)
 		{
-			int searchValue = map.GetVoxel(startIndex);
+			Voxel searchValue = map.GetVoxel(startIndex);
 			result.Clear();
 
 			_alreadyChecked.Clear();
@@ -35,9 +35,9 @@ namespace VoxelSystem
 			map.Search(result, searchValue, isSameFunction);
 		}
 
-		public static void SearchPlane(this VoxelMap map, HashSet<Vector3Int> result, Vector3Int startIndex, GeneralDirection3D side, Func<int, int, bool> isSameFunction)
+		public static void SearchPlane(this VoxelMap map, HashSet<Vector3Int> result, Vector3Int startIndex, GeneralDirection3D side, Func<Voxel, Voxel, bool> isSameFunction)
 		{
-			int searchValue = map.GetVoxel(startIndex);
+			Voxel searchValue = map.GetVoxel(startIndex);
 			result.Clear();
 
 			_alreadyChecked.Clear();
@@ -67,7 +67,7 @@ namespace VoxelSystem
 			Search(map, result, searchValue, isSameFunction);
 		}
 
-		static void Search(this VoxelMap map, HashSet<Vector3Int> result, int searchValue, Func<int, int , bool> isSameFunction)
+		static void Search(this VoxelMap map, HashSet<Vector3Int> result, Voxel searchValue, Func<Voxel, Voxel, bool> isSameFunction)
 		{
 			HashSet<Vector3Int> current, next;
 			do
@@ -93,7 +93,7 @@ namespace VoxelSystem
 							_alreadyChecked.Add(nextIndex);
 							continue;
 						}
-						int nextVoxel = map.GetVoxel(nextIndex);
+						Voxel nextVoxel = map.GetVoxel(nextIndex);
 
 						bool isSame = isSameFunction(nextVoxel, searchValue);
 
@@ -117,7 +117,7 @@ namespace VoxelSystem
 				}
 
 				_roundIndex++;
-			} while (!next.IsEmpty() && _roundIndex < _roundLimit);
+			} while (!next.IsEmpty() && _roundIndex < roundLimit);
 		}
 
 		/*
@@ -165,7 +165,7 @@ namespace VoxelSystem
 				}
 
 				_roundIndex++;
-			} while (!next.IsEmpty());
+			} while (!next.IsFilled());
 		}
 		*/
 	}

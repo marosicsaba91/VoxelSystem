@@ -17,7 +17,7 @@ public class WalkingAgentSetting : VoxelNavAgentSetting
 				for (int z = 0; z < size.z; z++)
 				{
 					if (voxelMap.GetVoxel(x, y, z).IsFilled()) continue;
-					if (!voxelMap.TryGetVoxel(x, y - 1, z, out int under)) continue;
+					if (!voxelMap.TryGetVoxel(x, y - 1, z, out Voxel under)) continue;
 					if (under.IsEmpty()) continue;
 					resultPositions.Add(new Vector3Int(x, y, z));
 				}

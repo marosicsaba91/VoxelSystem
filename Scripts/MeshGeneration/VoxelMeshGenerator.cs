@@ -1,18 +1,18 @@
 using Benchmark;
 using EasyInspector;
 using MUtility;
-using System;
+using System; 
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 namespace VoxelSystem
 {
 	[ExecuteAlways]
 	[RequireComponent(typeof(VoxelObject))]
 	public class VoxelMeshGenerator : MonoBehaviour
-	{ 
+	{
 		[SerializeField] VoxelShapePalette shapePalette;
 
 		[SerializeField, HideInInspector] VoxelObject voxelFilter;
@@ -73,7 +73,7 @@ namespace VoxelSystem
 				_lastFilter.MapChanged -= OnMapChanged;
 			}
 			MaterialPalette.Clear();
-			if(meshRenderer != null)
+			if (meshRenderer != null)
 				meshRenderer.GetSharedMaterials(MaterialPalette);
 
 			//Get GUID of the shape palette
@@ -109,54 +109,67 @@ namespace VoxelSystem
 		static BenchmarkTimer benchmarkTimer;
 
 		static readonly MeshBuilder meshBuilder = new();
-		// static readonly List<Vector3> _vertices = new();
-		// static readonly List<Vector3> _normals = new();
-		// static readonly List<Vector2> _uv = new();
-		// static readonly List<int> _triangles = new();
-		// static readonly List<SubMeshDescriptor> _descriptors = new();
 
-		struct VoxelInfo
+		struct VoxelInfo : IComparable
 		{
-			public int materialIndex;
-			public int shapeIndex;
+			public byte materialIndex;
+			public uint shapeId;
+
+			public int CompareTo(object obj)
+			{
+				int compMaterial = materialIndex.CompareTo(((VoxelInfo)obj).materialIndex);
+				if (compMaterial != 0) return compMaterial;
+				return shapeId.CompareTo(((VoxelInfo)obj).shapeId);
+			}
+
+			public override string ToString() => $"Material: {materialIndex} Shape: {shapeId}";
 		}
 
-		static readonly Dictionary<VoxelInfo, List<Vector3Int>> voxelsByType = new();
+		static readonly SortedDictionary<VoxelInfo, List<Vector3Int>> voxelsByType = new();
 
 		void BuildVoxelPositionDictionary(VoxelMap map)
 		{
-			ClearDictionary(MaterialPalette.Count, shapePalette.Shapes.Count);
+			ClearDictionary();
 
 			Vector3Int mapSize = map.FullSize;
 			for (int x = 0; x < mapSize.x; x++)
 				for (int y = 0; y < mapSize.y; y++)
 					for (int z = 0; z < mapSize.z; z++)
 					{
-						int voxel = map.GetVoxel(x, y, z);
+						Voxel voxel = map.GetVoxel(x, y, z);
 
 						if (voxel.IsEmpty()) continue;
 
-						int shapeIndex = voxel.GetShapeIndex();
-						int materialIndex = voxel.GetMaterialIndex();
 
-						VoxelInfo voxelInfo = new() { materialIndex = materialIndex, shapeIndex = shapeIndex };
+						uint shapeIndex = voxel.shapeId;
+						byte materialIndex = voxel.materialIndex;
 
-						if (voxelsByType.TryGetValue(voxelInfo, out List<Vector3Int> list))
-							list.Add(new Vector3Int(x, y, z));
-						else
-							Debug.LogWarning("VoxelInfo not found in dictionary: " + voxelInfo);
+						VoxelInfo voxelInfo = new() { materialIndex = materialIndex, shapeId = shapeIndex };
+
+						if (!voxelsByType.TryGetValue(voxelInfo, out List<Vector3Int> list))
+						{
+							list = new List<Vector3Int>();
+							voxelsByType.Add(voxelInfo, list);
+						}
+
+						list.Add(new Vector3Int(x, y, z));
 					}
 		}
-		void ClearDictionary(int materialCount, int shapeCount)
+
+		void ClearDictionary()
 		{
-			for (int i = 0; i < shapeCount; i++)
-				for (int j = 0; j < materialCount; j++)
-				{
-					if (voxelsByType.TryGetValue(new VoxelInfo() { materialIndex = j, shapeIndex = i }, out List<Vector3Int> list))
-						list.Clear();
-					else
-						voxelsByType.Add(new VoxelInfo() { materialIndex = j, shapeIndex = i }, new List<Vector3Int>());
-				}
+			List<KeyValuePair<VoxelInfo, List<Vector3Int>>> pairs = voxelsByType.Select(kvp => kvp).ToList();
+			for (int i = pairs.Count - 1; i >= 0; i--)
+			{
+				KeyValuePair<VoxelInfo, List<Vector3Int>> kvp = pairs[i];
+				VoxelInfo voxelInfo = kvp.Key;
+				List<Vector3Int> coordinates = kvp.Value;
+
+				if (coordinates.Count > 0)
+					coordinates.Clear();
+				else
+					voxelsByType.Remove(voxelInfo);
+			}
 		}
 
 
@@ -185,7 +198,6 @@ namespace VoxelSystem
 			benchmarkTimer?.StartModule("Build Voxel Position Dictionary");
 			BuildVoxelPositionDictionary(Map);
 
-			benchmarkTimer?.StartModule("Calculate Vertex Data");
 			CalculateAllMeshData(quick);
 
 
@@ -213,49 +225,58 @@ namespace VoxelSystem
 				destinationMeshFilter.sharedMesh = destinationMesh;
 		}
 
-
-		byte[] sideClosedMap;
-		void ClearOpenedSideMap()
-		{
-			if (sideClosedMap == null || sideClosedMap.Length != Map.Length)
-				sideClosedMap = new byte[Map.Length];
-			else
-				for (int i = 0; i < sideClosedMap.Length; i++)
-					sideClosedMap[i] = 0;
-		}
-
 		void CalculateAllMeshData(bool quick)
 		{
-			VoxelMap map = Map; 
+			VoxelMap map = Map;
 
 			// Pre-calculate VoxelData if needed
-			foreach (KeyValuePair<VoxelInfo, List<Vector3Int>> chunks in voxelsByType)
+			foreach (KeyValuePair<VoxelInfo, List<Vector3Int>> chunk in voxelsByType)
 			{
-				int shapeIndex = chunks.Key.shapeIndex;
-				VoxelShapeBuilder shapeBuilder = shapePalette.Shapes[shapeIndex];
-				shapeBuilder.SetupVoxelData(map, chunks.Value, shapeIndex, quick);
+				if (chunk.Value.Count == 0) continue;
+
+				uint shapeId = chunk.Key.shapeId;
+				VoxelShapeBuilder shapeBuilder = shapePalette.GetBuilder(shapeId);
+				benchmarkTimer?.StartModule("Pre-calculate Vertex Data: " + shapeBuilder.NiceName);
+				shapeBuilder.SetupVoxelData(map, chunk.Value, shapeId, quick);
 			}
 
-			// Calculate openness for every direction
-			ClearOpenedSideMap(); 
-			foreach (KeyValuePair<VoxelInfo, List<Vector3Int>> chunks in voxelsByType)
+			// Calculate every side of every Voxel side if they are open or not
+			foreach (KeyValuePair<VoxelInfo, List<Vector3Int>> chunk in voxelsByType)
 			{
-				int shapeIndex = chunks.Key.shapeIndex;
-				VoxelShapeBuilder shapeBuilder = shapePalette.Shapes[shapeIndex];
-				List<Vector3Int> voxels = chunks.Value;
-				shapeBuilder.SetupClosedSides(map, voxels, sideClosedMap, quick);
+				if (chunk.Value.Count == 0) continue;
+				uint shapeId = chunk.Key.shapeId;
+				VoxelShapeBuilder shapeBuilder = shapePalette.GetBuilder(shapeId);
+				benchmarkTimer?.StartModule("Calculate opened/closed data for voxel sides: " + shapeBuilder.NiceName);
+				List<Vector3Int> voxels = chunk.Value;
+				shapeBuilder.SetupClosedSides(map, voxels, quick);
 			}
 
 			// SetupMesh for every direction
-			for (int materialIndex = 0; materialIndex < MaterialPalette.Count; materialIndex++)
+			uint lastMaterialIndex = 0; 
+
+			foreach (KeyValuePair<VoxelInfo, List<Vector3Int>> chunk in voxelsByType)
 			{
-				for (int shapeIndex = 0; shapeIndex < shapePalette.Shapes.Count; shapeIndex++)
+				uint shapeId = chunk.Key.shapeId;
+				byte materialIndex = chunk.Key.materialIndex;
+				List<Vector3Int> voxelIndexes = chunk.Value;
+
+				if (voxelIndexes.Count == 0) continue;				
+
+				while (lastMaterialIndex < materialIndex)
 				{
-					VoxelShapeBuilder item = shapePalette.Shapes[shapeIndex];
-					List<Vector3Int> voxelIndexes = voxelsByType[new VoxelInfo() { materialIndex = materialIndex, shapeIndex = shapeIndex }];
-					item.GenerateMeshData(map, voxelIndexes, shapeIndex, meshBuilder, quick);
+					meshBuilder.EndMaterialDescriptor();
+					lastMaterialIndex++;
 				}
-				meshBuilder.NextMaterial();
+
+				VoxelShapeBuilder shapeBuilder = shapePalette.GetBuilder(shapeId);
+				benchmarkTimer?.StartModule("Calculate mesh side data: " + shapeBuilder.NiceName);
+				shapeBuilder.GenerateMeshData(map, voxelIndexes, shapeBuilder.VoxelId, meshBuilder, quick);
+			}
+
+			while (lastMaterialIndex < MaterialPalette.Count)
+			{
+				meshBuilder.EndMaterialDescriptor();
+				lastMaterialIndex++;
 			}
 		}
 
@@ -276,7 +297,6 @@ namespace VoxelSystem
 
 			return generator;
 		}
-
 	}
 
 }

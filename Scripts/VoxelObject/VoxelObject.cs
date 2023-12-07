@@ -1,9 +1,12 @@
-﻿using EasyInspector;
+﻿using Benchmark;
+using EasyInspector;
+using MUtility;
 using System.IO;
 using UnityEngine;
 
 namespace VoxelSystem
 {
+
 	[ExecuteAlways]
 	public class VoxelObject : MonoBehaviour
 	{
@@ -12,12 +15,10 @@ namespace VoxelSystem
 
 		[SerializeField] EasyMember sharedMap = new(nameof(SharedVoxelMap));
 		[SerializeField, DisableIf(nameof(HasSharedMap))] EasyMember exportVoxelMap = new(nameof(ExportVoxelMap));
-		// [SerializeField] EasyMember clearVoxelTransforms = new(nameof(ClearWrongVoxelTransforms));
 
 		[SerializeField, HideInInspector] SharedVoxelMap _lastFrameSharedMap = null;
 
 		public event MapChangedDelegate MapChanged;
-
 
 		void OnMapChanged(bool quick)
 		{
@@ -158,52 +159,5 @@ namespace VoxelSystem
 
 			return map.Raycast(globalRay, out hit, transform, returnOutsideVoxel);
 		}
-
-		/*
-		public void ClearWrongVoxelTransforms()
-		{
-			VoxelMap map = GetVoxelMap();
-			BoundsInt bounds = map.VoxelBoundaries;
-			if (!TryGetComponent(out VoxelMeshGenerator meshGenerator)) return;
-
-			VoxelShapePalette palette = meshGenerator.ShapePalette;
-			if (palette == null) return;
-
-
-			int faultyVoxelCount = 0;
-			foreach (Vector3Int index in bounds.WalkThrough())
-			{
-				int voxelValue = map.GetVoxel(index);
-				ushort extraVoxelData = voxelValue.GetExtraVoxelData();
-				Flip3D flip = extraVoxelData.GetFlip();
-				Vector3Int rotation = extraVoxelData.GetRotation();
-				if (flip == Flip3D.None && rotation == Vector3Int.zero) continue;
-
-				if (voxelValue.IsEmpty())
-					RepairVoxel(ref faultyVoxelCount, ref voxelValue);
-
-				int shapeIndex = voxelValue.GetShapeIndex();
-				VoxelShapeBuilder shape = palette.Shapes[shapeIndex];
-
-
-				//if (!shape.IsTransformEnabled)
-				//	RepairVoxel(map, ref faultyVoxelCount, index, ref voxelValue);
-			}
-
-			if (faultyVoxelCount == 0)
-				Debug.Log("No faulty voxel transforms found");
-			else
-			{
-				Debug.Log($"Cleared {faultyVoxelCount} faulty voxel transforms");
-				
-			}
-
-			static void RepairVoxel(ref int faultyVoxelCount, ref int voxelValue)
-			{ 
-				voxelValue.SetExtraVoxelData(0);
-				faultyVoxelCount++;
-			}
-		}
-		*/
 	}
 }

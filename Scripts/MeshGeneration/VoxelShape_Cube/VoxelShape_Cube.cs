@@ -17,15 +17,16 @@ namespace VoxelSystem
 		[SerializeField] List<Mesh> leftSide = new();
 		[SerializeField] List<Mesh> forwardSide = new();
 		[SerializeField] List<Mesh> backSide = new();
-		[SerializeField] bool transformFromRightHanded = true;
+		[SerializeField] bool autoConvertFromRightHanded = true;
 
 		[Header("Texture")]
-		[SerializeField] CubeUVSetup textureUvCoordinates;
-		[SerializeField] bool useTextureSettingOnCustomMeshes = true;
+		[SerializeField] CubeUVSetup textureUvCoordinates = new ();
+		[SerializeField] bool useTextureSettingOnCustomMeshes = false;
 
 		[Header("Other Setup")]
 		[SerializeField] bool drawSidesOnTheMapEdge = true;
 		[SerializeField] bool drawSidesBetweenDifferentVoxelTypes = false;
+		[SerializeField] bool isTransparent = false;
 
 
 		// Generated Data
@@ -58,7 +59,7 @@ namespace VoxelSystem
 				else
 				{
 					Mesh mesh = setupMeshes[0];
-					ArrayMesh arrayMesh = ArrayMesh.CreateFromMesh(mesh, transformFromRightHanded);
+					ArrayMesh arrayMesh = ArrayMesh.CreateFromMesh(mesh, autoConvertFromRightHanded);
 
 					if (useTextureSettingOnCustomMeshes)
 					{
@@ -66,13 +67,11 @@ namespace VoxelSystem
 						arrayMesh.ProjectUV(textureUvCoordinates.GetRect(direction), axis);
 					}
 					
-					meshCache.Add(arrayMesh);
-					//meshCache.AddRange(setupMeshes, transformFromRightHanded);
+					meshCache.Add(arrayMesh); 
 				}
 			}
 		}
-
-		static readonly Vector3 half = Vector3.one * 0.5f;
+				 
 		public static ArrayMesh GenerateDefaultSide(GeneralDirection3D direction, CubeUVSetup cubeTextureCoordinates)
 		{
 			Vector3Int normal = direction.ToVectorInt();
@@ -115,10 +114,22 @@ namespace VoxelSystem
 			_ => throw new ArgumentOutOfRangeException(nameof(direction), direction, null),
 		};
 
+		protected override void SetupClosedSides(VoxelMap map, List<Vector3Int> voxelPositions)
+		{
+			bool close = !isTransparent;
+			for (int i = 0; i < voxelPositions.Count; i++)
+			{
+				Vector3Int voxelPosition = voxelPositions[i];
+				Voxel v = map.GetVoxel(voxelPosition);
+				v.SetAllSideClose(close);
+				map.SetVoxel(voxelPosition, v);
+			}
+		}
+
 		protected sealed override void GenerateMeshData(
 			VoxelMap map,
 			List<Vector3Int> voxelPositions,
-			int shapeIndex,
+			uint shapeIndex,
 			MeshBuilder meshBuilder)
 		{
 			GenerateSideList(map, voxelPositions);
@@ -132,11 +143,11 @@ namespace VoxelSystem
 			for (int i = 0; i < voxelIndices.Count; i++)
 			{
 				Vector3Int voxelIndex = voxelIndices[i];
-				int voxel = map.GetVoxel(voxelIndex);
+				Voxel voxel = map.GetVoxel(voxelIndex);
 
 				if (voxel.IsEmpty()) continue;
 
-				int materialIndex = voxel.GetMaterialIndex();
+				int materialIndex = voxel.materialIndex;
 
 				for (int dirIndex = 0; dirIndex < directions.Length; dirIndex++)
 				{
@@ -148,12 +159,14 @@ namespace VoxelSystem
 
 						if (voxelExists)
 						{
-							int neighbour = map.GetVoxel(ni);
-							if (drawSidesBetweenDifferentVoxelTypes)
-							{
-								if (neighbour == voxel) continue;
-							}
-							else if (neighbour.IsFilled()) continue;
+							Voxel neighbour = map.GetVoxel(ni);
+
+							if (neighbour.shapeId == voxel.shapeId &&
+								neighbour.materialIndex == voxel.materialIndex) continue;
+
+							if (drawSidesBetweenDifferentVoxelTypes) continue;
+
+							if (neighbour.IsSideClosed(direction.Opposite())) continue;
 						}
 						else if (!drawSidesOnTheMapEdge && map.FullSize != Vector3Int.one) continue; 
 
@@ -169,8 +182,7 @@ namespace VoxelSystem
 		}
 
 		void UpdateMeshData(MeshBuilder meshBuilder)
-		{
-
+		{ 
 			for (int sideIndex = 0; sideIndex < allSides.Count; sideIndex++)
 			{
 				CubeSide side = allSides[sideIndex];

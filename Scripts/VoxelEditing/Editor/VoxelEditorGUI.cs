@@ -6,7 +6,8 @@ using System.Linq;
 using System;
 using UnityEditor;
 using UnityEngine;
-using EasyInspector; 
+using EasyInspector;
+using System.Collections;
 
 namespace VoxelSystem
 {
@@ -30,7 +31,6 @@ namespace VoxelSystem
 		static readonly VoxelTool[] cursorTools =
 			VoxelEditor_EnumHelper.allVoxelTools.Where(t => t.IsCursorTool()).ToArray();
 
-		static Texture warningIcon;
 		static GUIStyle headerStyle;
 		static GUIStyle paletteDarkStyle;
 
@@ -83,7 +83,7 @@ namespace VoxelSystem
 				catch (NullReferenceException) { }
 			}
 
-			warningIcon = EditorGUIUtility.IconContent("Warning").image;
+			// warningIcon = EditorGUIUtility.IconContent("Warning").image;
 
 			if (!_actionToContent.IsNullOrEmpty() && !_toolWithActionToContent.IsNullOrEmpty())
 				return;
@@ -193,7 +193,7 @@ namespace VoxelSystem
 			rect.height = singleLineHeight;
 			if (GUI.Button(rect, "Clear Map"))
 			{
-				voxelEditor.RecordForUndo("Map Cleared", RecordType.Map);
+				voxelEditor.RecordForUndo("Map Cleared", RecordType.Map); 
 				change = voxelEditor.Map.ClearWhole();
 			}
 
@@ -467,18 +467,20 @@ namespace VoxelSystem
 				voxelEditor,
 				voxelEditor.MaterialPalette.Select(item => item.name).ToList() ,
 				voxelEditor.SelectedMaterialIndex,
-				newSelectedIndex => voxelEditor.SelectedMaterialIndex = newSelectedIndex,
+				i => i,
+				newSelectedIndex => voxelEditor.SelectedMaterialIndex = (byte)newSelectedIndex,
 				VoxelTool.MaterialPicker,
-				new("Material GetCoordiante:", "The selected index of the Material names"),
+				new("Material Index:", "The selected index of the Material names"),
 				ref position);
 
 			DrawPalette(
-				voxelEditor,
-				voxelEditor.ShapePalette.Shapes.Select(item => item.DisplayName).ToList(),
-				voxelEditor.SelectedShapeIndex,
-				newSelectedIndex => voxelEditor.SelectedShapeIndex = newSelectedIndex,
+				voxelEditor, 
+				voxelEditor.ShapePalette.GetNames(),
+				(int) voxelEditor.SelectedShapeId,
+				index => (int)voxelEditor.ShapePalette.GetBuilderByIndex(index).VoxelId,
+				newSelectedID => voxelEditor.SelectedShapeId = (uint)newSelectedID,
 				VoxelTool.ShapePicker,
-				new("Shape GetCoordiante:", "The selected index of the Shape names"),
+				new("Shape Id:", "The selected index of the Shape names"),
 				ref position);
 			GUI.enabled = tempEnabled;
 		}
@@ -492,7 +494,7 @@ namespace VoxelSystem
 		}
 
 		static void DrawPalette(
-			IVoxelEditor voxelEditor, List<string> names, int selectedIndex,
+			IVoxelEditor voxelEditor, IEnumerable<string> names, int selectedValue, Func<int, int> indexToValue,
 			Action<int> onSelect, VoxelTool voxel, GUIContent title, ref Rect position)
 		{
 			GUI.color = Color.white;
@@ -506,35 +508,36 @@ namespace VoxelSystem
 			rect.x += colorPickerWidth + vSpacing;
 			rect.width = oneRowRect.width - colorPickerWidth + vSpacing;
 
-			if (selectedIndex > 0 && selectedIndex >= names.Count)
+			/*
+			if (selectedValue > 0 && selectedValue >= names.Count())
 			{
-				title.tooltip = "This index is over the names's range!";
+				title.tooltip = "This index is over the list's range!";
 				title.image = warningIcon;
 			}
+			*/
 
-			int newValue = EditorGUI.IntField(rect, title, selectedIndex);
-			newValue = Mathf.Max(newValue, 0);
+			int newValue = EditorGUI.IntField(rect, title, selectedValue);
+			newValue = Math.Max(newValue, 0);
 
-			int i = 0;
-			const float colorSpacing = 4;
+			int index = 0; 
 			float itemWidth = (oneRowRect.width - (itemsInARow - 1) * vSpacing) / itemsInARow;
 			if (names != null)
 				foreach (string name in names)
 				{
 					if (name == null) continue;
 
-					if (i % itemsInARow == 0)
+					if (index % itemsInARow == 0)
 					{
 						oneRowRect = position.SliceOut(_paletteButtonSize);
 						oneRowRect.width = itemWidth;
 					}
 
-					GUI.color = i == selectedIndex ? Color.white : new Color(1, 1, 1, 0.4f);
+					GUI.color = indexToValue(index) == selectedValue ? Color.white : new Color(1, 1, 1, 0.4f);
 					bool click = GUI.Button(oneRowRect, name, paletteButton);
 
 					/*
 					Rect colorRect = new(oneRowRect.x + colorSpacing, oneRowRect.y + colorSpacing, oneRowRect.width - 2 * colorSpacing, oneRowRect.height - 2 * colorSpacing);
-					GUI.color = i == selectedIndex ? Color.white : new Color(1, 1, 1, 0.65f);					
+					GUI.color = index == selectedValue ? Color.white : new Color(1, 1, 1, 0.65f);					
 					if (item.DisplayColor.a != 0)
 					{
 						Color c = item.DisplayColor;
@@ -546,14 +549,14 @@ namespace VoxelSystem
 					*/
 					GUI.Label(oneRowRect, name, paletteDarkStyle);
 					if (click)
-						newValue = i;
+						newValue = indexToValue(index);
 
 					oneRowRect.x += (itemWidth + vSpacing);
-					i++;
+					index++;
 				}
 
 
-			if (newValue != selectedIndex)
+			if (newValue != selectedValue)
 			{
 				Undo.RecordObject(voxelEditor.EditorObject, "Selected Value Changed");
 				if (voxelEditor.SelectedAction == VoxelAction.Erase)
@@ -565,9 +568,13 @@ namespace VoxelSystem
 		}
 
 
-		public static void DrawExtraControls(VoxelEditor voxelEditor, ref Rect position) =>
-			voxelEditor.SelectedVoxelValue = VoxelShapeBuilderEditor.DrawExtraControls(
-				voxelEditor.SelectedShape, voxelEditor.SelectedVoxelValue, voxelEditor.EditorObject, ref position);
+		public static void DrawExtraControls(VoxelEditor voxelEditor, ref Rect position)
+		{
+			Voxel voxelValue = voxelEditor.SelectedVoxelValue;
+			voxelValue.extraVoxelData = VoxelShapeBuilderEditor.DrawExtraControls(
+				voxelEditor.SelectedShape, voxelEditor.SelectedVoxelValue.extraVoxelData, voxelEditor.EditorObject, ref position);
+			voxelEditor.SelectedVoxelValue = voxelValue;
+		}
 
 		// Voxel Transformation
 
@@ -608,13 +615,14 @@ namespace VoxelSystem
 		static readonly MeshBuilder previewMeshBuilder = new();
 		static Mesh previewMesh;
 		static Mesh GetPreviewMesh() => previewMesh;
-		static int lastPreviewedShapeIndex = -1;
+		static uint lastPreviewedShapeIndex = 0;
 		static ushort lastExtraVoxelData = 0;
 
 		public static void DrawVoxelPreview(VoxelEditor voxelEditor, ref Rect position, GeneralDirection2D drawTo)
 		{
 			if (voxelEditor.ShapePalette == null) return;
-			if (voxelEditor.SelectedShapeIndex >= voxelEditor.ShapePalette.Shapes.Count) return;
+			VoxelShapeBuilder shape = voxelEditor.ShapePalette.GetBuilder(voxelEditor.SelectedShapeId);
+			if (shape == null) return;
 			if (Event.current.type != EventType.Repaint) return;
 			
 			Rect rect = position.SliceOut(150, drawTo);
@@ -627,18 +635,17 @@ namespace VoxelSystem
 			customMeshPreview.meshGetter = GetPreviewMesh;
 			customMeshPreview.SetDirty();
 
-			int shapeIndex = voxelEditor.SelectedShapeIndex;
-			ushort extraVoxelData = voxelEditor.SelectedVoxelValue.GetExtraVoxelData();
+			uint shapeId = voxelEditor.SelectedShapeId;
+			ushort extraVoxelData = voxelEditor.SelectedVoxelValue.extraVoxelData;
  
-			if (shapeIndex != lastPreviewedShapeIndex || lastExtraVoxelData != extraVoxelData )
+			if (shapeId != lastPreviewedShapeIndex || lastExtraVoxelData != extraVoxelData )
 			{
-				lastPreviewedShapeIndex = shapeIndex;
+				lastPreviewedShapeIndex = shapeId;
 				lastExtraVoxelData = extraVoxelData;
-
-				VoxelShapeBuilder shape = voxelEditor.ShapePalette.Shapes[voxelEditor.SelectedShapeIndex]; 
+				
 				ArrayVoxelMap map = ArrayVoxelMap.GetTestOneVoxelMap(voxelEditor.SelectedVoxelValue);
 				previewMeshBuilder.Clear();
-				shape.GenerateMeshData(map, new() { Vector3Int.zero }, shapeIndex, previewMeshBuilder, false);
+				shape.GenerateMeshData(map, new() { Vector3Int.zero }, shapeId, previewMeshBuilder, false);
 
 				if (previewMesh == null)  
 					previewMesh = new Mesh();

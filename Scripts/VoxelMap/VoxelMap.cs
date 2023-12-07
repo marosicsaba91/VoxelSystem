@@ -21,6 +21,8 @@ namespace VoxelSystem
 	[Serializable]
 	public abstract partial class VoxelMap
 	{
+		// public abstract void GetSize();
+
 		static readonly Dictionary<string, VoxelMap> mapDictionary = new();
 		public static bool TryGetMapByGuid(string guid, out VoxelMap map)
 		{
@@ -49,7 +51,7 @@ namespace VoxelSystem
 
 		// ------------- GET Information -------------
 
-		public bool IsVoxelEmpty(int voxelValue) => voxelValue.IsEmpty();
+		public bool IsVoxelEmpty(Voxel voxelValue) => voxelValue.IsEmpty();
 
 		public abstract BoundsInt VoxelBoundaries { get; protected set; }
 		public abstract Vector3Int FullSize { get; protected set; }
@@ -70,6 +72,15 @@ namespace VoxelSystem
 
 		public bool IsValidCoord(Vector3Int coordinate) => IsValidCoord(coordinate.x, coordinate.y, coordinate.z);
 
+		public Vector3Int ClampCoordinate(Vector3Int c)
+		{
+			Vector3Int size = FullSize;
+			c.x = Mathf.Clamp(c.x, 0, size.x - 1);
+			c.y = Mathf.Clamp(c.y, 0, size.y - 1);
+			c.z = Mathf.Clamp(c.z, 0, size.z - 1);
+			return c;
+		}
+
 		public int GetSize(Axis3D a)
 		{
 			if (a == Axis3D.X)
@@ -86,10 +97,11 @@ namespace VoxelSystem
 			mapDictionary.TryAdd(UniqueID, this);
 		}
 
-		public abstract void Setup();
+		public void Setup() => Setup(FullSize, emptyValue);
 
-		protected const int emptyValue = IntVoxelUtility.emptyValue;
-		public abstract void Setup(Vector3Int size, int value = emptyValue);
+		protected readonly Voxel emptyValue = Voxel.emptyValue;
+		public void Setup(Vector3Int size) => Setup(size, emptyValue);
+		public abstract void Setup(Vector3Int size, Voxel value);
 
 		// ------------- Changed Event -------------
 
@@ -111,12 +123,12 @@ namespace VoxelSystem
 
 		// ------------- GET Voxels -------------
 
-		public abstract int GetVoxel(int x, int y, int z);
-		public int GetVoxel(Vector3Int coordinate) => GetVoxel(coordinate.x, coordinate.y, coordinate.z);
+		public abstract Voxel GetVoxel(int x, int y, int z);
+		public Voxel GetVoxel(Vector3Int coordinate) => GetVoxel(coordinate.x, coordinate.y, coordinate.z);
 
-		public bool TryGetVoxel(Vector3Int index, out int voxel) =>
+		public bool TryGetVoxel(Vector3Int index, out Voxel voxel) =>
 			TryGetVoxel(index.x, index.y, index.z, out voxel);
-		public bool TryGetVoxel(int x, int y, int z, out int voxel)
+		public bool TryGetVoxel(int x, int y, int z, out Voxel voxel)
 		{
 			if (!IsValidCoord(x, y, z))
 			{
@@ -128,19 +140,22 @@ namespace VoxelSystem
 		}
 
 		public bool IsFilledSafe(Vector3Int coordinate) =>
-			TryGetVoxel(coordinate, out int voxel) && voxel.IsFilled();
+			TryGetVoxel(coordinate, out Voxel voxel) && voxel.IsFilled();
+
+		public bool IsFilledSafe(Vector3Int coordinate, GeneralDirection3D side) =>
+			TryGetVoxel(coordinate, out Voxel voxel) && voxel.IsFilled() && voxel.IsSideClosed(side);
 
 		// ------------- SET Voxels -------------
 
-		public abstract bool SetVoxel(int x, int y, int z, int value);
-		public bool SetVoxel(Vector3Int coordinate, int value) => SetVoxel(coordinate.x, coordinate.y, coordinate.z, value);
-		public bool SetVoxel(Vector3Int coordinate, VoxelAction action, int value) => SetVoxel(coordinate.x, coordinate.y, coordinate.z, action, value);
+		public abstract bool SetVoxel(int x, int y, int z, Voxel value);
+		public bool SetVoxel(Vector3Int coordinate, Voxel value) => SetVoxel(coordinate.x, coordinate.y, coordinate.z, value);
+		public bool SetVoxel(Vector3Int coordinate, VoxelAction action, Voxel value) => SetVoxel(coordinate.x, coordinate.y, coordinate.z, action, value);
 
-		public virtual bool SetVoxel(int x, int y, int z, VoxelAction action, int value)
+		public virtual bool SetVoxel(int x, int y, int z, VoxelAction action, Voxel value)
 		{
 			if (!IsValidCoord(x, y, z)) return false;
-			int v = GetVoxel(x, y, z);
-			int oldV = v;
+			Voxel v = GetVoxel(x, y, z);
+			Voxel oldV = v;
 
 			switch (action)
 			{
@@ -152,7 +167,7 @@ namespace VoxelSystem
 						v = value;
 					break;
 				case VoxelAction.Erase:
-					v.SetEmpty();
+					v = emptyValue;
 					break;
 				case VoxelAction.Repaint:
 					if (oldV.IsFilled())
@@ -160,13 +175,13 @@ namespace VoxelSystem
 					break;
 				case VoxelAction.RepaintMaterialOnly:
 					if (oldV.IsFilled())
-						v.SetMaterialIndex(value.GetMaterialIndex());
+						v.materialIndex =value.materialIndex;
 					break;
 				case VoxelAction.RepaintShapeOnly:
 					if (oldV.IsFilled())
 					{
-						v.SetShapeIndex(value.GetShapeIndex());
-						v.SetExtraVoxelData(value.GetExtraVoxelData());
+						v.shapeId = value.shapeId;
+						v.extraVoxelData = value.extraVoxelData;
 					}
 					break;
 			}
@@ -174,34 +189,34 @@ namespace VoxelSystem
 			return SetVoxel(x, y, z, v);
 		}
 
-		public bool FillVoxel(int x, int y, int z, int value) => SetVoxel(x, y, z, VoxelAction.Repaint, value);
-		public bool FillVoxel(Vector3Int coordinate, int value) => SetVoxel(coordinate.x, coordinate.y, coordinate.z, VoxelAction.Attach, value);
-		public bool RepaintVoxel(int x, int y, int z, int value) => SetVoxel(x, y, z, VoxelAction.Repaint, value);
-		public bool RepaintVoxel(Vector3Int coordinate, int value) => SetVoxel(coordinate.x, coordinate.y, coordinate.z, VoxelAction.Attach, value);
+		public bool FillVoxel(int x, int y, int z, Voxel value) => SetVoxel(x, y, z, VoxelAction.Repaint, value);
+		public bool FillVoxel(Vector3Int coordinate, Voxel value) => SetVoxel(coordinate.x, coordinate.y, coordinate.z, VoxelAction.Attach, value);
+		public bool RepaintVoxel(int x, int y, int z, Voxel value) => SetVoxel(x, y, z, VoxelAction.Repaint, value);
+		public bool RepaintVoxel(Vector3Int coordinate, Voxel value) => SetVoxel(coordinate.x, coordinate.y, coordinate.z, VoxelAction.Attach, value);
 		public bool ClearVoxel(Vector3Int coordinate) => ClearVoxel(coordinate.x, coordinate.y, coordinate.z);
 		public bool ClearVoxel(int x, int y, int z) => SetVoxel(x, y, z, VoxelAction.Overwrite, emptyValue);
 
 		// ------------- Batch SET Operation -------------
 
-		public abstract bool SetWhole(int value);
+		public abstract bool SetWhole(Voxel value);
 
-		public bool ClearWhole() => SetWhole(emptyValue);
+		public abstract bool ClearWhole();
 
-		public abstract bool SetRange(Vector3Int startCoordinate, Vector3Int endCoordinate, VoxelAction action, int value);
+		public abstract bool SetRange(Vector3Int startCoordinate, Vector3Int endCoordinate, VoxelAction action, Voxel value);
 
-		public bool SetRange(Vector3Int startCoordinate, Vector3Int endCoordinate, int value) => SetRange(startCoordinate, endCoordinate, VoxelAction.Overwrite, value);
+		public bool SetRange(Vector3Int startCoordinate, Vector3Int endCoordinate, Voxel value) => SetRange(startCoordinate, endCoordinate, VoxelAction.Overwrite, value);
 
-		public bool FillRange(Vector3Int startCoordinate, Vector3Int endCoordinate, int value) => SetRange(startCoordinate, endCoordinate, VoxelAction.Attach, value);
+		public bool FillRange(Vector3Int startCoordinate, Vector3Int endCoordinate, Voxel value) => SetRange(startCoordinate, endCoordinate, VoxelAction.Attach, value);
 
-		public bool RepaintRange(Vector3Int startCoordinate, Vector3Int endCoordinate, int value) => SetRange(startCoordinate, endCoordinate, VoxelAction.Repaint, value);
+		public bool RepaintRange(Vector3Int startCoordinate, Vector3Int endCoordinate, Voxel value) => SetRange(startCoordinate, endCoordinate, VoxelAction.Repaint, value);
 
 		public bool ClearRange(Vector3Int startCoordinate, Vector3Int endCoordinate) => SetRange(startCoordinate, endCoordinate, VoxelAction.Erase, emptyValue);
 
-		internal bool SetRange(BoundsInt bound, int paletteIndex)
+		internal bool SetRange(BoundsInt bound, Voxel value)
 		{
 			bool changed = false;
 			foreach (Vector3Int c in bound.WalkThrough())
-				changed |= SetVoxel(c, paletteIndex);
+				changed |= SetVoxel(c, value);
 			return changed;
 		}
 
@@ -218,7 +233,7 @@ namespace VoxelSystem
 			BoundsInt bound = new(min, max + Vector3Int.one - min);
 			foreach (Vector3Int index in bound.WalkThrough())
 			{
-				int v = original.GetVoxel(index);
+				Voxel v = original.GetVoxel(index);
 				changed |= SetVoxel(index, v);
 			}
 			return changed;

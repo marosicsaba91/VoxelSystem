@@ -5,6 +5,18 @@ namespace VoxelSystem
 	public abstract class SharedVoxelMap : ScriptableObject
 	{
 		internal abstract VoxelMap Map { get; }
+
+		/*
+		[SerializeField] EasyMember getSize = new(nameof(GetSize));
+
+		internal void GetSize()
+		{
+			Map?.GetSize();
+#if UNITY_EDITOR
+			UnityEditor.EditorUtility.SetDirty(this);
+#endif
+		}
+		*/
 	}
 
 	public abstract class SharedVoxelMap<TVoxelMap> : SharedVoxelMap where TVoxelMap : VoxelMap

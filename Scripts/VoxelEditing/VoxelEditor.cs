@@ -3,6 +3,7 @@ using MUtility;
 using System;
 using Object = UnityEngine.Object;
 using System.Collections.Generic;
+using VoxelSystem;
 
 namespace VoxelSystem
 {
@@ -23,7 +24,7 @@ namespace VoxelSystem
 		[SerializeField, HideInInspector] VoxelAction selectedAction = VoxelAction.Attach;
 		[SerializeField, HideInInspector] VoxelTool selectedTool = VoxelTool.None;
 		[SerializeField, HideInInspector] ToolState toolState = ToolState.None;
-		[SerializeField, HideInInspector] int selectedVoxelValue = 0;
+		[SerializeField, HideInInspector] Voxel selectedVoxelValue = Voxel.emptyValue;
 
 		[SerializeField, HideInInspector] internal VoxelObject voxelFilter;
 		[SerializeField, HideInInspector] internal VoxelMeshGenerator meshGenerator;
@@ -67,18 +68,13 @@ namespace VoxelSystem
 			set => toolState = value;
 		}
 
-		public int SelectedVoxelValue
+		public Voxel SelectedVoxelValue
 		{
 			get => selectedVoxelValue;
 			set => selectedVoxelValue = value;
 		}
 
 		// --- Material Palette ---
-		public int SelectedMaterialIndex
-		{
-			get => selectedVoxelValue.GetMaterialIndex();
-			set => selectedVoxelValue.SetMaterialIndex((byte)value);
-		}
 
 		public Material SelectedMaterial
 		{
@@ -89,26 +85,28 @@ namespace VoxelSystem
 				return MaterialPalette.IndexClamped(SelectedMaterialIndex);
 			}
 		}
-
-		// --- Shape Palette ---
-		public int SelectedShapeIndex
+		public byte SelectedMaterialIndex
 		{
-			get => selectedVoxelValue.GetShapeIndex();
-			set => selectedVoxelValue.SetShapeIndex((byte)value);
+			get => selectedVoxelValue.materialIndex;
+			set => selectedVoxelValue.materialIndex = value;
 		}
-		// --- Shape Palette ---
+
+		public uint SelectedShapeId 
+		{
+			get => selectedVoxelValue.shapeId;
+			set => selectedVoxelValue.shapeId = value;
+		}
+
+// --- Shape Palette ---
 		public VoxelShapeBuilder SelectedShape
 		{
 			get
 			{
 				VoxelShapePalette palette = ShapePalette;
-				if (palette == null) return null;
-				IReadOnlyList<VoxelShapeBuilder> shapes = palette.Shapes;
-				if (palette == null) return null;
-				byte index = selectedVoxelValue.GetShapeIndex();
-			    return shapes.IndexClamped(index);
+				if (palette == null) return null;   
+				return palette.GetBuilder(selectedVoxelValue.shapeId);
 			}
-		} 
+		}
 
 		void Update()
 		{

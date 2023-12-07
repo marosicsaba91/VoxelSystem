@@ -47,7 +47,7 @@ namespace VoxelSystem
 						if (sourceZ >= sourceMap.FullSize.z || sourceZ < 0) continue;
 
 						// Copy Voxel
-						int val = sourceMap.GetVoxel(sourceX, sourceY, sourceZ);
+						Voxel val = sourceMap.GetVoxel(sourceX, sourceY, sourceZ);
 						mapChanged |= SetVoxel(destinationX, destinationY, destinationZ, action, val);
 					}
 				}

@@ -7,45 +7,42 @@ using VoxelSystem;
 
 public class VoxelShape_Mesh : VoxelShapeBuilder
 {
+	[Space]
 	[SerializeField] Mesh mesh;
 	[SerializeField] bool autoConvertFromRightHanded = true;
-	[SerializeField] SideFlags isSideFilled = new(false);
+	[SerializeField] SideFlags closedSides = new(false);
 
-	static readonly Matrix4x4 rightToLeftHanded = Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(-90, 0, 0), new Vector3(-1, -1, 1));
-	
 	[SerializeField, HideInInspector] ArrayMesh[] transformedMeshes = new ArrayMesh[128];
 
 	protected override void InitializeMeshCache()
-	{ 
-		Matrix4x4 baseMatrix = autoConvertFromRightHanded ? rightToLeftHanded : Matrix4x4.identity;
+	{
 		for (int i = 0; i < CubicTransformation.allCount; i++)
 		{
 			CubicTransformation cubicTransformation = new(i);
-			Matrix4x4 transformation = cubicTransformation.GetTransformation() * baseMatrix;
+			Matrix4x4 transformation = cubicTransformation.GetTransformation(autoConvertFromRightHanded);
 			transformedMeshes[i] = ArrayMesh.CreateFromMesh(mesh, transformation);
 		}
 	}
 
 	protected override bool IsInitialized => !transformedMeshes.IsNullOrEmpty();
-
-	static readonly Vector3 half = Vector3.one * 0.5f;
-
+	
 	protected sealed override void GenerateMeshData(
 			VoxelMap map,
 			List<Vector3Int> voxelPositions,
-			int shapeIndex,
+			uint shapeIndex,
 			MeshBuilder meshBuilder)
 	{
 		for (int voxelIndex = 0; voxelIndex < voxelPositions.Count; voxelIndex++)
 		{
 			Vector3Int position = voxelPositions[voxelIndex];
-			int vertexValue = map.GetVoxel(position);
+			Voxel vertexValue = map.GetVoxel(position);
 
-			ushort extraVoxelData = vertexValue.GetExtraVoxelData();
+			ushort extraVoxelData = vertexValue.extraVoxelData;
 			if (extraVoxelData >= CubicTransformation.allCount)
 			{
 				extraVoxelData = 0;
-				map.SetVoxel(position, vertexValue.SetExtraVoxelData(0));
+				vertexValue.extraVoxelData = 0;
+				map.SetVoxel(position, vertexValue);
 			} 
 			ArrayMesh transformedMesh = transformedMeshes[extraVoxelData];
 
@@ -54,23 +51,25 @@ public class VoxelShape_Mesh : VoxelShapeBuilder
 		}
 	}
 
-	protected override void SetupClosedSides(VoxelMap map, List<Vector3Int> voxelPositions, byte[] sideClosedness)
+	protected override void SetupClosedSides(VoxelMap map, List<Vector3Int> voxelPositions)
 	{
 		for (int i = 0; i < voxelPositions.Count; i++)
 		{
-			int index = ArrayVoxelMap.GetIndex(voxelPositions[i], map.FullSize);
-			sideClosedness[index] = 0; // TODO: Implement this properly
-		} 
-		// Use IsSideFilled(dir, voxelValue);
-	}
+			Vector3Int voxelPosition = voxelPositions[i];
+			Voxel voxel = map.GetVoxel(voxelPosition);
+			voxel.closednessInfo = 0;
+			for (int d = 0; d < 6; d++)
+			{
+				GeneralDirection3D localDirection = (GeneralDirection3D)d;
+				CubicTransformation transformation = new(voxel.extraVoxelData);
+				GeneralDirection3D globalDir = transformation.TransformDirection(localDirection);
+				bool closed = closedSides[localDirection];
+				voxel.SetSideClosed(globalDir, closed);
+			}
 
-	public bool IsSideFilled(GeneralDirection3D dir, int voxelValue)
-	{ 
-		ushort extraVoxelData = voxelValue.GetExtraVoxelData();
-		CubicTransformation cubicTransformation = new(extraVoxelData); 
-		return isSideFilled[cubicTransformation.TransformDirection(dir)];
+			map.SetVoxel(voxelPosition, voxel); 
+		}
 	}
-
 
 	List<ExtraControl> controls;
 

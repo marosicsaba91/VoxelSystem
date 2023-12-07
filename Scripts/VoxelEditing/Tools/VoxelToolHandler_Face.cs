@@ -60,7 +60,7 @@ namespace VoxelSystem
 
 		protected override MapChange OnVoxelCursorDown(IVoxelEditor voxelEditor, VoxelHit hit)
 		{
-			// if (voxelEditor.Map.GetVoxel(hit.voxelIndex) == IntVoxelUtility.emptyValue)
+			// if (voxelEditor.Map.GetVoxel(hit.voxelIndex) == NumberSplittingUtility.emptyValue)
 			//	return false;
 
 			voxelEditor.Map.SearchPlane(_originalSide, hit.voxelIndex, hit.side, voxelEditor.SelectedAction.GetEqualityTestFunction());
@@ -98,7 +98,7 @@ namespace VoxelSystem
 					}
 					else // Set new voxels
 					{
-						int originalValue = voxelEditor.Map.GetVoxel(originalIndex);
+						Voxel originalValue = voxelEditor.Map.GetVoxel(originalIndex);
 						isChanged |= voxelEditor.Map.SetRange(currentEnd, lastEnd, action, originalValue);
 					}
 				}
@@ -111,7 +111,7 @@ namespace VoxelSystem
 					else // Set new voxels
 					{
 						currentEnd += surfaceNormal;
-						int originalValue = voxelEditor.Map.GetVoxel(originalIndex);
+						Voxel originalValue = voxelEditor.Map.GetVoxel(originalIndex);
 						isChanged |= voxelEditor.Map.SetRange(currentEnd, lastEnd, action, originalValue);
 					}
 				}

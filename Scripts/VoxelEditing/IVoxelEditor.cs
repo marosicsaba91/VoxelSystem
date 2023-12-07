@@ -19,16 +19,16 @@ namespace VoxelSystem
 		VoxelTool SelectedTool { get; set; }
 		VoxelAction SelectedAction { get; set; }
 
-		// Material Palette
-		int SelectedMaterialIndex { get; set; }
+		// Material Palette 
 		List<Material> MaterialPalette { get; }
 
-		// Shape Palette
-		int SelectedShapeIndex { get; set; }  
+		// Shape Palette 
 		VoxelShapePalette ShapePalette { get; }
 
+		public byte SelectedMaterialIndex { get; set; } 
+		public uint SelectedShapeId { get; set; } 
 		// VoxelValue
-		int SelectedVoxelValue { get; set; }
+		Voxel SelectedVoxelValue { get; set; }
 
 		// Selection
 		BoundsInt Selection { get; set; }

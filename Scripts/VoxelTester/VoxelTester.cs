@@ -1,7 +1,6 @@
 using UnityEngine;
 using VoxelSystem;
 using System.Text;
-using MUtility;
 using System.Collections.Generic;
 
 #if UNITY_EDITOR
@@ -16,7 +15,6 @@ public class VoxelTester : MonoBehaviour
 	[SerializeField] Vector3Int testedVoxelIndex;
 	 
 	[SerializeField] bool showVoxelInfo = true;
-	[SerializeField] bool showVoxelTransformation = true;
 	[SerializeField] bool showOpenAndClosedSides = true;
 
 	VoxelHit lastHitVoxel;
@@ -108,11 +106,11 @@ public class VoxelTester : MonoBehaviour
 		Vector3 center = index + Vector3.one * 0.5f;
 		Vector3 position = center + Vector3.right * 1.2f;
 
-		int voxelValue = map.GetVoxel(index);
+		Voxel voxelValue = map.GetVoxel(index);
 
 
 		StringBuilder text = new();
-		text.AppendLine("GetCoordiante: " + index);
+		text.AppendLine("GetCoordinate: " + index);
 		text.AppendLine("Value: " + voxelValue);
 		if (voxelValue.IsEmpty())
 		{
@@ -120,54 +118,28 @@ public class VoxelTester : MonoBehaviour
 		}
 		else
 		{
-			int materialIndex = voxelValue.GetMaterialIndex();
+			int materialIndex = voxelValue.materialIndex;
 			text.Append("Material: " + materialIndex);
 			if (materialPalette != null && materialPalette.Count > materialIndex)
 				text.Append(" (" + materialPalette[materialIndex].name + ")");
 			text.AppendLine();
 		}
-		int shapeIndex = voxelValue.GetShapeIndex();
-		text.Append("Shape: " + shapeIndex);
-		if (shapePalette != null && shapePalette.Shapes.Count > shapeIndex)
-			text.Append(" (" + shapePalette.Shapes[shapeIndex].DisplayName + ")");
+		uint shapeId = voxelValue.shapeId;
+		text.Append("Shape: " + shapeId);
+		if (shapePalette != null)
+		{
+			VoxelShapeBuilder shape = shapePalette.GetBuilder(shapeId);
+			if(shape!= null)
+				text.Append(" (" + shape.NiceName + ")");			
+		}
 		text.AppendLine();
 
-		ushort extraVoxelData = voxelValue.GetExtraVoxelData();
+		ushort extraVoxelData = voxelValue.extraVoxelData;
 		text.AppendLine("ExtraVoxelData: " + extraVoxelData);
 
 		Handles.Label(position, text.ToString());
 #endif
 	}
-
-	/*
-	void DrawVoxelTransform(VoxelObject obj, Vector3Int index)
-	{
-		if (!showVoxelTransformation) return;
-
-		VoxelMap map = obj.GetVoxelMap();
-		if (map == null) return;
-
-		int voxelValue = map.GetVoxel(index);
-		ushort extraVoxelData = voxelValue.GetExtraVoxelData();
-
-		Vector3 center = index + Vector3.one * 0.5f;
-
-		Vector3 right = GeneralDirection3D.Right.Transform(flip, rotation).ToVector();
-		Vector3 up = GeneralDirection3D.Up.Transform(flip, rotation).ToVector();
-		Vector3 forward = GeneralDirection3D.Forward.Transform(flip, rotation).ToVector();
-
-		Color originalColor = Gizmos.color;
-
-		Gizmos.color = Color.red;
-		Gizmos.DrawLine(center, center + right * 1.5f);
-		Gizmos.color = Color.green;
-		Gizmos.DrawLine(center, center + up * 1.5f);
-		Gizmos.color = Color.blue;
-		Gizmos.DrawLine(center, center + forward * 1.5f);
-
-		Gizmos.color = originalColor;
-	}
-	*/
 
 	void DrawVoxelSides(VoxelObject obj, Vector3Int index)
 	{
@@ -179,29 +151,9 @@ public class VoxelTester : MonoBehaviour
 		VoxelShapePalette shapePalette = meshGenerator.ShapePalette;
 		if (shapePalette == null) return;
 
-		int voxelValue = map.GetVoxel(index); 
-		int shapeIndex = voxelValue.GetShapeIndex();
-		if (shapePalette.Shapes.Count <= shapeIndex) return;
-
-		VoxelShapeBuilder shape = shapePalette.Shapes[shapeIndex];
-
-		Vector3 center = index + Vector3.one * 0.5f;
-		// ushort extraVoxelData = voxelValue.GetExtraVoxelData();
-		// Flip3D flip = extraVoxelData.GetFlip();
-		// Vector3Int rotation = extraVoxelData.GetRotation();
-
-		/*
-		foreach (GeneralDirection3D dir in DirectionUtility.generalDirection3DValues)
-		{
-			bool filled = shape.IsSideFilled(dir);
-			Gizmos.color = filled ? Color.black : Color.white;
-			Vector3 position = center + dir.ToVector() * 0.5f;
-			if(filled)
-				Gizmos.DrawSphere(position, 0.1f);
-			else
-				Gizmos.DrawWireSphere(position, 0.1f);
-		}
-		*/
+		Voxel voxelValue = map.GetVoxel(index); 
+		uint shapeIndex = voxelValue.shapeId;
+		if (shapePalette.ItemCount <= shapeIndex) return;
 	}
 
 }
