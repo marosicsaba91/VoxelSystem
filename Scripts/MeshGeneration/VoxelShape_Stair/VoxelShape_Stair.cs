@@ -258,7 +258,7 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 	protected sealed override void GenerateMeshData(
 		VoxelMap map,
 		List<Vector3Int> voxelPositions,
-		uint shapeIndex,
+		int shapeIndex,
 		MeshBuilder meshBuilder)
 	{
 		for (int i = 0; i < voxelPositions.Count; i++)
@@ -298,13 +298,13 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 	const int extraInfo_rotation = 2;
 	const int extraInfo_level = 3;
 
-	protected override void SetupVoxelData(VoxelMap map, List<Vector3Int> voxelPositions, uint shapeIndex)
+	protected override void SetupVoxelData(VoxelMap map, List<Vector3Int> voxelPositions, int shapeIndex)
 	{
 		for (int i = 0; i < voxelPositions.Count; i++)
 			SetupVoxelTypeAndRotation(map, voxelPositions[i], shapeIndex);
 	}
 
-	void SetupVoxelTypeAndRotation(VoxelMap map, Vector3Int position, uint shapeIndex)
+	void SetupVoxelTypeAndRotation(VoxelMap map, Vector3Int position, int shapeIndex)
 	{
 		Voxel voxelData = map.GetVoxel(position);
 		ushort extraVoxelData = voxelData.extraVoxelData;
@@ -451,11 +451,11 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 		bool upFilled = map.IsFilledSafe(position + Vector3Int.up, GeneralDirection3D.Up);
 
 		bool downFilled = map.IsFilledSafe(position + Vector3Int.down, GeneralDirection3D.Down);
-		bool backFilled = map.IsFilledSafe(position + back.ToVectorInt(), back);
+		bool backFilled = map.IsFilledSafe(position + back.ToVectorInt(), forward);
 		if (!downFilled)
 			meshBuilder.Add(transformedBottomSide, center);
 
-		if (!backFilled)
+		if (!backFilled) 
 			meshBuilder.Add(transformedBackSide[rotation], center);
 
 		bool addStair = !forwardFilled || !upFilled;
@@ -497,11 +497,9 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 		if (closeLeft)
 		{
 			if (addStair)
-			{
 				meshBuilder.Add(transformedLeftSide[rotation], center);
-			}
 			else
-				meshBuilder.Add(transformedBackSide[MathHelper.Mod(rotation - 1, 4)], center);
+				meshBuilder.Add(transformedBackSide[(rotation +3) % 4], center);
 		}
 	}
 
@@ -529,25 +527,19 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 
 		Vector3Int stairUpward = GetCornerDirection(rotation);
 		Vector3Int rightSideVector = ToRightOfCorner(stairUpward);
-		Vector3Int leftSideVector = -stairUpward - rightSideVector;
+		Vector3Int leftSideVector = stairUpward - rightSideVector;
 		GeneralDirection3D leftSideDirection = DirectionUtility.GeneralDirection3DFromVector(leftSideVector).Opposite();
 		GeneralDirection3D rightSideDirection = DirectionUtility.GeneralDirection3DFromVector(rightSideVector).Opposite();
-
+		 
 		if (isInner) 
 		{
-			leftSideVector = -leftSideVector;
-			rightSideVector = -rightSideVector;
-			leftSideDirection = leftSideDirection.Opposite();
-			rightSideDirection = rightSideDirection.Opposite();
-		}
+			// FIX7
+			GeneralDirection3D temp = leftSideDirection;
+			leftSideDirection = rightSideDirection.Opposite();
+			rightSideDirection = temp.Opposite();
 
-		bool closeRightSide = true;
-		if (map.TryGetVoxel(position + rightSideVector, out Voxel rightNeighbour))
-		{
-			if (autoSet && rightNeighbour.shapeId == voxelData.shapeId)
-				closeRightSide = false;
-			else
-				closeRightSide = !rightNeighbour.IsFilled(rightSideDirection);
+			rightSideVector = rightSideDirection.Opposite().ToVectorInt();
+			leftSideVector = leftSideDirection.Opposite().ToVectorInt();
 		}
 
 		bool closeLeftSide = true;
@@ -559,10 +551,29 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 				closeLeftSide = !leftNeighbour.IsFilled(leftSideDirection);
 		}
 
-		if (closeRightSide)
-			meshBuilder.Add(transformedLeftSide[rotation], center);
-		if (closeLeftSide)
-			meshBuilder.Add(transformedRightSide[(rotation + 3) % 4], center);
+		bool closeRightSide = true;
+		if (map.TryGetVoxel(position + rightSideVector, out Voxel rightNeighbour))
+		{
+			if (autoSet && rightNeighbour.shapeId == voxelData.shapeId)
+				closeRightSide = false;
+			else
+				closeRightSide = !rightNeighbour.IsFilled(rightSideDirection);
+		}
+
+		if (isInner)
+		{
+			if (closeLeftSide)
+				meshBuilder.Add(transformedLeftSide[(rotation + 3) % 4], center);
+			if (closeRightSide)
+				meshBuilder.Add(transformedRightSide[(rotation ) % 4], center);
+		}
+		else
+		{
+			if (closeLeftSide)
+				meshBuilder.Add(transformedLeftSide[rotation], center);
+			if (closeRightSide)
+				meshBuilder.Add(transformedRightSide[(rotation + 3) % 4], center);
+		}
 
 		// BACK MESHES
 
@@ -572,11 +583,6 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 			Vector3Int back2Vector = stairUpward + rightSideVector;
 			GeneralDirection3D back1Direction = DirectionUtility.GeneralDirection3DFromVector(back1Vector).Opposite();
 			GeneralDirection3D back2Direction = DirectionUtility.GeneralDirection3DFromVector(back2Vector).Opposite();
-
-			if (closeRightSide)
-				meshBuilder.Add(transformedRightSide[rotation], center);
-			if (closeLeftSide)
-				meshBuilder.Add(transformedLeftSide[(rotation + 3) % 4], center);
 
 			bool isBack2Filled = map.IsFilledSafe(position + back1Vector, back1Direction);
 			bool isBack1Filled = map.IsFilledSafe(position + back2Vector, back2Direction);
@@ -629,16 +635,7 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 
 		return initialRotation;
 	}
-
-	Vector3Int GetSimpleDirectionVector(int rotation) => rotation switch
-	{
-		0 => Vector3Int.forward,
-		1 => Vector3Int.right,
-		2 => Vector3Int.back,
-		3 => Vector3Int.left,
-		_ => throw new NotImplementedException()
-	};
-
+	 
 	GeneralDirection3D GetSimpleDirections(int rotation) => rotation switch
 	{
 		0 => GeneralDirection3D.Forward,

@@ -286,10 +286,10 @@ namespace VoxelSystem
 			if (oneVoxelMap == null)
 			{
 				oneVoxelMap = new ArrayVoxelMap();
-				oneVoxelMap.Setup(Vector3Int.one);
+				oneVoxelMap.Setup(Vector3Int.one * 3);
 			}
 
-			oneVoxelMap.SetVoxel(Vector3Int.zero, value);
+			oneVoxelMap.SetVoxel(Vector3Int.one, value);
 			return oneVoxelMap;
 		}
 	}

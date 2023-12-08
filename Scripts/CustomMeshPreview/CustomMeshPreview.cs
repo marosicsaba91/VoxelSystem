@@ -246,7 +246,6 @@ namespace VoxelSystem
 			light2.type = LightType.Directional;
 			light2.transform.rotation = Quaternion.LookRotation(lightDir * Vector3.back);
 			
-
 			Mesh mesh = preview.meshGetter?.Invoke();
 			Bounds bounds = mesh != null ? mesh.bounds : new Bounds(Vector3.zero, Vector3.one);
 

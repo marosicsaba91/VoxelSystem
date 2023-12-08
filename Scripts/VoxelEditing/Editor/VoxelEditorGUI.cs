@@ -33,6 +33,7 @@ namespace VoxelSystem
 
 		static GUIStyle headerStyle;
 		static GUIStyle paletteDarkStyle;
+		static Texture warningIcon;
 
 		static GUIStyle notSelectedButtonStyle;
 		static GUIStyle selectedButtonStyle;
@@ -83,7 +84,7 @@ namespace VoxelSystem
 				catch (NullReferenceException) { }
 			}
 
-			// warningIcon = EditorGUIUtility.IconContent("Warning").image;
+			warningIcon = EditorGUIUtility.IconContent("Warning").image;
 
 			if (!_actionToContent.IsNullOrEmpty() && !_toolWithActionToContent.IsNullOrEmpty())
 				return;
@@ -467,18 +468,20 @@ namespace VoxelSystem
 				voxelEditor,
 				voxelEditor.MaterialPalette.Select(item => item.name).ToList() ,
 				voxelEditor.SelectedMaterialIndex,
-				i => i,
+				index => index,
+				index => index < voxelEditor.MaterialPalette.Count && index >=0,
 				newSelectedIndex => voxelEditor.SelectedMaterialIndex = (byte)newSelectedIndex,
 				VoxelTool.MaterialPicker,
 				new("Material Index:", "The selected index of the Material names"),
 				ref position);
 
 			DrawPalette(
-				voxelEditor, 
+				voxelEditor,
 				voxelEditor.ShapePalette.GetNames(),
-				(int) voxelEditor.SelectedShapeId,
-				index => (int)voxelEditor.ShapePalette.GetBuilderByIndex(index).VoxelId,
-				newSelectedID => voxelEditor.SelectedShapeId = (uint)newSelectedID,
+				voxelEditor.SelectedShapeId,
+				index => voxelEditor.ShapePalette.GetBuilderByIndex(index).VoxelId,
+				value => voxelEditor.ShapePalette.ContainsID(value),
+				newSelectedID => voxelEditor.SelectedShapeId = newSelectedID,
 				VoxelTool.ShapePicker,
 				new("Shape Id:", "The selected index of the Shape names"),
 				ref position);
@@ -494,8 +497,11 @@ namespace VoxelSystem
 		}
 
 		static void DrawPalette(
-			IVoxelEditor voxelEditor, IEnumerable<string> names, int selectedValue, Func<int, int> indexToValue,
-			Action<int> onSelect, VoxelTool voxel, GUIContent title, ref Rect position)
+			IVoxelEditor voxelEditor, IEnumerable<string> names, int selectedValue,
+			Func<int, int> indexToValue,
+			Func<int, bool> isValidValue,
+			Action<int> onSelect,
+			VoxelTool voxel, GUIContent title, ref Rect position)
 		{
 			GUI.color = Color.white;
 			Rect oneRowRect = position.SliceOutLine();
@@ -508,13 +514,12 @@ namespace VoxelSystem
 			rect.x += colorPickerWidth + vSpacing;
 			rect.width = oneRowRect.width - colorPickerWidth + vSpacing;
 
-			/*
-			if (selectedValue > 0 && selectedValue >= names.Count())
+			if (!isValidValue(selectedValue))
 			{
 				title.tooltip = "This index is over the list's range!";
 				title.image = warningIcon;
 			}
-			*/
+
 
 			int newValue = EditorGUI.IntField(rect, title, selectedValue);
 			newValue = Math.Max(newValue, 0);
@@ -535,18 +540,6 @@ namespace VoxelSystem
 					GUI.color = indexToValue(index) == selectedValue ? Color.white : new Color(1, 1, 1, 0.4f);
 					bool click = GUI.Button(oneRowRect, name, paletteButton);
 
-					/*
-					Rect colorRect = new(oneRowRect.x + colorSpacing, oneRowRect.y + colorSpacing, oneRowRect.width - 2 * colorSpacing, oneRowRect.height - 2 * colorSpacing);
-					GUI.color = index == selectedValue ? Color.white : new Color(1, 1, 1, 0.65f);					
-					if (item.DisplayColor.a != 0)
-					{
-						Color c = item.DisplayColor;
-						c.a = 1;
-						EditorHelper.DrawBox(colorRect, c);
-						bool isDark = c.r + c.g + c.b < 1.5f;
-						GUI.color = isDark ? Color.white : Color.black;
-					}
-					*/
 					GUI.Label(oneRowRect, name, paletteDarkStyle);
 					if (click)
 						newValue = indexToValue(index);
@@ -576,46 +569,13 @@ namespace VoxelSystem
 			voxelEditor.SelectedVoxelValue = voxelValue;
 		}
 
-		// Voxel Transformation
-
-		/*
-		public static void DrawVoxelTransformation(VoxelEditor voxelEditor, ref Rect position, GeneralDirection2D drawTo)
-		{
-			bool tempEnabled = GUI.enabled;
-			GUI.enabled = voxelEditor.IsEditingEnabled();
-			int voxelValue = voxelEditor.SelectedVoxelValue;
-			Vector3Int rotation = voxelValue.GetRotation();
-			Flip3D flip = voxelValue.GetFlip();
-
-			float panelHeight = GetVoxelTransformationPanelHeight();
-			Rect fullRect = position.SliceOut(panelHeight, drawTo);
-			Rect rotationRect = fullRect.SliceOutLine(); 
-
-			EditorGUI.LabelField(rotationRect, "Rotation");
-			rotationRect = EditorHelper.ContentRect(rotationRect);
-			Vector3Int newRotation = EditorGUI.Vector3IntField(rotationRect, GUIContent.none, rotation);
-			Flip3D newFlip = (Flip3D)EditorGUI.EnumPopup(fullRect.SliceOutLine(), "Flip", flip);
-
-			if (GUI.enabled)
-			{
-				if (flip != newFlip || rotation != newRotation)
-				{ 
-					Undo.RecordObject(voxelEditor.EditorObject, "Selected Value Changed");
-					voxelEditor.SelectedRotation = newRotation;
-					voxelEditor.SelectedFlip = newFlip;
-				}
-			}
-			GUI.enabled = tempEnabled; 
-		}
-		*/
-
 		// Draw Preview
 
 		static readonly CustomMeshPreview customMeshPreview = new();
 		static readonly MeshBuilder previewMeshBuilder = new();
 		static Mesh previewMesh;
 		static Mesh GetPreviewMesh() => previewMesh;
-		static uint lastPreviewedShapeIndex = 0;
+		static int lastPreviewedShapeIndex = 0;
 		static ushort lastExtraVoxelData = 0;
 
 		public static void DrawVoxelPreview(VoxelEditor voxelEditor, ref Rect position, GeneralDirection2D drawTo)
@@ -635,7 +595,7 @@ namespace VoxelSystem
 			customMeshPreview.meshGetter = GetPreviewMesh;
 			customMeshPreview.SetDirty();
 
-			uint shapeId = voxelEditor.SelectedShapeId;
+			int shapeId = voxelEditor.SelectedShapeId;
 			ushort extraVoxelData = voxelEditor.SelectedVoxelValue.extraVoxelData;
  
 			if (shapeId != lastPreviewedShapeIndex || lastExtraVoxelData != extraVoxelData )
@@ -645,7 +605,7 @@ namespace VoxelSystem
 				
 				ArrayVoxelMap map = ArrayVoxelMap.GetTestOneVoxelMap(voxelEditor.SelectedVoxelValue);
 				previewMeshBuilder.Clear();
-				shape.GenerateMeshData(map, new() { Vector3Int.zero }, shapeId, previewMeshBuilder, false);
+				shape.GenerateMeshData(map, new() { Vector3Int.one }, shapeId, previewMeshBuilder, false);
 
 				if (previewMesh == null)  
 					previewMesh = new Mesh();

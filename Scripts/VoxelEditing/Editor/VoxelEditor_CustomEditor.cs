@@ -86,7 +86,7 @@ namespace VoxelSystem
 			}
 			else if (guiEvent.keyCode.TryGetValue(out number))
 			{
-				editor.SelectedShapeId = (uint)number;
+				editor.SelectedShapeId = number;
 				guiEvent.Use();
 			}
 

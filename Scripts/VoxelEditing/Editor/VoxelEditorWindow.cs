@@ -11,7 +11,7 @@ namespace VoxelSystem
 {
 	public class VoxelEditorWindow : EditorWindow
 	{
-		[MenuItem("Window/" + EditorConstants.categoryPath + "MyEditorWindow")]
+		[MenuItem("Window/" + EditorConstants.categoryPath + "Voxel Editor Window")]
 		public static void ShowExample()
 		{
 			VoxelEditorWindow ew = GetWindow<VoxelEditorWindow>();

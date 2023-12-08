@@ -22,7 +22,7 @@ namespace VoxelSystem
 		[Header("Other Setup")]
 		[SerializeField] bool mergeCloseEdges;
 		[SerializeField] VoxelConnectionType onMapEdge = VoxelConnectionType.CloseFully;
-		[SerializeField] bool drawBetwenVoxelChange = false;
+		[SerializeField] bool drawBetweenVoxelChange = false;
 		[SerializeField] bool isTransparent = false;
 
 
@@ -41,7 +41,7 @@ namespace VoxelSystem
 		protected sealed override void GenerateMeshData(
 			VoxelMap map,
 			List<Vector3Int> voxelPositions,
-			uint shapeIndex,
+			int shapeIndex,
 			MeshBuilder meshBuilder)
 		{
 			CalculateBlocks(blocks, voxelPositions, map);
@@ -142,7 +142,7 @@ namespace VoxelSystem
 			// ---------------------------------------------------------------------------------------------
 
 			// Between Two Different Type
-			if (!drawBetwenVoxelChange &&
+			if (!drawBetweenVoxelChange &&
 				nX.IsFilled() && nY.IsFilled() && nZ.IsFilled() &&
 				nXY.IsFilled() && nYZ.IsFilled() && nZX.IsFilled() &&
 				nXYZ.IsFilled())

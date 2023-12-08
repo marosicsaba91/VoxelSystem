@@ -129,7 +129,7 @@ namespace VoxelSystem
 		protected sealed override void GenerateMeshData(
 			VoxelMap map,
 			List<Vector3Int> voxelPositions,
-			uint shapeIndex,
+			int shapeIndex,
 			MeshBuilder meshBuilder)
 		{
 			GenerateSideList(map, voxelPositions);

@@ -29,7 +29,7 @@ public class VoxelShape_Mesh : VoxelShapeBuilder
 	protected sealed override void GenerateMeshData(
 			VoxelMap map,
 			List<Vector3Int> voxelPositions,
-			uint shapeIndex,
+			int shapeIndex,
 			MeshBuilder meshBuilder)
 	{
 		for (int voxelIndex = 0; voxelIndex < voxelPositions.Count; voxelIndex++)

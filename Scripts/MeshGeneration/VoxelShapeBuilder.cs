@@ -12,7 +12,7 @@ namespace VoxelSystem
 {
 	public abstract class VoxelShapeBuilder : ScriptableObject
 	{
-		[SerializeField] uint voxelId;
+		[SerializeField] int voxelId;
 		[SerializeField] string niceName;
 		[Space]
 		[HideInInspector] public Material previewMaterial;
@@ -26,7 +26,7 @@ namespace VoxelSystem
 		public Material PreviewMaterial => previewMaterial;
 		public int PreviewExtraSetting => previewExtraSetting;
 
-		public uint VoxelId => voxelId;
+		public int VoxelId => voxelId;
 
 
 		protected void OnValidate()
@@ -39,7 +39,7 @@ namespace VoxelSystem
 			AssemblyReloadEvents.beforeAssemblyReload += Dispose;
 
 			if (voxelId == 0)
-				voxelId = ((uint)Random.Range(0, int.MaxValue) * 2) + (uint)Random.Range(0, 2);
+				voxelId = Random.Range(0, int.MaxValue);
 		}
 		
 		void Dispose()
@@ -95,13 +95,13 @@ namespace VoxelSystem
 		internal void SetupVoxelData(
 			VoxelMap map,
 			List<Vector3Int> voxelPositions,
-			uint shapeId,
+			int shapeId,
 			bool quick)
 		{ 
 			GetVoxelVersion(quick).SetupVoxelData(map, voxelPositions, shapeId);
 		}
 
-		protected virtual void SetupVoxelData(VoxelMap map, List<Vector3Int> voxelPositions, uint shapeIndex) { }
+		protected virtual void SetupVoxelData(VoxelMap map, List<Vector3Int> voxelPositions, int shapeIndex) { }
 
 		internal void SetupClosedSides(VoxelMap map, List<Vector3Int> voxelPositions, bool quick) =>
 			GetVoxelVersion(quick).SetupClosedSides(map, voxelPositions);
@@ -111,7 +111,7 @@ namespace VoxelSystem
 		internal void GenerateMeshData(
 			VoxelMap map,
 			List<Vector3Int> voxelPositions,
-			uint shapeIndex,
+			int shapeId,
 			MeshBuilder meshBuilder,
 			bool quick)
 		{
@@ -121,7 +121,7 @@ namespace VoxelSystem
 				return;
 			}
 
-			GetVoxelVersion(quick).GenerateMeshData(map, voxelPositions, shapeIndex, meshBuilder);
+			GetVoxelVersion(quick).GenerateMeshData(map, voxelPositions, shapeId, meshBuilder);
 		}
 		
 		protected abstract bool IsInitialized { get; }
@@ -129,14 +129,14 @@ namespace VoxelSystem
 		protected abstract void GenerateMeshData(
 			VoxelMap map,
 			List<Vector3Int> voxelPositions,
-			uint shapeIndex,
+			int shapeIndex,
 			MeshBuilder meshBuilder);
 
 		// ---------- Preview -----------------------
 
 		[SerializeField, HideInInspector] MeshBuilder previewMeshBuilder = new();
 		protected Mesh previewMesh = null;
-		protected readonly List<Vector3Int> oneVoxelList = new() { Vector3Int.zero };
+		protected readonly List<Vector3Int> oneVoxelList = new() { Vector3Int.one };
 
 		public MeshBuilder GetSerializedPreviewMesh() => previewMeshBuilder;
 
@@ -163,11 +163,11 @@ namespace VoxelSystem
 
 		protected virtual void RecalculatePreviewMesh()
 		{
-			Voxel voxelValue = Voxel.emptyValue;
-			voxelValue.extraVoxelData = (ushort)previewExtraSetting;
+			Voxel voxelValue = new (voxelId, 0, (ushort)previewExtraSetting, 0);
 			ArrayVoxelMap map = ArrayVoxelMap.GetTestOneVoxelMap(voxelValue);
+
 			previewMeshBuilder.Clear();
-			GenerateMeshData(map, oneVoxelList, 0, previewMeshBuilder, false);
+			GenerateMeshData(map, oneVoxelList, voxelId, previewMeshBuilder, false);
 
 			if (previewMesh == null)
 				previewMesh = new Mesh();

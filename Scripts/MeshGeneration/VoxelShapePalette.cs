@@ -1,4 +1,5 @@
 using MUtility;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,7 +14,7 @@ namespace VoxelSystem
 
 		public int ItemCount => _items.Count;
 
-		public IEnumerable<uint> GetVoxelIds()
+		public IEnumerable<int> GetVoxelIds()
 		{
 			foreach (VoxelShapeBuilder item in _items)
 				yield return item.VoxelId;
@@ -25,7 +26,7 @@ namespace VoxelSystem
 				yield return item.NiceName;
 		}
 
-		public uint GetID(int index)
+		public int GetID(int index)
 		{
 			VoxelShapeBuilder builder = _items.IndexClamped(index);
 			if (builder != null)
@@ -34,7 +35,7 @@ namespace VoxelSystem
 		}
 
 
-		public VoxelShapeBuilder GetBuilder(uint id)
+		public VoxelShapeBuilder GetBuilder(int id)
 		{
 			foreach (VoxelShapeBuilder item in _items)
 			{
@@ -44,7 +45,21 @@ namespace VoxelSystem
 			return GetDummyBuilder();
 		}
 
-		public int GetIndexOf(uint id)
+		public bool TryGetBuilder(int id, out VoxelShapeBuilder builder)
+		{
+			foreach (VoxelShapeBuilder item in _items)
+			{
+				if (item.VoxelId == id)
+				{
+					builder = item;
+					return true;
+				}
+			}
+			builder = GetDummyBuilder();
+			return false;
+		}
+
+		public int GetIndexOf(int id)
 		{
 			for (int i = 0; i < _items.Count; i++)
 			{
@@ -70,6 +85,16 @@ namespace VoxelSystem
 				dummyBuilder.NiceName = "Dummy";
 			}
 			return dummyBuilder;
-		} 
+		}
+
+		internal bool ContainsID(int value) 
+		{ 
+			foreach (VoxelShapeBuilder item in _items)
+			{
+				if (item.VoxelId == value)
+					return true;
+			}
+			return false;
+		}
 	}
 }

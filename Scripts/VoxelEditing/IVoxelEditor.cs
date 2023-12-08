@@ -26,7 +26,7 @@ namespace VoxelSystem
 		VoxelShapePalette ShapePalette { get; }
 
 		public byte SelectedMaterialIndex { get; set; } 
-		public uint SelectedShapeId { get; set; } 
+		public int SelectedShapeId { get; set; } 
 		// VoxelValue
 		Voxel SelectedVoxelValue { get; set; }
 

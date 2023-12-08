@@ -1,0 +1,18 @@
+{
+  "name": "com.marosi.voxelsystem",
+  "version": "0.1.0",
+  "displayName": "VoxelSystem",
+  "description": "System to build voxel based meshes",
+  "unity": "2021.4",
+  "type": "library",
+  "hideInEditor": false,
+  "dependencies": {
+    "com.marosi.utility": "1.3.8",
+    "com.unity.editorcoroutines": "1.0.0"
+  },
+  "author": {
+    "name": "Csaba Marosi",
+    "email": "marosicsaba91@gmail.com",
+    "url": "csabamarosi.net/unity-tools/"
+  }
+}

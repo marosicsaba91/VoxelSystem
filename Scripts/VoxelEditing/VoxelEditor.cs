@@ -3,7 +3,6 @@ using MUtility;
 using System;
 using Object = UnityEngine.Object;
 using System.Collections.Generic;
-using VoxelSystem;
 
 namespace VoxelSystem
 {
@@ -21,10 +20,6 @@ namespace VoxelSystem
 	[ExecuteAlways]
 	class VoxelEditor : MonoBehaviour, IVoxelEditor
 	{
-		[SerializeField, HideInInspector] VoxelAction selectedAction = VoxelAction.Attach;
-		[SerializeField, HideInInspector] VoxelTool selectedTool = VoxelTool.None;
-		[SerializeField, HideInInspector] ToolState toolState = ToolState.None;
-		[SerializeField, HideInInspector] Voxel selectedVoxelValue = Voxel.emptyValue;
 
 		[SerializeField, HideInInspector] internal VoxelObject voxelFilter;
 		[SerializeField, HideInInspector] internal VoxelMeshGenerator meshGenerator;
@@ -59,20 +54,44 @@ namespace VoxelSystem
 		public VoxelShapePalette ShapePalette => meshGenerator.ShapePalette;
 
 		public string MapName => voxelFilter == null ? "-" : voxelFilter.MapName;
-		public VoxelTool SelectedTool { get => selectedTool; set => selectedTool = value; }
-		public VoxelAction SelectedAction { get => selectedAction; set => selectedAction = value; }
 
+
+
+
+		// Selected Tools End Editor Setup 
+		public VoxelTool SelectedTool
+		{
+			get => VoxelEditorSetup.SelectedTool;
+			set => VoxelEditorSetup.SelectedTool = value;
+		}	
+		public VoxelAction SelectedAction
+		{
+			get => VoxelEditorSetup.SelectedAction;
+			set => VoxelEditorSetup.SelectedAction = value;
+		}
 		public ToolState ToolState
 		{
-			get => toolState;
-			set => toolState = value;
-		}
-
+			set => VoxelEditorSetup.ToolState = value;
+			get => VoxelEditorSetup.ToolState;
+		} 
 		public Voxel SelectedVoxelValue
 		{
-			get => selectedVoxelValue;
-			set => selectedVoxelValue = value;
+			get => VoxelEditorSetup.SelectedVoxelValue;
+			set => VoxelEditorSetup.SelectedVoxelValue = value;
 		}
+		public byte SelectedMaterialIndex
+		{
+			get => VoxelEditorSetup.SelectedMaterialIndex;
+			set => VoxelEditorSetup.SelectedMaterialIndex = value;
+		}
+		public int SelectedShapeId
+		{
+			get => VoxelEditorSetup.SelectedShapeId;
+			set => VoxelEditorSetup.SelectedShapeId = value;
+		}
+
+
+
 
 		// --- Material Palette ---
 
@@ -85,17 +104,6 @@ namespace VoxelSystem
 				return MaterialPalette.IndexClamped(SelectedMaterialIndex);
 			}
 		}
-		public byte SelectedMaterialIndex
-		{
-			get => selectedVoxelValue.materialIndex;
-			set => selectedVoxelValue.materialIndex = value;
-		}
-
-		public uint SelectedShapeId 
-		{
-			get => selectedVoxelValue.shapeId;
-			set => selectedVoxelValue.shapeId = value;
-		}
 
 // --- Shape Palette ---
 		public VoxelShapeBuilder SelectedShape
@@ -104,7 +112,7 @@ namespace VoxelSystem
 			{
 				VoxelShapePalette palette = ShapePalette;
 				if (palette == null) return null;   
-				return palette.GetBuilder(selectedVoxelValue.shapeId);
+				return palette.GetBuilder(SelectedVoxelValue.shapeId);
 			}
 		}
 

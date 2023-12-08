@@ -10,12 +10,12 @@ namespace VoxelSystem
 		// The sequence of variables is NOT rearrangeable:
 		// The type is exactly 8 byte now, but it can grow to 12 byte with the wrong order
 
-		[FormerlySerializedAs("shapeID")] public uint shapeId;
+		[FormerlySerializedAs("shapeID")] public int shapeId;
 		public byte materialIndex;
 		public byte closednessInfo;
 		public ushort extraVoxelData;
 
-		public Voxel(uint shapeId, byte materialIndex, ushort extraVoxelData, byte closednessInfo)
+		public Voxel(int shapeId, byte materialIndex, ushort extraVoxelData, byte closednessInfo)
 		{
 			this.shapeId = shapeId;
 			this.materialIndex = materialIndex;
@@ -31,7 +31,7 @@ namespace VoxelSystem
 			longData >>= 16;
 			materialIndex = (byte)(longData & 0xFF);
 			longData >>= 8;
-			shapeId = (uint)longData;
+			shapeId = (int)longData;
 		}
 
 		public long ToLong()

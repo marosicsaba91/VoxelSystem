@@ -124,7 +124,7 @@ public class VoxelTester : MonoBehaviour
 				text.Append(" (" + materialPalette[materialIndex].name + ")");
 			text.AppendLine();
 		}
-		uint shapeId = voxelValue.shapeId;
+		int shapeId = voxelValue.shapeId;
 		text.Append("Shape: " + shapeId);
 		if (shapePalette != null)
 		{
@@ -152,7 +152,7 @@ public class VoxelTester : MonoBehaviour
 		if (shapePalette == null) return;
 
 		Voxel voxelValue = map.GetVoxel(index); 
-		uint shapeIndex = voxelValue.shapeId;
+		int shapeIndex = voxelValue.shapeId;
 		if (shapePalette.ItemCount <= shapeIndex) return;
 	}
 

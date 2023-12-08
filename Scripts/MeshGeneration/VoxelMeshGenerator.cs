@@ -113,7 +113,7 @@ namespace VoxelSystem
 		struct VoxelInfo : IComparable
 		{
 			public byte materialIndex;
-			public uint shapeId;
+			public int shapeId;
 
 			public int CompareTo(object obj)
 			{
@@ -141,7 +141,7 @@ namespace VoxelSystem
 						if (voxel.IsEmpty()) continue;
 
 
-						uint shapeIndex = voxel.shapeId;
+						int shapeIndex = voxel.shapeId;
 						byte materialIndex = voxel.materialIndex;
 
 						VoxelInfo voxelInfo = new() { materialIndex = materialIndex, shapeId = shapeIndex };
@@ -234,7 +234,7 @@ namespace VoxelSystem
 			{
 				if (chunk.Value.Count == 0) continue;
 
-				uint shapeId = chunk.Key.shapeId;
+				int shapeId = chunk.Key.shapeId;
 				VoxelShapeBuilder shapeBuilder = shapePalette.GetBuilder(shapeId);
 				benchmarkTimer?.StartModule("Pre-calculate Vertex Data: " + shapeBuilder.NiceName);
 				shapeBuilder.SetupVoxelData(map, chunk.Value, shapeId, quick);
@@ -244,7 +244,7 @@ namespace VoxelSystem
 			foreach (KeyValuePair<VoxelInfo, List<Vector3Int>> chunk in voxelsByType)
 			{
 				if (chunk.Value.Count == 0) continue;
-				uint shapeId = chunk.Key.shapeId;
+				int shapeId = chunk.Key.shapeId;
 				VoxelShapeBuilder shapeBuilder = shapePalette.GetBuilder(shapeId);
 				benchmarkTimer?.StartModule("Calculate opened/closed data for voxel sides: " + shapeBuilder.NiceName);
 				List<Vector3Int> voxels = chunk.Value;
@@ -252,11 +252,11 @@ namespace VoxelSystem
 			}
 
 			// SetupMesh for every direction
-			uint lastMaterialIndex = 0; 
+			byte lastMaterialIndex = 0; 
 
 			foreach (KeyValuePair<VoxelInfo, List<Vector3Int>> chunk in voxelsByType)
 			{
-				uint shapeId = chunk.Key.shapeId;
+				int shapeId = chunk.Key.shapeId;
 				byte materialIndex = chunk.Key.materialIndex;
 				List<Vector3Int> voxelIndexes = chunk.Value;
 
@@ -268,7 +268,10 @@ namespace VoxelSystem
 					lastMaterialIndex++;
 				}
 
-				VoxelShapeBuilder shapeBuilder = shapePalette.GetBuilder(shapeId);
+				bool hasBuilder = shapePalette.TryGetBuilder(shapeId, out VoxelShapeBuilder shapeBuilder);
+				if(!hasBuilder)
+					Debug.LogWarning($"No shape builder found for: {chunk.Key}.    VoxelCount: {voxelIndexes.Count}");
+
 				benchmarkTimer?.StartModule("Calculate mesh side data: " + shapeBuilder.NiceName);
 				shapeBuilder.GenerateMeshData(map, voxelIndexes, shapeBuilder.VoxelId, meshBuilder, quick);
 			}
