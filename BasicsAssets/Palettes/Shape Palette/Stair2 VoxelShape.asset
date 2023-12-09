@@ -866,7 +866,6 @@ MonoBehaviour:
       width: 0
       height: 0
   useTextureSettingOnCustomMeshes: 1
-  slope: 2
   isTransparent: 0
   transformedStairs:
   - vertices:
