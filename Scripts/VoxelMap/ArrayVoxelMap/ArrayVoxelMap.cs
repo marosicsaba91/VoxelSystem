@@ -24,6 +24,7 @@ namespace VoxelSystem
 
 		public void OnAfterDeserialize()
 		{
+			if (longVoxelData == null) return;
 			voxelData = new Voxel[longVoxelData.Length];
 			for (int i = 0; i < voxelData.Length; i++)
 			{

@@ -32,7 +32,7 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 	[SerializeField] bool useTextureSettingOnCustomMeshes = true;
 
 	[Header("Other Setup")]
-	[SerializeField, Range(1, 4)] int slope = 1;
+	// [SerializeField, Range(1, 4)] int slope = 1;
 	[SerializeField] bool isTransparent = false;
 
 

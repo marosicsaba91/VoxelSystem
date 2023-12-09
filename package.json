@@ -7,8 +7,11 @@
   "type": "library",
   "hideInEditor": false,
   "dependencies": {
-    "com.marosi.utility": "1.3.8",
-    "com.unity.editorcoroutines": "1.0.0"
+    "com.unity.editorcoroutines": "1.0.0",
+    "com.unity.textmeshpro": "1.0.0",
+    "com.marosi.mutility": "2.0.0",
+    "com.marosi.easyeditor": "0.0.1",
+    "com.marosi.benchmark": "1.0.0"
   },
   "author": {
     "name": "Csaba Marosi",
