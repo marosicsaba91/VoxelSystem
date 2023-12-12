@@ -13,6 +13,7 @@ namespace VoxelSystem
 	[RequireComponent(typeof(VoxelObject))]
 	public class VoxelMeshGenerator : MonoBehaviour
 	{
+
 		[SerializeField] VoxelShapePalette shapePalette;
 
 		[SerializeField, HideInInspector] VoxelObject voxelFilter;

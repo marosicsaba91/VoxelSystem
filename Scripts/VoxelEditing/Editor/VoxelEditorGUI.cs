@@ -106,6 +106,7 @@ namespace VoxelSystem
 				}
 			}
 
+
 			foreach (VoxelAction action in VoxelEditor_EnumHelper.allVoxelActions)
 			{
 				Texture texture = iconSettings.GetActionIcon(action);

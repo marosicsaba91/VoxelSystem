@@ -16,6 +16,7 @@ namespace VoxelSystem
 		public bool scale;
 	}
 
+
 	[RequireComponent(typeof(VoxelObject), typeof(VoxelMeshGenerator))]
 	[ExecuteAlways]
 	class VoxelEditor : MonoBehaviour, IVoxelEditor

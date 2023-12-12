@@ -1,4 +1,3 @@
-using MUtility;
 using System.Collections.Generic;
 using UnityEngine;
 using VoxelSystem;
@@ -32,7 +31,9 @@ public class WalkingAgentSetting : VoxelNavAgentSetting
 			{
 				Vector3Int neighbourIndex = indexPos + directionVector;
 				if (navMap.TryGetValue(neighbourIndex, out NavVoxelData neighbourVoxel))
+				{
 					data.AddConnection(neighbourVoxel);
+				}
 			}
 		}
 	}

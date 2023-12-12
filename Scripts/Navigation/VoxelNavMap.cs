@@ -14,7 +14,7 @@ namespace VoxelSystem
 	{
 		enum ChangeOn { Never, OnQuickChange, OnFinalChange, EveryChange }
 
-		[SerializeField] VoxelObject voxelFilter;
+		[SerializeField] VoxelObject voxelObject;
 		[SerializeField] VoxelNavAgentSetting agentSetting;
 
 		[SerializeField] VoxelNavTarget[] targets;
@@ -46,6 +46,7 @@ namespace VoxelSystem
 		[Space]
 		[SerializeField, ShowIf(nameof(visualizePoints)), Min(1)] int maxDistanceToShow = 10;
 		[SerializeField, ShowIf(nameof(visualizePoints)), Range(0, 1)] float maxDistanceAlpha = 0.5f;
+		[SerializeField, ShowIf(nameof(visualizePoints)), Range(0, 1)] float arrowSize = 0.5f;
 
 
 		readonly Dictionary<Vector3Int, NavVoxelData> navMap = new();
@@ -55,11 +56,11 @@ namespace VoxelSystem
 
 		void Update()
 		{
-			if (voxelFilter != null)
+			if (voxelObject != null)
 			{
-				voxelFilter.MapChanged -= OnMapChanged;
-				voxelFilter.MapChanged += OnMapChanged;
-				_lastFilter = voxelFilter;
+				voxelObject.MapChanged -= OnMapChanged;
+				voxelObject.MapChanged += OnMapChanged;
+				_lastFilter = voxelObject;
 			}
 			else if (_lastFilter != null)
 			{
@@ -133,8 +134,7 @@ namespace VoxelSystem
 		void CalculatePossibleVoxels()
 		{
 			_positionsCache.Clear();
-			agentSetting.GetPossiblePositions(voxelFilter.GetVoxelMap(), _positionsCache);
-
+			agentSetting.GetPossiblePositions(voxelObject.GetVoxelMap(), _positionsCache);
 			navMap.Clear();
 			for (int i = 0; i < _positionsCache.Count; i++)
 			{
@@ -143,7 +143,7 @@ namespace VoxelSystem
 			}
 		}
 
-		void SetupConnections() => agentSetting.SetupConnections(voxelFilter.GetVoxelMap(), navMap);
+		void SetupConnections() => agentSetting.SetupConnections(voxelObject.GetVoxelMap(), navMap);
 
 
 		readonly NavConnectionWeightWave _wave = new();
@@ -166,11 +166,14 @@ namespace VoxelSystem
 
 		void OnDrawGizmos()
 		{
+
 			if (!visualizePoints) return;
 			if (navMap == null) return;
-			if (voxelFilter == null) return;
+			if (voxelObject == null) return;
 
-			Transform mapTransform = voxelFilter.transform;
+			Gizmos.color = Color.white;
+			Transform mapTransform = voxelObject.transform;
+			float arrowGap = (1 - arrowSize) / 2;
 
 			// Points
 			if (showPoints)
@@ -179,9 +182,10 @@ namespace VoxelSystem
 				foreach (NavVoxelData voxel in navMap.Values)
 				{
 					float cost = voxel.cost;
-					if (cost > maxDistanceToShow) continue;
-					if (cost < 0 ) continue;
+					// if (cost < 0 ) continue; 
+					// if (cost > maxDistanceToShow) continue;
 					Vector3 voxelPosition = voxel.GlobalPoint(mapTransform);
+					Gizmos.DrawCube(voxelPosition, Vector3.one * 0.1f);
 					TextGizmos.TextColor = pointColor;
 					// max one decimal, preferably no decimal
 					string costString = cost.ToString("0.#");
@@ -205,13 +209,13 @@ namespace VoxelSystem
 					Vector3 closestPosition = minimumCostNeighbour.GlobalPoint(mapTransform);
 					float a = Mathf.Lerp(lineColor.a, maxDistanceAlpha, minimumCostNeighbour.cost / (maxDistanceToShow - 1));
 					Gizmos.color = new Color(lineColor.r, lineColor.g, lineColor.b, a);
-					DrawQuickArrow(voxelPosition, closestPosition);
+					DrawQuickArrow(voxelPosition, closestPosition, arrowGap);
 				}
 			}
 			// All Connections
 			else if (showAllConnections)
 			{
-				Gizmos.color = lineColor;
+				Gizmos.color = lineColor; 
 				foreach (NavVoxelData voxel in navMap.Values)
 				{
 					Vector3 voxelPosition = voxel.GlobalPoint(mapTransform);
@@ -221,7 +225,7 @@ namespace VoxelSystem
 					float a = Mathf.Lerp(lineColor.a, maxDistanceAlpha, cost / (maxDistanceToShow - 1));
 					Gizmos.color = new Color(lineColor.r, lineColor.g, lineColor.b, a);
 					foreach (NavVoxelData neighbour in voxel.neighbours)
-						DrawQuickArrow(voxelPosition, neighbour.GlobalPoint(mapTransform));
+						DrawQuickArrow(voxelPosition, neighbour.GlobalPoint(mapTransform), arrowGap);
 
 				}
 			}
@@ -235,15 +239,14 @@ namespace VoxelSystem
 					Gizmos.DrawSphere(worldPoint, 0.5f);
 				}
 
-			static void DrawQuickArrow(Vector3 from, Vector3 to)
+			static void DrawQuickArrow(Vector3 from, Vector3 to, float gap)
 			{
-				const float baseSze = 0.1f;
-				const float gapPercent = 0.1f;
+				const float baseSize = 0.05f;
 				Vector3 perpendicular = (from - to).GetPerpendicular();
-				Vector3 start = Vector3.Lerp(from, to, gapPercent);
-				Vector3 end = Vector3.Lerp(from, to, 1 - gapPercent);
+				Vector3 start = Vector3.Lerp(from, to, gap);
+				Vector3 end = Vector3.Lerp(from, to, 1 - gap);
 				Gizmos.DrawLine(start, end);
-				Gizmos.DrawLine(start + perpendicular * baseSze, start - perpendicular * baseSze);
+				Gizmos.DrawLine(start + perpendicular * baseSize, start - perpendicular * baseSize);
 			}
 		}
 
@@ -254,16 +257,15 @@ namespace VoxelSystem
 			path.Clear();
 			if (navMap == null)
 				return false;
-			if (voxelFilter == null)
+			if (voxelObject == null)
 				return false;
 
-			Transform t = voxelFilter.transform;
+			Transform t = voxelObject.transform;
 			Vector3 half = Vector3.one / 2f;
 
 			Vector3 localPosInMap = t.InverseTransformPoint(position);
 			Vector3Int indexPoint = Vector3Int.RoundToInt(localPosInMap);
 			path.Add(t.TransformPoint(indexPoint + half));
-			Debug.Log($"LocalPos: {localPosInMap} GetCoordiante: {indexPoint}");
 			if (!navMap.TryGetValue(indexPoint, out NavVoxelData currentVoxel))
 				return false;
 
