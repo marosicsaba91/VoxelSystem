@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using MUtility; 
+
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -28,8 +29,6 @@ namespace VoxelSystem
 
 		public Func<Mesh> meshGetter;
 
-
-		PreviewRenderUtility renderer;
 		static Material standardMaterial;
 		public Texture previewTexture;
 
@@ -171,13 +170,14 @@ namespace VoxelSystem
 		{
 			get
 			{
+#if UNITY_EDITOR
 				if (previewTexture == null || isDirty)
 				{
 					renderer ??= new PreviewRenderUtility();
 					Render();
 					isDirty = false;
-				}
-
+				} 
+#endif
 				return previewTexture;
 			}
 
@@ -190,6 +190,10 @@ namespace VoxelSystem
 			this.materials.AddRange(materials);
 		}
 
+
+#if UNITY_EDITOR
+		PreviewRenderUtility renderer;
+#endif
 
 		public void Render()
 		{
@@ -208,9 +212,9 @@ namespace VoxelSystem
 #endif
 		}
 
-#if UNITY_EDITOR
 		public void Dispose()
 		{
+#if UNITY_EDITOR
 			renderer?.Cleanup();
 			renderer = null;
 
@@ -224,8 +228,10 @@ namespace VoxelSystem
 				UnityEngine.Object.DestroyImmediate(standardMaterial);
 				standardMaterial = null;
 			}
+#endif
 		}
 
+#if UNITY_EDITOR
 		static Texture Render(CustomMeshPreview preview, PreviewRenderUtility renderer)
 		{
 			Rect position = new(0, 0, preview.textureSize.x, preview.textureSize.y);

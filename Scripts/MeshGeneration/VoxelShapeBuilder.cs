@@ -1,11 +1,11 @@
 ﻿using MUtility;
 using System;
 using System.Collections.Generic;
-using UnityEditor;
+using UnityEngine;
 using Random = UnityEngine.Random; 
 
 #if UNITY_EDITOR
-using UnityEngine;
+using UnityEditor;
 #endif
 
 namespace VoxelSystem
@@ -35,8 +35,10 @@ namespace VoxelSystem
 			OnValidateInternal();
 			SetupMeshPreview();
 
+#if UNITY_EDITOR
 			AssemblyReloadEvents.beforeAssemblyReload -= Dispose;
 			AssemblyReloadEvents.beforeAssemblyReload += Dispose;
+#endif
 
 			if (voxelId == 0)
 				voxelId = Random.Range(0, int.MaxValue);

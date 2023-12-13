@@ -4,7 +4,6 @@ using MUtility;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.EditorCoroutines.Editor;
 using UnityEngine;
 
 namespace VoxelSystem
@@ -68,32 +67,20 @@ namespace VoxelSystem
 			}
 		}
 
-		EditorCoroutine _delayedGeneration = null;
-
 		void OnMapChanged(bool quick)
 		{
 			if (autoRegenerateMap == ChangeOn.Never) return;
 
-			if (_delayedGeneration != null)
-				EditorCoroutineUtility.StopCoroutine(_delayedGeneration);
+			//if (_delayedGeneration != null)
+			//	EditorCoroutineUtility.StopCoroutine(_delayedGeneration);
 
 			if ((quick && autoRegenerateMap == ChangeOn.OnQuickChange) ||
 				autoRegenerateMap == ChangeOn.EveryChange)
 				RecalculateNavDataQuick();
 
-			else if (!quick && autoRegenerateMap is ChangeOn.OnFinalChange)
-				_delayedGeneration = EditorCoroutineUtility.StartCoroutine(RegenerateNavDataAfterDelay(), this);
+			else if (!quick && autoRegenerateMap == ChangeOn.OnFinalChange)
+				RecalculateNavDataQuick();
 
-		}
-
-		IEnumerator RegenerateNavDataAfterDelay()
-		{
-			float time = Time.realtimeSinceStartup;
-			while (Time.realtimeSinceStartup - time < regenDelay)
-				yield return null;
-			RecalculateNavDataQuick();
-
-			yield return null;
 		}
 
 		void Start()
