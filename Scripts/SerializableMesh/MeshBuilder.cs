@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MUtility;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -17,6 +18,8 @@ namespace VoxelSystem
 		[SerializeField] int _lastMaterialStartTriangleIndex = 0;
 		public int VertexCount => vertices.Count;
 		public int TriangleCount => triangles.Count;
+
+		static readonly Matrix4x4 rightToLeftHanded = Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(-90, 0, 0), new Vector3(-1, -1, 1));
 
 		public static MeshBuilder CreateFromMesh(Mesh mesh, Matrix4x4 transformation)
 		{
@@ -42,6 +45,21 @@ namespace VoxelSystem
 
 			meshBuilder.RecalculateWindings();
 			return meshBuilder;
+		}
+		public static MeshBuilder CreateFromMesh(Mesh mesh, bool fromRightHanded = false)
+		{
+			if (fromRightHanded)
+				return CreateFromMesh(mesh, rightToLeftHanded);
+			else
+			{
+				return new MeshBuilder()
+				{
+					vertices = new(mesh.vertices),
+					triangles = new(mesh.triangles),
+					uv = new(mesh.uv),
+					normals = new(mesh.normals)
+				};
+			}
 		}
 
 		public void RecalculateWindings()
@@ -131,7 +149,6 @@ namespace VoxelSystem
 			}
 			RecalculateWindings();
 		}
-
 
 		internal void ApplyRotation(Quaternion rotation)
 		{
@@ -244,6 +261,52 @@ namespace VoxelSystem
 			int triangleCount = TriangleCount - _lastMaterialStartTriangleIndex;
 			descriptors.Add(new SubMeshDescriptor(_lastMaterialStartTriangleIndex, triangleCount));
 			_lastMaterialStartTriangleIndex = TriangleCount;
+		}
+
+		public void Transform(Matrix4x4 transformation)
+		{
+			for (int i = 0; i < vertices.Count; i++)
+			{
+				vertices[i] = transformation.MultiplyVector(vertices[i]);
+				normals[i] = transformation.MultiplyVector(normals[i]);
+			}
+
+			if (transformation.determinant < 0)
+				RecalculateWindings();
+		}
+
+		internal void ProjectUV(Rect rect, Axis3D getAxis)
+		{
+
+			for (int i = 0; i < vertices.Count; i++)
+			{
+				Vector3 vx = vertices[i];
+				float ui = getAxis switch
+				{
+					Axis3D.X => vx.y,
+					Axis3D.Y => vx.x,
+					Axis3D.Z => vx.x,
+					_ => 0
+				};
+				float vi = getAxis switch
+				{
+					Axis3D.X => vx.z,
+					Axis3D.Y => vx.z,
+					Axis3D.Z => vx.y,
+					_ => 0
+				};
+				ui += 0.5f;
+				vi += 0.5f;
+
+
+				Vector2 min = rect.min;
+				Vector2 max = rect.max;
+
+				float u = Mathf.Lerp(min.x, max.x, ui);
+				float v = Mathf.Lerp(min.y, max.y, vi);
+
+				uv[i] = new Vector2(u, v);
+			}
 		}
 	}
 }

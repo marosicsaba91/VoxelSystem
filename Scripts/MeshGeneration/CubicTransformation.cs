@@ -127,6 +127,11 @@ public struct CubicTransformation
 		return result;
 	}
 
+	/// <summary>
+	/// Generate world direction from local direction
+	/// </summary>
+	/// <param name="localDir">Local Direction</param>
+	/// <returns>World Direction</returns>
 	internal GeneralDirection3D TransformDirection(GeneralDirection3D localDir)
 	{
 		if (localDir == GeneralDirection3D.Up)
@@ -169,13 +174,51 @@ public struct CubicTransformation
 		return localDir;
 	}
 
-	/*
-	internal GeneralDirection3D TransformDirectionSlow(GeneralDirection3D localDir)   // NEED OPTIMISATION
+
+	/// <summary>
+	/// Generate local direction from world direction
+	/// </summary>
+	/// <param name="worldDir">Global Direction</param>
+	/// <returns>Local Direction</returns>
+	internal GeneralDirection3D InverseTransformDirection(GeneralDirection3D worldDir)
 	{
-		Vector3 vec = localDir.ToVector();
-		Matrix4x4 transformation = GetTransformation();
-		vec = transformation.MultiplyVector(vec);
-		return DirectionUtility.GeneralDirection3DFromVector(vec);
+		//Generate Inverse Transformation Function based on TransformDirection
+
+		if (worldDir == UpDirection)
+			return verticalFlip ? GeneralDirection3D.Down : GeneralDirection3D.Up;
+		if (worldDir == UpDirection.Opposite())
+			return verticalFlip ? GeneralDirection3D.Up : GeneralDirection3D.Down;
+		
+		GeneralDirection3D localForward = GetForwardDirection(upDirectionIndex);
+		GeneralDirection3D localRight = GetRightDirection(upDirectionIndex);
+
+		if (verticalRotation == 1)
+		{
+			GeneralDirection3D f = localForward;
+			localForward = localRight;
+			localRight = f.Opposite();
+		}
+		else if (verticalRotation == 2)
+		{
+			localForward = localForward.Opposite();
+			localRight = localRight.Opposite();
+		}
+		else if (verticalRotation == 3)
+		{
+			GeneralDirection3D f = localForward;
+			localForward = localRight.Opposite();
+			localRight = f;
+		}
+
+		if (worldDir == localForward)
+			return GeneralDirection3D.Forward;
+		if (worldDir == localForward.Opposite())
+			return GeneralDirection3D.Back;
+		if (worldDir == localRight)
+			return GeneralDirection3D.Right;
+		if (worldDir == localRight.Opposite())
+			return GeneralDirection3D.Left;
+
+		return worldDir;
 	}
-	*/
 }

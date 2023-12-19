@@ -224,13 +224,13 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 			Vector3Int voxelPosition = voxelPositions[i];
 			Voxel v = map.GetVoxel(voxelPosition);
 
-			StairType stairType = (StairType)v.extraVoxelData.Get2Bit(extraInfo_stairType);
+			ShapeType stairType = GetStairType(v.extraVoxelData);
 
-			if (isTransparent || stairType == StairType.WalledIn)
+			if (isTransparent || stairType == ShapeType.FullBlock)
 				v.OpenAllSide();
 			else
 			{
-				int rotation = v.extraVoxelData.Get2Bit(extraInfo_rotation);
+				int rotation = GetRotation(v.extraVoxelData);
 
 				CubicTransformation transformation = new(GeneralDirection3D.Up, rotation, false);
 				v.SetSideClosed(GeneralDirection3D.Up, false);
@@ -244,8 +244,8 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 				v.SetSideClosed(globalRight, false);
 				v.SetSideClosed(globalBack, false);
 
-				bool leftClosed = stairType == StairType.InnerCorner;
-				bool forwardClosed = stairType is StairType.Simple or StairType.InnerCorner;
+				bool leftClosed = stairType == ShapeType.InnerCornerStair;
+				bool forwardClosed = stairType is ShapeType.SimpleStair or ShapeType.InnerCornerStair;
 
 				v.SetSideClosed(globalLeft, leftClosed);
 				v.SetSideClosed(globalForward, forwardClosed);
@@ -272,6 +272,7 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 		Vector3Int.back,
 		Vector3Int.left
 	};
+
 	static readonly Vector3Int[] diagonalDirections =
 	{
 		new (1,0,1),
@@ -280,18 +281,17 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 		new (-1,0,1),
 	};
 
-	enum StairType
-	{
-		Simple = stairType_Simple,
-		InnerCorner = stairType_InnerCorner,
-		OuterCorner = stairType_OuterCorner,
-		WalledIn = stairType_WalledIn,
-	}
+	GeneralDirection3D GetStairRightSideGlobal(ushort extraData) => GetStairType(extraData) switch
+	{ 
+		ShapeType.OuterCornerStair => GetSimpleDirections(GetRotation(extraData)),
+		_ => GetSimpleDirections((GetRotation(extraData) + 1) % 4)
+	};
 
-	const int stairType_Simple = 0;
-	const int stairType_InnerCorner = 1;
-	const int stairType_OuterCorner = 2;
-	const int stairType_WalledIn = 3;
+	GeneralDirection3D GetStairLeftSideGlobal(ushort extraData) => GetStairType(extraData) switch
+	{ 
+		ShapeType.InnerCornerStair => GetSimpleDirections((GetRotation(extraData) + 2) % 4),
+		_ => GetSimpleDirections((GetRotation(extraData) + 3) % 4)
+	};
 
 	const int extraInfo_isAutoSet = 0;
 	const int extraInfo_stairType = 1;
@@ -343,7 +343,7 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 
 			if (isFullyWalledIn)
 			{
-				extraVoxelData.Set2Bit(extraInfo_stairType, isFullyWalledIn ? stairType_WalledIn : stairType_Simple);
+				extraVoxelData.Set2Bit(extraInfo_stairType, isFullyWalledIn ? (int)ShapeType.FullBlock : (int)ShapeType.SimpleStair);
 				map.SetVoxel(position, voxelData);
 				return;
 			}
@@ -351,7 +351,7 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 
 		int stairType = extraVoxelData.Get2Bit(extraInfo_stairType);
 		int stairRotation = extraVoxelData.Get2Bit(extraInfo_rotation);
-		// int stairLevel = extraVoxelData.Get2Bit(extraInfo_level);
+		// int currentLevel = extraVoxelData.Get2Bit(extraInfo_level);
 
 		if (wallNeighbourCount == 0)
 		{
@@ -368,34 +368,34 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 
 			if (diagonalDir != Vector3Int.zero)
 			{
-				stairType = stairType_OuterCorner;
+				stairType = (int)ShapeType.OuterCornerStair;
 				stairRotation = GetRotation(stairRotation, diagonalDir);
 			}
 			else
-				stairType = stairType_Simple;
+				stairType = (int)ShapeType.SimpleStair;
 		}
 
 		else if (wallNeighbourCount == 1)
 		{
-			stairType = stairType_Simple;
+			stairType = (int)ShapeType.SimpleStair;
 			stairRotation = GetRotation(stairRotation, wallNeighbourDir);
 		}
 		else if (wallNeighbourCount == 2)
 		{
 			if (stairNeighbourCount == 2)
 			{
-				stairType = stairType_InnerCorner;
+				stairType = (int)ShapeType.InnerCornerStair;
 				stairRotation = GetRotation(stairRotation, wallNeighbourDir);
 			}
 			else
 			{
-				stairType = stairType_Simple;
+				stairType = (int)ShapeType.SimpleStair;
 				stairRotation = GetRotation(stairRotation, wallNeighbourDir + stairNeighbourDir);
 			}
 		}
 		else if (wallNeighbourCount == 3)
 		{
-			stairType = stairType_Simple;
+			stairType = (int)ShapeType.SimpleStair;
 			stairRotation = GetRotation(stairRotation, wallNeighbourDir);
 		}
 
@@ -410,20 +410,20 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 	{
 		Voxel voxelData = map.GetVoxel(position);
 		ushort extraVoxelData = voxelData.extraVoxelData;
-		int stairType = extraVoxelData.Get2Bit(extraInfo_stairType);
+		ShapeType stairType = (ShapeType) extraVoxelData.Get2Bit(extraInfo_stairType);
 
 		switch (stairType)
 		{
-			case stairType_Simple:
+			case ShapeType.SimpleStair:
 				BuildSimpleStair(map, position, voxelData, meshBuilder);
 				break;
-			case stairType_InnerCorner:
+			case ShapeType.InnerCornerStair:
 				BuildCorner(map, position, voxelData, true, meshBuilder);
 				break;
-			case stairType_OuterCorner:
+			case ShapeType.OuterCornerStair:
 				BuildCorner(map, position, voxelData, false, meshBuilder);
 				break;
-			case stairType_WalledIn:
+			case ShapeType.FullBlock:
 				// Nothing To Do
 				break;
 		}
@@ -614,7 +614,7 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 
 		if (upX == 0 && upZ == 0) return initialRotation;
 
-		if (upX == 0 || upZ == 0)  // Simple
+		if (upX == 0 || upZ == 0)  // SimpleStair
 		{
 			if (upZ == 1) return 0; // Forward
 			if (upX == 1) return 1; // Right
@@ -675,30 +675,30 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 		}
 	}
 
-	List<ExtraControl> controls;
-	public override IReadOnlyList<ExtraControl> GetExtraControls()
+	List<ExtraVoxelControl> controls;
+	public override IReadOnlyList<ExtraVoxelControl> GetExtraControls()
 	{
-		controls ??= new List<ExtraControl>()
+		controls ??= new List<ExtraVoxelControl>()
 		{
-			new ExtraControl<bool> ()
+			new ExtraVoxelControl<bool> ()
 			{
 				name = "Enable Auto Setup",
 				getValue = GetAutoSetup,
 				setValue = SetAutoSetup
 			},
-			new ExtraControl<StairType>()
+			new ExtraVoxelControl<ShapeType>()
 			{
 				name = "Stair Type",
 				getValue = GetStairType,
 				setValue = SetStairType
 			},
-			new ExtraControl<int>
+			new ExtraVoxelControl<int>
 			{
 				name = "Rotation",
 				getValue = GetRotation,
 				setValue = SetRotation
 			},
-			new ExtraControl<int>
+			new ExtraVoxelControl<int>
 			{
 				name = "Level",
 				getValue = GetLevel,
@@ -711,8 +711,8 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 	static bool GetAutoSetup(ushort extraVoxelData) => extraVoxelData.Get2Bit(extraInfo_isAutoSet) == 0;
 	static ushort SetAutoSetup(ushort originalExtraVoxelData, bool newValue) =>
 		originalExtraVoxelData.Set2Bit(extraInfo_isAutoSet, newValue ? 0 : 1);
-	static StairType GetStairType(ushort voxelData) => (StairType)voxelData.Get2Bit(extraInfo_stairType);
-	static ushort SetStairType(ushort originalExtraVoxelData, StairType newValue) =>
+	static ShapeType GetStairType(ushort voxelData) => (ShapeType)voxelData.Get2Bit(extraInfo_stairType);
+	static ushort SetStairType(ushort originalExtraVoxelData, ShapeType newValue) =>
 		originalExtraVoxelData.Set2Bit(extraInfo_stairType, (int)newValue);
 	static int GetRotation(ushort extraVoxelData) =>
 		extraVoxelData.Get2Bit(extraInfo_rotation);
@@ -721,4 +721,32 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 	static int GetLevel(ushort extraVoxelData) => extraVoxelData.Get2Bit(extraInfo_level);
 	static ushort SetLevel(ushort originalExtraVoxelData, int newValue) =>
 		originalExtraVoxelData.Set2Bit(extraInfo_level, newValue);
+
+
+
+	protected override PhysicalVoxelShape PhysicalShape(ushort extraData)
+	{
+		GeneralDirection3D left = GetStairLeftSideGlobal(extraData);
+		GeneralDirection3D right = GetStairRightSideGlobal(extraData);
+
+		return new()
+		{
+			shapeType = GetStairType(extraData),
+
+			stairSideUp = GeneralDirection3D.Up,
+			stairSide1 = left,
+			stairSide2 = right,
+			
+			levelLeight = 1,       // TODO
+			levelCount = 1,        // TODO
+			currentLevel = 0,        // TODO
+
+			solidTop = true,
+			solidBottom = true,
+			solidForward = true,
+			solidBack = true,
+			solidLeft = true,
+			solidRight = true,
+		};
+	}
 }

@@ -12,7 +12,6 @@ namespace VoxelSystem
 		public Vector2[] uv;
 		public int[] triangles;
 
-
 		static readonly Matrix4x4 rightToLeftHanded = Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(-90, 0, 0), new Vector3(-1, -1, 1));
 
 		public bool IsEmpty => vertices.IsNullOrEmpty();

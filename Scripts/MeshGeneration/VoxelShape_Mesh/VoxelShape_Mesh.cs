@@ -1,4 +1,4 @@
-using MUtility; 
+using MUtility;
 using System.Collections.Generic;
 using UnityEngine;
 using VoxelSystem;
@@ -25,7 +25,7 @@ public class VoxelShape_Mesh : VoxelShapeBuilder
 	}
 
 	protected override bool IsInitialized => !transformedMeshes.IsNullOrEmpty();
-	
+
 	protected sealed override void GenerateMeshData(
 			VoxelMap map,
 			List<Vector3Int> voxelPositions,
@@ -43,7 +43,7 @@ public class VoxelShape_Mesh : VoxelShapeBuilder
 				extraVoxelData = 0;
 				vertexValue.extraVoxelData = 0;
 				map.SetVoxel(position, vertexValue);
-			} 
+			}
 			ArrayMesh transformedMesh = transformedMeshes[extraVoxelData];
 
 			Vector3 center = position + half;
@@ -67,29 +67,29 @@ public class VoxelShape_Mesh : VoxelShapeBuilder
 				voxel.SetSideClosed(globalDir, closed);
 			}
 
-			map.SetVoxel(voxelPosition, voxel); 
+			map.SetVoxel(voxelPosition, voxel);
 		}
 	}
 
-	List<ExtraControl> controls;
+	List<ExtraVoxelControl> controls;
 
-	public override IReadOnlyList<ExtraControl> GetExtraControls()
+	public override IReadOnlyList<ExtraVoxelControl> GetExtraControls()
 	{
-		controls ??= new List<ExtraControl>()
+		controls ??= new List<ExtraVoxelControl>()
 		{
-			new ExtraControl<GeneralDirection3D> ()
+			new ExtraVoxelControl<GeneralDirection3D> ()
 			{
 				name = "UpDirection",
 				getValue = GetUpDirection,
 				setValue = SetUpDirection
 			},
-			new ExtraControl<int>()
+			new ExtraVoxelControl<int>()
 			{
 				name = "Vertical Rotation",
 				getValue = GetRotation,
 				setValue = SetRotation
 			},
-			new ExtraControl<bool>()
+			new ExtraVoxelControl<bool>()
 			{
 				name = "Vertical Flip",
 				getValue = GetFlip,
@@ -98,7 +98,7 @@ public class VoxelShape_Mesh : VoxelShapeBuilder
 		};
 		return controls;
 	}
-	static GeneralDirection3D GetUpDirection(ushort extraVoxelData) 
+	static GeneralDirection3D GetUpDirection(ushort extraVoxelData)
 	{
 		CubicTransformation cubicTransformation = new(extraVoxelData);
 		return cubicTransformation.UpDirection;
@@ -140,5 +140,32 @@ public class VoxelShape_Mesh : VoxelShapeBuilder
 			verticalFlip = value
 		};
 		return (ushort)cubicTransformation.GetIndex();
+	}
+
+	CubicTransformation GetTransformation(ushort extraVoxelData) => new(extraVoxelData);
+
+
+	protected override PhysicalVoxelShape PhysicalShape(ushort extraVoxelData)
+	{
+		CubicTransformation transformation = GetTransformation(extraVoxelData);
+		PhysicalVoxelShape physicalVoxelShape = new()
+		{
+			shapeType = ShapeType.FullBlock,
+
+			solidRight = closedSides[transformation.InverseTransformDirection(GeneralDirection3D.Right)],
+			solidLeft = closedSides[transformation.InverseTransformDirection(GeneralDirection3D.Left)],
+			solidTop = closedSides[transformation.InverseTransformDirection(GeneralDirection3D.Up)],
+			solidBottom = closedSides[transformation.InverseTransformDirection(GeneralDirection3D.Down)],
+			solidForward = closedSides[transformation.InverseTransformDirection(GeneralDirection3D.Forward)],
+			solidBack = closedSides[transformation.InverseTransformDirection(GeneralDirection3D.Back)],
+			 
+			levelCount = 0,
+			currentLevel = 0,
+			levelLeight = 0,
+			stairSideUp = GeneralDirection3D.Up,
+			stairSide1 = GeneralDirection3D.Right,
+			stairSide2 = GeneralDirection3D.Left,
+		};
+		return physicalVoxelShape;
 	}
 }

@@ -352,5 +352,7 @@ namespace VoxelSystem
 				map.SetVoxel(voxelPosition, v);
 			}
 		}
+
+		protected override PhysicalVoxelShape PhysicalShape(ushort extraData) => PhysicalVoxelShape.full;
 	}
 }

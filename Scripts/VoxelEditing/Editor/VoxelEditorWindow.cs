@@ -66,7 +66,7 @@ namespace VoxelSystem
 			contentRect.height += 100;
 
 			VoxelShapeBuilder selectedShape = voxelEditor.SelectedShape;
-			IReadOnlyList<ExtraControl> extraControls = selectedShape == null ? null : selectedShape.GetExtraControls();
+			IReadOnlyList<ExtraVoxelControl> extraControls = selectedShape == null ? null : selectedShape.GetExtraControls();
 			int extraControlCount = extraControls == null ? 0: extraControls.Count;
 
 			float contentHeight = 490f

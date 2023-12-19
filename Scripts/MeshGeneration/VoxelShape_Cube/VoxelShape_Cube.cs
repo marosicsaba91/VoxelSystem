@@ -30,7 +30,7 @@ namespace VoxelSystem
 
 
 		// Generated Data
-		[SerializeField, HideInInspector] MeshCache[] sideMeshCache = new MeshCache[6];
+		[SerializeField, HideInInspector] MeshList[] sideMeshCache = new MeshList[6];
 
 		protected override bool IsInitialized => sideMeshCache[0] != null && sideMeshCache[0].Count > 0;
 
@@ -41,13 +41,13 @@ namespace VoxelSystem
 		protected override void InitializeMeshCache()
 		{
 			if (sideMeshCache == null || sideMeshCache.Length != 6)
-				sideMeshCache = new MeshCache[6];
+				sideMeshCache = new MeshList[6];
 
 			for (int dirIndex = 0; dirIndex < directions.Length; dirIndex++)
 			{
-				MeshCache meshCache = sideMeshCache[dirIndex];
+				MeshList meshCache = sideMeshCache[dirIndex];
 				if (meshCache == null)
-					meshCache = sideMeshCache[dirIndex] = new MeshCache();
+					meshCache = sideMeshCache[dirIndex] = new MeshList();
 				else
 					meshCache.Clear();
 
@@ -192,6 +192,8 @@ namespace VoxelSystem
 				meshBuilder.Add(sideMesh, center);
 			}
 		}
+
+		protected override PhysicalVoxelShape PhysicalShape(ushort extraData) => PhysicalVoxelShape.full;
 	}
 
 	struct CubeSide

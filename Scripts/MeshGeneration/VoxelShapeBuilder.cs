@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Random = UnityEngine.Random; 
+using Random = UnityEngine.Random;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -16,9 +16,9 @@ namespace VoxelSystem
 		[SerializeField] string niceName;
 		[Space]
 		[HideInInspector] public Material previewMaterial;
-		[HideInInspector] public int previewExtraSetting; 
+		[HideInInspector] public int previewExtraSetting;
 		[HideInInspector] public VoxelShapeBuilder quickVersion;
-		
+
 		public static readonly CustomMeshPreview meshPreview = new();
 
 		protected static readonly Vector3 half = Vector3.one * 0.5f;
@@ -30,7 +30,7 @@ namespace VoxelSystem
 
 
 		protected void OnValidate()
-		{ 
+		{
 			ValidateQuickVersion();
 			OnValidateInternal();
 			SetupMeshPreview();
@@ -43,7 +43,7 @@ namespace VoxelSystem
 			if (voxelId == 0)
 				voxelId = Random.Range(0, int.MaxValue);
 		}
-		
+
 		void Dispose()
 		{
 			if (previewMesh != null)
@@ -62,12 +62,12 @@ namespace VoxelSystem
 				if (quickVersion.quickVersion != null)
 				{
 					quickVersion.quickVersion = null;
-					Debug.LogWarning("Quick version can not have a quick version");
+					Debug.LogWarning("AlwaysQuick version can not have a quick version");
 				}
 				if (quickVersion == this)
 				{
 					quickVersion = null;
-					Debug.LogWarning("Quick version can not be self");
+					Debug.LogWarning("AlwaysQuick version can not be self");
 				}
 			}
 		}
@@ -99,7 +99,7 @@ namespace VoxelSystem
 			List<Vector3Int> voxelPositions,
 			int shapeId,
 			bool quick)
-		{ 
+		{
 			GetVoxelVersion(quick).SetupVoxelData(map, voxelPositions, shapeId);
 		}
 
@@ -125,7 +125,7 @@ namespace VoxelSystem
 
 			GetVoxelVersion(quick).GenerateMeshData(map, voxelPositions, shapeId, meshBuilder);
 		}
-		
+
 		protected abstract bool IsInitialized { get; }
 
 		protected abstract void GenerateMeshData(
@@ -141,6 +141,9 @@ namespace VoxelSystem
 		protected readonly List<Vector3Int> oneVoxelList = new() { Vector3Int.one };
 
 		public MeshBuilder GetSerializedPreviewMesh() => previewMeshBuilder;
+
+
+		protected abstract PhysicalVoxelShape PhysicalShape(ushort extraData);
 
 		void SetupMeshPreview()
 		{
@@ -165,7 +168,7 @@ namespace VoxelSystem
 
 		protected virtual void RecalculatePreviewMesh()
 		{
-			Voxel voxelValue = new (voxelId, 0, (ushort)previewExtraSetting, 0);
+			Voxel voxelValue = new(voxelId, 0, (ushort)previewExtraSetting, 0);
 			ArrayVoxelMap map = ArrayVoxelMap.GetTestOneVoxelMap(voxelValue);
 
 			previewMeshBuilder.Clear();
@@ -178,21 +181,21 @@ namespace VoxelSystem
 
 			previewMeshBuilder.CopyToMesh(previewMesh);
 		}
-				
-		public virtual IReadOnlyList<ExtraControl> GetExtraControls() => null;
+
+		public virtual IReadOnlyList<ExtraVoxelControl> GetExtraControls() => null;
 	}
 
-	// ---------- ExtraControl ------------------------
+	// ---------- ExtraVoxelControl ------------------------
 
-	public abstract class ExtraControl
-	{ 
+	public abstract class ExtraVoxelControl
+	{
 		public string name;
 		public abstract Type DataType { get; }
 		public abstract object GetExtraData(ushort extraVoxelData);
 		public abstract ushort SetExtraData(ushort originalExtraVoxelData, object newValue);
 	}
 
-	public class ExtraControl<T> : ExtraControl
+	public class ExtraVoxelControl<T> : ExtraVoxelControl
 	{
 		public delegate T GetValueDel(ushort voxelData);
 		public delegate ushort SetValueDel(ushort originalExtraVoxelData, T newValue);
@@ -204,3 +207,4 @@ namespace VoxelSystem
 		public sealed override Type DataType => typeof(T);
 	}
 }
+

@@ -72,7 +72,7 @@ namespace VoxelSystem
 
 		public static ushort DrawExtraControls(VoxelShapeBuilder selectedShape, ushort extraVoxelData, Object recordedObj, ref Rect position)
 		{
-			IReadOnlyList<ExtraControl> extraControls = selectedShape == null ? null : selectedShape.GetExtraControls();
+			IReadOnlyList<ExtraVoxelControl> extraControls = selectedShape == null ? null : selectedShape.GetExtraControls();
 			if (extraControls == null || extraControls.Count == 0) return extraVoxelData;
 
 			int controlCount = extraControls.Count;
@@ -82,7 +82,7 @@ namespace VoxelSystem
 			Undo.RecordObject(recordedObj, "Selected Value Changed"); 
 
 
-			foreach (ExtraControl control in extraControls)
+			foreach (ExtraVoxelControl control in extraControls)
 			{
 				Rect controlRect = fullRect.SliceOutLine();
 				EditorGUI.LabelField(controlRect, control.name);

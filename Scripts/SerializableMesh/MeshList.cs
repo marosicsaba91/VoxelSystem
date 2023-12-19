@@ -5,7 +5,7 @@ using UnityEngine;
 namespace VoxelSystem
 {
 	[Serializable]
-	class MeshCache
+	class MeshList
 	{
 		[SerializeField] List<ArrayMesh> meshes = new();
 
