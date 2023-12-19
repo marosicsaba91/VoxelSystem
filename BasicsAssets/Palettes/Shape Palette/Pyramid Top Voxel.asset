@@ -14,8 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   voxelId: 500
   niceName: Pyramid Top
-  previewMaterial: {fileID: -3661639628750336703, guid: 7e0223e1d3e1733499accfa5ebffb67e,
-    type: 3}
+  previewMaterial: {fileID: 2100000, guid: d90071d7c09e5374380240be130c9dfe, type: 2}
   previewExtraSetting: 0
   quickVersion: {fileID: 0}
   previewMeshBuilder:
@@ -134,6 +133,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000c0000000e0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: -0.49999994, y: 0.49999994, z: -0.49999994}
     - {x: -0.49999994, y: 0.49999997, z: 0.49999988}
@@ -186,6 +186,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 0100000000000000020000000400000003000000050000000700000006000000080000000a000000090000000b0000000d0000000c0000000e0000000e0000000c0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: -0.49999994, y: -0.49999994, z: 0.49999988}
     - {x: 0.49999982, y: -0.49999997, z: 0.49999994}
@@ -238,6 +239,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000c0000000e0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: -0.49999994, y: 0.49999994, z: 0.49999988}
     - {x: 0.49999982, y: 0.49999997, z: 0.49999994}
@@ -290,6 +292,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 0100000000000000020000000400000003000000050000000700000006000000080000000a000000090000000b0000000d0000000c0000000e0000000e0000000c0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: 0.49999997, y: -0.49999994, z: 0.4999999}
     - {x: 0.4999999, y: -0.49999997, z: -0.4999999}
@@ -342,6 +345,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000c0000000e0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: 0.49999997, y: 0.49999994, z: 0.4999999}
     - {x: 0.4999999, y: 0.49999997, z: -0.4999999}
@@ -394,6 +398,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 0100000000000000020000000400000003000000050000000700000006000000080000000a000000090000000b0000000d0000000c0000000e0000000e0000000c0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: 0.49999988, y: -0.49999994, z: -0.49999994}
     - {x: -0.49999988, y: -0.49999997, z: -0.49999988}
@@ -446,6 +451,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000c0000000e0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: 0.49999988, y: 0.49999994, z: -0.49999994}
     - {x: -0.49999988, y: 0.49999997, z: -0.49999988}
@@ -498,6 +504,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 0100000000000000020000000400000003000000050000000700000006000000080000000a000000090000000b0000000d0000000c0000000e0000000e0000000c0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: -0.4999999, y: 0.50000006, z: -0.49999994}
     - {x: -0.49999994, y: 0.50000006, z: 0.49999988}
@@ -550,6 +557,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000c0000000e0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: 0.5, y: 0.49999994, z: -0.49999994}
     - {x: 0.50000006, y: 0.49999994, z: 0.49999988}
@@ -602,6 +610,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 0100000000000000020000000400000003000000050000000700000006000000080000000a000000090000000b0000000d0000000c0000000e0000000e0000000c0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: -0.49999994, y: 0.49999994, z: 0.49999994}
     - {x: -0.49999997, y: -0.49999988, z: 0.49999994}
@@ -654,6 +663,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000c0000000e0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: 0.49999994, y: 0.49999994, z: 0.49999994}
     - {x: 0.49999997, y: -0.49999988, z: 0.49999994}
@@ -706,6 +716,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 0100000000000000020000000400000003000000050000000700000006000000080000000a000000090000000b0000000d0000000c0000000e0000000e0000000c0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: -0.4999999, y: -0.49999997, z: 0.5}
     - {x: -0.49999994, y: -0.4999999, z: -0.5}
@@ -758,6 +769,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000c0000000e0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: 0.5, y: -0.5000001, z: 0.5}
     - {x: 0.50000006, y: -0.5, z: -0.5}
@@ -810,6 +822,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 0100000000000000020000000400000003000000050000000700000006000000080000000a000000090000000b0000000d0000000c0000000e0000000e0000000c0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: -0.49999994, y: -0.49999994, z: -0.49999994}
     - {x: -0.49999997, y: 0.49999988, z: -0.49999994}
@@ -862,6 +875,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000c0000000e0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: 0.49999994, y: -0.49999994, z: -0.49999994}
     - {x: 0.49999997, y: 0.49999988, z: -0.49999994}
@@ -914,6 +928,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 0100000000000000020000000400000003000000050000000700000006000000080000000a000000090000000b0000000d0000000c0000000e0000000e0000000c0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: -0.49999994, y: 0.5, z: -0.4999999}
     - {x: -0.49999994, y: -0.49999985, z: -0.50000006}
@@ -966,6 +981,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000c0000000e0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: -0.49999994, y: 0.4999999, z: 0.5}
     - {x: -0.49999994, y: -0.49999997, z: 0.49999994}
@@ -1018,6 +1034,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 0100000000000000020000000400000003000000050000000700000006000000080000000a000000090000000b0000000d0000000c0000000e0000000e0000000c0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: -0.49999994, y: -0.49999994, z: -0.49999994}
     - {x: 0.49999988, y: -0.49999994, z: -0.49999997}
@@ -1070,6 +1087,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000c0000000e0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: -0.49999994, y: -0.49999994, z: 0.49999994}
     - {x: 0.49999988, y: -0.49999994, z: 0.49999997}
@@ -1122,6 +1140,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 0100000000000000020000000400000003000000050000000700000006000000080000000a000000090000000b0000000d0000000c0000000e0000000e0000000c0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: 0.5000001, y: -0.49999988, z: -0.4999999}
     - {x: 0.5, y: 0.5, z: -0.50000006}
@@ -1174,6 +1193,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000c0000000e0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: 0.5000001, y: -0.5, z: 0.5}
     - {x: 0.5, y: 0.49999988, z: 0.49999994}
@@ -1226,6 +1246,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 0100000000000000020000000400000003000000050000000700000006000000080000000a000000090000000b0000000d0000000c0000000e0000000e0000000c0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: 0.49999994, y: 0.49999994, z: -0.49999994}
     - {x: -0.49999988, y: 0.49999994, z: -0.49999997}
@@ -1278,6 +1299,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000c0000000e0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: 0.49999994, y: 0.49999994, z: 0.49999994}
     - {x: -0.49999988, y: 0.49999994, z: 0.49999997}
@@ -1330,6 +1352,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 0100000000000000020000000400000003000000050000000700000006000000080000000a000000090000000b0000000d0000000c0000000e0000000e0000000c0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: -0.49999994, y: 0.49999994, z: 0.49999994}
     - {x: -0.49999994, y: 0.49999997, z: -0.49999988}
@@ -1382,6 +1405,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000c0000000e0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: -0.49999994, y: -0.49999994, z: 0.49999994}
     - {x: -0.49999994, y: -0.49999997, z: -0.49999988}
@@ -1434,6 +1458,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 0100000000000000020000000400000003000000050000000700000006000000080000000a000000090000000b0000000d0000000c0000000e0000000e0000000c0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: -0.49999994, y: 0.49999988, z: -0.49999994}
     - {x: 0.49999982, y: 0.4999999, z: -0.49999988}
@@ -1486,6 +1511,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000c0000000e0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: -0.49999994, y: -0.49999988, z: -0.49999994}
     - {x: 0.49999982, y: -0.4999999, z: -0.49999988}
@@ -1538,6 +1564,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 0100000000000000020000000400000003000000050000000700000006000000080000000a000000090000000b0000000d0000000c0000000e0000000e0000000c0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: 0.49999997, y: 0.49999994, z: -0.4999999}
     - {x: 0.4999999, y: 0.49999997, z: 0.4999999}
@@ -1590,6 +1617,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000c0000000e0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: 0.49999997, y: -0.49999994, z: -0.4999999}
     - {x: 0.4999999, y: -0.49999997, z: 0.4999999}
@@ -1642,6 +1670,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 0100000000000000020000000400000003000000050000000700000006000000080000000a000000090000000b0000000d0000000c0000000e0000000e0000000c0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: 0.49999988, y: 0.49999988, z: 0.49999988}
     - {x: -0.49999988, y: 0.4999999, z: 0.49999994}
@@ -1694,6 +1723,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000c0000000e0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: 0.49999988, y: -0.49999988, z: 0.49999988}
     - {x: -0.49999988, y: -0.4999999, z: 0.49999994}
@@ -1746,6 +1776,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 0100000000000000020000000400000003000000050000000700000006000000080000000a000000090000000b0000000d0000000c0000000e0000000e0000000c0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: 0.5, y: -0.49999994, z: -0.49999994}
     - {x: 0.50000006, y: -0.49999994, z: 0.49999988}
@@ -1798,6 +1829,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000c0000000e0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: -0.4999999, y: -0.50000006, z: -0.49999994}
     - {x: -0.49999994, y: -0.50000006, z: 0.49999988}
@@ -1850,6 +1882,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 0100000000000000020000000400000003000000050000000700000006000000080000000a000000090000000b0000000d0000000c0000000e0000000e0000000c0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: 0.49999994, y: -0.49999994, z: 0.49999994}
     - {x: 0.49999997, y: 0.49999988, z: 0.49999994}
@@ -1902,6 +1935,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000c0000000e0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: -0.49999994, y: -0.49999994, z: 0.49999994}
     - {x: -0.49999997, y: 0.49999988, z: 0.49999994}
@@ -1954,6 +1988,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 0100000000000000020000000400000003000000050000000700000006000000080000000a000000090000000b0000000d0000000c0000000e0000000e0000000c0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: 0.5, y: 0.5000001, z: 0.5}
     - {x: 0.50000006, y: 0.5, z: -0.5}
@@ -2006,6 +2041,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000c0000000e0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: -0.4999999, y: 0.49999997, z: 0.5}
     - {x: -0.49999994, y: 0.4999999, z: -0.5}
@@ -2058,6 +2094,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 0100000000000000020000000400000003000000050000000700000006000000080000000a000000090000000b0000000d0000000c0000000e0000000e0000000c0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: 0.49999994, y: 0.49999994, z: -0.49999994}
     - {x: 0.49999997, y: -0.49999988, z: -0.49999994}
@@ -2110,6 +2147,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000c0000000e0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: -0.49999994, y: 0.49999994, z: -0.49999994}
     - {x: -0.49999997, y: -0.49999988, z: -0.49999994}
@@ -2162,6 +2200,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 0100000000000000020000000400000003000000050000000700000006000000080000000a000000090000000b0000000d0000000c0000000e0000000e0000000c0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: -0.49999994, y: -0.4999999, z: 0.5}
     - {x: -0.49999994, y: 0.49999997, z: 0.49999994}
@@ -2214,6 +2253,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000c0000000e0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: -0.49999994, y: -0.5, z: -0.4999999}
     - {x: -0.49999994, y: 0.49999985, z: -0.50000006}
@@ -2266,6 +2306,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 0100000000000000020000000400000003000000050000000700000006000000080000000a000000090000000b0000000d0000000c0000000e0000000e0000000c0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: -0.49999994, y: 0.49999994, z: 0.49999994}
     - {x: 0.49999988, y: 0.49999994, z: 0.49999997}
@@ -2318,6 +2359,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000c0000000e0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: -0.49999994, y: 0.49999994, z: -0.49999994}
     - {x: 0.49999988, y: 0.49999994, z: -0.49999997}
@@ -2370,6 +2412,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 0100000000000000020000000400000003000000050000000700000006000000080000000a000000090000000b0000000d0000000c0000000e0000000e0000000c0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: 0.5000001, y: 0.5, z: 0.5}
     - {x: 0.5, y: -0.49999988, z: 0.49999994}
@@ -2422,6 +2465,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000c0000000e0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: 0.5000001, y: 0.49999988, z: -0.4999999}
     - {x: 0.5, y: -0.5, z: -0.50000006}
@@ -2474,6 +2518,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 0100000000000000020000000400000003000000050000000700000006000000080000000a000000090000000b0000000d0000000c0000000e0000000e0000000c0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: 0.49999994, y: -0.49999994, z: 0.49999994}
     - {x: -0.49999988, y: -0.49999994, z: 0.49999997}
@@ -2526,6 +2571,7 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000c0000000e0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices:
     - {x: 0.49999994, y: -0.49999994, z: -0.49999994}
     - {x: -0.49999988, y: -0.49999994, z: -0.49999997}
@@ -2578,323 +2624,404 @@ MonoBehaviour:
     - {x: 0.75, y: 0.010000005}
     - {x: 0.99, y: 0.25}
     triangles: 0100000000000000020000000400000003000000050000000700000006000000080000000a000000090000000b0000000d0000000c0000000e0000000e0000000c0000000f000000
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0
   - vertices: []
     normals: []
     uv: []
     triangles: 
+    _lastMaterialStartTriangleIndex: 0

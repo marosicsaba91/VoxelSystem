@@ -19,7 +19,7 @@ namespace VoxelSystem
 	{
 		[SerializeField] OctoBlockLibrary blockLibrary;
 
-		[Header("Other Setup")]
+		[Header("Other SetupFromMesh")]
 		[SerializeField] bool mergeCloseEdges;
 		[SerializeField] VoxelConnectionType onMapEdge = VoxelConnectionType.CloseFully;
 		[SerializeField] bool drawBetweenVoxelChange = false;
@@ -51,7 +51,7 @@ namespace VoxelSystem
 			{
 				Vector3Int subVoxelIndex = blockWithPosition.Key;
 				OctoBlock block = blockWithPosition.Value;
-				if (!blockLibrary.TryGetMesh(block.blockType, block.axis, block.subVoxel, out ArrayMesh mesh))
+				if (!blockLibrary.TryGetMesh(block.blockType, block.axis, block.subVoxel, out MeshBuilder mesh))
 					continue;
 				Vector3 offset = block.Center(subVoxelIndex);
 
@@ -59,7 +59,7 @@ namespace VoxelSystem
 				meshBuilder.vertices.AddRange(mesh.vertices.Select(v => v + offset));
 				meshBuilder.normals.AddRange(mesh.normals);
 				meshBuilder.uv.AddRange(mesh.uv);
-				meshBuilder.triangles.AddRange(mesh.triangles.Select(t => t + meshBuilder.VertexCount - mesh.vertices.Length));
+				meshBuilder.triangles.AddRange(mesh.triangles.Select(t => t + meshBuilder.VertexCount - mesh.VertexCount));
 			}
 		}
 

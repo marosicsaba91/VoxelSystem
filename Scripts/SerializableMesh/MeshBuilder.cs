@@ -17,49 +17,55 @@ namespace VoxelSystem
 
 		[SerializeField] int _lastMaterialStartTriangleIndex = 0;
 		public int VertexCount => vertices.Count;
+		public bool IsEmpty => vertices.IsNullOrEmpty();
+
 		public int TriangleCount => triangles.Count;
 
 		static readonly Matrix4x4 rightToLeftHanded = Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(-90, 0, 0), new Vector3(-1, -1, 1));
 
-		public static MeshBuilder CreateFromMesh(Mesh mesh, Matrix4x4 transformation)
+		public MeshBuilder() { }
+
+		public MeshBuilder(Mesh mesh) => SetupFromMesh(mesh);
+
+		public MeshBuilder(Mesh mesh, Matrix4x4 transformation) => SetupFromMesh(mesh, transformation);
+
+		public MeshBuilder(Mesh mesh, bool fromRightHanded)
+		{
+			if (fromRightHanded)
+				SetupFromMesh(mesh, rightToLeftHanded);
+			else
+				SetupFromMesh(mesh);
+		}
+
+		void SetupFromMesh(Mesh mesh)
+		{
+			vertices.AddRange(mesh.vertices);
+			triangles.AddRange(mesh.triangles);
+			uv.AddRange(mesh.uv);
+			normals.AddRange(mesh.normals);
+		}
+
+		void SetupFromMesh(Mesh mesh, Matrix4x4 transformation)
 		{
 			int vCount = mesh.vertexCount;
 
-			MeshBuilder meshBuilder = new();
-
-			meshBuilder.vertices.Capacity = vCount;
-			meshBuilder.normals.Capacity = vCount;
-			meshBuilder.uv.Capacity = vCount;
+			vertices.Capacity = vCount;
+			normals.Capacity = vCount;
+			uv.Capacity = vCount;
 
 			for (int i = 0; i < vCount; i++)
 			{
-				meshBuilder.vertices.Add(transformation.MultiplyVector(mesh.vertices[i]));
-				meshBuilder.normals.Add(transformation.MultiplyVector(mesh.normals[i]));
-				meshBuilder.uv.Add(mesh.uv[i]);
+				vertices.Add(transformation.MultiplyVector(mesh.vertices[i]));
+				normals.Add(transformation.MultiplyVector(mesh.normals[i]));
+				uv.Add(mesh.uv[i]);
 			}
 
 			int tCount = mesh.triangles.Length;
-			meshBuilder.triangles.Capacity = tCount;
+			triangles.Capacity = tCount;
 			for (int i = 0; i < tCount; i++)
-				meshBuilder.triangles.Add(mesh.triangles[i]);
+				triangles.Add(mesh.triangles[i]);
 
-			meshBuilder.RecalculateWindings();
-			return meshBuilder;
-		}
-		public static MeshBuilder CreateFromMesh(Mesh mesh, bool fromRightHanded = false)
-		{
-			if (fromRightHanded)
-				return CreateFromMesh(mesh, rightToLeftHanded);
-			else
-			{
-				return new MeshBuilder()
-				{
-					vertices = new(mesh.vertices),
-					triangles = new(mesh.triangles),
-					uv = new(mesh.uv),
-					normals = new(mesh.normals)
-				};
-			}
+			RecalculateWindings();
 		}
 
 		public void RecalculateWindings()
@@ -125,7 +131,7 @@ namespace VoxelSystem
 			destinationMesh.normals = normals.ToArray();
 			destinationMesh.uv = uv.ToArray();
 			destinationMesh.triangles = triangles.ToArray();
-		
+
 
 			if (descriptors.Count > 0)
 			{
@@ -134,7 +140,7 @@ namespace VoxelSystem
 				{
 					SubMeshDescriptor descriptor = descriptors[j];
 					destinationMesh.SetSubMesh(j, descriptor);
-				} 
+				}
 			}
 
 			destinationMesh.RecalculateBounds();
@@ -174,7 +180,7 @@ namespace VoxelSystem
 				triangles.Add(mesh.triangles[i]);
 		}
 
-		public void Add(MeshBuilder mesh) 
+		public void Add(MeshBuilder mesh)
 		{
 			int startIndex = vertices.Count;
 
@@ -186,23 +192,6 @@ namespace VoxelSystem
 			}
 
 			for (int i = 0; i < mesh.triangles.Count; i++)
-			{
-				triangles.Add(mesh.triangles[i] + startIndex);
-			}
-		}
-
-		public void Add(ArrayMesh mesh)
-		{
-			int startIndex = vertices.Count;
-
-			for (int i = 0; i < mesh.vertices.Length; i++)
-			{
-				vertices.Add(mesh.vertices[i]);
-				normals.Add(mesh.normals[i]);
-				uv.Add(mesh.uv[i]);
-			}
-
-			for (int i = 0; i < mesh.triangles.Length; i++)
 			{
 				triangles.Add(mesh.triangles[i] + startIndex);
 			}
@@ -224,40 +213,23 @@ namespace VoxelSystem
 				triangles.Add(mesh.triangles[i] + startIndex);
 			}
 		}
-
-		public void Add(ArrayMesh mesh, Vector3 translate)
-		{
-			int startIndex = vertices.Count;
-
-			for (int i = 0; i < mesh.vertices.Length; i++)
-			{
-				vertices.Add(mesh.vertices[i] + translate);
-				normals.Add(mesh.normals[i]);
-				uv.Add(mesh.uv[i]);
-			}
-
-			for (int i = 0; i < mesh.triangles.Length; i++)
-			{
-				triangles.Add(mesh.triangles[i] + startIndex);
-			}
-		}
-
-		public void AddVertex(Vector3 vertex, Vector3 normal, Vector2 uv) 
+		
+		public void AddVertex(Vector3 vertex, Vector3 normal, Vector2 uv)
 		{
 			vertices.Add(vertex);
 			normals.Add(normal);
 			this.uv.Add(uv);
 		}
 
-		internal void AddTriangle(int v1, int v2, int v3) 
+		internal void AddTriangle(int v1, int v2, int v3)
 		{
 			triangles.Add(v1);
 			triangles.Add(v2);
 			triangles.Add(v3);
 		}
 
-		public void EndMaterialDescriptor() 
-		{ 
+		public void EndMaterialDescriptor()
+		{
 			int triangleCount = TriangleCount - _lastMaterialStartTriangleIndex;
 			descriptors.Add(new SubMeshDescriptor(_lastMaterialStartTriangleIndex, triangleCount));
 			_lastMaterialStartTriangleIndex = TriangleCount;

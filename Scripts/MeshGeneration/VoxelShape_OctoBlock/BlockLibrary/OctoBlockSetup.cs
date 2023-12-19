@@ -61,7 +61,7 @@ namespace VoxelSystem
 		{
 			int allDirectionsCount = SubVoxelUtility.AllSubVoxel.Count;
 
-			// Setup presentationObjects list
+			// SetupFromMesh presentationObjects list
 			for (int i = 0; i < allDirectionsCount; i++)
 			{
 				SubVoxelFlags voxelDirection = SubVoxelUtility.AllSubVoxel[i];
@@ -77,7 +77,7 @@ namespace VoxelSystem
 				}
 			}
 
-			// Setup list order
+			// SetupFromMesh list order
 			for (int i = 0; i < allDirectionsCount; i++)
 			{
 				SubVoxelFlags voxelDirection = SubVoxelUtility.AllSubVoxel[i];

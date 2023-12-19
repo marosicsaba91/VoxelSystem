@@ -168,6 +168,7 @@ MonoBehaviour:
       - {x: 1, y: 0.5}
       - {x: 1, y: 0.25}
       triangles: 000000000100000002000000000000000200000003000000
+      _lastMaterialStartTriangleIndex: 0
   - meshes:
     - vertices:
       - {x: -0.5, y: -0.5, z: -0.5}
@@ -185,6 +186,7 @@ MonoBehaviour:
       - {x: 0.5, y: 0.25}
       - {x: 0.5, y: 0}
       triangles: 000000000200000001000000000000000300000002000000
+      _lastMaterialStartTriangleIndex: 0
   - meshes:
     - vertices:
       - {x: -0.5, y: -0.5, z: -0.5}
@@ -202,6 +204,7 @@ MonoBehaviour:
       - {x: 0.25, y: 0.5}
       - {x: 0.25, y: 0.25}
       triangles: 000000000200000001000000000000000300000002000000
+      _lastMaterialStartTriangleIndex: 0
   - meshes:
     - vertices:
       - {x: -0.5, y: 0.5, z: -0.5}
@@ -219,6 +222,7 @@ MonoBehaviour:
       - {x: 0.5, y: 0.75}
       - {x: 0.5, y: 0.5}
       triangles: 000000000100000002000000000000000200000003000000
+      _lastMaterialStartTriangleIndex: 0
   - meshes:
     - vertices:
       - {x: -0.5, y: -0.5, z: 0.5}
@@ -236,6 +240,7 @@ MonoBehaviour:
       - {x: 0.75, y: 0.5}
       - {x: 0.75, y: 0.25}
       triangles: 000000000100000002000000000000000200000003000000
+      _lastMaterialStartTriangleIndex: 0
   - meshes:
     - vertices:
       - {x: -0.5, y: -0.5, z: -0.5}
@@ -253,3 +258,4 @@ MonoBehaviour:
       - {x: 0.5, y: 0.5}
       - {x: 0.5, y: 0.25}
       triangles: 000000000200000001000000000000000300000002000000
+      _lastMaterialStartTriangleIndex: 0

@@ -31,18 +31,18 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 	[SerializeField] CubeUVSetup cubeTextureCoordinates;
 	[SerializeField] bool useTextureSettingOnCustomMeshes = true;
 
-	[Header("Other Setup")]
+	[Header("Other SetupFromMesh")]
 	// [SerializeField, Range(1, 4)] int slope = 1;
 	[SerializeField] bool isTransparent = false;
 
 
-	[SerializeField, HideInInspector] ArrayMesh[] transformedStairs = new ArrayMesh[4];
-	[SerializeField, HideInInspector] ArrayMesh[] transformedInnerCorners = new ArrayMesh[4];
-	[SerializeField, HideInInspector] ArrayMesh[] transformedOuterCorner = new ArrayMesh[4];
-	[SerializeField, HideInInspector] ArrayMesh[] transformedRightSide = new ArrayMesh[4];
-	[SerializeField, HideInInspector] ArrayMesh[] transformedLeftSide = new ArrayMesh[4];
-	[SerializeField, HideInInspector] ArrayMesh[] transformedBackSide = new ArrayMesh[4];
-	[SerializeField, HideInInspector] ArrayMesh transformedBottomSide;
+	[SerializeField, HideInInspector] MeshBuilder[] transformedStairs = new MeshBuilder[4];
+	[SerializeField, HideInInspector] MeshBuilder[] transformedInnerCorners = new MeshBuilder[4];
+	[SerializeField, HideInInspector] MeshBuilder[] transformedOuterCorner = new MeshBuilder[4];
+	[SerializeField, HideInInspector] MeshBuilder[] transformedRightSide = new MeshBuilder[4];
+	[SerializeField, HideInInspector] MeshBuilder[] transformedLeftSide = new MeshBuilder[4];
+	[SerializeField, HideInInspector] MeshBuilder[] transformedBackSide = new MeshBuilder[4];
+	[SerializeField, HideInInspector] MeshBuilder transformedBottomSide;
 
 	protected sealed override bool IsInitialized => !transformedStairs[0].IsEmpty;
 
@@ -73,11 +73,11 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 		}
 	}
 
-	ArrayMesh GenerateBottom()
+	MeshBuilder GenerateBottom()
 	{
 		if (bottomSide != null)
 		{
-			ArrayMesh result = ArrayMesh.CreateFromMesh(bottomSide, autoConvertFromRightHanded);
+			MeshBuilder result = new (bottomSide, autoConvertFromRightHanded);
 			if (useTextureSettingOnCustomMeshes)
 				result.ProjectUV(cubeTextureCoordinates.GetRect(GeneralDirection3D.Down), Axis3D.Y);
 			return result;
@@ -85,11 +85,11 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 		return VoxelShape_Cube.GenerateDefaultSide(GeneralDirection3D.Down, cubeTextureCoordinates);
 	}
 
-	ArrayMesh GenerateStair()
+	MeshBuilder GenerateStair()
 	{
 		if (stairs != null)
 		{
-			ArrayMesh result = ArrayMesh.CreateFromMesh(stairs, autoConvertFromRightHanded);
+			MeshBuilder result = new (stairs, autoConvertFromRightHanded);
 			if (useTextureSettingOnCustomMeshes)
 				result.ProjectUV(cubeTextureCoordinates.GetRect(GeneralDirection3D.Up), Axis3D.Y);
 			return result;
@@ -98,10 +98,10 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 
 		Rect rect = cubeTextureCoordinates.GetRect(GeneralDirection3D.Up);
 
-		Vector3[] vs = { new(-0.5f, -0.5f, -0.5f), new(0.5f, -0.5f, -0.5f), new(0.5f, 0.5f, 0.5f), new(-0.5f, 0.5f, 0.5f), };
-		Vector3[] ns = { normal, normal, normal, normal };
-		Vector2[] uvs = { rect.BottomLeft(), rect.TopLeft(), rect.TopRight(), rect.BottomRight() };
-		int[] triangles = { 0, 2, 1, 0, 3, 2 };
+		List<Vector3> vs = new(){ new(-0.5f, -0.5f, -0.5f), new(0.5f, -0.5f, -0.5f), new(0.5f, 0.5f, 0.5f), new(-0.5f, 0.5f, 0.5f), };
+		List<Vector3> ns = new() { normal, normal, normal, normal };
+		List<Vector2> uvs = new() { rect.BottomLeft(), rect.TopLeft(), rect.TopRight(), rect.BottomRight() };
+		List<int> triangles = new() { 0, 2, 1, 0, 3, 2 };
 
 		return new()
 		{
@@ -112,11 +112,11 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 		};
 	}
 
-	ArrayMesh GenerateInnerCorners()
+	MeshBuilder GenerateInnerCorners()
 	{
 		if (innerCorner != null)
 		{
-			ArrayMesh result = ArrayMesh.CreateFromMesh(innerCorner, autoConvertFromRightHanded);
+			MeshBuilder result = new(innerCorner, autoConvertFromRightHanded);
 			if (useTextureSettingOnCustomMeshes)
 				result.ProjectUV(cubeTextureCoordinates.GetRect(GeneralDirection3D.Up), Axis3D.Y);
 			return result;
@@ -126,12 +126,12 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 		Vector3 normal2 = new(1, 1, 0);
 
 
-		Vector3[] vs = {
+		List<Vector3> vs = new()  {
 			new(0.5f, -0.5f, -0.5f), new(-0.5f, 0.5f, 0.5f), new(0.5f, 0.5f, 0.5f),
 			new(0.5f, -0.5f, -0.5f), new(-0.5f, 0.5f, -0.5f), new(-0.5f, 0.5f, 0.5f), };
-		Vector3[] ns = { normal1, normal1, normal1, normal2, normal2, normal2 };
-		Vector2[] uvs = { rect.BottomLeft(), rect.TopRight(), rect.TopLeft(), rect.BottomLeft(), rect.BottomRight(), rect.TopRight(), };
-		int[] triangles = { 0, 1, 2, 3, 4, 5 };
+		List<Vector3> ns = new() { normal1, normal1, normal1, normal2, normal2, normal2 };
+		List<Vector2> uvs = new() { rect.BottomLeft(), rect.TopRight(), rect.TopLeft(), rect.BottomLeft(), rect.BottomRight(), rect.TopRight(), };
+		List<int> triangles = new() { 0, 1, 2, 3, 4, 5 };
 
 		return new()
 		{
@@ -142,11 +142,11 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 		};
 	}
 
-	ArrayMesh GenerateOuterCorners()
+	MeshBuilder GenerateOuterCorners()
 	{
 		if (outerCorner != null)
 		{
-			ArrayMesh result = ArrayMesh.CreateFromMesh(outerCorner, autoConvertFromRightHanded);
+			MeshBuilder result = new (outerCorner, autoConvertFromRightHanded);
 			if (useTextureSettingOnCustomMeshes)
 				result.ProjectUV(cubeTextureCoordinates.GetRect(GeneralDirection3D.Up), Axis3D.Y);
 			return result;
@@ -155,12 +155,12 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 		Vector3 normal1 = new(1, 1, 0);  // Right Side
 		Vector3 normal2 = new(0, 1, -1);
 
-		Vector3[] vs = {
+		List<Vector3> vs = new() {
 			new(0.5f, -0.5f, -0.5f), new(-0.5f, 0.5f, 0.5f), new(0.5f, -0.5f, 0.5f),
 			new(0.5f, -0.5f, -0.5f), new(-0.5f, -0.5f, -0.5f), new(-0.5f, 0.5f, 0.5f), };
-		Vector3[] ns = { normal1, normal1, normal1, normal2, normal2, normal2 };
-		Vector2[] uvs = { rect.BottomLeft(), rect.TopRight(), rect.TopLeft(), rect.BottomLeft(), rect.BottomRight(), rect.TopRight(), };
-		int[] triangles = { 0, 1, 2, 3, 4, 5 };
+		List<Vector3> ns = new() { normal1, normal1, normal1, normal2, normal2, normal2 };
+		List<Vector2> uvs = new() { rect.BottomLeft(), rect.TopRight(), rect.TopLeft(), rect.BottomLeft(), rect.BottomRight(), rect.TopRight(), };
+		List<int> triangles = new() { 0, 1, 2, 3, 4, 5 };
 
 		return new()
 		{
@@ -171,18 +171,18 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 		};
 	}
 
-	ArrayMesh GenerateSide(HorizontalDirection direction)
+	MeshBuilder GenerateSide(HorizontalDirection direction)
 	{
 		if (direction == HorizontalDirection.Left && leftSide != null)
 		{
-			ArrayMesh result = ArrayMesh.CreateFromMesh(leftSide, autoConvertFromRightHanded);
+			MeshBuilder result = new(leftSide, autoConvertFromRightHanded);
 			if (useTextureSettingOnCustomMeshes)
 				result.ProjectUV(cubeTextureCoordinates.GetRect(GeneralDirection3D.Left), Axis3D.X);
 			return result;
 		}
 		if (direction == HorizontalDirection.Right && rightSide != null)
 		{
-			ArrayMesh result = ArrayMesh.CreateFromMesh(rightSide, autoConvertFromRightHanded);
+			MeshBuilder result = new(rightSide, autoConvertFromRightHanded);
 			result.ProjectUV(cubeTextureCoordinates.GetRect(GeneralDirection3D.Right), Axis3D.X);
 			return result;
 		}
@@ -191,10 +191,10 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 		Vector3 offset = dir3D.ToVector() * 0.5f;
 
 		Rect rect = cubeTextureCoordinates.GetRect(GeneralDirection3D.Up);
-		Vector3[] vs = { new Vector3(0, -0.5f, -0.5f) + offset, new Vector3(0, -0.5f, 0.5f) + offset, new Vector3(0, 0.5f, 0.5f) + offset };
-		Vector3[] ns = { normal, normal, normal, normal };
-		Vector2[] uvs = { rect.BottomLeft(), rect.BottomRight(), rect.TopRight(), };
-		int[] triangles = dir3D == GeneralDirection3D.Left ? new int[] { 0, 1, 2 } : new int[] { 2, 1, 0 };
+		List<Vector3> vs = new (){ new Vector3(0, -0.5f, -0.5f) + offset, new Vector3(0, -0.5f, 0.5f) + offset, new Vector3(0, 0.5f, 0.5f) + offset };
+		List<Vector3> ns = new() { normal, normal, normal, normal };
+		List<Vector2> uvs = new() { rect.BottomLeft(), rect.BottomRight(), rect.TopRight(), };
+		List<int> triangles = dir3D == GeneralDirection3D.Left ? new() { 0, 1, 2 } : new() { 2, 1, 0 };
 
 		return new()
 		{
@@ -205,11 +205,11 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 		};
 	}
 
-	ArrayMesh GenerateBack()
+	MeshBuilder GenerateBack()
 	{
 		if (backSide != null)
 		{
-			ArrayMesh result = ArrayMesh.CreateFromMesh(backSide, autoConvertFromRightHanded);
+			MeshBuilder result = new(backSide, autoConvertFromRightHanded);
 			if (useTextureSettingOnCustomMeshes)
 				result.ProjectUV(cubeTextureCoordinates.GetRect(GeneralDirection3D.Back), Axis3D.Z);
 			return result;
@@ -311,7 +311,7 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 		bool useAutoSetup = GetAutoSetup(extraVoxelData);
 		if (!useAutoSetup) return;
 
-		// Setup Rotation & StairShape
+		// SetupFromMesh Rotation & StairShape
 		int wallNeighbourCount = 0;
 		int stairNeighbourCount = 0;
 
@@ -682,7 +682,7 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 		{
 			new ExtraVoxelControl<bool> ()
 			{
-				name = "Enable Auto Setup",
+				name = "Enable Auto SetupFromMesh",
 				getValue = GetAutoSetup,
 				setValue = SetAutoSetup
 			},

@@ -39,7 +39,7 @@ namespace VoxelSystem
 			EditorGUILayout.PropertyField(quickVersionProperty);
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Preview", EditorStyles.boldLabel);
-			if (GUILayout.Button("Initialize Setup & Preview"))
+			if (GUILayout.Button("Initialize SetupFromMesh & Preview"))
 			{
 				builder.InitializeAndSetupPreview();
 				preview.SetDirty();

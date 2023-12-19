@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   voxelId: 4001
   niceName: Rounded Trspt
-  previewMaterial: {fileID: 2100000, guid: a8050bff7c2820f4d9137636e3b271f1, type: 2}
+  previewMaterial: {fileID: 2100000, guid: d90071d7c09e5374380240be130c9dfe, type: 2}
   previewExtraSetting: 0
   quickVersion: {fileID: 11400000, guid: b9086327e93f7ff41bb9063fd9f17659, type: 2}
   previewMeshBuilder:

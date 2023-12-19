@@ -14,18 +14,18 @@ namespace VoxelSystem
 		[Header("Generated Data")]
 		// CACHED DATA - GENERATED
 		[SerializeField, ReadOnly] List<OctoBlockKey> keys = new(); 
-		[SerializeField, ReadOnly] List<ArrayMesh> meshes = new();
+		[SerializeField, ReadOnly] List<MeshBuilder> meshes = new();
 
-		Dictionary<OctoBlockKey, ArrayMesh> _meshCache = new();
+		Dictionary<OctoBlockKey, MeshBuilder> _meshCache = new();
 
-		public bool TryGetMesh(OctoBlockType blockType, Axis3D axis, Vector3Int subVoxel, out ArrayMesh mesh)
+		public bool TryGetMesh(OctoBlockType blockType, Axis3D axis, Vector3Int subVoxel, out MeshBuilder mesh)
 		{ 
 			SubVoxelFlags dir = SubVoxelUtility.FromVector(subVoxel);
 			OctoBlockKey blockKey = new(blockType, dir, axis);
 
 			if (_meshCache.IsNullOrEmpty())
 			{
-				_meshCache = new Dictionary<OctoBlockKey, ArrayMesh>();
+				_meshCache = new Dictionary<OctoBlockKey, MeshBuilder>();
 				for (int i = 0; i < keys.Count; i++)
 					_meshCache.Add(keys[i], meshes[i]);
 			}
@@ -33,7 +33,7 @@ namespace VoxelSystem
 			return _meshCache.TryGetValue(blockKey, out mesh);
 		}
 
-		public void AddBlock(OctoBlockKey key, ArrayMesh mesh)
+		public void AddBlock(OctoBlockKey key, MeshBuilder mesh)
 		{
 			keys.Add(key);
 			meshes.Add(mesh);
@@ -49,8 +49,7 @@ namespace VoxelSystem
 		}
 
 		[SerializeField, UsedImplicitly]
-		EasyMessage warning = new(nameof(WarningMessage))
-		{ messageType = MessageType.Warning, messageSize = MessageSize.Normal };
+		EasyMessage warning = new(nameof(WarningMessage)) { messageType = MessageType.Warning, messageSize = MessageSize.Normal };
 
 		public string WarningMessage
 		{

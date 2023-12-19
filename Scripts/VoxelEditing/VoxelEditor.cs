@@ -59,7 +59,7 @@ namespace VoxelSystem
 
 
 
-		// Selected Tools End Editor Setup 
+		// Selected Tools End Editor SetupFromMesh 
 		public VoxelTool SelectedTool
 		{
 			get => VoxelEditorSetup.SelectedTool;

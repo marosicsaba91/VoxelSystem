@@ -207,7 +207,7 @@ namespace VoxelSystem
 			}
 			rect.x += width + vSpacing;
 			GUI.enabled = VoxelClipboard.HaveContent && enableEdit;
-			if (GUI.Button(rect, "Setup from Clipboard"))
+			if (GUI.Button(rect, "SetupFromMesh from Clipboard"))
 			{
 				voxelEditor.RecordForUndo("Selection Cleared", RecordType.Map | RecordType.Transform | RecordType.Editor);
 				voxelEditor.Map.SetupFrom(VoxelClipboard.ClipboardMap);

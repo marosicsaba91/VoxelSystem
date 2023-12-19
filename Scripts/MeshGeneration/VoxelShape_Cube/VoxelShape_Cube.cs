@@ -23,11 +23,10 @@ namespace VoxelSystem
 		[SerializeField] CubeUVSetup textureUvCoordinates = new ();
 		[SerializeField] bool useTextureSettingOnCustomMeshes = false;
 
-		[Header("Other Setup")]
+		[Header("Other SetupFromMesh")]
 		[SerializeField] bool drawSidesOnTheMapEdge = true;
 		[SerializeField] bool drawSidesBetweenDifferentVoxelTypes = false;
 		[SerializeField] bool isTransparent = false;
-
 
 		// Generated Data
 		[SerializeField, HideInInspector] MeshList[] sideMeshCache = new MeshList[6];
@@ -35,8 +34,8 @@ namespace VoxelSystem
 		protected override bool IsInitialized => sideMeshCache[0] != null && sideMeshCache[0].Count > 0;
 
 		readonly List<CubeSide> allSides = new();
-		static readonly int[] positiveWinding = { 0, 1, 2, 0, 2, 3 };
-		static readonly int[] negativeWinding = { 0, 2, 1, 0, 3, 2 };
+		static readonly List<int> positiveWinding = new() { 0, 1, 2, 0, 2, 3 };
+		static readonly List<int> negativeWinding = new() { 0, 2, 1, 0, 3, 2 };
 		static readonly GeneralDirection3D[] directions = DirectionUtility.generalDirection3DValues;
 		protected override void InitializeMeshCache()
 		{
@@ -59,20 +58,20 @@ namespace VoxelSystem
 				else
 				{
 					Mesh mesh = setupMeshes[0];
-					ArrayMesh arrayMesh = ArrayMesh.CreateFromMesh(mesh, autoConvertFromRightHanded);
+					MeshBuilder meshBuilder = new(mesh, autoConvertFromRightHanded);
 
 					if (useTextureSettingOnCustomMeshes)
 					{
 						Axis3D axis = direction.GetAxis();
-						arrayMesh.ProjectUV(textureUvCoordinates.GetRect(direction), axis);
+						meshBuilder.ProjectUV(textureUvCoordinates.GetRect(direction), axis);
 					}
 					
-					meshCache.Add(arrayMesh); 
+					meshCache.Add(meshBuilder); 
 				}
 			}
 		}
 				 
-		public static ArrayMesh GenerateDefaultSide(GeneralDirection3D direction, CubeUVSetup cubeTextureCoordinates)
+		public static MeshBuilder GenerateDefaultSide(GeneralDirection3D direction, CubeUVSetup cubeTextureCoordinates)
 		{
 			Vector3Int normal = direction.ToVectorInt();
 			GeneralDirection3D d1 = direction.Previous();
@@ -90,9 +89,9 @@ namespace VoxelSystem
 
 			Rect rect = cubeTextureCoordinates.GetRect(direction);
 
-			Vector3[] vs = { nh - p1 - p2, nh - p1 + p2, nh + p1 + p2, nh + p1 - p2 };
-			Vector3[] ns = { n, n, n, n };
-			Vector2[] uvs = { rect.BottomLeft(), rect.TopLeft(), rect.TopRight(), rect.BottomRight() };
+			List<Vector3> vs = new() { nh - p1 - p2, nh - p1 + p2, nh + p1 + p2, nh + p1 - p2 };
+			List<Vector3> ns = new() { n, n, n, n };
+			List<Vector2> uvs = new() { rect.BottomLeft(), rect.TopLeft(), rect.TopRight(), rect.BottomRight() };
 
 			return new()
 			{
@@ -186,7 +185,7 @@ namespace VoxelSystem
 			for (int sideIndex = 0; sideIndex < allSides.Count; sideIndex++)
 			{
 				CubeSide side = allSides[sideIndex];
-				ArrayMesh sideMesh = sideMeshCache[(int)side.direction].GetRandom(Random.Range(0, 100));  // TODO: use seed 
+				MeshBuilder sideMesh = sideMeshCache[(int)side.direction].GetRandom(Random.Range(0, 100));  // TODO: use seed 
 
 				Vector3 center = side.voxelIndex + half;
 				meshBuilder.Add(sideMesh, center);

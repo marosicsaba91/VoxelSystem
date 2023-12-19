@@ -12,7 +12,8 @@ public class VoxelShape_Mesh : VoxelShapeBuilder
 	[SerializeField] bool autoConvertFromRightHanded = true;
 	[SerializeField] SideFlags closedSides = new(false);
 
-	[SerializeField, HideInInspector] ArrayMesh[] transformedMeshes = new ArrayMesh[128];
+	[SerializeField] MeshBuilder[] transformedMeshes = new MeshBuilder[128];
+	 
 
 	protected override void InitializeMeshCache()
 	{
@@ -20,7 +21,7 @@ public class VoxelShape_Mesh : VoxelShapeBuilder
 		{
 			CubicTransformation cubicTransformation = new(i);
 			Matrix4x4 transformation = cubicTransformation.GetTransformation(autoConvertFromRightHanded);
-			transformedMeshes[i] = ArrayMesh.CreateFromMesh(mesh, transformation);
+			transformedMeshes[i] = new MeshBuilder(mesh, transformation);
 		}
 	}
 
@@ -44,7 +45,7 @@ public class VoxelShape_Mesh : VoxelShapeBuilder
 				vertexValue.extraVoxelData = 0;
 				map.SetVoxel(position, vertexValue);
 			}
-			ArrayMesh transformedMesh = transformedMeshes[extraVoxelData];
+			MeshBuilder transformedMesh = transformedMeshes[extraVoxelData];
 
 			Vector3 center = position + half;
 			meshBuilder.Add(transformedMesh, center);

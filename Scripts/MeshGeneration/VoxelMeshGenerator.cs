@@ -277,13 +277,11 @@ namespace VoxelSystem
 
 		void UpdateMeshComponents(bool quick, Mesh destinationMesh)
 		{
-			Debug.Log($"Generate Mesh");
 			// UpdateCollider 
 			bool generateCollider =
 				(destination.generateForCollider == MeshGenerationMode.QuickAndFull) ||
 			   	(quick && destination.generateForCollider == MeshGenerationMode.AlwaysQuick) ||
 			   	(!quick && destination.generateForCollider == MeshGenerationMode.AlwaysFull);
-			Debug.Log($"Generate Collider: {quick}");
 			if (generateCollider && references.destinationMeshCollider != null)
 				references.destinationMeshCollider.sharedMesh = destinationMesh;
 

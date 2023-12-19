@@ -106,7 +106,7 @@ namespace VoxelSystem
 						continue;
 
 					Matrix4x4 matrix4X4 = setup.GetTransformation(subVoxel);
-					ArrayMesh customMesh = ArrayMesh.CreateFromMesh(mesh, matrix4X4);
+					MeshBuilder customMesh = new (mesh, matrix4X4);
 					voxelBlockLibrary.AddBlock(new OctoBlockKey(blockType, subVoxel, axis), customMesh);
 				}
 			}
