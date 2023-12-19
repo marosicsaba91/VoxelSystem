@@ -1,3 +1,4 @@
+using MeshUtility;
 using MUtility;
 using System;
 using System.Collections.Generic;
@@ -29,77 +30,41 @@ namespace VoxelSystem
 		[SerializeField] bool isTransparent = false;
 
 		// Generated Data
-		[SerializeField, HideInInspector] MeshList[] sideMeshCache = new MeshList[6];
+		[SerializeField, HideInInspector] MeshBuilderList[] sideMeshCache = new MeshBuilderList[6];
 
 		protected override bool IsInitialized => sideMeshCache[0] != null && sideMeshCache[0].Count > 0;
 
 		readonly List<CubeSide> allSides = new();
-		static readonly List<int> positiveWinding = new() { 0, 1, 2, 0, 2, 3 };
-		static readonly List<int> negativeWinding = new() { 0, 2, 1, 0, 3, 2 };
 		static readonly GeneralDirection3D[] directions = DirectionUtility.generalDirection3DValues;
 		protected override void InitializeMeshCache()
 		{
 			if (sideMeshCache == null || sideMeshCache.Length != 6)
-				sideMeshCache = new MeshList[6];
+				sideMeshCache = new MeshBuilderList[6];
 
 			for (int dirIndex = 0; dirIndex < directions.Length; dirIndex++)
 			{
-				MeshList meshCache = sideMeshCache[dirIndex];
-				if (meshCache == null)
-					meshCache = sideMeshCache[dirIndex] = new MeshList();
+				MeshBuilderList meshList = sideMeshCache[dirIndex];
+				if (meshList == null)
+					meshList = sideMeshCache[dirIndex] = new MeshBuilderList();
 				else
-					meshCache.Clear();
+					meshList.Clear();
 
 				GeneralDirection3D direction = directions[dirIndex];
 
 				List<Mesh> setupMeshes = GetSetupMeshes(direction);
 				if (setupMeshes.Count == 0)
-					meshCache.Add(GenerateDefaultSide(direction, textureUvCoordinates));
+					meshList.Add(textureUvCoordinates.GetCubeSide(direction));
 				else
 				{
 					Mesh mesh = setupMeshes[0];
 					MeshBuilder meshBuilder = new(mesh, autoConvertFromRightHanded);
 
 					if (useTextureSettingOnCustomMeshes)
-					{
-						Axis3D axis = direction.GetAxis();
-						meshBuilder.ProjectUV(textureUvCoordinates.GetRect(direction), axis);
-					}
-					
-					meshCache.Add(meshBuilder); 
+						meshBuilder.ProjectUV(textureUvCoordinates, direction);
+
+					meshList.Add(meshBuilder);
 				}
 			}
-		}
-				 
-		public static MeshBuilder GenerateDefaultSide(GeneralDirection3D direction, CubeUVSetup cubeTextureCoordinates)
-		{
-			Vector3Int normal = direction.ToVectorInt();
-			GeneralDirection3D d1 = direction.Previous();
-			GeneralDirection3D d2 = direction.Next();
-
-			if (!d1.IsPositive())
-				d1 = d1.Opposite();
-			if (!d2.IsPositive())
-				d2 = d2.Opposite();
-
-			Vector3 n = (Vector3)normal;
-			Vector3 p1 = d1.ToVector() * 0.5f;
-			Vector3 p2 = d2.ToVector() * 0.5f;
-			Vector3 nh = n * 0.5f;
-
-			Rect rect = cubeTextureCoordinates.GetRect(direction);
-
-			List<Vector3> vs = new() { nh - p1 - p2, nh - p1 + p2, nh + p1 + p2, nh + p1 - p2 };
-			List<Vector3> ns = new() { n, n, n, n };
-			List<Vector2> uvs = new() { rect.BottomLeft(), rect.TopLeft(), rect.TopRight(), rect.BottomRight() };
-
-			return new()
-			{
-				vertices = vs,
-				normals = ns,
-				uv = uvs,
-				triangles = direction.IsPositive() ? positiveWinding : negativeWinding
-			};
 		}
 
 		List<Mesh> GetSetupMeshes(GeneralDirection3D direction) => direction switch

@@ -5,6 +5,7 @@ using JetBrains.Annotations;
 using UnityEngine;
 using EasyInspector;
 using Benchmark;
+using MeshUtility;
 
 namespace VoxelSystem
 {

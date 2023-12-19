@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
+using MeshUtility;
 
 #if UNITY_EDITOR
 using UnityEditor;

@@ -8,6 +8,7 @@ using UnityEditor;
 using UnityEngine;
 using EasyInspector;
 using System.Collections;
+using MeshUtility;
 
 namespace VoxelSystem
 {

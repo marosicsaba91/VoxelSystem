@@ -1,3 +1,4 @@
+using MeshUtility;
 using MUtility;
 using System;
 using System.Collections.Generic;
@@ -79,10 +80,10 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 		{
 			MeshBuilder result = new (bottomSide, autoConvertFromRightHanded);
 			if (useTextureSettingOnCustomMeshes)
-				result.ProjectUV(cubeTextureCoordinates.GetRect(GeneralDirection3D.Down), Axis3D.Y);
+				result.ProjectUV(cubeTextureCoordinates, GeneralDirection3D.Down);
 			return result;
 		}
-		return VoxelShape_Cube.GenerateDefaultSide(GeneralDirection3D.Down, cubeTextureCoordinates);
+		return cubeTextureCoordinates.GetCubeSide(GeneralDirection3D.Down);
 	}
 
 	MeshBuilder GenerateStair()
@@ -91,7 +92,7 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 		{
 			MeshBuilder result = new (stairs, autoConvertFromRightHanded);
 			if (useTextureSettingOnCustomMeshes)
-				result.ProjectUV(cubeTextureCoordinates.GetRect(GeneralDirection3D.Up), Axis3D.Y);
+				result.ProjectUV(cubeTextureCoordinates, GeneralDirection3D.Up);
 			return result;
 		}
 		Vector3 normal = new(0, 1, -1);
@@ -118,7 +119,7 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 		{
 			MeshBuilder result = new(innerCorner, autoConvertFromRightHanded);
 			if (useTextureSettingOnCustomMeshes)
-				result.ProjectUV(cubeTextureCoordinates.GetRect(GeneralDirection3D.Up), Axis3D.Y);
+				result.ProjectUV(cubeTextureCoordinates, GeneralDirection3D.Up);
 			return result;
 		}
 		Rect rect = cubeTextureCoordinates.GetRect(GeneralDirection3D.Up);
@@ -148,7 +149,7 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 		{
 			MeshBuilder result = new (outerCorner, autoConvertFromRightHanded);
 			if (useTextureSettingOnCustomMeshes)
-				result.ProjectUV(cubeTextureCoordinates.GetRect(GeneralDirection3D.Up), Axis3D.Y);
+				result.ProjectUV(cubeTextureCoordinates, GeneralDirection3D.Up);
 			return result;
 		}
 		Rect rect = cubeTextureCoordinates.GetRect(GeneralDirection3D.Up);
@@ -177,13 +178,13 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 		{
 			MeshBuilder result = new(leftSide, autoConvertFromRightHanded);
 			if (useTextureSettingOnCustomMeshes)
-				result.ProjectUV(cubeTextureCoordinates.GetRect(GeneralDirection3D.Left), Axis3D.X);
+				result.ProjectUV(cubeTextureCoordinates, GeneralDirection3D.Left);
 			return result;
 		}
 		if (direction == HorizontalDirection.Right && rightSide != null)
 		{
 			MeshBuilder result = new(rightSide, autoConvertFromRightHanded);
-			result.ProjectUV(cubeTextureCoordinates.GetRect(GeneralDirection3D.Right), Axis3D.X);
+			result.ProjectUV(cubeTextureCoordinates, GeneralDirection3D.Right);
 			return result;
 		}
 		GeneralDirection3D dir3D = direction.ToGeneralDirection3D();
@@ -211,10 +212,10 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 		{
 			MeshBuilder result = new(backSide, autoConvertFromRightHanded);
 			if (useTextureSettingOnCustomMeshes)
-				result.ProjectUV(cubeTextureCoordinates.GetRect(GeneralDirection3D.Back), Axis3D.Z);
+				result.ProjectUV(cubeTextureCoordinates, GeneralDirection3D.Back);
 			return result;
 		}
-		return VoxelShape_Cube.GenerateDefaultSide(GeneralDirection3D.Forward, cubeTextureCoordinates);
+		return cubeTextureCoordinates.GetCubeSide(GeneralDirection3D.Forward);
 	}
 
 	protected sealed override void SetupClosedSides(VoxelMap map, List<Vector3Int> voxelPositions)
