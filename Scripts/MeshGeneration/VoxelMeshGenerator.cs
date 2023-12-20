@@ -276,6 +276,27 @@ namespace VoxelSystem
 			UpdateMeshComponents(quick, destinationMesh);
 		}
 
+		public FlexibleMesh GeneratePhysicalMesh() 
+		{
+			VoxelMap map = Map; 
+			BuildVoxelPositionDictionary(map);
+			FlexibleMesh mesh = new();
+			foreach (KeyValuePair<VoxelInfo, List<Vector3Int>> chunk in voxelsByType)
+			{
+				if (chunk.Value.Count == 0) continue; 
+				int shapeId = chunk.Key.shapeId;
+				VoxelShapeBuilder shapeBuilder = shapePalette.GetBuilder(shapeId);
+				foreach (Vector3Int voxelPosition in chunk.Value)
+				{
+					Voxel voxel = map.GetVoxel(voxelPosition);
+					shapeBuilder.AddMeshSides(mesh, voxelPosition, voxel.extraVoxelData);
+				}
+			}
+			return mesh;
+		}
+
+
+
 		void UpdateMeshComponents(bool quick, Mesh destinationMesh)
 		{
 			// UpdateCollider 

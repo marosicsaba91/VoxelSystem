@@ -11,9 +11,7 @@ namespace VoxelSystem
 {
 
 	[Serializable]
-	class TransformDirectory : SerializableDictionary<SubVoxelFlags, Transform>
-	{
-	}
+	class TransformDirectory : SerializableDictionary<SubVoxelFlags, Transform> { }
 
 	[Serializable]
 	struct MeshInfo
@@ -29,7 +27,7 @@ namespace VoxelSystem
 
 		[Header("Visualisation")]
 		[SerializeField, Range(0, 0.5f)]
-		 float testDistance = 0;
+		float testDistance = 0;
 
 		[FormerlySerializedAs("presentationObjects2")][SerializeField] TransformDirectory transformDictionary = new();
 		[SerializeField] OctoBlockLibraryGenerator library;
@@ -86,7 +84,6 @@ namespace VoxelSystem
 			}
 
 			// Destroy extra children
-			transformDictionary.SortByKey();
 			for (int i = transform.childCount - 1; i >= allDirectionsCount; i--)
 			{
 				Transform child = transform.GetChild(i);
@@ -118,7 +115,7 @@ namespace VoxelSystem
 
 			if (mesh != null)
 			{
-				if (!t.TryGetComponent<MeshFilter>(out MeshFilter meshFilter))
+				if (!t.TryGetComponent(out MeshFilter meshFilter))
 					meshFilter = t.gameObject.AddComponent<MeshFilter>();
 				meshFilter.sharedMesh = mesh;
 			}
@@ -128,7 +125,7 @@ namespace VoxelSystem
 				library == null || library.Material == null ? DefaultOctoBlockInfo.Instance.MaterialNotFoundMaterial :
 				library.Material;
 
-			if (!t.TryGetComponent<MeshRenderer>(out MeshRenderer meshRenderer))
+			if (!t.TryGetComponent(out MeshRenderer meshRenderer))
 				meshRenderer = t.gameObject.AddComponent<MeshRenderer>();
 			meshRenderer.sharedMaterial = material;
 		}
@@ -147,20 +144,9 @@ namespace VoxelSystem
 		public Matrix4x4 GetTransformation(SubVoxelFlags subVoxel)
 		{
 			if (!transformDictionary.TryGetValue(subVoxel, out Transform child))
-			{
 				return Matrix4x4.identity;
-			}
 
-			// Matrix4x4 m = child.localToWorldMatrix;
-			Matrix4x4 m = Matrix4x4.TRS(child.localPosition, child.localRotation, child.localScale);
-
-
-			// Vector3 pos = GetChildLocalPosition(dir);
-			// m.m03 += pos.x;
-			// m.m13 += pos.y;
-			// m.m23 += pos.z;
-
-			return m;
+			return Matrix4x4.TRS(child.localPosition, child.localRotation, child.localScale);
 		}
 	}
 }

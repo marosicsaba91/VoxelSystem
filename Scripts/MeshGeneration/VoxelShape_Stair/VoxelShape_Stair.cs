@@ -78,7 +78,7 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 	{
 		if (bottomSide != null)
 		{
-			MeshBuilder result = new (bottomSide, autoConvertFromRightHanded);
+			MeshBuilder result = new(bottomSide, autoConvertFromRightHanded);
 			if (useTextureSettingOnCustomMeshes)
 				result.ProjectUV(cubeTextureCoordinates, GeneralDirection3D.Down);
 			return result;
@@ -90,7 +90,7 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 	{
 		if (stairs != null)
 		{
-			MeshBuilder result = new (stairs, autoConvertFromRightHanded);
+			MeshBuilder result = new(stairs, autoConvertFromRightHanded);
 			if (useTextureSettingOnCustomMeshes)
 				result.ProjectUV(cubeTextureCoordinates, GeneralDirection3D.Up);
 			return result;
@@ -99,7 +99,7 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 
 		Rect rect = cubeTextureCoordinates.GetRect(GeneralDirection3D.Up);
 
-		List<Vector3> vs = new(){ new(-0.5f, -0.5f, -0.5f), new(0.5f, -0.5f, -0.5f), new(0.5f, 0.5f, 0.5f), new(-0.5f, 0.5f, 0.5f), };
+		List<Vector3> vs = new() { new(-0.5f, -0.5f, -0.5f), new(0.5f, -0.5f, -0.5f), new(0.5f, 0.5f, 0.5f), new(-0.5f, 0.5f, 0.5f), };
 		List<Vector3> ns = new() { normal, normal, normal, normal };
 		List<Vector2> uvs = new() { rect.BottomLeft(), rect.TopLeft(), rect.TopRight(), rect.BottomRight() };
 		List<int> triangles = new() { 0, 2, 1, 0, 3, 2 };
@@ -147,7 +147,7 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 	{
 		if (outerCorner != null)
 		{
-			MeshBuilder result = new (outerCorner, autoConvertFromRightHanded);
+			MeshBuilder result = new(outerCorner, autoConvertFromRightHanded);
 			if (useTextureSettingOnCustomMeshes)
 				result.ProjectUV(cubeTextureCoordinates, GeneralDirection3D.Up);
 			return result;
@@ -192,7 +192,7 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 		Vector3 offset = dir3D.ToVector() * 0.5f;
 
 		Rect rect = cubeTextureCoordinates.GetRect(GeneralDirection3D.Up);
-		List<Vector3> vs = new (){ new Vector3(0, -0.5f, -0.5f) + offset, new Vector3(0, -0.5f, 0.5f) + offset, new Vector3(0, 0.5f, 0.5f) + offset };
+		List<Vector3> vs = new() { new Vector3(0, -0.5f, -0.5f) + offset, new Vector3(0, -0.5f, 0.5f) + offset, new Vector3(0, 0.5f, 0.5f) + offset };
 		List<Vector3> ns = new() { normal, normal, normal, normal };
 		List<Vector2> uvs = new() { rect.BottomLeft(), rect.BottomRight(), rect.TopRight(), };
 		List<int> triangles = dir3D == GeneralDirection3D.Left ? new() { 0, 1, 2 } : new() { 2, 1, 0 };
@@ -283,13 +283,13 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 	};
 
 	GeneralDirection3D GetStairRightSideGlobal(ushort extraData) => GetStairType(extraData) switch
-	{ 
+	{
 		ShapeType.OuterCornerStair => GetSimpleDirections(GetRotation(extraData)),
 		_ => GetSimpleDirections((GetRotation(extraData) + 1) % 4)
 	};
 
 	GeneralDirection3D GetStairLeftSideGlobal(ushort extraData) => GetStairType(extraData) switch
-	{ 
+	{
 		ShapeType.InnerCornerStair => GetSimpleDirections((GetRotation(extraData) + 2) % 4),
 		_ => GetSimpleDirections((GetRotation(extraData) + 3) % 4)
 	};
@@ -411,7 +411,7 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 	{
 		Voxel voxelData = map.GetVoxel(position);
 		ushort extraVoxelData = voxelData.extraVoxelData;
-		ShapeType stairType = (ShapeType) extraVoxelData.Get2Bit(extraInfo_stairType);
+		ShapeType stairType = (ShapeType)extraVoxelData.Get2Bit(extraInfo_stairType);
 
 		switch (stairType)
 		{
@@ -456,7 +456,7 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 		if (!downFilled)
 			meshBuilder.Add(transformedBottomSide, center);
 
-		if (!backFilled) 
+		if (!backFilled)
 			meshBuilder.Add(transformedBackSide[rotation], center);
 
 		bool addStair = !forwardFilled || !upFilled;
@@ -470,7 +470,7 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 
 		bool closeRight = true;
 		bool closeLeft = true;
-		 
+
 		if (map.TryGetVoxel(position + right.ToVectorInt(), out Voxel rightNeighbour))
 		{
 			if (autoSet && rightNeighbour.shapeId == voxelData.shapeId)
@@ -500,7 +500,7 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 			if (addStair)
 				meshBuilder.Add(transformedLeftSide[rotation], center);
 			else
-				meshBuilder.Add(transformedBackSide[(rotation +3) % 4], center);
+				meshBuilder.Add(transformedBackSide[(rotation + 3) % 4], center);
 		}
 	}
 
@@ -511,7 +511,7 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 		bool autoSet = GetAutoSetup(extraVoxelData);
 		// int level = extraVoxelData.Get2Bit(extraInfo_level);
 		Vector3 center = position + half;
-		
+
 		// TOP MESH
 		if (isInner)
 			meshBuilder.Add(transformedInnerCorners[rotation], center);
@@ -531,8 +531,8 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 		Vector3Int leftSideVector = stairUpward - rightSideVector;
 		GeneralDirection3D leftSideDirection = DirectionUtility.GeneralDirection3DFromVector(leftSideVector).Opposite();
 		GeneralDirection3D rightSideDirection = DirectionUtility.GeneralDirection3DFromVector(rightSideVector).Opposite();
-		 
-		if (isInner) 
+
+		if (isInner)
 		{
 			// FIX7
 			GeneralDirection3D temp = leftSideDirection;
@@ -566,7 +566,7 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 			if (closeLeftSide)
 				meshBuilder.Add(transformedLeftSide[(rotation + 3) % 4], center);
 			if (closeRightSide)
-				meshBuilder.Add(transformedRightSide[(rotation ) % 4], center);
+				meshBuilder.Add(transformedRightSide[(rotation) % 4], center);
 		}
 		else
 		{
@@ -636,7 +636,7 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 
 		return initialRotation;
 	}
-	 
+
 	GeneralDirection3D GetSimpleDirections(int rotation) => rotation switch
 	{
 		0 => GeneralDirection3D.Forward,
@@ -737,7 +737,7 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 			stairSideUp = GeneralDirection3D.Up,
 			stairSide1 = left,
 			stairSide2 = right,
-			
+
 			levelLeight = 1,       // TODO
 			levelCount = 1,        // TODO
 			currentLevel = 0,        // TODO
@@ -750,4 +750,6 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 			solidRight = true,
 		};
 	}
+
+	public sealed override void AddMeshSides(FlexibleMesh mesh, Vector3Int position, ushort extraData) => mesh.AddCube(position);
 }

@@ -143,9 +143,6 @@ namespace VoxelSystem
 
 		public MeshBuilder GetSerializedPreviewMesh() => previewMeshBuilder;
 
-
-		protected abstract PhysicalVoxelShape PhysicalShape(ushort extraData);
-
 		void SetupMeshPreview()
 		{
 			meshPreview.meshGetter = GetPreviewMesh;
@@ -184,6 +181,30 @@ namespace VoxelSystem
 		}
 
 		public virtual IReadOnlyList<ExtraVoxelControl> GetExtraControls() => null;
+
+
+
+		// ---------- PhysicalVoxelShape ------------------------
+		protected abstract PhysicalVoxelShape PhysicalShape(ushort extraData);
+
+		public virtual void AddMeshSides(FlexibleMesh flexMesh, Vector3Int startPoint, ushort extraData)
+		{
+			Vector3 p000 = new Vector3(0, 0, 0) + startPoint;
+			Vector3 p001 = new Vector3(0, 0, 1) + startPoint;
+			Vector3 p010 = new Vector3(0, 1, 0) + startPoint;
+			Vector3 p011 = new Vector3(0, 1, 1) + startPoint;
+			Vector3 p100 = new Vector3(1, 0, 0) + startPoint;
+			Vector3 p101 = new Vector3(1, 0, 1) + startPoint;
+			Vector3 p110 = new Vector3(1, 1, 0) + startPoint;
+			Vector3 p111 = new Vector3(1, 1, 1) + startPoint;
+
+			flexMesh.AddFace(p000, p010, p110, p100);
+			flexMesh.AddFace(p000, p100, p101, p001);
+			flexMesh.AddFace(p000, p001, p011, p010);
+			flexMesh.AddFace(p100, p110, p111, p101);
+			flexMesh.AddFace(p010, p011, p111, p110);
+			flexMesh.AddFace(p001, p101, p111, p011);
+		}
 	}
 
 	// ---------- ExtraVoxelControl ------------------------
