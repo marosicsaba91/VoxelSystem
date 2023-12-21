@@ -156,17 +156,17 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 		Vector3 normal1 = new(1, 1, 0);  // Right Side
 		Vector3 normal2 = new(0, 1, -1);
 
-		List<Vector3> vs = new() {
+		List<Vector3> vertices = new() {
 			new(0.5f, -0.5f, -0.5f), new(-0.5f, 0.5f, 0.5f), new(0.5f, -0.5f, 0.5f),
 			new(0.5f, -0.5f, -0.5f), new(-0.5f, -0.5f, -0.5f), new(-0.5f, 0.5f, 0.5f), };
-		List<Vector3> ns = new() { normal1, normal1, normal1, normal2, normal2, normal2 };
+		List<Vector3> normals = new() { normal1, normal1, normal1, normal2, normal2, normal2 };
 		List<Vector2> uvs = new() { rect.BottomLeft(), rect.TopRight(), rect.TopLeft(), rect.BottomLeft(), rect.BottomRight(), rect.TopRight(), };
 		List<int> triangles = new() { 0, 1, 2, 3, 4, 5 };
 
 		return new()
 		{
-			vertices = vs,
-			normals = ns,
+			vertices = vertices,
+			normals = normals,
 			uv = uvs,
 			triangles = triangles
 		};
@@ -434,7 +434,7 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 	{
 		ushort extraVoxelData = voxelData.extraVoxelData;
 		int rotation = extraVoxelData.Get2Bit(extraInfo_rotation);
-		int level = extraVoxelData.Get2Bit(extraInfo_level);
+		// int level = extraVoxelData.Get2Bit(extraInfo_level);
 		bool autoSet = GetAutoSetup(extraVoxelData);
 
 		// int offset = Mathf.Min(level, slope - 1) - 	
@@ -751,5 +751,50 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 		};
 	}
 
-	public sealed override void AddMeshSides(FlexibleMesh mesh, Vector3Int position, ushort extraData) => mesh.AddCube(position);
+
+	readonly Vector3[] bottomFull = { new(0, 0, 0), new(1, 0, 0), new(1, 0, 1), new(0, 0, 1) };
+	readonly Vector3[] forwardFull = { new(0, 0, 1), new(1, 0, 1), new(1, 1, 1), new(0, 1, 1) };
+	readonly Vector3[] ramp = { new(0, 0, 0), new(0, 1, 1), new(1, 1, 1), new(1, 0, 0) };
+	// readonly Vector3[] backFull = { new(0, 0, 0), new(0, 1, 0), new(1, 1, 0), new(1, 0, 0) };
+
+	readonly Vector3[][] rotatedRamps;
+	void GenerateRotatedPhysical() 
+	{
+		if(rotatedRamps != null) return;
+		for (int i = 0; i < 4; i++)
+		{
+			rotatedRamps[i] = new Vector3[4];
+			for (int j = 0; j < ramp.Length; j++)
+			{
+				Vector3 vertex = ramp[j];
+				Vector3 rotated = vertex; // TODO
+				rotatedRamps[i][j] = rotated;
+			}
+		}
+	}
+
+	public override void BuildPhysicalMeshSides(FlexibleMesh flexMesh, VoxelMap map, Vector3Int voxelPoint, ref int sideCounter)
+	{
+		GenerateRotatedPhysical();
+
+		Voxel voxel = map.GetVoxel(voxelPoint);
+		int rotation = GetRotation(voxel.extraVoxelData);
+		ShapeType stairType = GetStairType(voxel.extraVoxelData);
+		CubicTransformation transformation = new(GeneralDirection3D.Up, rotation, false);
+
+		GeneralDirection3D localBackInGlobal = transformation.TransformDirection(GeneralDirection3D.Back);
+
+
+		if(stairType == ShapeType.SimpleStair)
+		{
+			flexMesh.AddFace(ramp, voxelPoint);
+
+			// if(voxel.IsSideClosed(localBackInGlobal))
+				flexMesh.AddFace(forwardFull, voxelPoint);
+
+			if (voxel.IsSideClosed(GeneralDirection3D.Down))
+				flexMesh.AddFace(bottomFull, voxelPoint);
+			return;
+		}
+	}
 }

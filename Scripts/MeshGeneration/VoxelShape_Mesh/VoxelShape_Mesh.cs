@@ -170,6 +170,4 @@ public class VoxelShape_Mesh : VoxelShapeBuilder
 		};
 		return physicalVoxelShape;
 	}
-
-	public sealed override void AddMeshSides(FlexibleMesh mesh, Vector3Int position, ushort extraData) => mesh.AddCube(position);
 }

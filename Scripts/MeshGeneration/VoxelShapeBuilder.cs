@@ -187,46 +187,57 @@ namespace VoxelSystem
 		// ---------- PhysicalVoxelShape ------------------------
 		protected abstract PhysicalVoxelShape PhysicalShape(ushort extraData);
 
-		public virtual void AddMeshSides(FlexibleMesh flexMesh, Vector3Int startPoint, ushort extraData)
+		static readonly Vector3 p000 = new(0, 0, 0);
+		static readonly Vector3 p001 = new(0, 0, 1);
+		static readonly Vector3 p010 = new(0, 1, 0);
+		static readonly Vector3 p011 = new(0, 1, 1);
+		static readonly Vector3 p100 = new(1, 0, 0);
+		static readonly Vector3 p101 = new(1, 0, 1);
+		static readonly Vector3 p110 = new(1, 1, 0);
+		static readonly Vector3 p111 = new(1, 1, 1);
+		static readonly Dictionary<GeneralDirection3D, Vector3[]> sideDictionary = new()
 		{
-			Vector3 p000 = new Vector3(0, 0, 0) + startPoint;
-			Vector3 p001 = new Vector3(0, 0, 1) + startPoint;
-			Vector3 p010 = new Vector3(0, 1, 0) + startPoint;
-			Vector3 p011 = new Vector3(0, 1, 1) + startPoint;
-			Vector3 p100 = new Vector3(1, 0, 0) + startPoint;
-			Vector3 p101 = new Vector3(1, 0, 1) + startPoint;
-			Vector3 p110 = new Vector3(1, 1, 0) + startPoint;
-			Vector3 p111 = new Vector3(1, 1, 1) + startPoint;
+			{ GeneralDirection3D.Right, new Vector3[]{ p100, p110, p111, p101 } },
+			{ GeneralDirection3D.Left, new Vector3[]{ p000, p001, p011, p010 } },
 
-			flexMesh.AddFace(p000, p010, p110, p100);
-			flexMesh.AddFace(p000, p100, p101, p001);
-			flexMesh.AddFace(p000, p001, p011, p010);
-			flexMesh.AddFace(p100, p110, p111, p101);
-			flexMesh.AddFace(p010, p011, p111, p110);
-			flexMesh.AddFace(p001, p101, p111, p011);
+			{ GeneralDirection3D.Up, new Vector3[]{ p010, p011, p111, p110 } },
+			{ GeneralDirection3D.Down, new Vector3[]{ p000, p100, p101, p001 } },
+			{ GeneralDirection3D.Forward, new Vector3[]{ p001, p101, p111, p011 } },
+			{ GeneralDirection3D.Back, new Vector3[]{ p000, p010, p110, p100 } },
+		};
+
+		public virtual void BuildPhysicalMeshSides(FlexibleMesh flexMesh, VoxelMap map, Vector3Int startPoint, ref int sideCounter)
+		{
+			for (int i = 0; i < 6; i++)
+			{
+				GeneralDirection3D direction = DirectionUtility.generalDirection3DValues[i];
+				flexMesh.AddFace(sideDictionary[direction], startPoint);
+				sideCounter++;
+			}
 		}
 	}
-
-	// ---------- ExtraVoxelControl ------------------------
-
-	public abstract class ExtraVoxelControl
-	{
-		public string name;
-		public abstract Type DataType { get; }
-		public abstract object GetExtraData(ushort extraVoxelData);
-		public abstract ushort SetExtraData(ushort originalExtraVoxelData, object newValue);
-	}
-
-	public class ExtraVoxelControl<T> : ExtraVoxelControl
-	{
-		public delegate T GetValueDel(ushort voxelData);
-		public delegate ushort SetValueDel(ushort originalExtraVoxelData, T newValue);
-
-		public GetValueDel getValue;
-		public SetValueDel setValue;
-		public sealed override object GetExtraData(ushort extraVoxelData) => getValue(extraVoxelData);
-		public sealed override ushort SetExtraData(ushort originalExtraVoxelData, object newValue) => setValue(originalExtraVoxelData, (T)newValue);
-		public sealed override Type DataType => typeof(T);
-	}
 }
+
+// ---------- ExtraVoxelControl ------------------------
+
+public abstract class ExtraVoxelControl
+{
+	public string name;
+	public abstract Type DataType { get; }
+	public abstract object GetExtraData(ushort extraVoxelData);
+	public abstract ushort SetExtraData(ushort originalExtraVoxelData, object newValue);
+}
+
+public class ExtraVoxelControl<T> : ExtraVoxelControl
+{
+	public delegate T GetValueDel(ushort voxelData);
+	public delegate ushort SetValueDel(ushort originalExtraVoxelData, T newValue);
+
+	public GetValueDel getValue;
+	public SetValueDel setValue;
+	public sealed override object GetExtraData(ushort extraVoxelData) => getValue(extraVoxelData);
+	public sealed override ushort SetExtraData(ushort originalExtraVoxelData, object newValue) => setValue(originalExtraVoxelData, (T)newValue);
+	public sealed override Type DataType => typeof(T);
+}
+
 

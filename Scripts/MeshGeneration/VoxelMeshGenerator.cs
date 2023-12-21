@@ -276,7 +276,7 @@ namespace VoxelSystem
 			UpdateMeshComponents(quick, destinationMesh);
 		}
 
-		public FlexibleMesh GeneratePhysicalMesh() 
+		public FlexibleMesh GeneratePhysicalMesh(ref int sideCounter) 
 		{
 			VoxelMap map = Map; 
 			BuildVoxelPositionDictionary(map);
@@ -287,10 +287,7 @@ namespace VoxelSystem
 				int shapeId = chunk.Key.shapeId;
 				VoxelShapeBuilder shapeBuilder = shapePalette.GetBuilder(shapeId);
 				foreach (Vector3Int voxelPosition in chunk.Value)
-				{
-					Voxel voxel = map.GetVoxel(voxelPosition);
-					shapeBuilder.AddMeshSides(mesh, voxelPosition, voxel.extraVoxelData);
-				}
+					shapeBuilder.BuildPhysicalMeshSides(mesh, map, voxelPosition, ref sideCounter);
 			}
 			return mesh;
 		}

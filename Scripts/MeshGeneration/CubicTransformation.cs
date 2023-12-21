@@ -1,7 +1,6 @@
 ﻿using MUtility;
 using System;
 using UnityEngine;
-using VoxelSystem;
 
 [Serializable]
 public struct CubicTransformation
@@ -11,7 +10,7 @@ public struct CubicTransformation
 	public int upDirectionIndex;
 	[Range(0, 3)] public int verticalRotation;
 	public bool verticalFlip;
-	public const int allCount = 48;
+	public const int allCount = 48;  
 
 	public CubicTransformation(GeneralDirection3D upDirection, int verticalRotation, bool verticalFlip)
 	{
