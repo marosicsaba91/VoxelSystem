@@ -16,12 +16,12 @@ public class VoxelShape_Mesh : VoxelShapeBuilder
 	[SerializeField] MeshBuilder[] transformedMeshes = new MeshBuilder[128];
 	 
 
-	protected override void InitializeMeshCache()
+	protected override void InitializeCachedData()
 	{
-		for (int i = 0; i < CubicTransformation.allCount; i++)
+		for (byte i = 0; i < CubicTransformation.allTransformationCount; i++)
 		{
 			CubicTransformation cubicTransformation = new(i);
-			Matrix4x4 transformation = cubicTransformation.GetTransformation(autoConvertFromRightHanded);
+			Matrix4x4 transformation = cubicTransformation.GetTransformationMatrix(autoConvertFromRightHanded);
 			transformedMeshes[i] = new MeshBuilder(mesh, transformation);
 		}
 	}
@@ -40,7 +40,7 @@ public class VoxelShape_Mesh : VoxelShapeBuilder
 			Voxel vertexValue = map.GetVoxel(position);
 
 			ushort extraVoxelData = vertexValue.extraVoxelData;
-			if (extraVoxelData >= CubicTransformation.allCount)
+			if (extraVoxelData >= CubicTransformation.allTransformationCount)
 			{
 				extraVoxelData = 0;
 				vertexValue.extraVoxelData = 0;
@@ -63,7 +63,7 @@ public class VoxelShape_Mesh : VoxelShapeBuilder
 			for (int d = 0; d < 6; d++)
 			{
 				GeneralDirection3D localDirection = (GeneralDirection3D)d;
-				CubicTransformation transformation = new(voxel.extraVoxelData);
+				CubicTransformation transformation = new((byte)voxel.extraVoxelData);
 				GeneralDirection3D globalDir = transformation.TransformDirection(localDirection);
 				bool closed = closedSides[localDirection];
 				voxel.SetSideClosed(globalDir, closed);
@@ -81,7 +81,7 @@ public class VoxelShape_Mesh : VoxelShapeBuilder
 		{
 			new ExtraVoxelControl<GeneralDirection3D> ()
 			{
-				name = "UpDirection",
+				name = "Up Direction",
 				getValue = GetUpDirection,
 				setValue = SetUpDirection
 			},
@@ -102,49 +102,48 @@ public class VoxelShape_Mesh : VoxelShapeBuilder
 	}
 	static GeneralDirection3D GetUpDirection(ushort extraVoxelData)
 	{
-		CubicTransformation cubicTransformation = new(extraVoxelData);
-		return cubicTransformation.UpDirection;
+		CubicTransformation cubicTransformation = new((byte)extraVoxelData);
+		return cubicTransformation.upDirection;
 	}
 
 	static ushort SetUpDirection(ushort originalExtraValue, GeneralDirection3D value)
 	{
-		CubicTransformation cubicTransformation = new(originalExtraValue)
+		CubicTransformation cubicTransformation = new((byte)originalExtraValue)
 		{
-			UpDirection = value
+			upDirection = value
 		};
-		return (ushort)cubicTransformation.GetIndex();
+		return cubicTransformation.GetIndex();
 	}
 	static int GetRotation(ushort extraVoxelData)
 	{
-		CubicTransformation cubicTransformation = new(extraVoxelData);
+		CubicTransformation cubicTransformation = new((byte)extraVoxelData);
 		return cubicTransformation.verticalRotation % 4;
 	}
 	static ushort SetRotation(ushort originalExtraValue, int value)
 	{
 		value %= 4;
-		CubicTransformation cubicTransformation = new(originalExtraValue)
+		CubicTransformation cubicTransformation = new((byte)originalExtraValue)
 		{
 			verticalRotation = value
 		};
-		return (ushort)cubicTransformation.GetIndex();
+		return cubicTransformation.GetIndex();
 	}
-
 
 	static bool GetFlip(ushort extraVoxelData)
 	{
-		CubicTransformation cubicTransformation = new(extraVoxelData);
+		CubicTransformation cubicTransformation = new((byte)extraVoxelData);
 		return cubicTransformation.verticalFlip;
 	}
 	static ushort SetFlip(ushort originalExtraValue, bool value)
 	{
-		CubicTransformation cubicTransformation = new(originalExtraValue)
+		CubicTransformation cubicTransformation = new((byte)originalExtraValue)
 		{
 			verticalFlip = value
 		};
-		return (ushort)cubicTransformation.GetIndex();
+		return cubicTransformation.GetIndex();
 	}
 
-	CubicTransformation GetTransformation(ushort extraVoxelData) => new(extraVoxelData);
+	CubicTransformation GetTransformation(ushort extraVoxelData) => new((byte)extraVoxelData);
 
 
 	protected override PhysicalVoxelShape PhysicalShape(ushort extraVoxelData)

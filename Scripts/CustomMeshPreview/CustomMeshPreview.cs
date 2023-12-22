@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using MUtility; 
+using MUtility;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -18,11 +18,12 @@ namespace VoxelSystem
 		[SerializeField] Color backgroundColor = new(0.3f, 0.3f, 0.3f);
 
 		[SerializeField] Vector2 cameraAngle = new(25, 25);
-		[SerializeField] Vector2 lightAngle = new(45, 55); 
+		[SerializeField] Vector2 lightAngle = new(45, 55);
 		[SerializeField] Quaternion rotateMesh;
 
 		[SerializeField] float fieldOfView = 30;
 		[SerializeField] float zoom = 1;
+		[SerializeField] bool showDirections = true;
 
 		public bool isExpandable = true;
 		public bool areChangesLogged = false;
@@ -31,6 +32,11 @@ namespace VoxelSystem
 
 		static Material standardMaterial;
 		public Texture previewTexture;
+
+		static Material redMaterial;
+		static Material greenMaterial;
+		static Material blueMaterial;
+		static Mesh cube;
 
 		public Vector2 TextureSize
 		{
@@ -63,7 +69,7 @@ namespace VoxelSystem
 			set
 			{
 				if (Material == value) return;
-				if(materials.Count == 0)
+				if (materials.Count == 0)
 					materials.Add(value);
 				else
 					materials[0] = value;
@@ -176,7 +182,7 @@ namespace VoxelSystem
 					renderer ??= new PreviewRenderUtility();
 					Render();
 					isDirty = false;
-				} 
+				}
 #endif
 				return previewTexture;
 			}
@@ -237,7 +243,7 @@ namespace VoxelSystem
 			Rect position = new(0, 0, preview.textureSize.x, preview.textureSize.y);
 			renderer.BeginPreview(position, GUIStyle.none);
 
-			Camera cam = renderer.camera; 
+			Camera cam = renderer.camera;
 			Light light1 = renderer.lights[0];
 			Light light2 = renderer.lights[1];
 
@@ -251,7 +257,7 @@ namespace VoxelSystem
 			light2.intensity = 4f;
 			light2.type = LightType.Directional;
 			light2.transform.rotation = Quaternion.LookRotation(lightDir * Vector3.back);
-			
+
 			Mesh mesh = preview.meshGetter?.Invoke();
 			Bounds bounds = mesh != null ? mesh.bounds : new Bounds(Vector3.zero, Vector3.one);
 
@@ -279,8 +285,26 @@ namespace VoxelSystem
 
 					renderer.DrawMesh(mesh, Matrix4x4.identity, material, 0);
 				}
-
 			}
+
+			if (preview.showDirections)
+			{
+				if (cube == null && redMaterial == null || greenMaterial == null || blueMaterial == null)
+				{
+					// Shader standardShader = Shader.Find("Standard");
+					Shader standardShader = Shader.Find("Universal Render Pipeline/Lit");
+					cube = Resources.GetBuiltinResource<Mesh>("Cube.fbx");
+					redMaterial = new(standardShader) { color = Color.red };
+					greenMaterial = new(standardShader) { color = Color.green };
+					blueMaterial = new(standardShader) { color = Color.blue };
+				}
+
+				Vector3 cubeSize = Vector3.one * (bounds.size.Mean() * 0.1f);
+				renderer.DrawMesh(cube, Matrix4x4.TRS(bounds.center + 1.6f * bounds.extents.x * Vector3.right, Quaternion.identity, cubeSize), redMaterial, 0);
+				renderer.DrawMesh(cube, Matrix4x4.TRS(bounds.center + 1.6f * bounds.extents.y * Vector3.up, Quaternion.identity, cubeSize), greenMaterial, 0);
+				renderer.DrawMesh(cube, Matrix4x4.TRS(bounds.center + 1.6f * bounds.extents.z * Vector3.forward, Quaternion.identity, cubeSize), blueMaterial, 0);
+			}
+
 
 			cam.Render();
 			Texture prev = renderer.EndPreview();

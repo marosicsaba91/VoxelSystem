@@ -13,13 +13,11 @@ namespace VoxelSystem
 	{
 
 		SerializedProperty previewMaterialProperty;
-		// SerializedProperty previewExtraSettingProperty;
 		SerializedProperty quickVersionProperty;
 
 		void OnEnable()
 		{
-			previewMaterialProperty = serializedObject.FindProperty(nameof(VoxelShapeBuilder.previewMaterial));
-			// previewExtraSettingProperty = serializedObject.FindProperty(nameof(VoxelShapeBuilder.previewExtraSetting));
+			previewMaterialProperty = serializedObject.FindProperty(nameof(VoxelShapeBuilder.previewMaterial)); 
 			quickVersionProperty = serializedObject.FindProperty(nameof(VoxelShapeBuilder.quickVersion));
 		}
 
@@ -28,7 +26,6 @@ namespace VoxelSystem
 			base.OnInspectorGUI();
 
 			VoxelShapeBuilder builder = (VoxelShapeBuilder)target;
-			CustomMeshPreview preview = VoxelShapeBuilder.meshPreview;
 
 			float fullWidth = EditorGUIUtility.currentViewWidth; 
 			EditorGUILayout.Space();
@@ -39,24 +36,32 @@ namespace VoxelSystem
 			EditorGUILayout.PropertyField(quickVersionProperty);
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Preview", EditorStyles.boldLabel);
-			if (GUILayout.Button("Initialize SetupFromMesh & Preview"))
+			CustomMeshPreview preview = builder.meshPreview;
+			if (GUILayout.Button("Initialize Cached Data"))
 			{
-				builder.InitializeAndSetupPreview();
-				preview.SetDirty();
+				builder.InitializeMeshCacheAndSave();
+				builder.RecalculatePreviewMesh();
+				preview.Render();
 			}
 
 			EditorGUILayout.PropertyField(previewMaterialProperty); 
 			serializedObject.ApplyModifiedProperties();
 
+			// Preview
+
 			// Extra Controls
 			int lines = builder.GetExtraControls()?.Count ?? 0;
 			Rect extraControlsRect = EditorGUILayout.GetControlRect(false, EditorHelper.GetStandardPanelHeight(lines));
-			builder.previewExtraSetting = DrawExtraControls(builder, (ushort) builder.previewExtraSetting, builder, ref extraControlsRect);
+			ushort extraControls = builder.previewExtraSetting;
+			ushort newExtraControls = DrawExtraControls(builder, extraControls, builder, ref extraControlsRect);
+			if (extraControls != newExtraControls) 
+			{
+				builder.previewExtraSetting = newExtraControls;
+				builder.RecalculatePreviewMesh();
+				preview.Render();
+			}
 
-			// Preview
-
-			// Get GUI Event
-
+			// Get GUI Event 
 			Rect rect = GUILayoutUtility.GetRect(256, 256);
 			CustomMeshPreviewDrawer.HandleMouseMovement(rect, preview);
 			if (Event.current.type == EventType.Repaint)
@@ -65,8 +70,12 @@ namespace VoxelSystem
 				preview.BackgroundType = CameraClearFlags.Skybox;
 				preview.Material = builder.PreviewMaterial;
 				preview.meshGetter = builder.GetPreviewMesh;
-
 				EditorGUI.DrawPreviewTexture(rect, preview.PreviewTexture);
+			}
+			if (GUILayout.Button("Regenerate Preview"))
+			{
+				builder.RecalculatePreviewMesh();
+				preview.Render();
 			}
 		}
 

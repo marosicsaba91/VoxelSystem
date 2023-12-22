@@ -81,7 +81,7 @@ namespace VoxelSystem
 			if (dummyBuilder == null)
 			{
 				dummyBuilder = CreateInstance<VoxelShape_Cube>(); 
-				dummyBuilder.InitializeAndSetupPreview();
+				dummyBuilder.InitializeMeshCacheAndSave();
 				dummyBuilder.NiceName = "Dummy";
 			}
 			return dummyBuilder;

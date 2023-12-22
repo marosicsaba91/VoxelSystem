@@ -37,7 +37,7 @@ namespace VoxelSystem
 		static VoxelMap _currentVoxelMap;
 
 		static readonly List<Vector3> _breakPoints = new();
-		protected override void InitializeMeshCache() { }
+		protected override void InitializeCachedData() { }
 
 		protected sealed override void GenerateMeshData(
 			VoxelMap map,

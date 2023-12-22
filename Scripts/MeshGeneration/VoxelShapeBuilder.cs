@@ -17,15 +17,15 @@ namespace VoxelSystem
 		[SerializeField] string niceName;
 		[Space]
 		[HideInInspector] public Material previewMaterial;
-		[HideInInspector] public int previewExtraSetting;
+		[HideInInspector] public ushort previewExtraSetting;
 		[HideInInspector] public VoxelShapeBuilder quickVersion;
 
-		public static readonly CustomMeshPreview meshPreview = new();
+		public readonly CustomMeshPreview meshPreview = new();
 
 		protected static readonly Vector3 half = Vector3.one * 0.5f;
 
 		public Material PreviewMaterial => previewMaterial;
-		public int PreviewExtraSetting => previewExtraSetting;
+		public ushort PreviewExtraSetting => previewExtraSetting;
 
 		public int VoxelId => voxelId;
 
@@ -35,16 +35,17 @@ namespace VoxelSystem
 			ValidateQuickVersion();
 			OnValidateInternal();
 			SetupMeshPreview();
-
+			/*
 #if UNITY_EDITOR
 			AssemblyReloadEvents.beforeAssemblyReload -= Dispose;
 			AssemblyReloadEvents.beforeAssemblyReload += Dispose;
 #endif
-
+			*/
 			if (voxelId == 0)
 				voxelId = Random.Range(0, int.MaxValue);
 		}
 
+		/*
 		void Dispose()
 		{
 			if (previewMesh != null)
@@ -55,6 +56,7 @@ namespace VoxelSystem
 
 			meshPreview.Dispose();
 		}
+		*/
 
 		void ValidateQuickVersion()
 		{
@@ -73,17 +75,16 @@ namespace VoxelSystem
 			}
 		}
 
-		public void InitializeAndSetupPreview()
+		public void InitializeMeshCacheAndSave()
 		{
-			InitializeMeshCache();
-			RecalculatePreviewMesh();
+			InitializeCachedData();
 
 #if UNITY_EDITOR
 			EditorUtility.SetDirty(this);
 #endif
 		}
 
-		protected abstract void InitializeMeshCache();
+		protected abstract void InitializeCachedData();
 
 		protected virtual void OnValidateInternal() { }
 
@@ -164,9 +165,9 @@ namespace VoxelSystem
 			return previewMesh;
 		}
 
-		protected virtual void RecalculatePreviewMesh()
+		public void RecalculatePreviewMesh()
 		{
-			Voxel voxelValue = new(voxelId, 0, (ushort)previewExtraSetting, 0);
+			Voxel voxelValue = new(voxelId, 0, previewExtraSetting, 0);
 			ArrayVoxelMap map = ArrayVoxelMap.GetTestOneVoxelMap(voxelValue);
 
 			previewMeshBuilder.Clear();
@@ -178,6 +179,11 @@ namespace VoxelSystem
 				previewMesh.Clear();
 
 			previewMeshBuilder.CopyToMesh(previewMesh);
+
+#if UNITY_EDITOR
+			EditorUtility.SetDirty(this);
+#endif
+
 		}
 
 		public virtual IReadOnlyList<ExtraVoxelControl> GetExtraControls() => null;

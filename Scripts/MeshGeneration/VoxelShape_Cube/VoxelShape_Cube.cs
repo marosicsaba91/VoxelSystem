@@ -36,7 +36,7 @@ namespace VoxelSystem
 
 		readonly List<CubeSide> allSides = new();
 		static readonly GeneralDirection3D[] directions = DirectionUtility.generalDirection3DValues;
-		protected override void InitializeMeshCache()
+		protected override void InitializeCachedData()
 		{
 			if (sideMeshCache == null || sideMeshCache.Length != 6)
 				sideMeshCache = new MeshBuilderList[6];

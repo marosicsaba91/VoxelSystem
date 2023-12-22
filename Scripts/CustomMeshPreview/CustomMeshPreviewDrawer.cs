@@ -104,7 +104,6 @@ namespace VoxelSystem
 				return true;
 			}
 
-
 			return false;
 
 			void Log(string s)
