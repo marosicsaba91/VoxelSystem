@@ -1,5 +1,5 @@
 using MeshUtility;
-using MUtility; 
+using MUtility;
 using System.Collections.Generic;
 using UnityEngine;
 using VoxelSystem;
@@ -93,6 +93,8 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 
 	protected sealed override bool IsInitialized => !transformedStairs[0].IsEmpty;
 
+	// ----------------- Initialize Cached Data -------------------------------------
+
 	protected override void InitializeCachedData()
 	{
 		Setup(transformedStairs);
@@ -103,7 +105,7 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 		Setup(transformedBackSide);
 		Setup(transformedBottomSide);
 		static void Setup(MeshBuilder[] array)
-		{ 
+		{
 			if (array.Length != transformCount)
 			{
 				array = new MeshBuilder[transformCount];
@@ -280,6 +282,14 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 		return cubeTextureCoordinates.GetCubeSide(GeneralDirection3D.Forward);
 	}
 
+	// ---------------------------------------------------------------------------------------------------------------
+
+	protected override void SetupVoxelData(VoxelMap map, List<Vector3Int> voxelPositions, int shapeIndex)
+	{
+		for (int i = 0; i < voxelPositions.Count; i++)
+			SetupVoxelTypeAndRotation(map, voxelPositions[i], shapeIndex);
+	}
+
 	protected sealed override void SetupClosedSides(VoxelMap map, List<Vector3Int> voxelPositions)
 	{
 		for (int i = 0; i < voxelPositions.Count; i++)
@@ -316,34 +326,16 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 		}
 	}
 
+	// ---------------------------------- Mesh Generation ------------------------------------------------------------
+
 	protected sealed override void GenerateMeshData(
-		VoxelMap map,
-		List<Vector3Int> voxelPositions,
-		int shapeIndex,
-		MeshBuilder meshBuilder)
+		VoxelMap map, List<Vector3Int> voxelPositions,
+		int shapeIndex, MeshBuilder meshBuilder)
 	{
 		for (int i = 0; i < voxelPositions.Count; i++)
 			BuildMesh(map, voxelPositions[i], meshBuilder);
 	}
 
-	GeneralDirection3D GetStairRightSideGlobal(ushort extraData) => GetStairType(extraData) switch
-	{
-		ShapeType.OuterCornerStair => GetTransformation(extraData).TransformDirection(GeneralDirection3D.Forward),
-		_ => GetTransformation(extraData).TransformDirection(GeneralDirection3D.Right),
-	};
-
-	GeneralDirection3D GetStairLeftSideGlobal(ushort extraData) => GetStairType(extraData) switch
-	{
-		ShapeType.InnerCornerStair => GetTransformation(extraData).TransformDirection(GeneralDirection3D.Back),
-		_ => GetTransformation(extraData).TransformDirection(GeneralDirection3D.Left),
-	};
-
-
-	protected override void SetupVoxelData(VoxelMap map, List<Vector3Int> voxelPositions, int shapeIndex)
-	{
-		for (int i = 0; i < voxelPositions.Count; i++)
-			SetupVoxelTypeAndRotation(map, voxelPositions[i], shapeIndex);
-	}
 
 	readonly GeneralDirection3D[] stairNeighbourDirections = new GeneralDirection3D[4];
 	readonly GeneralDirection3D[] wallNeighbourDirections = new GeneralDirection3D[3];
@@ -414,7 +406,7 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 			GeneralDirection3D back = wallNeighbourDirections[1];
 			GeneralDirection3D up = down.Opposite();
 			GeneralDirection3D forward = back.Opposite();
-			if(up.GetAxis()!= forward.GetAxis())
+			if (up.GetAxis() != forward.GetAxis())
 				transformation = CubicTransformation.FromUpForward(up, forward);
 		}
 		else if (wallNeighbourCount == 3)
@@ -760,7 +752,7 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 	static bool GetAutoSetup(ushort extraVoxelData) => extraVoxelData.Get2Bit(extraInfo_isAutoSet) == 0;
 	static ushort SetAutoSetup(ushort originalExtraVoxelData, bool newValue)
 	{
-		ushort newData = originalExtraVoxelData.Set2Bit(extraInfo_isAutoSet, newValue ? 0 : 1); 
+		ushort newData = originalExtraVoxelData.Set2Bit(extraInfo_isAutoSet, newValue ? 0 : 1);
 		return newData;
 	}
 
@@ -805,7 +797,7 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 		{
 			verticalFlip = value
 		};
-		return originalExtraValue.SetByte(0, cubicTransformation.GetIndex()); 
+		return originalExtraValue.SetByte(0, cubicTransformation.GetIndex());
 	}
 
 
@@ -834,6 +826,18 @@ public class VoxelShape_Stair : VoxelShapeBuilder
 			solidRight = true,
 		};
 	}
+
+	GeneralDirection3D GetStairRightSideGlobal(ushort extraData) => GetStairType(extraData) switch
+	{
+		ShapeType.OuterCornerStair => GetTransformation(extraData).TransformDirection(GeneralDirection3D.Forward),
+		_ => GetTransformation(extraData).TransformDirection(GeneralDirection3D.Right),
+	};
+
+	GeneralDirection3D GetStairLeftSideGlobal(ushort extraData) => GetStairType(extraData) switch
+	{
+		ShapeType.InnerCornerStair => GetTransformation(extraData).TransformDirection(GeneralDirection3D.Back),
+		_ => GetTransformation(extraData).TransformDirection(GeneralDirection3D.Left),
+	};
 
 	public override void BuildPhysicalMeshSides(FlexibleMesh flexMesh, VoxelMap map, Vector3Int voxelPoint, ref int sideCounter)
 	{
