@@ -144,29 +144,4 @@ public class VoxelShape_Mesh : VoxelShapeBuilder
 	}
 
 	CubicTransformation GetTransformation(ushort extraVoxelData) => new((byte)extraVoxelData);
-
-
-	protected override PhysicalVoxelShape PhysicalShape(ushort extraVoxelData)
-	{
-		CubicTransformation transformation = GetTransformation(extraVoxelData);
-		PhysicalVoxelShape physicalVoxelShape = new()
-		{
-			shapeType = ShapeType.FullBlock,
-
-			solidRight = closedSides[transformation.InverseTransformDirection(GeneralDirection3D.Right)],
-			solidLeft = closedSides[transformation.InverseTransformDirection(GeneralDirection3D.Left)],
-			solidTop = closedSides[transformation.InverseTransformDirection(GeneralDirection3D.Up)],
-			solidBottom = closedSides[transformation.InverseTransformDirection(GeneralDirection3D.Down)],
-			solidForward = closedSides[transformation.InverseTransformDirection(GeneralDirection3D.Forward)],
-			solidBack = closedSides[transformation.InverseTransformDirection(GeneralDirection3D.Back)],
-			 
-			levelCount = 0,
-			currentLevel = 0,
-			levelLeight = 0,
-			stairSideUp = GeneralDirection3D.Up,
-			stairSide1 = GeneralDirection3D.Right,
-			stairSide2 = GeneralDirection3D.Left,
-		};
-		return physicalVoxelShape;
-	}
 }

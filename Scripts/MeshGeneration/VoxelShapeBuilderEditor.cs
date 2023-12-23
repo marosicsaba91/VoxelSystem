@@ -30,8 +30,8 @@ namespace VoxelSystem
 			float fullWidth = EditorGUIUtility.currentViewWidth; 
 			EditorGUILayout.Space();
 			Rect messageRect = GUILayoutUtility.GetRect(fullWidth, 24);
-			EasyMessageDrawer.DrawMessage(messageRect, 
-				"Use another VoxelShapeBuilder for generating quickly or for Collider",
+			EasyMessageDrawer.DrawMessage(messageRect,
+				"Use another Shape for quick generation",
 				EasyInspector.MessageType.Info, 12);
 			EditorGUILayout.PropertyField(quickVersionProperty);
 			EditorGUILayout.Space();

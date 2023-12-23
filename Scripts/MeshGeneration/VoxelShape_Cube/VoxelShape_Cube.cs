@@ -156,8 +156,6 @@ namespace VoxelSystem
 				meshBuilder.Add(sideMesh, center);
 			}
 		}
-
-		protected override PhysicalVoxelShape PhysicalShape(ushort extraData) => PhysicalVoxelShape.full;
 	}
 
 	struct CubeSide

@@ -191,8 +191,6 @@ namespace VoxelSystem
 
 
 		// ---------- PhysicalVoxelShape ------------------------
-		protected abstract PhysicalVoxelShape PhysicalShape(ushort extraData);
-
 		static readonly Vector3 p000 = new(0, 0, 0);
 		static readonly Vector3 p001 = new(0, 0, 1);
 		static readonly Vector3 p010 = new(0, 1, 0);
