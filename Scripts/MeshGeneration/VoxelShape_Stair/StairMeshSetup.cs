@@ -166,8 +166,6 @@ namespace VoxelSystem
 				uvSetup = null;
 
 			Matrix4x4 rotateLeft = Matrix4x4.Rotate(Quaternion.Euler(0, -90, 0));
-			//rotateLeft *= Matrix4x4.Rotate(Quaternion.Euler(0, -90, 0));
-			//rotateLeft *= Matrix4x4.Translate(Vector3.one * -0.5f);
 
 			for (byte i = 0; i < CubicTransformation.allTransformationCount; i++)
 			{

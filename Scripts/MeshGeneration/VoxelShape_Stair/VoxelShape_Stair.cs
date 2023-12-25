@@ -1,7 +1,7 @@
 using EasyInspector;
 using MeshUtility;
 using MUtility;
-using System.Collections.Generic;
+using System.Collections.Generic; 
 using UnityEngine;
 
 namespace VoxelSystem
@@ -17,7 +17,7 @@ namespace VoxelSystem
 	[CreateAssetMenu(fileName = "StairVoxelShape", menuName = EditorConstants.categoryPath + "VoxelShape: Stair", order = EditorConstants.soOrder_VoxelShape)]
 	public class VoxelShape_Stair : VoxelShapeBuilder
 	{
-		[Header("Mesh")] 
+		[Header("Mesh")]
 		[SerializeField] StairMeshSetup meshSetup = new();
 
 		[Header("Texture")]
@@ -41,7 +41,9 @@ namespace VoxelSystem
 				SetupVoxelTypeAndTransformation(map, voxelPositions[i], shapeIndex);
 		}
 
-		void SetupVoxelTypeAndTransformation(VoxelMap map, Vector3Int position, int shapeIndex)
+		readonly GeneralDirection3D[] stairNeighborsDirections = new GeneralDirection3D[4];
+		readonly GeneralDirection3D[] wallNeighborsDirections = new GeneralDirection3D[3];
+		void SetupVoxelTypeAndTransformation(VoxelMap map, Vector3Int position, int shapeId)
 		{
 			Voxel voxelData = map.GetVoxel(position);
 			ushort extraVoxelData = voxelData.extraVoxelData;
@@ -51,30 +53,27 @@ namespace VoxelSystem
 			// SetupFromMesh Rotation & StairShape
 			int wallNeighborsCount = 0;
 			int stairNeighborsCount = 0;
-
 			foreach (GeneralDirection3D direction in DirectionUtility.generalDirection3DValues)
 			{
 				Vector3Int directionVector = direction.ToVectorInt();
+				if (!map.TryGetVoxel(position + directionVector, out Voxel neighbor)) continue;
+				if (!neighbor.IsFilled()) continue;
 
-				if (map.TryGetVoxel(position + directionVector, out Voxel neighbour))
+				if (neighbor.shapeId == shapeId)
 				{
-					if (neighbour.shapeId == shapeIndex)
-					{
-						stairNeighborsDirections[stairNeighborsCount] = direction;
-						stairNeighborsCount++;
-						if (stairNeighborsCount == 4)
-							break;
-					}
-					else if (neighbour.IsFilled())
-					{
-						wallNeighborsDirections[stairNeighborsCount] = direction;
-						wallNeighborsCount++;
-						if (stairNeighborsCount == 3)
-							break;
-					}
+					stairNeighborsDirections[stairNeighborsCount] = direction;
+					stairNeighborsCount++;
+					if (stairNeighborsCount == 4)
+						break;
+				}
+				else
+				{
+					wallNeighborsDirections[wallNeighborsCount] = direction;
+					wallNeighborsCount++;
+					if (wallNeighborsCount == 3)
+						break;
 				}
 			}
-
 
 			StairShape stairType = GetStairType(extraVoxelData);
 			CubicTransformation transformation = GetTransformation(extraVoxelData);
@@ -88,45 +87,63 @@ namespace VoxelSystem
 				{
 					GeneralDirection3D s1 = stairNeighborsDirections[0];
 					GeneralDirection3D s2 = stairNeighborsDirections[1];
-					if (s1 == s2.Opposite())
-					{
-						stairType = StairShape.SimpleStair;
-						transformation = CubicTransformation.FromRightUp(s1, up);
-					}
-					else
+					if (s1 != s2.Opposite() && s1 != up)
 					{
 						stairType = StairShape.OuterCornerStair;
-						transformation = CubicTransformation.FromRightForward(s1, s2);
+
+						if (DirectionUtility.IsLeftHanded(s1, up, s2))
+							transformation = CubicTransformation.FromDirections(s1, up, s2);
+						else
+							transformation = CubicTransformation.FromDirections(s2, up, s1);
 					}
 				}
+
 			}
 			else if (wallNeighborsCount == 2)
 			{
 				stairType = StairShape.SimpleStair;
 				GeneralDirection3D down = wallNeighborsDirections[0];
-				GeneralDirection3D back = wallNeighborsDirections[1];
-				GeneralDirection3D up = down.Opposite();
-				GeneralDirection3D forward = back.Opposite();
-				if (up.GetAxis() != forward.GetAxis())
-					transformation = CubicTransformation.FromUpForward(up, forward);
+				GeneralDirection3D forward = wallNeighborsDirections[1];
+				if (forward.GetAxis() == Axis3D.Y)
+					(forward, down) = (down, forward);
+
+				if (down.GetAxis() != forward.GetAxis())
+					transformation = CubicTransformation.FromUpForward(down.Opposite(), forward);
 			}
 			else if (wallNeighborsCount == 3)
 			{
 				stairType = StairShape.InnerCornerStair;
-				// TODO
-				/*
-				GeneralDirection3D down = wallNeighbourDirections[0];
-				GeneralDirection3D back = wallNeighbourDirections[1];
-				GeneralDirection3D left = wallNeighbourDirections[2];
-
-				GeneralDirection3D up = down.Opposite();
-				GeneralDirection3D forward = back.Opposite();
-				GeneralDirection3D right = left.Opposite();
-				if (stairNeighbourCount == 2)
+				Axis3D a0 = wallNeighborsDirections[0].GetAxis();
+				Axis3D a1 = wallNeighborsDirections[1].GetAxis();
+				Axis3D a2 = wallNeighborsDirections[2].GetAxis();
+				if (a0 != a1 && a0 != a2 && a1 != a2)
 				{
+					DirectionUtility.SortDirectionsByAxis(
+						wallNeighborsDirections[0], wallNeighborsDirections[1], wallNeighborsDirections[2],
+						out GeneralDirection3D xWall, out GeneralDirection3D yWall, out GeneralDirection3D zWall);
+
+					Debug.Log($"xWall: {xWall},yWall: {yWall}, zWall: {zWall}");
+
+					if (stairNeighborsCount == 2)
+					{
+						GeneralDirection3D right = stairNeighborsDirections[0];
+						GeneralDirection3D back = stairNeighborsDirections[1];
+						Axis3D rightAxis = right.GetAxis();
+						Axis3D backAxis = back.GetAxis();
+						Axis3D upAxis = DirectionUtility.OtherAxis(rightAxis, backAxis);
+						GeneralDirection3D up =
+							upAxis == Axis3D.X ? xWall :
+							upAxis == Axis3D.Y ? yWall :
+							zWall;
+						up = up.Opposite();
+
+						transformation = CubicTransformation.FromDirections(right, up, back.Opposite());
+					}
+					else
+					{
+						transformation = CubicTransformation.FromDirections(xWall, yWall.Opposite(), zWall);
+					}
 				}
-				// transformation = CubicTransformation.FromRightUp(right, up);
-				*/
 			}
 			else if (wallNeighborsCount >= 4)
 			{
@@ -139,6 +156,7 @@ namespace VoxelSystem
 			map.SetVoxel(position, voxelData);
 		}
 
+
 		protected sealed override void SetupClosedSides(VoxelMap map, List<Vector3Int> voxelPositions)
 		{
 			for (int i = 0; i < voxelPositions.Count; i++)
@@ -148,19 +166,23 @@ namespace VoxelSystem
 
 				StairShape stairType = GetStairType(v.extraVoxelData);
 
-				if (isTransparent || stairType == StairShape.FullBlock)
+				if (isTransparent)
 					v.OpenAllSide();
+				else if (stairType == StairShape.FullBlock)
+					v.CloseAllSide();
 				else
 				{
 					CubicTransformation transformation = GetTransformation(v.extraVoxelData);
-					v.SetSideClosed(GeneralDirection3D.Up, false);
-					v.SetSideClosed(GeneralDirection3D.Down, true);
 
+					GeneralDirection3D globalUp = transformation.TransformDirection(GeneralDirection3D.Up);
+					GeneralDirection3D globalDown = globalUp.Opposite();
 					GeneralDirection3D globalRight = transformation.TransformDirection(GeneralDirection3D.Right);
-					GeneralDirection3D globalLeft = transformation.TransformDirection(GeneralDirection3D.Left);
+					GeneralDirection3D globalLeft = globalRight.Opposite();
 					GeneralDirection3D globalForward = transformation.TransformDirection(GeneralDirection3D.Forward);
-					GeneralDirection3D globalBack = transformation.TransformDirection(GeneralDirection3D.Back);
+					GeneralDirection3D globalBack = globalForward.Opposite();
 
+					v.SetSideClosed(globalUp, false);
+					v.SetSideClosed(globalDown, true);
 					v.SetSideClosed(globalRight, false);
 					v.SetSideClosed(globalBack, false);
 
@@ -177,6 +199,7 @@ namespace VoxelSystem
 
 
 		// ---------------------------------- Mesh Generation ------------------------------------------------------------
+
 		protected sealed override void GenerateMeshData(
 			VoxelMap map, List<Vector3Int> voxelPositions,
 			int shapeIndex, MeshBuilder meshBuilder)
@@ -184,10 +207,6 @@ namespace VoxelSystem
 			for (int i = 0; i < voxelPositions.Count; i++)
 				BuildMesh(map, voxelPositions[i], meshBuilder);
 		}
-
-
-		readonly GeneralDirection3D[] stairNeighborsDirections = new GeneralDirection3D[4];
-		readonly GeneralDirection3D[] wallNeighborsDirections = new GeneralDirection3D[3];
 
 
 		void BuildMesh(VoxelMap map, Vector3Int position, MeshBuilder meshBuilder)
