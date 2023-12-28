@@ -10,7 +10,7 @@ namespace VoxelSystem
 		public const int defaultMapSize = 8;
 
 		[SerializeField] Vector3Int size;
-		[SerializeField] long[] longVoxelData;
+		[SerializeField] long[] longVoxelData = new long[0];
 		Voxel[] voxelData;
 		 
 		public void OnBeforeSerialize() 

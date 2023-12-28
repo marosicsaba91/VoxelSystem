@@ -1,28 +1,26 @@
-﻿using Benchmark;
 using EasyInspector;
-using MUtility;
-using System.IO;
+using System.IO; 
 using UnityEngine;
 
 namespace VoxelSystem
 {
-
 	[ExecuteAlways]
-	public class VoxelObject : MonoBehaviour
+	partial class VoxelObject : MonoBehaviour
 	{
 		[SerializeField, HideInInspector] ArrayVoxelMap innerMap = null;
 		[SerializeField, HideInInspector] SharedVoxelMap sharedVoxelMap = null;
-
+		[Header("Voxel Map")]
 		[SerializeField] EasyMember sharedMap = new(nameof(SharedVoxelMap));
-		[SerializeField, DisableIf(nameof(HasSharedMap))] EasyMember exportVoxelMap = new(nameof(ExportVoxelMap));
-
+		[SerializeField, DisableIf(nameof(HasSharedMap))] EasyMember exportVoxelMapAsAsset =
+			new(nameof(ExportVoxelMap));
 		[SerializeField, HideInInspector] SharedVoxelMap _lastFrameSharedMap = null;
 
 		public event MapChangedDelegate MapChanged;
 
-		void OnMapChanged(bool quick)
+		void OnMapChanged(bool isFinal)
 		{
-			MapChanged?.Invoke(quick);
+			MapChanged?.Invoke(isFinal);
+			RegenerateMeshesAndUpdateMeshComponents(isFinal);
 		}
 
 		public string MapName => HasSharedMap ? SharedVoxelMap.name : name;
@@ -45,7 +43,7 @@ namespace VoxelSystem
 				else
 				{
 					sharedVoxelMap = value;
-					OnMapChanged(false);
+					OnMapChanged(isFinal: true);
 				}
 			}
 		}
@@ -67,7 +65,10 @@ namespace VoxelSystem
 
 		void Update() // ExecuteAlways
 		{
-			SubscribeToChange();
+			if (Application.isPlaying) return;
+
+			EditorUpdate_Map();
+			EditorUpdate_MeshGeneration();
 		}
 
 		void OnEnable()
@@ -76,7 +77,7 @@ namespace VoxelSystem
 			{
 				innerMap = new();
 				innerMap.Setup();
-				OnMapChanged(false);
+				OnMapChanged(isFinal: true);
 			}
 			VoxelMap map = GetVoxelMap();
 			if (map != null)
@@ -90,7 +91,7 @@ namespace VoxelSystem
 				map.MapChangedEvent -= OnMapChanged;
 		}
 
-		void SubscribeToChange()
+		void EditorUpdate_Map()
 		{
 			if (_lastFrameSharedMap == null && sharedVoxelMap == null)
 			{

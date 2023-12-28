@@ -21,7 +21,7 @@ namespace VoxelSystem
 			_lastBound = new (hit.voxelIndex, Vector3Int.one);
 
 			_lastTimeMapChanged = map.SetVoxel(hit.voxelIndex, voxelEditor.SelectedAction, voxelEditor.SelectedVoxelValue);
-			return _lastTimeMapChanged ? MapChange.Quick : MapChange.None;
+			return _lastTimeMapChanged ? MapChange.Edit : MapChange.None;
 		}
 
 		protected sealed override MapChange OnVoxelCursorDrag(IVoxelEditor voxelEditor, VoxelHit hit)
@@ -42,7 +42,7 @@ namespace VoxelSystem
 			_lastTimeMapChanged = mapChanged;
 			_lastBound = bound;
 
-			return updateMap ? MapChange.Quick : MapChange.None;
+			return updateMap ? MapChange.Edit : MapChange.None;
 		}
 
 		protected sealed override MapChange OnVoxelCursorUp(IVoxelEditor voxelEditor, VoxelHit hit) => MapChange.Final;

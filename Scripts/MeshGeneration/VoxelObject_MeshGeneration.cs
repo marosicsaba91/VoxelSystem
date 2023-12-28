@@ -7,76 +7,64 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace VoxelSystem
 {
-	[ExecuteAlways]
-	[RequireComponent(typeof(VoxelObject))]
-	public class VoxelMeshGenerator : MonoBehaviour
+	public partial class VoxelObject : MonoBehaviour
 	{
 		enum MeshGenerationMode
 		{
-			AlwaysFull,
-			QuickAndFull,
+			None,
 			AlwaysQuick,
-			None
+			AlwaysFull,
+			QuickOnEditFullOnFinish,
+			QuickOnFinish,
 		}
 
 		[Serializable]
-		class References
+		class MeshDestination
 		{
-			[HideInInspector] public VoxelObject voxelObject;
 			public MeshRenderer meshRenderer;
 			public MeshFilter destinationMeshFilter;
 			public MeshCollider destinationMeshCollider;
-		}
-
-		[Serializable]
-		class Destination
-		{
-			[NonSerialized] public VoxelMeshGenerator voxelMeshGenerator;
 			public Mesh fullMesh;
 			public Mesh quickMesh;
-			public MeshGenerationMode generateForMeshFilter = MeshGenerationMode.QuickAndFull;
-			public MeshGenerationMode generateForCollider = MeshGenerationMode.AlwaysQuick;
-			[SerializeField] EasyMember createQuickMeshFile = new(nameof(CreateQuickMeshFile));
-			[SerializeField] EasyMember createFullMeshFile = new(nameof(CreateFullMeshFile));
-
-			void CreateQuickMeshFile() => voxelMeshGenerator.CreateFullMeshFile();
-			void CreateFullMeshFile() => voxelMeshGenerator.CreateQuickMeshFile();
+			public MeshGenerationMode generateForMeshFilter = MeshGenerationMode.QuickOnEditFullOnFinish;
+			public MeshGenerationMode generateForCollider = MeshGenerationMode.QuickOnFinish;
 		}
 
+		[Header("Mesh Generation")]
 		[SerializeField] VoxelShapePalette shapePalette;
 		[SerializeField] bool autoRegenerateMeshes = true;
 
-		[SerializeField] References references = new();
-		[SerializeField] Destination destination = new();
-
-		[SerializeField] bool doBenchmark;
-		[SerializeField] TMP_Text benchmarkOutput;
-
+		[SerializeField, FormerlySerializedAs("destination")] MeshDestination meshDestination = new();
+		[SerializeField] EasyMember createQuickMeshFile = new(nameof(CreateQuickMeshFile));
+		[SerializeField] EasyMember createFullMeshFile = new(nameof(CreateFullMeshFile));
 		[SerializeField] EasyMember regenerateMeshes = new(nameof(RegenerateMeshesFinal));
 
-		VoxelMap Map => references.voxelObject == null ? null : references.voxelObject.GetVoxelMap();
+		[Header("Benchmarking")]
+		[SerializeField] bool doBenchmark;
+		[SerializeField] TMP_Text benchmarkOutput;
 
 		public List<Material> MaterialPalette { get; } = new();
 		public VoxelShapePalette ShapePalette => shapePalette;
 
-		public void CreateFullMeshFile() => CreateMeshFile(destination.fullMesh, false);
+		public void CreateFullMeshFile() => CreateMeshFile(false);
 
-		public void CreateQuickMeshFile() => CreateMeshFile(destination.quickMesh, true);
+		public void CreateQuickMeshFile() => CreateMeshFile(true);
 
 
-		public void CreateMeshFile(Mesh mesh, bool quick)
+		public void CreateMeshFile(bool quick)
 		{
 #if UNITY_EDITOR
-			if (mesh == null)
-				RegenerateMesh(quick);
+			Mesh mesh = new();
+			RegenerateMesh(quick, ref mesh);
 
 			string path = UnityEditor.EditorUtility.SaveFilePanel(
 				"Save Voxel Mesh",
 				"",
-				references.voxelObject.MapName + ".asset",
+				MapName + ".asset",
 				"asset");
 
 			int index = path.IndexOf("Assets/");
@@ -88,79 +76,51 @@ namespace VoxelSystem
 #endif
 		}
 
-		VoxelObject _lastFilter;
-
-
-		void Update()
+		void EditorUpdate_MeshGeneration()
 		{
-			if (Application.isPlaying) return;
-
-			if (references.voxelObject != null)
-			{
-				references.voxelObject.MapChanged -= RegenerateMeshes;
-				references.voxelObject.MapChanged += RegenerateMeshes;
-				_lastFilter = references.voxelObject;
-			}
-			else if (_lastFilter != null)
-			{
-				_lastFilter.MapChanged -= RegenerateMeshes;
-			}
 			MaterialPalette.Clear();
-			if (references.meshRenderer != null)
-				references.meshRenderer.GetSharedMaterials(MaterialPalette);
-
-			//Get GUID of the shape palette
-			//Get GUID of the material palette
-
-			Guid guid = Guid.NewGuid();
-
+			if (meshDestination.meshRenderer != null)
+				meshDestination.meshRenderer.GetSharedMaterials(MaterialPalette);
 		}
 
-		void Start()
-		{
-			if (references.voxelObject != null)
-				references.voxelObject.MapChanged += RegenerateMeshes;
-		}
-		public void RegenerateMeshesFinal() => RegenerateMeshes(false);  // NEGATE
+		public void RegenerateMeshesFinal() => RegenerateMeshesAndUpdateMeshComponents(isFinal: true);
 
-		void RegenerateMeshes(bool notFinal)   // NEGATE
+		void RegenerateMeshesAndUpdateMeshComponents(bool isFinal)
 		{
 			if (!autoRegenerateMeshes) return;
 
-			bool final = !notFinal;
-
-			bool generateQuick = final ?
-				destination.generateForMeshFilter is MeshGenerationMode.AlwaysQuick ||
-				destination.generateForCollider is MeshGenerationMode.AlwaysQuick
+			bool generateQuick = isFinal ?
+				meshDestination.generateForMeshFilter is MeshGenerationMode.AlwaysQuick or MeshGenerationMode.QuickOnFinish ||
+				meshDestination.generateForCollider is MeshGenerationMode.AlwaysQuick or MeshGenerationMode.QuickOnFinish
 				:
-				(destination.generateForMeshFilter is MeshGenerationMode.QuickAndFull ||
-				destination.generateForCollider is MeshGenerationMode.QuickAndFull);
+				(meshDestination.generateForMeshFilter is MeshGenerationMode.QuickOnEditFullOnFinish ||
+				meshDestination.generateForCollider is MeshGenerationMode.QuickOnEditFullOnFinish);
 
 			if (generateQuick)
-				RegenerateMesh(quick: true);
+				RegenerateMesh(isQuick: true, ref meshDestination.quickMesh);
 
-			bool generateFull = final ?
-				destination.generateForMeshFilter is MeshGenerationMode.QuickAndFull or MeshGenerationMode.AlwaysFull ||
-				destination.generateForCollider is MeshGenerationMode.QuickAndFull or MeshGenerationMode.AlwaysFull 
+			bool generateFull = isFinal ?
+				meshDestination.generateForMeshFilter is MeshGenerationMode.QuickOnEditFullOnFinish or MeshGenerationMode.AlwaysFull ||
+				meshDestination.generateForCollider is MeshGenerationMode.QuickOnEditFullOnFinish or MeshGenerationMode.AlwaysFull
 				:
-				(destination.generateForMeshFilter == MeshGenerationMode.AlwaysFull ||
-				destination.generateForCollider == MeshGenerationMode.AlwaysFull);
+				(meshDestination.generateForMeshFilter == MeshGenerationMode.AlwaysFull ||
+				meshDestination.generateForCollider == MeshGenerationMode.AlwaysFull);
 
 
 			if (generateFull)
-				RegenerateMesh(quick: false);
+				RegenerateMesh(isQuick: false, ref meshDestination.fullMesh);
+
+			UpdateMeshComponents(isFinal);
 		}
 
 		void OnValidate()
 		{
-			destination.voxelMeshGenerator = this;
-			references.voxelObject = GetComponent<VoxelObject>();
-			if (references.destinationMeshFilter == null)
-				references.destinationMeshFilter = GetComponent<MeshFilter>();
-			if (references.destinationMeshCollider == null)
-				references.destinationMeshCollider = GetComponent<MeshCollider>();
-			if (references.meshRenderer == null)
-				references.meshRenderer = GetComponent<MeshRenderer>();
+			if (meshDestination.destinationMeshFilter == null)
+				meshDestination.destinationMeshFilter = GetComponent<MeshFilter>();
+			if (meshDestination.destinationMeshCollider == null)
+				meshDestination.destinationMeshCollider = GetComponent<MeshCollider>();
+			if (meshDestination.meshRenderer == null)
+				meshDestination.meshRenderer = GetComponent<MeshRenderer>();
 		}
 
 		static BenchmarkTimer benchmarkTimer;
@@ -179,7 +139,7 @@ namespace VoxelSystem
 				return shapeId.CompareTo(((VoxelInfo)obj).shapeId);
 			}
 
-			public override string ToString() => $"Material: {materialIndex} Shape: {shapeId}";
+			public override readonly string ToString() => $"Material: {materialIndex} Shape: {shapeId}";
 		}
 
 		static readonly SortedDictionary<VoxelInfo, List<Vector3Int>> voxelsByType = new();
@@ -194,13 +154,10 @@ namespace VoxelSystem
 					for (int z = 0; z < mapSize.z; z++)
 					{
 						Voxel voxel = map.GetVoxel(x, y, z);
-
 						if (voxel.IsEmpty()) continue;
-
 
 						int shapeIndex = voxel.shapeId;
 						byte materialIndex = voxel.materialIndex;
-
 						VoxelInfo voxelInfo = new() { materialIndex = materialIndex, shapeId = shapeIndex };
 
 						if (!voxelsByType.TryGetValue(voxelInfo, out List<Vector3Int> list))
@@ -229,16 +186,11 @@ namespace VoxelSystem
 			}
 		}
 
-		public void RegenerateMesh(bool quick)
+		public void RegenerateMesh(bool isQuick, ref Mesh destinationMesh)
 		{
-			if (!isActiveAndEnabled)
-				return;
-
 			if (MaterialPalette == null)
-			{
 				Debug.LogWarning("Material palette is null. Please assign a material palette to the MeshGenerator component.");
-				return;
-			}
+
 
 			if (doBenchmark)
 				benchmarkTimer ??= new BenchmarkTimer(name + " " + GetType());
@@ -249,16 +201,14 @@ namespace VoxelSystem
 			meshBuilder.Clear();
 
 			benchmarkTimer?.StartModule("Build Voxel Position Dictionary");
-			BuildVoxelPositionDictionary(Map);
+			BuildVoxelPositionDictionary(GetVoxelMap());
 
-			CalculateAllMeshData(quick);
-
-			Mesh destinationMesh = quick ? destination.quickMesh : destination.fullMesh;
+			CalculateAllMeshData(isQuick);
 
 			benchmarkTimer?.StartModule("Copy Vertex data to Mesh");
 
 			if (destinationMesh == null)
-				destinationMesh = new() { name = references.voxelObject.MapName };
+				destinationMesh = new() { name = MapName };
 			else
 				destinationMesh.Clear();
 			meshBuilder.CopyToMesh(destinationMesh);
@@ -272,18 +222,16 @@ namespace VoxelSystem
 
 				benchmarkTimer.Clear();
 			}
-
-			UpdateMeshComponents(quick, destinationMesh);
 		}
 
-		public FlexibleMesh GeneratePhysicalMesh(ref int sideCounter) 
+		public FlexibleMesh GeneratePhysicalMesh(ref int sideCounter)
 		{
-			VoxelMap map = Map; 
+			VoxelMap map = GetVoxelMap();
 			BuildVoxelPositionDictionary(map);
 			FlexibleMesh mesh = new();
 			foreach (KeyValuePair<VoxelInfo, List<Vector3Int>> chunk in voxelsByType)
 			{
-				if (chunk.Value.Count == 0) continue; 
+				if (chunk.Value.Count == 0) continue;
 				int shapeId = chunk.Key.shapeId;
 				VoxelShapeBuilder shapeBuilder = shapePalette.GetBuilder(shapeId);
 				foreach (Vector3Int voxelPosition in chunk.Value)
@@ -292,30 +240,47 @@ namespace VoxelSystem
 			return mesh;
 		}
 
-
-
-		void UpdateMeshComponents(bool quick, Mesh destinationMesh)
+		void UpdateMeshComponents(bool isFinal)
 		{
-			// UpdateCollider 
-			bool generateCollider =
-				(destination.generateForCollider == MeshGenerationMode.QuickAndFull) ||
-			   	(quick && destination.generateForCollider == MeshGenerationMode.AlwaysQuick) ||
-			   	(!quick && destination.generateForCollider == MeshGenerationMode.AlwaysFull);
-			if (generateCollider && references.destinationMeshCollider != null)
-				references.destinationMeshCollider.sharedMesh = destinationMesh;
+			if (meshDestination.destinationMeshFilter != null &&
+				TryGetMesh(meshDestination.generateForMeshFilter, isFinal, out Mesh filterMesh))
+				meshDestination.destinationMeshFilter.mesh = filterMesh;
 
-			// Update MeshFilter 
-			bool generateMeshFilter =
-				(destination.generateForMeshFilter == MeshGenerationMode.QuickAndFull) ||
-			   	(quick && destination.generateForMeshFilter == MeshGenerationMode.AlwaysQuick) ||
-			   	(!quick && destination.generateForMeshFilter == MeshGenerationMode.AlwaysFull);
-			if (generateMeshFilter && references.destinationMeshFilter != null)
-				references.destinationMeshFilter.mesh = destinationMesh;
+			if (meshDestination.destinationMeshCollider != null &&
+				TryGetMesh(meshDestination.generateForCollider, isFinal, out Mesh colliderMesh))
+				meshDestination.destinationMeshCollider.sharedMesh = colliderMesh;
+		}
+
+		bool TryGetMesh(MeshGenerationMode mode, bool isFinal, out Mesh result)
+		{
+			if (mode == MeshGenerationMode.QuickOnFinish && isFinal)
+			{
+				result = meshDestination.quickMesh;
+				return true;
+			}
+			if (mode == MeshGenerationMode.AlwaysQuick)
+			{
+				result = meshDestination.quickMesh;
+				return true;
+			}
+			if (mode == MeshGenerationMode.AlwaysFull)
+			{
+				result = meshDestination.fullMesh;
+				return true;
+			}
+			if (mode == MeshGenerationMode.QuickOnEditFullOnFinish)
+			{
+				result = isFinal ? meshDestination.fullMesh : meshDestination.quickMesh;
+				return true;
+			}
+
+			result = null;
+			return false;
 		}
 
 		void CalculateAllMeshData(bool quick)
 		{
-			VoxelMap map = Map;
+			VoxelMap map = GetVoxelMap();
 
 			// Pre-calculate VoxelData if needed
 			foreach (KeyValuePair<VoxelInfo, List<Vector3Int>> chunk in voxelsByType)
@@ -371,9 +336,9 @@ namespace VoxelSystem
 			}
 		}
 
-		public VoxelMeshGenerator CreateACopy(GameObject go)
+		public VoxelObject CreateACopy(GameObject go)
 		{
-			VoxelMeshGenerator newGen = go.AddComponent<VoxelMeshGenerator>();
+			VoxelObject newGen = go.AddComponent<VoxelObject>();
 			newGen.shapePalette = shapePalette;
 
 			return newGen;

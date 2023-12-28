@@ -110,7 +110,7 @@ namespace VoxelSystem
 
 			if (voxelEditor.Map == null)
 			{
-				EditorGUILayout.HelpBox("No Map to Edit. Use VoxelFilter", UnityEditor.MessageType.Warning);
+				EditorGUILayout.HelpBox("No Map to Edit. Use Voxel Editor & Voxel Object Component!", UnityEditor.MessageType.Warning);
 				return;
 			}
 

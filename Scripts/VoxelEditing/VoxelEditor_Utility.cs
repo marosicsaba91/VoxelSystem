@@ -125,10 +125,10 @@ namespace VoxelSystem
 			ArrayVoxelMap map = voxelEditor.SeparateSelection();
 			newMapFilter.SetVoxelMap(map);
 			VoxelEditor newEditor = newGO.AddComponent<VoxelEditor>();
-			newEditor.voxelFilter = newMapFilter;
+			newEditor.voxelObject = newMapFilter;
 
-			foreach (VoxelMeshGenerator generator in newGO.GetComponents<VoxelMeshGenerator>())
-				newEditor.meshGenerator = generator.CreateACopy(newGO);
+			foreach (VoxelObject generator in newGO.GetComponents<VoxelObject>())
+				newEditor.voxelObject = generator.CreateACopy(newGO);
 
 #if UNITY_EDITOR
 			UnityEditor.Undo.RegisterCreatedObjectUndo(newGO, "VoxelMap Separated"); 

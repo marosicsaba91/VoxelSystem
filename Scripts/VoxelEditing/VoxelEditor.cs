@@ -17,13 +17,12 @@ namespace VoxelSystem
 	}
 
 
-	[RequireComponent(typeof(VoxelObject), typeof(VoxelMeshGenerator))]
+	[RequireComponent(typeof(VoxelObject))]
 	[ExecuteAlways]
 	class VoxelEditor : MonoBehaviour, IVoxelEditor
 	{
 
-		[SerializeField, HideInInspector] internal VoxelObject voxelFilter;
-		[SerializeField, HideInInspector] internal VoxelMeshGenerator meshGenerator;
+		[SerializeField, HideInInspector] internal VoxelObject voxelObject;
 		[SerializeField, HideInInspector] internal TransformLock transformLock = new();
 		[SerializeField, HideInInspector] internal BoundsInt selection = new(Vector3Int.zero, Vector3Int.one * -1);
 
@@ -31,30 +30,27 @@ namespace VoxelSystem
 
 		public Transform Transform => transform;
 
-		public VoxelMap Map => voxelFilter == null ? null : voxelFilter.GetVoxelMap();
+		public VoxelMap Map => voxelObject == null ? null : voxelObject.GetVoxelMap();
 
 		public BoundsInt Selection { get => selection; set => selection = value; }
 
-		public Object MapContainer => voxelFilter == null ? null :
-			voxelFilter.HasSharedMap ? voxelFilter.SharedVoxelMap : voxelFilter;
+		public Object MapContainer => voxelObject == null ? null :
+			voxelObject.HasSharedMap ? voxelObject.SharedVoxelMap : voxelObject;
 
 		public Object EditorObject => this;
 
 		void OnValidate()
 		{
-			if (voxelFilter == null)
-				voxelFilter = GetComponent<VoxelObject>();
-
-			if (meshGenerator == null)
-				meshGenerator = GetComponent<VoxelMeshGenerator>();
+			if (voxelObject == null)
+				voxelObject = GetComponent<VoxelObject>(); 
 
 		}
 
-		public List<Material> MaterialPalette => meshGenerator.MaterialPalette;
+		public List<Material> MaterialPalette => voxelObject.MaterialPalette;
 
-		public VoxelShapePalette ShapePalette => meshGenerator.ShapePalette;
+		public VoxelShapePalette ShapePalette => voxelObject.ShapePalette;
 
-		public string MapName => voxelFilter == null ? "-" : voxelFilter.MapName;
+		public string MapName => voxelObject == null ? "-" : voxelObject.MapName;
 
 
 
@@ -100,8 +96,8 @@ namespace VoxelSystem
 		{
 			get
 			{
-				if (meshGenerator == null) return null;
-				if (meshGenerator.MaterialPalette == null) return null;
+				if (voxelObject == null) return null;
+				if (voxelObject.MaterialPalette == null) return null;
 				return MaterialPalette.IndexClamped(SelectedMaterialIndex);
 			}
 		}
@@ -143,8 +139,8 @@ namespace VoxelSystem
 
 		void OnDrawGizmosSelected()
 		{
-			if (voxelFilter == null)
-				voxelFilter = GetComponent<VoxelObject>();
+			if (voxelObject == null)
+				voxelObject = GetComponent<VoxelObject>();
 
 			if (Map == null)
 				return;

@@ -1,4 +1,4 @@
-using MUtility;
+﻿using MUtility;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,7 +6,7 @@ using Object = UnityEngine.Object;
 
 namespace VoxelSystem
 {
-	public enum MapChange { None, Quick, Final }
+	public enum MapChange { None, Edit, Final }
 
 	[Serializable]
 	public struct VoxelHit
@@ -16,7 +16,7 @@ namespace VoxelSystem
 		public Vector3 hitWorldPosition;  // Is it wordPos?
 	}
 
-	public delegate void MapChangedDelegate(bool isQuick);
+	public delegate void MapChangedDelegate(bool isFinal);
 
 	[Serializable]
 	public abstract partial class VoxelMap
@@ -111,15 +111,17 @@ namespace VoxelSystem
 		internal void MapChanged(MapChange change)
 		{
 			if (change == MapChange.None) return;
-			bool isQuick = change == MapChange.Quick;
-			OnMapChanged(isQuick);
-			MapChangedEvent?.Invoke(isQuick);
+			bool isFinal = change == MapChange.Final;
+			OnMapChanged(isFinal);
+			MapChangedEvent?.Invoke(isFinal);
 		}
 
-		protected virtual void OnMapChanged(bool isQuick) { }
+		protected virtual void OnMapChanged(bool isFinal) { }
 
-		internal void UndoRedoEvenInvokedOnMap() =>
-			MapChangedEvent?.Invoke(false);
+		internal void UndoRedoEvenInvokedOnMap()
+		{
+			MapChangedEvent?.Invoke(isFinal: true);
+		}
 
 		// ------------- GET Voxels -------------
 

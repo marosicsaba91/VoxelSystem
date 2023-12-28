@@ -97,7 +97,7 @@ public class VoxelTester : MonoBehaviour
 
 		List<Material> materialPalette = null;
 		VoxelShapePalette shapePalette = null;
-		if (obj.TryGetComponent(out VoxelMeshGenerator meshGenerator))
+		if (obj.TryGetComponent(out VoxelObject meshGenerator))
 		{
 			materialPalette = meshGenerator.MaterialPalette;
 			shapePalette = meshGenerator.ShapePalette;
@@ -147,7 +147,7 @@ public class VoxelTester : MonoBehaviour
 
 		VoxelMap map = obj.GetVoxelMap();
 		if (map == null) return;
-		if (!obj.TryGetComponent(out VoxelMeshGenerator meshGenerator)) return; 
+		if (!obj.TryGetComponent(out VoxelObject meshGenerator)) return; 
 		VoxelShapePalette shapePalette = meshGenerator.ShapePalette;
 		if (shapePalette == null) return;
 

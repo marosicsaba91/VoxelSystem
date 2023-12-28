@@ -122,7 +122,7 @@ namespace VoxelSystem
 						wallNeighborsDirections[0], wallNeighborsDirections[1], wallNeighborsDirections[2],
 						out GeneralDirection3D xWall, out GeneralDirection3D yWall, out GeneralDirection3D zWall);
 
-					Debug.Log($"xWall: {xWall},yWall: {yWall}, zWall: {zWall}");
+					//Debug.Log($"xWall: {xWall},yWall: {yWall}, zWall: {zWall}");
 
 					if (stairNeighborsCount == 2)
 					{

@@ -118,7 +118,7 @@ namespace VoxelSystem
 			}
 
 			lastOffsetValue = offsetValue;
-			return isChanged ? MapChange.Quick : MapChange.None;
+			return isChanged ? MapChange.Edit : MapChange.None;
 		}
 
 		int GetOffset(IVoxelEditor voxelEditor)

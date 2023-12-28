@@ -140,7 +140,7 @@ namespace VoxelSystem
 			if (isSelectionOperation)
 			{
 				if(DoResizeSelection(voxelEditor, direction, stepsClamped))
-					return MapChange.Quick;
+					return MapChange.Edit;
 				else
 					return MapChange.None;
 			}
@@ -149,7 +149,7 @@ namespace VoxelSystem
 			if ( !direction.IsPositive())
 				Translate(voxelEditor, direction, stepsClamped);
 			DoResizeMap(map, direction, stepsClamped);
-			return MapChange.Quick;
+			return MapChange.Edit;
 		}
 
 		protected override MapChange OnHandleUp(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo, int steps)

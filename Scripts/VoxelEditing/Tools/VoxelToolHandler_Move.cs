@@ -79,7 +79,7 @@ namespace VoxelSystem
 			voxelEditor.Selection = selection;
 			_lastOffset = offset;
 
-			return MapChange.Quick;
+			return MapChange.Edit;
 		}
 
 		protected sealed override MapChange OnHandleUp(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo, int steps) =>
