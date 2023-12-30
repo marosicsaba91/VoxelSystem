@@ -142,7 +142,8 @@ namespace VoxelSystem
 					if (v.IsFilled())
 					{
 						v.shapeId = value.shapeId;
-						v.extraVoxelData = value.extraVoxelData;
+						v.extraData = value.extraData;
+						v.cubicTransformation = value.cubicTransformation;
 					}
 					break;
 
@@ -270,7 +271,7 @@ namespace VoxelSystem
 							{
 								Voxel v = voxelData[index];
 								v.shapeId = value.shapeId;
-								v.extraVoxelData = value.extraVoxelData;
+								v.extraData = value.extraData;
 								voxelData[index] = v;
 								changed |= true;
 							}
@@ -289,8 +290,9 @@ namespace VoxelSystem
 				oneVoxelMap = new ArrayVoxelMap();
 				oneVoxelMap.Setup(Vector3Int.one * 3);
 			}
-
 			oneVoxelMap.SetVoxel(Vector3Int.one, value);
+			Voxel v = oneVoxelMap.GetVoxel(Vector3Int.one);
+
 			return oneVoxelMap;
 		}
 	}

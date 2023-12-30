@@ -27,20 +27,24 @@ namespace VoxelSystem
 				Vector3Int original = GetCoordinate(i);
 				int nx =
 					axis == Axis3D.X ? original.x :
-					axis == Axis3D.Y ? (leftHandPositive ? size.z - original.z - 1 : original.z) :
-					axis == Axis3D.Z ? (leftHandPositive ? original.y : size.y - original.y - 1) : 0;
+					axis == Axis3D.Y ? (leftHandPositive ? original.z : size.z - original.z - 1) :
+					axis == Axis3D.Z ? (leftHandPositive ? size.y - original.y - 1 : original.y) : 0;
 				int ny =
-					axis == Axis3D.X ? (leftHandPositive ? original.z : size.z - original.z - 1) :
+					axis == Axis3D.X ? (leftHandPositive ? size.z - original.z - 1 : original.z) :
 					axis == Axis3D.Y ? original.y :
-					axis == Axis3D.Z ? (leftHandPositive ? size.x - original.x - 1 : original.x) : 0;
+					axis == Axis3D.Z ? (leftHandPositive ? original.x : size.x - original.x - 1) : 0;
 				int nz =
-					axis == Axis3D.X ? (leftHandPositive ? size.y - original.y - 1 : original.y) :
-					axis == Axis3D.Y ? (leftHandPositive ? original.x : size.x - original.x - 1) :
+					axis == Axis3D.X ? (leftHandPositive ? original.y : size.y - original.y - 1) :
+					axis == Axis3D.Y ? (leftHandPositive ? size.x - original.x - 1 : original.x) :
 					axis == Axis3D.Z ? original.z : 0;
 
-				//Debug.Log(original+"  "+new Vector3Int(nx,ny,nz));
 				int ni = nx + (ny * newW) + (nz * newW * newH);
-				newVoxelData[ni] = voxelData[i];
+
+				Voxel v = voxelData[i];
+				CubicTransformation transformation = new(v.cubicTransformation);
+				transformation.Turn(axis, leftHandPositive);
+				v.cubicTransformation = transformation.ToByte();
+				newVoxelData[ni] = v;
 			}
 
 			size = new Vector3Int(newW, newH, newD);
@@ -62,7 +66,11 @@ namespace VoxelSystem
 					o.z = size.z - o.z - 1;
 				int ni = o.x + (o.y * size.x) + (o.z * size.x * size.y);
 
-				newVoxelData[ni] = voxelData[i];
+				Voxel v = voxelData[i];
+				CubicTransformation transformation = new(v.cubicTransformation);
+				transformation.Mirror(axis);
+				v.cubicTransformation = transformation.ToByte();
+				newVoxelData[ni] = v;
 			}
 			voxelData = newVoxelData;
 		}

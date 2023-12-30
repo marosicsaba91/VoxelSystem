@@ -17,7 +17,7 @@ namespace VoxelSystem
 
 		void OnEnable()
 		{
-			previewMaterialProperty = serializedObject.FindProperty(nameof(VoxelShapeBuilder.previewMaterial)); 
+			previewMaterialProperty = serializedObject.FindProperty(nameof(VoxelShapeBuilder.previewMaterial));
 			quickVersionProperty = serializedObject.FindProperty(nameof(VoxelShapeBuilder.quickVersion));
 		}
 
@@ -27,7 +27,7 @@ namespace VoxelSystem
 
 			VoxelShapeBuilder builder = (VoxelShapeBuilder)target;
 
-			float fullWidth = EditorGUIUtility.currentViewWidth; 
+			float fullWidth = EditorGUIUtility.currentViewWidth;
 			EditorGUILayout.Space();
 			Rect messageRect = GUILayoutUtility.GetRect(fullWidth, 24);
 			EasyMessageDrawer.DrawMessage(messageRect,
@@ -35,7 +35,6 @@ namespace VoxelSystem
 				EasyInspector.MessageType.Info, 12);
 			EditorGUILayout.PropertyField(quickVersionProperty);
 			EditorGUILayout.Space();
-			EditorGUILayout.LabelField("Preview", EditorStyles.boldLabel);
 			CustomMeshPreview preview = builder.meshPreview;
 			if (GUILayout.Button("Initialize Cached Data"))
 			{
@@ -44,52 +43,82 @@ namespace VoxelSystem
 				preview.Render();
 			}
 
-			EditorGUILayout.PropertyField(previewMaterialProperty); 
+			EditorGUILayout.LabelField("Preview", EditorStyles.boldLabel);
+			EditorGUILayout.PropertyField(previewMaterialProperty);
 			serializedObject.ApplyModifiedProperties();
 
 			// Preview
 
 			// Extra Controls
+			CubicTransformation transformation = builder.previewTransformation;
+			CubicTransformation newTransform = transformation;
+			byte extraControls = builder.previewExtraSetting;
+
 			int lines = builder.GetExtraControls()?.Count ?? 0;
 			Rect extraControlsRect = EditorGUILayout.GetControlRect(false, EditorHelper.GetStandardPanelHeight(lines));
-			ushort extraControls = builder.previewExtraSetting;
-			ushort newExtraControls = DrawExtraControls(builder, extraControls, builder, ref extraControlsRect);
-			if (extraControls != newExtraControls) 
-			{
-				builder.previewExtraSetting = newExtraControls;
-				builder.RecalculatePreviewMesh();
-				preview.Render();
-			}
+			byte newExtraData = DrawExtraControls(builder, extraControls, ref extraControlsRect);
+
+
 
 			// Get GUI Event 
 			Rect rect = GUILayoutUtility.GetRect(256, 256);
 			CustomMeshPreviewDrawer.HandleMouseMovement(rect, preview);
 			if (Event.current.type == EventType.Repaint)
-			{ 
+			{
 				preview.TextureSize = new Vector2(rect.width, rect.height);
 				preview.BackgroundType = CameraClearFlags.Skybox;
 				preview.Material = builder.PreviewMaterial;
 				preview.meshGetter = builder.GetPreviewMesh;
 				EditorGUI.DrawPreviewTexture(rect, preview.PreviewTexture);
 			}
+
+			if (builder.SupportsTransformation)
+			{
+				Rect cubicTransformRect = EditorGUILayout.GetControlRect(false, EditorHelper.GetStandardPanelHeight(1));
+				newTransform = DrawCubicTransformation(transformation, ref cubicTransformRect);
+			}
+
 			if (GUILayout.Button("Regenerate Preview"))
 			{
 				builder.RecalculatePreviewMesh();
 				preview.Render();
 			}
+
+			if (extraControls != newExtraData || transformation != newTransform)
+			{
+				Undo.RecordObject(builder, "Selected Value Changed");
+				builder.previewTransformation = newTransform;
+				builder.previewExtraSetting = newExtraData;
+				builder.RecalculatePreviewMesh();
+				preview.Render();
+			}
 		}
 
-		public static ushort DrawExtraControls(VoxelShapeBuilder selectedShape, ushort extraVoxelData, Object recordedObj, ref Rect position)
+		public static CubicTransformation DrawCubicTransformation(CubicTransformation transformation, ref Rect position)
+		{
+			CubicTransformation newTransform = transformation;
+			Rect full = position.SliceOutLine();
+			position.RemoveOneSpace();
+
+			Rect r = full.SliceOut(100, GeneralDirection2D.Left);
+			GUIContent gUIContent = new("Transformation", null, "Up Direction   /   Vertical Mirroring   /   Vertical Rotation");
+			EditorGUI.LabelField(r, gUIContent);
+			r = full.SliceOut(80, GeneralDirection2D.Left); 
+			newTransform.upDirection = (GeneralDirection3D)EditorGUI.EnumPopup(r, transformation.upDirection);
+			r = full.SliceOut(18, GeneralDirection2D.Left); 
+			newTransform.verticalFlip = EditorGUI.Toggle(r, transformation.verticalFlip); 
+			newTransform.verticalRotation = EditorGUI.IntSlider(full, transformation.verticalRotation, 0, 3);
+
+			return newTransform;
+		}
+
+		public static byte DrawExtraControls(VoxelShapeBuilder selectedShape, byte extraVoxelData, ref Rect position)
 		{
 			IReadOnlyList<ExtraVoxelControl> extraControls = selectedShape == null ? null : selectedShape.GetExtraControls();
 			if (extraControls == null || extraControls.Count == 0) return extraVoxelData;
-
 			int controlCount = extraControls.Count;
 
 			Rect fullRect = position.SliceOut(EditorHelper.GetStandardPanelHeight(controlCount));
-
-			Undo.RecordObject(recordedObj, "Selected Value Changed"); 
-
 
 			foreach (ExtraVoxelControl control in extraControls)
 			{
@@ -102,7 +131,7 @@ namespace VoxelSystem
 				object newValue = EditorHelper.AnythingField(controlRect, control.DataType, oldValue, GUIContent.none, ref isExpanded);
 
 				extraVoxelData = control.SetExtraData(extraVoxelData, newValue);
-			} 
+			}
 			return extraVoxelData;
 		}
 	}

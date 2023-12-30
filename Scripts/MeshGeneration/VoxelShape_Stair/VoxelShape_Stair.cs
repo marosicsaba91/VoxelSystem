@@ -28,6 +28,7 @@ namespace VoxelSystem
 		// [SerializeField, Range(1, 4)] int slope = 1;
 		[SerializeField] bool isTransparent = false;
 
+		public sealed override bool SupportsTransformation => true;
 
 		protected sealed override bool IsInitialized => meshSetup.IsInitialized;
 		protected override void InitializeCachedData() =>
@@ -45,11 +46,11 @@ namespace VoxelSystem
 		readonly GeneralDirection3D[] wallNeighborsDirections = new GeneralDirection3D[3];
 		void SetupVoxelTypeAndTransformation(VoxelMap map, Vector3Int position, int shapeId)
 		{
-			Voxel voxelData = map.GetVoxel(position);
-			ushort extraVoxelData = voxelData.extraVoxelData;
+			Voxel voxel = map.GetVoxel(position);
+			byte extraVoxelData = voxel.extraData;
 			bool useAutoSetup = GetAutoSetup(extraVoxelData);
 			if (!useAutoSetup) return;
-
+			
 			// SetupFromMesh Rotation & StairShape
 			int wallNeighborsCount = 0;
 			int stairNeighborsCount = 0;
@@ -76,7 +77,7 @@ namespace VoxelSystem
 			}
 
 			StairShape stairType = GetStairType(extraVoxelData);
-			CubicTransformation transformation = GetTransformation(extraVoxelData);
+			CubicTransformation transformation = new(voxel.cubicTransformation);
 
 			if (wallNeighborsCount == 1)
 			{
@@ -122,8 +123,6 @@ namespace VoxelSystem
 						wallNeighborsDirections[0], wallNeighborsDirections[1], wallNeighborsDirections[2],
 						out GeneralDirection3D xWall, out GeneralDirection3D yWall, out GeneralDirection3D zWall);
 
-					//Debug.Log($"xWall: {xWall},yWall: {yWall}, zWall: {zWall}");
-
 					if (stairNeighborsCount == 2)
 					{
 						GeneralDirection3D right = stairNeighborsDirections[0];
@@ -151,9 +150,9 @@ namespace VoxelSystem
 			}
 
 			extraVoxelData = SetStairType(extraVoxelData, stairType);
-			extraVoxelData = SetTransformation(extraVoxelData, transformation);
-			voxelData.extraVoxelData = extraVoxelData;
-			map.SetVoxel(position, voxelData);
+			voxel.cubicTransformation = transformation.ToByte();
+			voxel.extraData = extraVoxelData;
+			map.SetVoxel(position, voxel);
 		}
 
 
@@ -164,7 +163,7 @@ namespace VoxelSystem
 				Vector3Int voxelPosition = voxelPositions[i];
 				Voxel v = map.GetVoxel(voxelPosition);
 
-				StairShape stairType = GetStairType(v.extraVoxelData);
+				StairShape stairType = GetStairType(v.extraData);
 
 				if (isTransparent)
 					v.OpenAllSide();
@@ -172,7 +171,7 @@ namespace VoxelSystem
 					v.CloseAllSide();
 				else
 				{
-					CubicTransformation transformation = GetTransformation(v.extraVoxelData);
+					CubicTransformation transformation = new(v.cubicTransformation);
 
 					GeneralDirection3D globalUp = transformation.TransformDirection(GeneralDirection3D.Up);
 					GeneralDirection3D globalDown = globalUp.Opposite();
@@ -212,9 +211,9 @@ namespace VoxelSystem
 		void BuildMesh(VoxelMap map, Vector3Int position, MeshBuilder meshBuilder)
 		{
 			Voxel voxelData = map.GetVoxel(position);
-			ushort extraVoxelData = voxelData.extraVoxelData;
+			byte extraVoxelData = voxelData.extraData;
 			StairShape stairShape = GetStairType(extraVoxelData);
-			CubicTransformation transformation = GetTransformation(extraVoxelData);
+			CubicTransformation transformation = new(voxelData.cubicTransformation);
 			bool autoSetup = GetAutoSetup(extraVoxelData);
 
 			meshSetup.BuildMesh(position, voxelData.shapeId, stairShape, transformation, autoSetup, map, meshBuilder);
@@ -227,11 +226,11 @@ namespace VoxelSystem
 			// GenerateRotatedPhysical();
 			/*
 			Voxel voxel = map.GetVoxel(voxelPoint);
-			CubicTransformation transformation = GetTransformation(voxel.extraVoxelData);
-			StairShape stairType = GetStairType(voxel.extraVoxelData);
+			CubicTransformation transformation = GetTransformation(voxel.extraData);
+			StairShape stairType = GetStairType(voxel.extraData);
 
 			GeneralDirection3D localBackInGlobal = transformation.TransformDirection(GeneralDirection3D.Back);
-			byte transformIndex = transformation.GetIndex();
+			byte transformIndex = transformation.ToByte();
 
 			if (stairType == StairShape.SimpleStair)
 			{
@@ -266,24 +265,6 @@ namespace VoxelSystem
 				getValue = GetStairType,
 				setValue = SetStairType
 			},
-			new ExtraVoxelControl<GeneralDirection3D> ()
-			{
-				name = "Up Direction",
-				getValue = GetUpDirection,
-				setValue = SetUpDirection
-			},
-			new ExtraVoxelControl<int>()
-			{
-				name = "Vertical Rotation",
-				getValue = GetRotation,
-				setValue = SetRotation
-			},
-			new ExtraVoxelControl<bool>()
-			{
-				name = "Vertical Flip",
-				getValue = GetFlip,
-				setValue = SetFlip
-			},
 			new ExtraVoxelControl<int>
 			{
 				name = "Level",
@@ -295,28 +276,26 @@ namespace VoxelSystem
 		}
 
 
-		const int extraInfo_isAutoSet = 4;
-		const int extraInfo_stairType = 5;
-		const int extraInfo_level = 6;
+		const int extraInfo_isAutoSet = 0;
+		const int extraInfo_stairType = 1;
+		const int extraInfo_level = 2;
 
-		static bool GetAutoSetup(ushort extraVoxelData) => extraVoxelData.Get2Bit(extraInfo_isAutoSet) == 0;
-		static ushort SetAutoSetup(ushort originalExtraVoxelData, bool newValue)
+		static bool GetAutoSetup(byte extraVoxelData) => extraVoxelData.Get2Bit(extraInfo_isAutoSet) == 0;
+		static byte SetAutoSetup(byte originalExtraVoxelData, bool newValue)
 		{
-			ushort newData = originalExtraVoxelData.Set2Bit(extraInfo_isAutoSet, newValue ? 0 : 1);
+			byte newData = originalExtraVoxelData.Set2Bit(extraInfo_isAutoSet, newValue ? 0 : 1);
 			return newData;
 		}
-
-		static StairShape GetStairType(ushort voxelData) => (StairShape)voxelData.Get2Bit(extraInfo_stairType);
-		static ushort SetStairType(ushort originalExtraVoxelData, StairShape newValue) =>
-			originalExtraVoxelData.Set2Bit(extraInfo_stairType, (int)newValue);
-		static int GetLevel(ushort extraVoxelData) => extraVoxelData.Get2Bit(extraInfo_level);
-		static ushort SetLevel(ushort originalExtraVoxelData, int newValue) =>
+		static StairShape GetStairType(byte extraData) => (StairShape)extraData.Get2Bit(extraInfo_stairType);
+		static byte SetStairType(byte originalExtraData, StairShape newValue) =>
+			 originalExtraData.Set2Bit(extraInfo_stairType, (int)newValue);
+		static int GetLevel(byte extraVoxelData) => extraVoxelData.Get2Bit(extraInfo_level);
+		static byte SetLevel(byte originalExtraVoxelData, int newValue) =>
 			originalExtraVoxelData.Set2Bit(extraInfo_level, newValue);
 
-		static CubicTransformation GetTransformation(ushort extraVoxelData) =>
-			new(extraVoxelData.GetByte(0));
-		static ushort SetTransformation(ushort originalExtraVoxelData, CubicTransformation newValue) =>
-			originalExtraVoxelData.SetByte(0, newValue.GetIndex());
+		/*
+		static ushort SetTransformation(ushort originalExtraData, CubicTransformation newValue) =>
+			originalExtraData.SetByte(0, newValue.ToByte());
 
 		static GeneralDirection3D GetUpDirection(ushort extraVoxelData) => GetTransformation(extraVoxelData).upDirection;
 
@@ -326,7 +305,7 @@ namespace VoxelSystem
 			{
 				upDirection = value
 			};
-			return originalExtraValue.SetByte(0, cubicTransformation.GetIndex());
+			return originalExtraValue.SetByte(0, cubicTransformation.ToByte());
 		}
 		static int GetRotation(ushort extraVoxelData) => GetTransformation(extraVoxelData).verticalRotation;
 		static ushort SetRotation(ushort originalExtraValue, int value)
@@ -336,7 +315,7 @@ namespace VoxelSystem
 			{
 				verticalRotation = value
 			};
-			return originalExtraValue.SetByte(0, cubicTransformation.GetIndex());
+			return originalExtraValue.SetByte(0, cubicTransformation.ToByte());
 		}
 
 		static bool GetFlip(ushort extraVoxelData) => GetTransformation(extraVoxelData).verticalFlip;
@@ -347,7 +326,8 @@ namespace VoxelSystem
 			{
 				verticalFlip = value
 			};
-			return originalExtraValue.SetByte(0, cubicTransformation.GetIndex());
+			return originalExtraValue.SetByte(0, cubicTransformation.ToByte());
 		}
+		*/
 	}
 }

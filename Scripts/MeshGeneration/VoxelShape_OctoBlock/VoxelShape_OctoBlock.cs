@@ -27,6 +27,7 @@ namespace VoxelSystem
 		[SerializeField] bool isTransparent = false;
 
 
+		public sealed override bool SupportsTransformation => false;
 		protected override bool IsInitialized => blockLibrary != null;
 
 		readonly Dictionary<Vector3Int, OctoBlock> blocks = new();

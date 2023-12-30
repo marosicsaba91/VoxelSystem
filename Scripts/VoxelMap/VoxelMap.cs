@@ -183,7 +183,7 @@ namespace VoxelSystem
 					if (oldV.IsFilled())
 					{
 						v.shapeId = value.shapeId;
-						v.extraVoxelData = value.extraVoxelData;
+						v.extraData = value.extraData;
 					}
 					break;
 			}

@@ -2,6 +2,7 @@ using UnityEngine;
 using VoxelSystem;
 using System.Text;
 using System.Collections.Generic;
+using MUtility;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -10,11 +11,13 @@ using UnityEditor;
 public class VoxelTester : MonoBehaviour
 {
 	[SerializeField] bool enabledTest = true;
+	[SerializeField] bool showOnlyOnSelected = true;
 
 	[SerializeField] VoxelObject testedVoxelObject;
 	[SerializeField] Vector3Int testedVoxelIndex;
-	 
+
 	[SerializeField] bool showVoxelInfo = true;
+	[SerializeField] bool showTransform = true;
 	[SerializeField] bool showOpenAndClosedSides = true;
 
 	VoxelHit lastHitVoxel;
@@ -52,16 +55,35 @@ public class VoxelTester : MonoBehaviour
 
 	void OnDrawGizmosSelected()
 	{
-#if UNITY_EDITOR
 		if (lastHitObject != null)
 		{
 			Gizmos.matrix = lastHitObject.transform.localToWorldMatrix;
 			Gizmos.color = Color.magenta;
 			DrawCube(lastHitVoxel.voxelIndex);
-
+			Handles.matrix = Matrix4x4.identity;
+			Gizmos.matrix = Matrix4x4.identity;
 		}
 
+		if (showOnlyOnSelected)
+			Draw();
+	}
 
+	void OnDrawGizmos()
+	{
+		if (!showOnlyOnSelected)
+			Draw();
+
+	}
+
+	void Draw()
+	{
+#if UNITY_EDITOR
+
+		if (lastHitObject != null)
+		{
+			Gizmos.matrix = lastHitObject.transform.localToWorldMatrix;
+			Gizmos.color = Color.magenta;
+		}
 		if (enabledTest && testedVoxelObject != null)
 		{
 			Gizmos.matrix = testedVoxelObject.transform.localToWorldMatrix;
@@ -70,14 +92,14 @@ public class VoxelTester : MonoBehaviour
 			Handles.color = Color.magenta;
 
 			DrawCube(testedVoxelIndex);
-			
+
 			DrawVoxelInfo(testedVoxelObject, testedVoxelIndex);
-			// DrawVoxelTransform(testedVoxelObject, testedVoxelIndex);
+			DrawVoxelTransform(testedVoxelObject, testedVoxelIndex);
 			DrawVoxelSides(testedVoxelObject, testedVoxelIndex);
 		}
-
 		Handles.matrix = Matrix4x4.identity;
 		Gizmos.matrix = Matrix4x4.identity;
+
 #endif
 	}
 
@@ -85,6 +107,33 @@ public class VoxelTester : MonoBehaviour
 	{
 		Vector3 center = index + Vector3.one * 0.5f;
 		Gizmos.DrawWireCube(center, Vector3.one * 1.1f);
+	}
+
+	void DrawVoxelTransform(VoxelObject obj, Vector3Int index)
+	{ 
+		if (!showTransform) return;
+
+		VoxelMap map = obj.GetVoxelMap();
+		if (map == null) return;
+
+
+		Voxel voxelValue = map.GetVoxel(index);
+		CubicTransformation transformation = new(voxelValue.cubicTransformation);
+		GeneralDirection3D up = transformation.upDirection;
+		GeneralDirection3D forward = transformation.TransformDirection(GeneralDirection3D.Forward);
+		GeneralDirection3D right = transformation.TransformDirection(GeneralDirection3D.Right);
+		Vector3 upVector = up.ToVectorInt();
+		Vector3 forwardVector = forward.ToVectorInt();
+		Vector3 rightVector = right.ToVectorInt();
+
+		Vector3 center = index + Vector3.one * 0.5f + Vector3.up; 
+
+		Gizmos.color = Color.red;
+		Gizmos.DrawLine(center, center + rightVector * 0.5f);
+		Gizmos.color = Color.green;
+		Gizmos.DrawLine(center, center + upVector * 0.5f);
+		Gizmos.color = Color.blue;
+		Gizmos.DrawLine(center, center + forwardVector * 0.5f);
 	}
 
 	void DrawVoxelInfo(VoxelObject obj, Vector3Int index)
@@ -134,7 +183,7 @@ public class VoxelTester : MonoBehaviour
 		}
 		text.AppendLine();
 
-		ushort extraVoxelData = voxelValue.extraVoxelData;
+		ushort extraVoxelData = voxelValue.extraData;
 		text.AppendLine("ExtraVoxelData: " + extraVoxelData);
 
 		Handles.Label(position, text.ToString());

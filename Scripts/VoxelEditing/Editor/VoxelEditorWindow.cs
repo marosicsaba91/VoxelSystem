@@ -19,7 +19,6 @@ namespace VoxelSystem
 		}
 
 		// Use old System for Drawing GUI
-
 		public void OnGUI()
 		{
 			foreach (Object item in Selection.objects)
@@ -89,8 +88,9 @@ namespace VoxelSystem
 			VoxelEditorGUI.DrawControlPanel(voxelEditor, ref contentRect);
 			contentRect.y += 6;
 			contentRect.height -= 6;
-			VoxelEditorGUI.DrawPalettes(voxelEditor, ref contentRect);			
-			VoxelEditorGUI.DrawExtraControls(voxelEditor, ref contentRect);			
+			VoxelEditorGUI.DrawPalettes(voxelEditor, ref contentRect);
+			VoxelEditorGUI.DrawExtraControls(voxelEditor, ref contentRect);		
+			VoxelEditorGUI.DrawCubicTransformation(voxelEditor, ref contentRect);	
 			VoxelEditorGUI.DrawVoxelPreview(voxelEditor, ref contentRect, GeneralDirection2D.Up);
 
 			EditorGUILayout.GetControlRect(false, contentRect.y);

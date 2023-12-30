@@ -29,6 +29,7 @@ namespace VoxelSystem
 					coneType = HandeleConeType.Box,
 					position = position,
 					direction = side,
+					side = side,
 					text = null
 				};
 				yield return new VoxelHandelInfo()
@@ -36,6 +37,7 @@ namespace VoxelSystem
 					coneType = HandeleConeType.Arrow,
 					position = position + side.ToVector() * standardSpacing,
 					direction = side,
+					side = side,
 					text = null
 				};
 			}

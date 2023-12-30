@@ -70,6 +70,7 @@ namespace VoxelSystem
 					coneType = HandeleConeType.Box,
 					position = position,
 					direction = side,
+					side = side,
 					text = text,
 				};
 			}

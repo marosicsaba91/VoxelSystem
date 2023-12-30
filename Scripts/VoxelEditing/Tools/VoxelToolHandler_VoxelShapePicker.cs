@@ -36,7 +36,7 @@ namespace VoxelSystem
 			Voxel picked = voxelEditor.Map.GetVoxel(index);
 
 			selected.shapeId = picked.shapeId;
-			selected.extraVoxelData = picked.extraVoxelData;
+			selected.extraData = picked.extraData;
 
 			voxelEditor.SelectedVoxelValue = selected;
 		}

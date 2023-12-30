@@ -105,6 +105,8 @@ namespace VoxelSystem
 
 		public static Vector3Int GetMapOrSelectionSize(this IVoxelEditor editor) =>
 			editor.HasSelection() ? editor.Selection.size : editor.Map.FullSize;
+		public static Vector3 GetMapOrSelectionCenter(this IVoxelEditor editor) =>
+			editor.HasSelection() ? ((Vector3)(editor.Selection.min + editor.Selection.max)) / 2f : (Vector3)editor.Selection.size / 2f;
 
 		public static void Deselect(this IVoxelEditor editor) =>
 			editor.Selection = new BoundsInt(Vector3Int.zero, Vector3Int.one * -1);

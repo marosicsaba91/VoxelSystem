@@ -7,7 +7,6 @@ using System;
 using UnityEditor;
 using UnityEngine;
 using EasyInspector;
-using System.Collections;
 using MeshUtility;
 
 namespace VoxelSystem
@@ -196,7 +195,7 @@ namespace VoxelSystem
 			rect.height = singleLineHeight;
 			if (GUI.Button(rect, "Clear Map"))
 			{
-				voxelEditor.RecordForUndo("Map Cleared", RecordType.Map); 
+				voxelEditor.RecordForUndo("Map Cleared", RecordType.Map);
 				change = voxelEditor.Map.ClearWhole();
 			}
 
@@ -468,10 +467,10 @@ namespace VoxelSystem
 			GUI.enabled = enableEdit;
 			DrawPalette(
 				voxelEditor,
-				voxelEditor.MaterialPalette.Select(item => item.name).ToList() ,
+				voxelEditor.MaterialPalette.Select(item => item.name).ToList(),
 				voxelEditor.SelectedMaterialIndex,
 				index => index,
-				index => index < voxelEditor.MaterialPalette.Count && index >=0,
+				index => index < voxelEditor.MaterialPalette.Count && index >= 0,
 				newSelectedIndex => voxelEditor.SelectedMaterialIndex = (byte)newSelectedIndex,
 				VoxelTool.MaterialPicker,
 				new("Material Index:", "The selected index of the Material names"),
@@ -526,7 +525,7 @@ namespace VoxelSystem
 			int newValue = EditorGUI.IntField(rect, title, selectedValue);
 			newValue = Math.Max(newValue, 0);
 
-			int index = 0; 
+			int index = 0;
 			float itemWidth = (oneRowRect.width - (itemsInARow - 1) * vSpacing) / itemsInARow;
 			if (names != null)
 				foreach (string name in names)
@@ -562,12 +561,22 @@ namespace VoxelSystem
 			GUI.color = Color.white;
 		}
 
+		public static void DrawCubicTransformation(VoxelEditor voxelEditor, ref Rect position)
+		{
+			if (voxelEditor.SelectedShape == null) return;
+			if (!voxelEditor.SelectedShape.SupportsTransformation) return;
+
+			Voxel voxelValue = voxelEditor.SelectedVoxelValue;
+			CubicTransformation transformation = new(voxelValue.cubicTransformation);
+			voxelValue.cubicTransformation = VoxelShapeBuilderEditor.DrawCubicTransformation(transformation, ref position).ToByte();
+			voxelEditor.SelectedVoxelValue = voxelValue;
+		}
 
 		public static void DrawExtraControls(VoxelEditor voxelEditor, ref Rect position)
 		{
 			Voxel voxelValue = voxelEditor.SelectedVoxelValue;
-			voxelValue.extraVoxelData = VoxelShapeBuilderEditor.DrawExtraControls(
-				voxelEditor.SelectedShape, voxelEditor.SelectedVoxelValue.extraVoxelData, voxelEditor.EditorObject, ref position);
+			voxelValue.extraData = VoxelShapeBuilderEditor.DrawExtraControls(
+				voxelEditor.SelectedShape, voxelEditor.SelectedVoxelValue.extraData, ref position);
 			voxelEditor.SelectedVoxelValue = voxelValue;
 		}
 
@@ -578,7 +587,8 @@ namespace VoxelSystem
 		static Mesh previewMesh;
 		static Mesh GetPreviewMesh() => previewMesh;
 		static int lastPreviewedShapeIndex = 0;
-		static ushort lastExtraVoxelData = 0;
+		static byte lastCubicTransformation = 0;
+		static byte lastExtraVoxelData = 0;
 
 		public static void DrawVoxelPreview(VoxelEditor voxelEditor, ref Rect position, GeneralDirection2D drawTo)
 		{
@@ -586,7 +596,7 @@ namespace VoxelSystem
 			VoxelShapeBuilder shape = voxelEditor.ShapePalette.GetBuilder(voxelEditor.SelectedShapeId);
 			if (shape == null) return;
 			if (Event.current.type != EventType.Repaint) return;
-			
+
 			Rect rect = position.SliceOut(150, drawTo);
 
 			customMeshPreview.TextureSize = new Vector2(rect.width, rect.height);
@@ -598,25 +608,29 @@ namespace VoxelSystem
 			customMeshPreview.SetDirty();
 
 			int shapeId = voxelEditor.SelectedShapeId;
-			ushort extraVoxelData = voxelEditor.SelectedVoxelValue.extraVoxelData;
- 
-			if (shapeId != lastPreviewedShapeIndex || lastExtraVoxelData != extraVoxelData )
+			byte cubicTransformation = voxelEditor.SelectedVoxelValue.cubicTransformation;
+			byte extraVoxelData = voxelEditor.SelectedVoxelValue.extraData;
+
+			if (shapeId != lastPreviewedShapeIndex ||
+				cubicTransformation != lastCubicTransformation ||
+				lastExtraVoxelData != extraVoxelData)
 			{
 				lastPreviewedShapeIndex = shapeId;
+				lastCubicTransformation = cubicTransformation;
 				lastExtraVoxelData = extraVoxelData;
-				
+
 				ArrayVoxelMap map = ArrayVoxelMap.GetTestOneVoxelMap(voxelEditor.SelectedVoxelValue);
 				previewMeshBuilder.Clear();
 				shape.GenerateMeshData(map, new() { Vector3Int.one }, shapeId, previewMeshBuilder, false);
 
-				if (previewMesh == null)  
+				if (previewMesh == null)
 					previewMesh = new Mesh();
 				else
 					previewMesh.Clear();
 
-				previewMeshBuilder.CopyToMesh(previewMesh); 
+				previewMeshBuilder.CopyToMesh(previewMesh);
 			}
-			
+
 			EditorGUI.DrawPreviewTexture(rect, customMeshPreview.PreviewTexture);
 		}
 	}

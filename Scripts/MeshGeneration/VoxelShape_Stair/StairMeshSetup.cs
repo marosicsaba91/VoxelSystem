@@ -245,7 +245,7 @@ namespace VoxelSystem
 
 		void BuildSimpleStair(VoxelMap map, Vector3Int position, int shapeID, CubicTransformation transformation, bool autoSet, MeshBuilder meshBuilder)
 		{
-			byte transformationIndex = transformation.GetIndex();
+			byte transformationIndex = transformation.ToByte();
 
 			// STAIR MESH 
 			meshBuilder.Add(transformedSimpleStairs[transformationIndex], position);
@@ -263,7 +263,7 @@ namespace VoxelSystem
 
 		void BuildOuterCorner(VoxelMap map, Vector3Int position, int shapeID, CubicTransformation transformation, bool autoSet, MeshBuilder meshBuilder)
 		{
-			byte transformationIndex = transformation.GetIndex();
+			byte transformationIndex = transformation.ToByte();
 
 			// STAIR MESH 
 			meshBuilder.Add(transformedOuterCornerStairs[transformationIndex], position);
@@ -278,7 +278,7 @@ namespace VoxelSystem
 
 		void BuildInnerCorner(VoxelMap map, Vector3Int position, int shapeID, CubicTransformation transformation, bool autoSet, MeshBuilder meshBuilder)
 		{
-			byte transformationIndex = transformation.GetIndex();
+			byte transformationIndex = transformation.ToByte();
 
 			// STAIR MESH 
 			meshBuilder.Add(transformedInnerCornerStairs[transformationIndex], position);

@@ -49,7 +49,7 @@ namespace VoxelSystem
 		}
 
 		public VoxelMap GetVoxelMap()
-		{
+		{ 
 			if (sharedVoxelMap == null)
 				return innerMap;
 			else
@@ -67,7 +67,7 @@ namespace VoxelSystem
 		{
 			if (Application.isPlaying) return;
 
-			EditorUpdate_Map();
+			EditorUpdate_VoxelMap();
 			EditorUpdate_MeshGeneration();
 		}
 
@@ -91,7 +91,7 @@ namespace VoxelSystem
 				map.MapChangedEvent -= OnMapChanged;
 		}
 
-		void EditorUpdate_Map()
+		void EditorUpdate_VoxelMap()
 		{
 			if (_lastFrameSharedMap == null && sharedVoxelMap == null)
 			{
@@ -118,7 +118,6 @@ namespace VoxelSystem
 		void ExportVoxelMap()
 		{
 #if UNITY_EDITOR
-
 			string path = UnityEditor.EditorUtility.SaveFilePanelInProject("Save Voxel Map", "VoxelMap", "asset", "Save Voxel Map");
 			if (path.Length != 0)
 			{

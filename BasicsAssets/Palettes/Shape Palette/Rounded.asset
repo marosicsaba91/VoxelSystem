@@ -16,6 +16,10 @@ MonoBehaviour:
   niceName: Rounded
   previewMaterial: {fileID: 2100000, guid: d90071d7c09e5374380240be130c9dfe, type: 2}
   previewExtraSetting: 0
+  previewTransformation:
+    upDirection: 0
+    verticalRotation: 0
+    verticalFlip: 0
   quickVersion: {fileID: 11400000, guid: b9086327e93f7ff41bb9063fd9f17659, type: 2}
   previewMeshBuilder:
     vertices:

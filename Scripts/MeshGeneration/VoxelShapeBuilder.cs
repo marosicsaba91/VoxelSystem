@@ -17,7 +17,8 @@ namespace VoxelSystem
 		[SerializeField] string niceName;
 		[Space]
 		[HideInInspector] public Material previewMaterial;
-		[HideInInspector] public ushort previewExtraSetting;
+		[HideInInspector] public byte previewExtraSetting;
+		[HideInInspector] public CubicTransformation previewTransformation = CubicTransformation.identity;
 		[HideInInspector] public VoxelShapeBuilder quickVersion;
 
 		public readonly CustomMeshPreview meshPreview = new();
@@ -25,39 +26,17 @@ namespace VoxelSystem
 		protected static readonly Vector3 half = Vector3.one * 0.5f;
 
 		public Material PreviewMaterial => previewMaterial;
-		public ushort PreviewExtraSetting => previewExtraSetting;
-
 		public int VoxelId => voxelId;
 
-
-		protected void OnValidate()
+		void OnValidate()
 		{
 			ValidateQuickVersion();
 			OnValidateInternal();
-			SetupMeshPreview();
-			/*
-#if UNITY_EDITOR
-			AssemblyReloadEvents.beforeAssemblyReload -= Dispose;
-			AssemblyReloadEvents.beforeAssemblyReload += Dispose;
-#endif
-			*/
+			SetupMeshPreview(); 
 			if (voxelId == 0)
 				voxelId = Random.Range(0, int.MaxValue);
 		}
-
-		/*
-		void Dispose()
-		{
-			if (previewMesh != null)
-			{
-				DestroyImmediate(previewMesh);
-				previewMesh = null;
-			}
-
-			meshPreview.Dispose();
-		}
-		*/
-
+		
 		void ValidateQuickVersion()
 		{
 			if (quickVersion != null)
@@ -129,6 +108,7 @@ namespace VoxelSystem
 		}
 
 		protected abstract bool IsInitialized { get; }
+		public abstract bool SupportsTransformation { get; }
 
 		protected abstract void GenerateMeshData(
 			VoxelMap map,
@@ -167,7 +147,7 @@ namespace VoxelSystem
 
 		public void RecalculatePreviewMesh()
 		{
-			Voxel voxelValue = new(voxelId, 0, previewExtraSetting, 0);
+			Voxel voxelValue = new(voxelId, 0, 0, previewTransformation.ToByte(), previewExtraSetting);
 			ArrayVoxelMap map = ArrayVoxelMap.GetTestOneVoxelMap(voxelValue);
 
 			previewMeshBuilder.Clear();
@@ -228,19 +208,19 @@ public abstract class ExtraVoxelControl
 {
 	public string name;
 	public abstract Type DataType { get; }
-	public abstract object GetExtraData(ushort extraVoxelData);
-	public abstract ushort SetExtraData(ushort originalExtraVoxelData, object newValue);
+	public abstract object GetExtraData(byte extraVoxelData);
+	public abstract byte SetExtraData(byte originalExtraVoxelData, object newValue);
 }
 
 public class ExtraVoxelControl<T> : ExtraVoxelControl
 {
-	public delegate T GetValueDel(ushort voxelData);
-	public delegate ushort SetValueDel(ushort originalExtraVoxelData, T newValue);
+	public delegate T GetValueDel(byte voxelData);
+	public delegate byte SetValueDel(byte originalExtraVoxelData, T newValue);
 
 	public GetValueDel getValue;
 	public SetValueDel setValue;
-	public sealed override object GetExtraData(ushort extraVoxelData) => getValue(extraVoxelData);
-	public sealed override ushort SetExtraData(ushort originalExtraVoxelData, object newValue) => setValue(originalExtraVoxelData, (T)newValue);
+	public sealed override object GetExtraData(byte extraVoxelData) => getValue(extraVoxelData);
+	public sealed override byte SetExtraData(byte originalExtraVoxelData, object newValue) => setValue(originalExtraVoxelData, (T)newValue);
 	public sealed override Type DataType => typeof(T);
 }
 
