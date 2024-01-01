@@ -106,7 +106,7 @@ namespace VoxelSystem
 			r = full.SliceOut(80, GeneralDirection2D.Left); 
 			newTransform.upDirection = (GeneralDirection3D)EditorGUI.EnumPopup(r, transformation.upDirection);
 			r = full.SliceOut(18, GeneralDirection2D.Left); 
-			newTransform.verticalFlip = EditorGUI.Toggle(r, transformation.verticalFlip); 
+			newTransform.isVerticalFlipped = EditorGUI.Toggle(r, transformation.isVerticalFlipped); 
 			newTransform.verticalRotation = EditorGUI.IntSlider(full, transformation.verticalRotation, 0, 3);
 
 			return newTransform;

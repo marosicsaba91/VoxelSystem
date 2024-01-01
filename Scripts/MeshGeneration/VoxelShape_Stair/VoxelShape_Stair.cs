@@ -42,8 +42,8 @@ namespace VoxelSystem
 				SetupVoxelTypeAndTransformation(map, voxelPositions[i], shapeIndex);
 		}
 
-		readonly GeneralDirection3D[] stairNeighborsDirections = new GeneralDirection3D[4];
-		readonly GeneralDirection3D[] wallNeighborsDirections = new GeneralDirection3D[3];
+		readonly GeneralDirection3D[] stairNeighborsDirections = new GeneralDirection3D[6];
+		readonly GeneralDirection3D[] wallNeighborsDirections = new GeneralDirection3D[6];
 		void SetupVoxelTypeAndTransformation(VoxelMap map, Vector3Int position, int shapeId)
 		{
 			Voxel voxel = map.GetVoxel(position);
@@ -63,16 +63,12 @@ namespace VoxelSystem
 				if (neighbor.shapeId == shapeId)
 				{
 					stairNeighborsDirections[stairNeighborsCount] = direction;
-					stairNeighborsCount++;
-					if (stairNeighborsCount == 4)
-						break;
+					stairNeighborsCount++; 
 				}
 				else
 				{
 					wallNeighborsDirections[wallNeighborsCount] = direction;
-					wallNeighborsCount++;
-					if (wallNeighborsCount == 3)
-						break;
+					wallNeighborsCount++; 
 				}
 			}
 
@@ -88,7 +84,7 @@ namespace VoxelSystem
 				{
 					GeneralDirection3D s1 = stairNeighborsDirections[0];
 					GeneralDirection3D s2 = stairNeighborsDirections[1];
-					if (s1 != s2.Opposite() && s1 != up)
+					if (s1 != s2.Opposite() && s1 != up && s2!= up)
 					{
 						stairType = StairShape.OuterCornerStair;
 
@@ -113,33 +109,32 @@ namespace VoxelSystem
 			}
 			else if (wallNeighborsCount == 3)
 			{
-				stairType = StairShape.InnerCornerStair;
 				Axis3D a0 = wallNeighborsDirections[0].GetAxis();
 				Axis3D a1 = wallNeighborsDirections[1].GetAxis();
 				Axis3D a2 = wallNeighborsDirections[2].GetAxis();
 				if (a0 != a1 && a0 != a2 && a1 != a2)
 				{
+					stairType = StairShape.InnerCornerStair;
 					DirectionUtility.SortDirectionsByAxis(
 						wallNeighborsDirections[0], wallNeighborsDirections[1], wallNeighborsDirections[2],
 						out GeneralDirection3D xWall, out GeneralDirection3D yWall, out GeneralDirection3D zWall);
 
 					if (stairNeighborsCount == 2)
 					{
-						GeneralDirection3D right = stairNeighborsDirections[0];
-						GeneralDirection3D back = stairNeighborsDirections[1];
-						Axis3D rightAxis = right.GetAxis();
-						Axis3D backAxis = back.GetAxis();
+						GeneralDirection3D side1 = stairNeighborsDirections[0];
+						GeneralDirection3D side2 = stairNeighborsDirections[1];
+						Axis3D rightAxis = side1.GetAxis();
+						Axis3D backAxis = side2.GetAxis();
 						Axis3D upAxis = DirectionUtility.OtherAxis(rightAxis, backAxis);
 						GeneralDirection3D up =
 							upAxis == Axis3D.X ? xWall :
 							upAxis == Axis3D.Y ? yWall :
 							zWall;
-						up = up.Opposite();
 
-						transformation = CubicTransformation.FromDirections(right, up, back.Opposite());
+						transformation = CubicTransformation.FromDirections(side1.Opposite(), up.Opposite(), side2.Opposite());
 					}
 					else
-					{
+					{ 
 						transformation = CubicTransformation.FromDirections(xWall, yWall.Opposite(), zWall);
 					}
 				}
@@ -173,11 +168,11 @@ namespace VoxelSystem
 				{
 					CubicTransformation transformation = new(v.cubicTransformation);
 
-					GeneralDirection3D globalUp = transformation.TransformDirection(GeneralDirection3D.Up);
+					GeneralDirection3D globalUp = transformation.Up;
 					GeneralDirection3D globalDown = globalUp.Opposite();
-					GeneralDirection3D globalRight = transformation.TransformDirection(GeneralDirection3D.Right);
+					GeneralDirection3D globalRight = transformation.Right;
 					GeneralDirection3D globalLeft = globalRight.Opposite();
-					GeneralDirection3D globalForward = transformation.TransformDirection(GeneralDirection3D.Forward);
+					GeneralDirection3D globalForward = transformation.Forward;
 					GeneralDirection3D globalBack = globalForward.Opposite();
 
 					v.SetSideClosed(globalUp, false);
@@ -318,13 +313,13 @@ namespace VoxelSystem
 			return originalExtraValue.SetByte(0, cubicTransformation.ToByte());
 		}
 
-		static bool GetFlip(ushort extraVoxelData) => GetTransformation(extraVoxelData).verticalFlip;
+		static bool GetFlip(ushort extraVoxelData) => GetTransformation(extraVoxelData).isVerticalFlipped;
 
 		static ushort SetFlip(ushort originalExtraValue, bool value)
 		{
 			CubicTransformation cubicTransformation = new((byte)originalExtraValue)
 			{
-				verticalFlip = value
+				isVerticalFlipped = value
 			};
 			return originalExtraValue.SetByte(0, cubicTransformation.ToByte());
 		}

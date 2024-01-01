@@ -120,8 +120,8 @@ public class VoxelTester : MonoBehaviour
 		Voxel voxelValue = map.GetVoxel(index);
 		CubicTransformation transformation = new(voxelValue.cubicTransformation);
 		GeneralDirection3D up = transformation.upDirection;
-		GeneralDirection3D forward = transformation.TransformDirection(GeneralDirection3D.Forward);
-		GeneralDirection3D right = transformation.TransformDirection(GeneralDirection3D.Right);
+		GeneralDirection3D forward = transformation.Forward;
+		GeneralDirection3D right = transformation.Right;
 		Vector3 upVector = up.ToVectorInt();
 		Vector3 forwardVector = forward.ToVectorInt();
 		Vector3 rightVector = right.ToVectorInt();
