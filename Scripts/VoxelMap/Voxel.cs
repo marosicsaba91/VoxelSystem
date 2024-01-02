@@ -67,12 +67,13 @@ namespace VoxelSystem
 		public static bool operator ==(Voxel a, Voxel b) =>
 			a.shapeId == b.shapeId &&
 			a.materialIndex == b.materialIndex &&
+			a.closednessInfo == b.closednessInfo &&
 			a.cubicTransformation == b.cubicTransformation &&
 			a.extraData == b.extraData;
 
 		public static bool operator !=(Voxel a, Voxel b) => !(a == b);
 		public override bool Equals(object obj) => obj is Voxel other && this == other;
-		public override int GetHashCode() => shapeId.GetHashCode() ^ materialIndex.GetHashCode() ^ cubicTransformation.GetHashCode() ^ extraData.GetHashCode();
+		public override int GetHashCode() => shapeId.GetHashCode() ^ materialIndex.GetHashCode() ^ closednessInfo.GetHashCode() ^ cubicTransformation.GetHashCode() ^ extraData.GetHashCode();
 
 		public bool IsSideClosed(GeneralDirection3D side) =>
 			(closednessInfo & (1 << (int)side)) != 0;

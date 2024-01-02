@@ -13,6 +13,10 @@ public class VoxelTester : MonoBehaviour
 	[SerializeField] bool enabledTest = true;
 	[SerializeField] bool showOnlyOnSelected = true;
 
+	[SerializeField] Color selectionColor = Color.magenta;
+	[SerializeField] Color selectedColor = Color.green;
+	[SerializeField] Color textColor = Color.white;
+
 	[SerializeField] VoxelObject testedVoxelObject;
 	[SerializeField] Vector3Int testedVoxelIndex;
 
@@ -58,7 +62,7 @@ public class VoxelTester : MonoBehaviour
 		if (lastHitObject != null)
 		{
 			Gizmos.matrix = lastHitObject.transform.localToWorldMatrix;
-			Gizmos.color = Color.magenta;
+			Gizmos.color = selectionColor;
 			DrawCube(lastHitVoxel.voxelIndex);
 			Handles.matrix = Matrix4x4.identity;
 			Gizmos.matrix = Matrix4x4.identity;
@@ -82,14 +86,14 @@ public class VoxelTester : MonoBehaviour
 		if (lastHitObject != null)
 		{
 			Gizmos.matrix = lastHitObject.transform.localToWorldMatrix;
-			Gizmos.color = Color.magenta;
+			Gizmos.color = selectionColor;
 		}
 		if (enabledTest && testedVoxelObject != null)
 		{
 			Gizmos.matrix = testedVoxelObject.transform.localToWorldMatrix;
 			Handles.matrix = testedVoxelObject.transform.localToWorldMatrix;
-			Gizmos.color = Color.green;
-			Handles.color = Color.magenta;
+			Gizmos.color = selectedColor;
+			Handles.color = selectionColor;
 
 			DrawCube(testedVoxelIndex);
 
@@ -183,9 +187,13 @@ public class VoxelTester : MonoBehaviour
 		}
 		text.AppendLine();
 
+		ushort closedness = voxelValue.closednessInfo;
+		text.AppendLine("Closedness: " + closedness);
+
 		ushort extraVoxelData = voxelValue.extraData;
 		text.AppendLine("ExtraVoxelData: " + extraVoxelData);
 
+		Handles.color = textColor;
 		Handles.Label(position, text.ToString());
 #endif
 	}

@@ -142,8 +142,8 @@ namespace VoxelSystem
 					if (v.IsFilled())
 					{
 						v.shapeId = value.shapeId;
-						v.extraData = value.extraData;
 						v.cubicTransformation = value.cubicTransformation;
+						v.extraData = value.extraData;
 					}
 					break;
 

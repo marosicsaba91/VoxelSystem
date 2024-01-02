@@ -295,10 +295,11 @@ namespace VoxelSystem
 			AddSideMesh(map, position, shapeID, transformation, transformationIndex, autoSet, transformedRightSide2, GeneralDirection3D.Back, meshBuilder);
 		}
 
-		void AddMeshIfSideOpen(VoxelMap map, Vector3Int position, CubicTransformation transformation, byte transformationIndex, MeshBuilder[] transformed, GeneralDirection3D direction, MeshBuilder meshBuilder)
+		void AddMeshIfSideOpen(VoxelMap map, Vector3Int position, CubicTransformation transformation, byte transformationIndex, MeshBuilder[] transformed, GeneralDirection3D localDirection, MeshBuilder meshBuilder)
 		{
-			GeneralDirection3D transformedDir = transformation.TransformDirection(direction);
+			GeneralDirection3D transformedDir = transformation.TransformDirection(localDirection);
 			bool isSideFilled = map.IsFilledSafe(position + transformedDir.ToVectorInt(), transformedDir.Opposite());
+			
 			if (!isSideFilled)
 				meshBuilder.Add(transformed[transformationIndex], position);
 		}
