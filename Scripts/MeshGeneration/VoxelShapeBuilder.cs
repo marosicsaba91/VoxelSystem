@@ -32,11 +32,11 @@ namespace VoxelSystem
 		{
 			ValidateQuickVersion();
 			OnValidateInternal();
-			SetupMeshPreview(); 
+			SetupMeshPreview();
 			if (voxelId == 0)
 				voxelId = Random.Range(0, int.MaxValue);
 		}
-		
+
 		void ValidateQuickVersion()
 		{
 			if (quickVersion != null)
@@ -190,15 +190,53 @@ namespace VoxelSystem
 			{ GeneralDirection3D.Back, new Vector3[]{ p000, p010, p110, p100 } },
 		};
 
-		public virtual void BuildPhysicalMeshSides(FlexibleMesh flexMesh, VoxelMap map, Vector3Int startPoint, ref int sideCounter)
+		public virtual void GetPhysicalSides(List<Vector3[]> resultSides, VoxelMap map, Vector3Int startPoint)
 		{
 			for (int i = 0; i < 6; i++)
 			{
 				GeneralDirection3D direction = DirectionUtility.generalDirection3DValues[i];
-				flexMesh.AddFace(sideDictionary[direction], startPoint);
-				sideCounter++;
+				Vector3[] localSide = sideDictionary[direction];
+
+				Vector3[] side = new Vector3[localSide.Length];
+				for (int j = 0; j < localSide.Length; j++)
+					side[j] += localSide[j] + startPoint;
+
+				resultSides.Add(side);
 			}
 		}
+
+		public virtual void GetNavigationEdges(List<DirectedEdge> resultEdges, VoxelMap map, Vector3Int voxelPosition)
+		{
+			Voxel voxel = map.GetVoxel(voxelPosition);
+			for (int i = 0; i < 6; i++)
+			{
+				GeneralDirection3D direction = DirectionUtility.generalDirection3DValues[i];
+
+				if (!voxel.IsSideClosed(direction)) continue;
+
+				if (map.TryGetVoxel(voxelPosition + direction.ToVectorInt(), out Voxel neighbor))
+					if (neighbor.IsSideClosed(direction.Opposite())) continue;
+
+				GeneralDirection3D perpendicular1 = direction.GetPerpendicularNext();
+				GeneralDirection3D perpendicular2 = direction.GetPerpendicularPrevious();
+
+				Vector3 normal = direction.ToVector();
+				Vector3 p1Vector = perpendicular1.ToVector() * 0.5f;
+				Vector3 p2Vector = perpendicular2.ToVector() * 0.5f;
+				Vector3 center = Vector3.one * 0.5f + voxelPosition + normal * 0.5f;
+
+				resultEdges.Add(new (center, center + p1Vector, normal));
+				resultEdges.Add(new (center, center + p2Vector, normal));
+				resultEdges.Add(new(center, center - p1Vector, normal));
+				resultEdges.Add(new(center, center - p2Vector, normal));
+
+				resultEdges.Add(new(center, center + p1Vector + p2Vector, normal));
+				resultEdges.Add(new(center, center + p1Vector - p2Vector, normal));
+				resultEdges.Add(new(center, center - p1Vector + p2Vector, normal));
+				resultEdges.Add(new(center, center - p1Vector - p2Vector, normal));
+			}
+		}
+
 	}
 }
 

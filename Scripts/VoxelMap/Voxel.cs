@@ -13,15 +13,15 @@ namespace VoxelSystem
 		[FormerlySerializedAs("shapeID")] public int shapeId;
 		public byte materialIndex;
 		public byte closednessInfo;
-		public byte cubicTransformation;
+		public byte cubicTransformationIndex;
 		public byte extraData;
 
-		public Voxel(int shapeId, byte materialIndex, byte closednessInfo, byte cubicTransformation, byte extraData)
+		public Voxel(int shapeId, byte materialIndex, byte closednessInfo, byte cubicTransformationIndex, byte extraData)
 		{
 			this.shapeId = shapeId;
 			this.materialIndex = materialIndex;
 			this.closednessInfo = closednessInfo;
-			this.cubicTransformation = cubicTransformation;
+			this.cubicTransformationIndex = cubicTransformationIndex;
 			this.extraData = extraData;
 		}
 
@@ -29,7 +29,7 @@ namespace VoxelSystem
 		{
 			extraData = (byte)(longData & 0xFF);
 			longData >>= 8;
-			cubicTransformation = (byte)(longData & 0xFF);
+			cubicTransformationIndex = (byte)(longData & 0xFF);
 			longData >>= 8;
 			closednessInfo = (byte)(longData & 0xFF);
 			longData >>= 8;
@@ -46,7 +46,7 @@ namespace VoxelSystem
 			longData <<= 8;
 			longData |= closednessInfo;
 			longData <<= 8;
-			longData |= cubicTransformation;
+			longData |= cubicTransformationIndex;
 			longData <<= 8;
 			longData |= extraData;
 			return longData;
@@ -64,16 +64,22 @@ namespace VoxelSystem
 		public bool IsFilled() => !IsEmpty();
 		public bool IsFilled(GeneralDirection3D side) => !IsEmpty() && IsSideClosed(side);
 
+		public CubicTransformation CubicTransformation
+		{
+			get => new(cubicTransformationIndex);
+			set => cubicTransformationIndex = value.ToByte();
+		}
+
 		public static bool operator ==(Voxel a, Voxel b) =>
 			a.shapeId == b.shapeId &&
 			a.materialIndex == b.materialIndex &&
 			a.closednessInfo == b.closednessInfo &&
-			a.cubicTransformation == b.cubicTransformation &&
+			a.cubicTransformationIndex == b.cubicTransformationIndex &&
 			a.extraData == b.extraData;
 
 		public static bool operator !=(Voxel a, Voxel b) => !(a == b);
 		public override bool Equals(object obj) => obj is Voxel other && this == other;
-		public override int GetHashCode() => shapeId.GetHashCode() ^ materialIndex.GetHashCode() ^ closednessInfo.GetHashCode() ^ cubicTransformation.GetHashCode() ^ extraData.GetHashCode();
+		public override int GetHashCode() => shapeId.GetHashCode() ^ materialIndex.GetHashCode() ^ closednessInfo.GetHashCode() ^ cubicTransformationIndex.GetHashCode() ^ extraData.GetHashCode();
 
 		public bool IsSideClosed(GeneralDirection3D side) =>
 			(closednessInfo & (1 << (int)side)) != 0;

@@ -41,11 +41,11 @@ public class VoxelShape_Mesh : VoxelShapeBuilder
 			Vector3Int position = voxelPositions[voxelIndex];
 			Voxel vertexValue = map.GetVoxel(position);
 
-			byte transformation = vertexValue.cubicTransformation;
+			byte transformation = vertexValue.cubicTransformationIndex;
 			if (transformation >= CubicTransformation.allTransformationCount)
 			{
 				transformation = 0;
-				vertexValue.cubicTransformation = 0;
+				vertexValue.cubicTransformationIndex = 0;
 				map.SetVoxel(position, vertexValue);
 			}
 			MeshBuilder transformedMesh = transformedMeshes[transformation];
@@ -62,7 +62,7 @@ public class VoxelShape_Mesh : VoxelShapeBuilder
 			Vector3Int voxelPosition = voxelPositions[i];
 			Voxel voxel = map.GetVoxel(voxelPosition);
 			voxel.closednessInfo = 0;
-			CubicTransformation transformation = new(voxel.cubicTransformation);
+			CubicTransformation transformation = voxel.CubicTransformation;
 			for (int d = 0; d < 6; d++)
 			{
 				GeneralDirection3D localDirection = (GeneralDirection3D)d;

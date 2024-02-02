@@ -224,22 +224,6 @@ namespace VoxelSystem
 			}
 		}
 
-		public FlexibleMesh GeneratePhysicalMesh(ref int sideCounter)
-		{
-			VoxelMap map = GetVoxelMap();
-			BuildVoxelPositionDictionary(map);
-			FlexibleMesh mesh = new();
-			foreach (KeyValuePair<VoxelInfo, List<Vector3Int>> chunk in voxelsByType)
-			{
-				if (chunk.Value.Count == 0) continue;
-				int shapeId = chunk.Key.shapeId;
-				VoxelShapeBuilder shapeBuilder = shapePalette.GetBuilder(shapeId);
-				foreach (Vector3Int voxelPosition in chunk.Value)
-					shapeBuilder.BuildPhysicalMeshSides(mesh, map, voxelPosition, ref sideCounter);
-			}
-			return mesh;
-		}
-
 		void UpdateMeshComponents(bool isFinal)
 		{
 			if (meshDestination.destinationMeshFilter != null &&
@@ -299,7 +283,7 @@ namespace VoxelSystem
 				if (chunk.Value.Count == 0) continue;
 				int shapeId = chunk.Key.shapeId;
 				VoxelShapeBuilder shapeBuilder = shapePalette.GetBuilder(shapeId);
-				benchmarkTimer?.StartModule("Calculate opened/closed data for voxel sides: " + shapeBuilder.NiceName);
+				benchmarkTimer?.StartModule("Calculate opened/closed data for voxel resultSides: " + shapeBuilder.NiceName);
 				List<Vector3Int> voxels = chunk.Value;
 				shapeBuilder.SetupClosedSides(map, voxels, quick);
 			}
@@ -325,7 +309,7 @@ namespace VoxelSystem
 				if (!hasBuilder)
 					Debug.LogWarning($"No shape builder found for: {chunk.Key}.    VoxelCount: {voxelIndexes.Count}");
 
-				benchmarkTimer?.StartModule("Calculate mesh side data: " + shapeBuilder.NiceName);
+				benchmarkTimer?.StartModule("Calculate resultSides side data: " + shapeBuilder.NiceName);
 				shapeBuilder.GenerateMeshData(map, voxelIndexes, shapeBuilder.VoxelId, meshBuilder, quick);
 			}
 
@@ -343,6 +327,50 @@ namespace VoxelSystem
 
 			return newGen;
 		}
+
+		// ------------------ PHYSICAL SHAPE GENERATION ------------------ //
+
+		public void GeneratePhysicalMesh(List<Vector3[]> resultSides)
+		{
+			VoxelMap map = GetVoxelMap();
+			BuildVoxelPositionDictionary(map); 
+			foreach (KeyValuePair<VoxelInfo, List<Vector3Int>> chunk in voxelsByType)
+			{
+				if (chunk.Value.Count == 0) continue;
+
+				int shapeId = chunk.Key.shapeId;
+				VoxelShapeBuilder shapeBuilder = shapePalette.GetBuilder(shapeId);
+
+				foreach (Vector3Int voxelPosition in chunk.Value)
+					shapeBuilder.GetPhysicalSides(resultSides, map, voxelPosition);
+			} 
+		}
+
+		public void GetNavigationEdges(List<DirectedEdge> resultEdges)
+		{
+			VoxelMap map = GetVoxelMap();
+			BuildVoxelPositionDictionary(map);
+			foreach (KeyValuePair<VoxelInfo, List<Vector3Int>> chunk in voxelsByType)
+			{
+				if (chunk.Value.Count == 0) continue;
+
+				int shapeId = chunk.Key.shapeId;
+				VoxelShapeBuilder shapeBuilder = shapePalette.GetBuilder(shapeId);
+
+				foreach (Vector3Int voxelPosition in chunk.Value)
+					shapeBuilder.GetNavigationEdges(resultEdges, map, voxelPosition);
+			}
+		}
 	}
 
+	public struct DirectedEdge 
+	{
+		public Vector3 a, b, normal;
+		public DirectedEdge(Vector3 a, Vector3 b, Vector3 normal)
+		{
+			this.a = a;
+			this.b = b;
+			this.normal = normal;
+		}
+	}
 }

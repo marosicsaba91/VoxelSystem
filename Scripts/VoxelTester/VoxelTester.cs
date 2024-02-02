@@ -29,6 +29,7 @@ public class VoxelTester : MonoBehaviour
 	 
 	public bool EnableTest => enabledTest;
 
+
 	internal void Raycast(Ray ray, bool isClick)
 	{
 		VoxelObject tested = null;
@@ -122,7 +123,7 @@ public class VoxelTester : MonoBehaviour
 
 
 		Voxel voxelValue = map.GetVoxel(index);
-		CubicTransformation transformation = new(voxelValue.cubicTransformation);
+		CubicTransformation transformation = voxelValue.CubicTransformation;
 		GeneralDirection3D up = transformation.upDirection;
 		GeneralDirection3D forward = transformation.Forward;
 		GeneralDirection3D right = transformation.Right;

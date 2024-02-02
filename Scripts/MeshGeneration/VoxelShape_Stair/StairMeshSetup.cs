@@ -2,6 +2,7 @@
 using MUtility;
 using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace VoxelSystem
 {
@@ -44,9 +45,9 @@ namespace VoxelSystem
 		public Mesh rightSide;
 		[SerializeField, Tooltip("The side of the stair that goes down looking FORWARD")]
 		public Mesh leftSide;
-		[SerializeField, Tooltip("The back of the Mesh looking FORWARD")]
-		public Mesh backSide;
-		[SerializeField, Tooltip("The back of the Mesh looking Down Globally")]
+		[SerializeField, Tooltip("The front of the Mesh looking FORWARD")]
+		[FormerlySerializedAs("backSide")] public Mesh frontSide;
+		[SerializeField, Tooltip("The bottom of the Mesh looking Down Globally")]
 		public Mesh bottom;
 		[Space]
 		[SerializeField] bool autoConvertFromRightHanded = true;
@@ -55,8 +56,26 @@ namespace VoxelSystem
 
 		const int transformCount = CubicTransformation.allTransformationCount;
 
+		static readonly Vector3[] simpleStairs_Points = { new(0, 0, 0), new(0, 1, 1), new(1, 1, 1), new(1, 0, 0) };
+		static readonly Vector3[] outerCornerStairs_Points1 = { new(0, 0, 0), new(1, 1, 1), new(1, 0, 0) };
+		static readonly Vector3[] outerCornerStairs_Points2 = { new(0, 0, 0), new(0, 0, 1), new(1, 1, 1) };
+		static readonly Vector3[] innerCornerStairs_Points1 = { new(0, 0, 0), new(1, 1, 1), new(1, 1, 0) };
+		static readonly Vector3[] innerCornerStairs_Points2 = { new(0, 0, 0), new(0, 1, 1), new(1, 1, 1) };
+		static readonly Vector3[] bottom_Points = { new(0, 0, 0), new(1, 0, 0), new(1, 0, 1), new(0, 0, 1) };
+		static readonly Vector3[] leftSide_Points = { new(0, 0, 0), new(0, 0, 1), new(0, 1, 1) };
+		static readonly Vector3[] rightSide_Points = { new(1, 0, 1), new(1, 0, 0), new(1, 1, 1) };
+		static readonly Vector3[] frontSide_Points = { new(0, 0, 1), new(1, 0, 1), new(1, 1, 1), new(0, 1, 1) };
+
+		static readonly Vector3[] leftSide_Points2 = { new(0, 0, 1), new(1, 0, 1), new(1, 1, 1) };
+		static readonly Vector3[] rightSide_Points2 = { new(1, 0, 0), new(0, 0, 0), new(1, 1, 0) };
+		static readonly Vector3[] frontSide_Points2 = { new(1, 0, 0), new(1, 1, 0), new(1, 1, 1), new(1, 0, 1) };
+
+		public static readonly Vector3[][] simpleStair_PhysicalSides = { simpleStairs_Points, bottom_Points, frontSide_Points, rightSide_Points, leftSide_Points };
+		public static readonly Vector3[][] innerCorner_PhysicalSides = { innerCornerStairs_Points1, innerCornerStairs_Points2, bottom_Points, frontSide_Points, frontSide_Points2, rightSide_Points2, leftSide_Points };
+		public static readonly Vector3[][] outerCorner_PhysicalSides = { outerCornerStairs_Points1, outerCornerStairs_Points2, bottom_Points, rightSide_Points, leftSide_Points2 };
+
 		static readonly MeshBuilder simpleStairs_Default = new(
-			new Vector3[] { new(0, 0, 0), new(0, 1, 1), new(1, 1, 1), new(1, 0, 0) },
+			simpleStairs_Points,
 			new Vector3[] { new(0, 1, -1), new(0, 1, -1), new(0, 1, -1), new(0, 1, -1), new(0, 1, -1), new(0, 1, -1) },
 			new Vector2[] { new(0, 0), new(0, 1), new(1, 1), new(1, 0) },
 			new int[] { 0, 1, 2, 0, 2, 3 }
@@ -64,7 +83,7 @@ namespace VoxelSystem
 
 		static readonly MeshBuilder outerCornerStairs_Default = new(
 			new Vector3[] {
-				new(0, 0, 0), new(1, 1, 1), new(1, 0, 0),  
+				new(0, 0, 0), new(1, 1, 1), new(1, 0, 0),
 				new(0, 0, 0), new(0, 0, 1), new(1, 1, 1),},
 			new Vector3[] { new(0, 1, -1), new(0, 1, -1), new(0, 1, -1), new(-1, 1, 0), new(-1, 1, 0), new(-1, 1, 0) },
 			new Vector2[] { new(1, 0), new(0, 1), new(1, 1), new(1, 0), new(0, 0), new(0, 1) },
@@ -81,31 +100,33 @@ namespace VoxelSystem
 		);
 
 		static readonly MeshBuilder bottom_Default = new(
-			new Vector3[] { new(0, 0, 0), new(1, 0, 0), new(1, 0, 1), new(0, 0, 1) },
+			bottom_Points,
 			new Vector3[] { Vector3.back, Vector3.back, Vector3.back, Vector3.back, Vector3.back, Vector3.back },
 			new Vector2[] { new(0, 0), new(1, 0), new(1, 1), new(0, 1) },
 			new int[] { 0, 1, 2, 0, 2, 3 }
 		);
 
-		static readonly MeshBuilder backSide_Default = new(
-			new Vector3[] { new(0, 0, 1), new(1, 0, 1), new(1, 1, 1), new(0, 1, 1) },
+		static readonly MeshBuilder frontSide_Default = new(
+			frontSide_Points,
 			new Vector3[] { new(0, 0, 1), new(0, 0, 1), new(0, 0, 1), new(0, 0, 1), new(0, 0, 1), new(0, 0, 1) },
 			new Vector2[] { new(0, 0), new(1, 0), new(1, 1), new(0, 1) },
 			new int[] { 0, 1, 2, 0, 2, 3 }
 		);
 
 		static readonly MeshBuilder leftSide_Default = new(
-			new Vector3[] { new(0, 0, 0), new(0, 0, 1), new(0, 1, 1) },
+			leftSide_Points,
 			new Vector3[] { Vector3.left, Vector3.left, Vector3.left, Vector3.left },
 			new Vector2[] { new(0, 0), new(1, 0), new(1, 1) },
 			new int[] { 0, 1, 2 }
 		);
 		static readonly MeshBuilder rightSide_Default = new(
-			new Vector3[] { new(1, 0, 0), new(1, 0, 1), new(1, 1, 1) },
+			rightSide_Points,
 			new Vector3[] { Vector3.right, Vector3.right, Vector3.right, Vector3.right },
 			new Vector2[] { new(0, 0), new(1, 0), new(1, 1), new(1, 1) },
-			new int[] { 2, 1, 0 }
+			new int[] { 0, 1, 2 }
 		);
+
+
 
 		// Cached Data ------------------------------------------------------------------------
 
@@ -116,20 +137,9 @@ namespace VoxelSystem
 		[SerializeField, HideInInspector] public MeshBuilder[] transformedRightSide2;
 		[SerializeField, HideInInspector] public MeshBuilder[] transformedLeftSide;
 		[SerializeField, HideInInspector] public MeshBuilder[] transformedLeftSide2;
-		[SerializeField, HideInInspector] public MeshBuilder[] transformedBackSide;
-		[SerializeField, HideInInspector] public MeshBuilder[] transformedBackSide2;
+		[SerializeField, HideInInspector] public MeshBuilder[] transformedFrontSide;
+		[SerializeField, HideInInspector] public MeshBuilder[] transformedFrontSide2;
 		[SerializeField, HideInInspector] public MeshBuilder[] transformedBottom;
-
-		[SerializeField, HideInInspector] public MeshBuilder[] transformedSimpleStairs_Default;
-		[SerializeField, HideInInspector] public MeshBuilder[] transformedInnerCornerStairs_Default;
-		[SerializeField, HideInInspector] public MeshBuilder[] transformedOuterCornerStairs_Default;
-		[SerializeField, HideInInspector] public MeshBuilder[] transformedRightSide_Default;
-		[SerializeField, HideInInspector] public MeshBuilder[] transformedRightSide2_Default;
-		[SerializeField, HideInInspector] public MeshBuilder[] transformedLeftSide_Default;
-		[SerializeField, HideInInspector] public MeshBuilder[] transformedLeftSide2_Default;
-		[SerializeField, HideInInspector] public MeshBuilder[] transformedBackSide_Default;
-		[SerializeField, HideInInspector] public MeshBuilder[] transformedBackSide2_Default;
-		[SerializeField, HideInInspector] public MeshBuilder[] transformedBottom_Default;
 
 		// Initialization ----------------------------------------------------------------------------
 
@@ -142,13 +152,12 @@ namespace VoxelSystem
 			transformedOuterCornerStairs = Setup(transformedOuterCornerStairs);
 			transformedRightSide = Setup(transformedRightSide);
 			transformedLeftSide = Setup(transformedLeftSide);
-			transformedBackSide = Setup(transformedBackSide);
+			transformedFrontSide = Setup(transformedFrontSide);
 			transformedBottom = Setup(transformedBottom);
 
 			transformedRightSide2 = Setup(transformedRightSide2);
 			transformedLeftSide2 = Setup(transformedLeftSide2);
-			transformedBackSide2 = Setup(transformedBackSide2);
-
+			transformedFrontSide2 = Setup(transformedFrontSide2); 
 			static MeshBuilder[] Setup(MeshBuilder[] array)
 			{
 				if (array == null || array.Length != transformCount)
@@ -173,33 +182,21 @@ namespace VoxelSystem
 				Matrix4x4 transformation = ct.GetTransformationMatrix();
 				transformation = Matrix4x4.Translate(Vector3.one * 0.5f) * transformation;
 
-				transformedSimpleStairs[i] = GenerateSide(simpleStairs_Default, simpleStairs, uvSetup, GeneralDirection3D.Up);
-				transformedSimpleStairs[i].Transform(transformation);
-				transformedInnerCornerStairs[i] = GenerateSide(innerCornerStairs_Default, innerCornerStairs, uvSetup, GeneralDirection3D.Up);
-				transformedInnerCornerStairs[i].Transform(transformation);
-				transformedOuterCornerStairs[i] = GenerateSide(outerCornerStairs_Default, outerCornerStairs, uvSetup, GeneralDirection3D.Up);
-				transformedOuterCornerStairs[i].Transform(transformation);
-				transformedRightSide[i] = GenerateSide(rightSide_Default, rightSide, uvSetup, GeneralDirection3D.Right);
-				transformedRightSide[i].Transform(transformation);
-				transformedLeftSide[i] = GenerateSide(leftSide_Default, leftSide, uvSetup, GeneralDirection3D.Left);
-				transformedLeftSide[i].Transform(transformation);
-				transformedBackSide[i] = GenerateSide(backSide_Default, backSide, uvSetup, GeneralDirection3D.Forward);
-				transformedBackSide[i].Transform(transformation);
-				transformedBottom[i] = GenerateSide(bottom_Default, bottom, uvSetup, GeneralDirection3D.Down);
-				transformedBottom[i].Transform(transformation);
+				transformedSimpleStairs[i] = GenerateSide(simpleStairs_Default, simpleStairs, transformation, uvSetup, GeneralDirection3D.Up); 
+				transformedInnerCornerStairs[i] = GenerateSide(innerCornerStairs_Default, innerCornerStairs, transformation, uvSetup, GeneralDirection3D.Up); 
+				transformedOuterCornerStairs[i] = GenerateSide(outerCornerStairs_Default, outerCornerStairs, transformation, uvSetup, GeneralDirection3D.Up); 
+				transformedRightSide[i] = GenerateSide(rightSide_Default, rightSide, transformation, uvSetup, GeneralDirection3D.Right); 
+				transformedLeftSide[i] = GenerateSide(leftSide_Default, leftSide, transformation, uvSetup, GeneralDirection3D.Left); 
+				transformedFrontSide[i] = GenerateSide(frontSide_Default, frontSide, transformation, uvSetup, GeneralDirection3D.Forward); 
+				transformedBottom[i] = GenerateSide(bottom_Default, bottom, transformation, uvSetup, GeneralDirection3D.Down); 
 
-				transformedRightSide2[i] = GenerateSide(rightSide_Default, rightSide, uvSetup, GeneralDirection3D.Right);
-				transformedRightSide2[i].Transform(rotateRight); 
-				transformedRightSide2[i].Transform(transformation);
-				transformedLeftSide2[i] = GenerateSide(leftSide_Default, leftSide, uvSetup, GeneralDirection3D.Left);
-				transformedLeftSide2[i].Transform(rotateRight);
-				transformedLeftSide2[i].Transform(transformation);
-				transformedBackSide2[i] = GenerateSide(backSide_Default, backSide, uvSetup, GeneralDirection3D.Forward);
-				transformedBackSide2[i].Transform(rotateRight);
-				transformedBackSide2[i].Transform(transformation);
+				transformedRightSide2[i] = GenerateSide(rightSide_Default, rightSide, transformation * rotateRight, uvSetup, GeneralDirection3D.Right); 
+				transformedLeftSide2[i] = GenerateSide(leftSide_Default, leftSide, transformation * rotateRight, uvSetup, GeneralDirection3D.Left); 
+				transformedFrontSide2[i] = GenerateSide(frontSide_Default, frontSide, transformation * rotateRight, uvSetup, GeneralDirection3D.Forward);
 			}
 		}
-		MeshBuilder GenerateSide(MeshBuilder defaultVersion, Mesh setupVersion, CubeUVSetup uvSetup, GeneralDirection3D uvProjection)
+
+		MeshBuilder GenerateSide(MeshBuilder defaultVersion, Mesh setupVersion, Matrix4x4 transformation, CubeUVSetup uvSetup, GeneralDirection3D uvProjection)
 		{
 			MeshBuilder builder;
 			if (setupVersion == null)
@@ -214,6 +211,8 @@ namespace VoxelSystem
 
 			if (uvSetup != null)
 				builder.ProjectUV(uvSetup, uvProjection);
+
+			builder.Transform(transformation);
 
 			return builder;
 		}
@@ -254,7 +253,7 @@ namespace VoxelSystem
 			AddMeshIfSideOpen(map, position, transformation, transformationIndex, transformedBottom, GeneralDirection3D.Down, meshBuilder);
 
 			// BACK MESH 
-			AddMeshIfSideOpen(map, position, transformation, transformationIndex, transformedBackSide, GeneralDirection3D.Forward, meshBuilder);
+			AddMeshIfSideOpen(map, position, transformation, transformationIndex, transformedFrontSide, GeneralDirection3D.Forward, meshBuilder);
 
 			// SIDE MESHES
 			AddSideMesh(map, position, shapeID, transformation, transformationIndex, autoSet, transformedRightSide, GeneralDirection3D.Right, meshBuilder);
@@ -287,8 +286,8 @@ namespace VoxelSystem
 			AddMeshIfSideOpen(map, position, transformation, transformationIndex, transformedBottom, GeneralDirection3D.Down, meshBuilder);
 
 			// BACK MESHES
-			AddMeshIfSideOpen(map, position, transformation, transformationIndex, transformedBackSide, GeneralDirection3D.Forward, meshBuilder);
-			AddMeshIfSideOpen(map, position, transformation, transformationIndex, transformedBackSide2, GeneralDirection3D.Right, meshBuilder);
+			AddMeshIfSideOpen(map, position, transformation, transformationIndex, transformedFrontSide, GeneralDirection3D.Forward, meshBuilder);
+			AddMeshIfSideOpen(map, position, transformation, transformationIndex, transformedFrontSide2, GeneralDirection3D.Right, meshBuilder);
 
 			// SIDE MESHES
 			AddSideMesh(map, position, shapeID, transformation, transformationIndex, autoSet, transformedLeftSide, GeneralDirection3D.Left, meshBuilder);
@@ -299,7 +298,7 @@ namespace VoxelSystem
 		{
 			GeneralDirection3D transformedDir = transformation.TransformDirection(localDirection);
 			bool isSideFilled = map.IsFilledSafe(position + transformedDir.ToVectorInt(), transformedDir.Opposite());
-			
+
 			if (!isSideFilled)
 				meshBuilder.Add(transformed[transformationIndex], position);
 		}

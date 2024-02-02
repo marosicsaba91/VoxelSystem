@@ -40,11 +40,11 @@ namespace VoxelSystem
 
 				int ni = nx + (ny * newW) + (nz * newW * newH);
 
-				Voxel v = voxelData[i];
-				CubicTransformation transformation = new(v.cubicTransformation);
+				Voxel voxel = voxelData[i];
+				CubicTransformation transformation = voxel.CubicTransformation;
 				transformation.Turn(axis, leftHandPositive);
-				v.cubicTransformation = transformation.ToByte();
-				newVoxelData[ni] = v;
+				voxel.CubicTransformation = transformation;
+				newVoxelData[ni] = voxel;
 			}
 
 			size = new Vector3Int(newW, newH, newD);
@@ -66,11 +66,11 @@ namespace VoxelSystem
 					o.z = size.z - o.z - 1;
 				int ni = o.x + (o.y * size.x) + (o.z * size.x * size.y);
 
-				Voxel v = voxelData[i];
-				CubicTransformation transformation = new(v.cubicTransformation);
+				Voxel voxel = voxelData[i];
+				CubicTransformation transformation = voxel.CubicTransformation;
 				transformation.Mirror(axis);
-				v.cubicTransformation = transformation.ToByte();
-				newVoxelData[ni] = v;
+				voxel.CubicTransformation = transformation;
+				newVoxelData[ni] = voxel;
 			}
 			voxelData = newVoxelData;
 		}

@@ -1,7 +1,9 @@
 using EasyInspector;
 using MeshUtility;
+using Microsoft.SqlServer.Server;
 using MUtility;
-using System.Collections.Generic; 
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace VoxelSystem
@@ -50,7 +52,7 @@ namespace VoxelSystem
 			byte extraVoxelData = voxel.extraData;
 			bool useAutoSetup = GetAutoSetup(extraVoxelData);
 			if (!useAutoSetup) return;
-			
+
 			// SetupFromMesh Rotation & StairShape
 			int wallNeighborsCount = 0;
 			int stairNeighborsCount = 0;
@@ -63,17 +65,17 @@ namespace VoxelSystem
 				if (neighbor.shapeId == shapeId)
 				{
 					stairNeighborsDirections[stairNeighborsCount] = direction;
-					stairNeighborsCount++; 
+					stairNeighborsCount++;
 				}
 				else
 				{
 					wallNeighborsDirections[wallNeighborsCount] = direction;
-					wallNeighborsCount++; 
+					wallNeighborsCount++;
 				}
 			}
 
-			StairShape stairType = GetStairType(extraVoxelData);
-			CubicTransformation transformation = new(voxel.cubicTransformation);
+			StairShape stairType = GetStairShape(extraVoxelData);
+			CubicTransformation transformation = voxel.CubicTransformation;
 
 			if (wallNeighborsCount == 1)
 			{
@@ -84,7 +86,7 @@ namespace VoxelSystem
 				{
 					GeneralDirection3D s1 = stairNeighborsDirections[0];
 					GeneralDirection3D s2 = stairNeighborsDirections[1];
-					if (s1 != s2.Opposite() && s1 != up && s2!= up)
+					if (s1 != s2.Opposite() && s1 != up && s2 != up)
 					{
 						stairType = StairShape.OuterCornerStair;
 
@@ -134,7 +136,7 @@ namespace VoxelSystem
 						transformation = CubicTransformation.FromDirections(side1.Opposite(), up.Opposite(), side2.Opposite());
 					}
 					else
-					{ 
+					{
 						transformation = CubicTransformation.FromDirections(xWall, yWall.Opposite(), zWall);
 					}
 				}
@@ -145,7 +147,7 @@ namespace VoxelSystem
 			}
 
 			extraVoxelData = SetStairType(extraVoxelData, stairType);
-			voxel.cubicTransformation = transformation.ToByte();
+			voxel.CubicTransformation = transformation;
 			voxel.extraData = extraVoxelData;
 			map.SetVoxel(position, voxel);
 		}
@@ -156,17 +158,17 @@ namespace VoxelSystem
 			for (int i = 0; i < voxelPositions.Count; i++)
 			{
 				Vector3Int voxelPosition = voxelPositions[i];
-				Voxel v = map.GetVoxel(voxelPosition);
+				Voxel voxel = map.GetVoxel(voxelPosition);
 
-				StairShape stairType = GetStairType(v.extraData);
+				StairShape stairType = GetStairShape(voxel.extraData);
 
 				if (isTransparent)
-					v.OpenAllSide();
+					voxel.OpenAllSide();
 				else if (stairType == StairShape.FullBlock)
-					v.CloseAllSide();
+					voxel.CloseAllSide();
 				else
 				{
-					CubicTransformation transformation = new(v.cubicTransformation);
+					CubicTransformation transformation = voxel.CubicTransformation;
 
 					GeneralDirection3D globalUp = transformation.Up;
 					GeneralDirection3D globalDown = globalUp.Opposite();
@@ -175,22 +177,21 @@ namespace VoxelSystem
 					GeneralDirection3D globalForward = transformation.Forward;
 					GeneralDirection3D globalBack = globalForward.Opposite();
 
-					v.SetSideClosed(globalUp, false);
-					v.SetSideClosed(globalDown, true);
-					v.SetSideClosed(globalRight, false);
-					v.SetSideClosed(globalBack, false);
+					voxel.SetSideClosed(globalUp, false);
+					voxel.SetSideClosed(globalDown, true);
+					voxel.SetSideClosed(globalRight, false);
+					voxel.SetSideClosed(globalBack, false);
 
 					bool leftClosed = stairType == StairShape.InnerCornerStair;
-					bool forwardClosed = stairType is StairShape.SimpleStair or StairShape.InnerCornerStair;
+					bool freontClosed = stairType is StairShape.SimpleStair or StairShape.InnerCornerStair;
 
-					v.SetSideClosed(globalLeft, leftClosed);
-					v.SetSideClosed(globalForward, forwardClosed);
+					voxel.SetSideClosed(globalLeft, leftClosed);
+					voxel.SetSideClosed(globalForward, freontClosed);
 				}
 
-				map.SetVoxel(voxelPosition, v);
+				map.SetVoxel(voxelPosition, voxel);
 			}
 		}
-
 
 		// ---------------------------------- Mesh Generation ------------------------------------------------------------
 
@@ -207,8 +208,8 @@ namespace VoxelSystem
 		{
 			Voxel voxelData = map.GetVoxel(position);
 			byte extraVoxelData = voxelData.extraData;
-			StairShape stairShape = GetStairType(extraVoxelData);
-			CubicTransformation transformation = new(voxelData.cubicTransformation);
+			StairShape stairShape = GetStairShape(extraVoxelData);
+			CubicTransformation transformation = voxelData.CubicTransformation;
 			bool autoSetup = GetAutoSetup(extraVoxelData);
 
 			meshSetup.BuildMesh(position, voxelData.shapeId, stairShape, transformation, autoSetup, map, meshBuilder);
@@ -216,29 +217,99 @@ namespace VoxelSystem
 
 		// ---------------------------------- Physical Mesh Generation ------------------------------------------------------------
 
-		public override void BuildPhysicalMeshSides(FlexibleMesh flexMesh, VoxelMap map, Vector3Int voxelPoint, ref int sideCounter)
+		public override void GetPhysicalSides(List<Vector3[]> resultSides, VoxelMap map, Vector3Int voxelPoint)
 		{
-			// GenerateRotatedPhysical();
-			/*
 			Voxel voxel = map.GetVoxel(voxelPoint);
-			CubicTransformation transformation = GetTransformation(voxel.extraData);
-			StairShape stairType = GetStairType(voxel.extraData);
+			StairShape stairType = GetStairShape(voxel.extraData);
 
-			GeneralDirection3D localBackInGlobal = transformation.TransformDirection(GeneralDirection3D.Back);
-			byte transformIndex = transformation.ToByte();
+			Matrix4x4 transformationMatrix =
+				Matrix4x4.Translate(Vector3.one * 0.5f) *
+				voxel.CubicTransformation.GetTransformationMatrix() *
+				Matrix4x4.Translate(Vector3.one * -0.5f);
 
-			if (stairType == StairShape.SimpleStair)
+			Vector3[][] meshSetup = stairType switch
 			{
-				flexMesh.AddFace(meshSetup.transformedSimpleStairs_Default[transformIndex], voxelPoint);
+				StairShape.SimpleStair => StairMeshSetup.simpleStair_PhysicalSides,
+				StairShape.InnerCornerStair => StairMeshSetup.innerCorner_PhysicalSides,
+				StairShape.OuterCornerStair => StairMeshSetup.outerCorner_PhysicalSides,
+				_ => null,
+			};
 
-				// if(voxel.IsSideClosed(localBackInGlobal))
-				flexMesh.AddFace(meshSetup.transformedBackSide_Physical[transformIndex], voxelPoint);
+			if (meshSetup == null) return;
 
-				if (voxel.IsSideClosed(GeneralDirection3D.Down))
-					flexMesh.AddFace(meshSetup.transformedBottom_Physical[transformIndex], voxelPoint);
-				return;
+			for (int i = 0; i < meshSetup.Length; i++)
+			{
+				Vector3[] localSide = meshSetup[i];
+
+				Vector3[] side = new Vector3[localSide.Length];
+				for (int j = 0; j < localSide.Length; j++)
+					side[j] = transformationMatrix.MultiplyPoint(localSide[j]) + voxelPoint;
+
+				resultSides.Add(side);
 			}
-			*/
+		}
+
+		public sealed override void GetNavigationEdges(List<DirectedEdge> resultEdges, VoxelMap map, Vector3Int voxelPosition)
+		{
+			Voxel voxel = map.GetVoxel(voxelPosition);
+			StairShape stairType = GetStairShape(voxel.extraData);
+			CubicTransformation cubicTransform = voxel.CubicTransformation;
+
+			AddFullSide(resultEdges, map, voxelPosition, cubicTransform.Down);
+			if (stairType is StairShape.FullBlock) return;
+			if (stairType is StairShape.SimpleStair or StairShape.InnerCornerStair)
+				AddFullSide(resultEdges, map, voxelPosition, cubicTransform.Forward);
+			if (stairType is StairShape.InnerCornerStair)
+				AddFullSide(resultEdges, map, voxelPosition, cubicTransform.Right);
+			if (stairType is StairShape.SimpleStair)
+				AddStairSide(resultEdges, voxelPosition, cubicTransform);
+		}
+
+		void AddStairSide(List<DirectedEdge> resultEdges, Vector3Int voxelPosition, CubicTransformation transformation)
+		{
+			GeneralDirection3D forward = transformation.Forward;
+			GeneralDirection3D up = transformation.Up;
+			GeneralDirection3D right = transformation.Right;
+			Vector3 center = Vector3.one * 0.5f + voxelPosition;
+			Vector3 forwardVector = forward.ToVector();
+			Vector3 backVector = -forwardVector;
+			Vector3 upVector = up.ToVector();
+			Vector3 rightVector = right.ToVector();
+			Vector3 normal = upVector + backVector;
+			Vector3 p1Vector = rightVector * 0.5f;
+			Vector3 p2Vector = (upVector + forwardVector) / 2f;
+
+			AddEdges(resultEdges, normal, p1Vector, p2Vector, center);
+		}
+
+		static void AddFullSide(List<DirectedEdge> resultEdges, VoxelMap map, Vector3Int voxelPosition, GeneralDirection3D direction)
+		{
+			if (map.TryGetVoxel(voxelPosition + direction.ToVectorInt(), out Voxel neighbor))
+			{
+				if (neighbor.IsSideClosed(direction.Opposite())) return;
+			}
+
+			GeneralDirection3D perpendicular1 = direction.GetPerpendicularNext();
+			GeneralDirection3D perpendicular2 = direction.GetPerpendicularPrevious();
+			Vector3 normal = direction.ToVector();
+			Vector3 p1Vector = perpendicular1.ToVector() * 0.5f;
+			Vector3 p2Vector = perpendicular2.ToVector() * 0.5f;
+			Vector3 center = Vector3.one * 0.5f + voxelPosition + normal * 0.5f;
+
+			AddEdges(resultEdges, normal, p1Vector, p2Vector, center);
+		}
+
+		private static void AddEdges(List<DirectedEdge> resultEdges, Vector3 normal, Vector3 offset1, Vector3 offset2, Vector3 center)
+		{
+			resultEdges.Add(new(center, center + offset1, normal));
+			resultEdges.Add(new(center, center + offset2, normal));
+			resultEdges.Add(new(center, center - offset1, normal));
+			resultEdges.Add(new(center, center - offset2, normal));
+
+			resultEdges.Add(new(center, center + offset1 + offset2, normal));
+			resultEdges.Add(new(center, center + offset1 - offset2, normal));
+			resultEdges.Add(new(center, center - offset1 + offset2, normal));
+			resultEdges.Add(new(center, center - offset1 - offset2, normal));
 		}
 
 		// EXTRA CONTROL METHODS ------------
@@ -257,7 +328,7 @@ namespace VoxelSystem
 			new ExtraVoxelControl<StairShape>()
 			{
 				name = "Stair Type",
-				getValue = GetStairType,
+				getValue = GetStairShape,
 				setValue = SetStairType
 			},
 			new ExtraVoxelControl<int>
@@ -281,48 +352,11 @@ namespace VoxelSystem
 			byte newData = originalExtraVoxelData.Set2Bit(extraInfo_isAutoSet, newValue ? 0 : 1);
 			return newData;
 		}
-		static StairShape GetStairType(byte extraData) => (StairShape)extraData.Get2Bit(extraInfo_stairType);
+		static StairShape GetStairShape(byte extraData) => (StairShape)extraData.Get2Bit(extraInfo_stairType);
 		static byte SetStairType(byte originalExtraData, StairShape newValue) =>
 			 originalExtraData.Set2Bit(extraInfo_stairType, (int)newValue);
 		static int GetLevel(byte extraVoxelData) => extraVoxelData.Get2Bit(extraInfo_level);
 		static byte SetLevel(byte originalExtraVoxelData, int newValue) =>
 			originalExtraVoxelData.Set2Bit(extraInfo_level, newValue);
-
-		/*
-		static ushort SetTransformation(ushort originalExtraData, CubicTransformation newValue) =>
-			originalExtraData.SetByte(0, newValue.ToByte());
-
-		static GeneralDirection3D GetUpDirection(ushort extraVoxelData) => GetTransformation(extraVoxelData).upDirection;
-
-		static ushort SetUpDirection(ushort originalExtraValue, GeneralDirection3D value)
-		{
-			CubicTransformation cubicTransformation = new((byte)originalExtraValue)
-			{
-				upDirection = value
-			};
-			return originalExtraValue.SetByte(0, cubicTransformation.ToByte());
-		}
-		static int GetRotation(ushort extraVoxelData) => GetTransformation(extraVoxelData).verticalRotation;
-		static ushort SetRotation(ushort originalExtraValue, int value)
-		{
-			value %= 4;
-			CubicTransformation cubicTransformation = new((byte)originalExtraValue)
-			{
-				verticalRotation = value
-			};
-			return originalExtraValue.SetByte(0, cubicTransformation.ToByte());
-		}
-
-		static bool GetFlip(ushort extraVoxelData) => GetTransformation(extraVoxelData).isVerticalFlipped;
-
-		static ushort SetFlip(ushort originalExtraValue, bool value)
-		{
-			CubicTransformation cubicTransformation = new((byte)originalExtraValue)
-			{
-				isVerticalFlipped = value
-			};
-			return originalExtraValue.SetByte(0, cubicTransformation.ToByte());
-		}
-		*/
 	}
 }

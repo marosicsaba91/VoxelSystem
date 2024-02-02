@@ -19,7 +19,7 @@ MonoBehaviour:
   previewTransformation:
     upDirection: 0
     verticalRotation: 0
-    verticalFlip: 0
+    isVerticalFlipped: 0
   quickVersion: {fileID: 0}
   previewMeshBuilder:
     vertices:

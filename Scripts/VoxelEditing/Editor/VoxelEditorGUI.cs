@@ -567,8 +567,8 @@ namespace VoxelSystem
 			if (!voxelEditor.SelectedShape.SupportsTransformation) return;
 
 			Voxel voxelValue = voxelEditor.SelectedVoxelValue;
-			CubicTransformation transformation = new(voxelValue.cubicTransformation);
-			voxelValue.cubicTransformation = VoxelShapeBuilderEditor.DrawCubicTransformation(transformation, ref position).ToByte();
+			CubicTransformation transformation = voxelValue.CubicTransformation;
+			voxelValue.CubicTransformation = VoxelShapeBuilderEditor.DrawCubicTransformation(transformation, ref position);
 			voxelEditor.SelectedVoxelValue = voxelValue;
 		}
 
@@ -608,7 +608,7 @@ namespace VoxelSystem
 			customMeshPreview.SetDirty();
 
 			int shapeId = voxelEditor.SelectedShapeId;
-			byte cubicTransformation = voxelEditor.SelectedVoxelValue.cubicTransformation;
+			byte cubicTransformation = voxelEditor.SelectedVoxelValue.cubicTransformationIndex;
 			byte extraVoxelData = voxelEditor.SelectedVoxelValue.extraData;
 
 			if (shapeId != lastPreviewedShapeIndex ||
