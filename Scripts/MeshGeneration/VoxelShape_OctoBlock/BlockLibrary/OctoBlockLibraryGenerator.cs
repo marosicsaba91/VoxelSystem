@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using MUtility;
 using JetBrains.Annotations;
 using UnityEngine;
-using EasyInspector;
+using EasyEditor;
 using Benchmark;
 using MeshUtility;
 
@@ -59,8 +59,8 @@ namespace VoxelSystem
 		 
 		// BUTTONS
 		[Header("Actions")]
-		[SerializeField, UsedImplicitly] EasyMember clearLibrary = new(nameof(Clear));
-		[SerializeField, UsedImplicitly] EasyMember regenerateLibrary = new(nameof(RegenerateLibrary));
+		[SerializeField, UsedImplicitly] EasyButton clearLibrary = new(nameof(Clear));
+		[SerializeField, UsedImplicitly] EasyButton regenerateLibrary = new(nameof(RegenerateLibrary));
 
 		// -------------------------------------------------------------------------------------------------------------
 

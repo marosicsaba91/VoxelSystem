@@ -1,5 +1,5 @@
 using Benchmark;
-using EasyInspector;
+using EasyEditor;
 using MeshUtility;
 using MUtility;
 using System;
@@ -39,9 +39,9 @@ namespace VoxelSystem
 		[SerializeField] bool autoRegenerateMeshes = true;
 
 		[SerializeField, FormerlySerializedAs("destination")] MeshDestination meshDestination = new();
-		[SerializeField] EasyMember createQuickMeshFile = new(nameof(CreateQuickMeshFile));
-		[SerializeField] EasyMember createFullMeshFile = new(nameof(CreateFullMeshFile));
-		[SerializeField] EasyMember regenerateMeshes = new(nameof(RegenerateMeshesFinal));
+		[SerializeField] EasyButton createQuickMeshFile = new(nameof(CreateQuickMeshFile));
+		[SerializeField] EasyButton createFullMeshFile = new(nameof(CreateFullMeshFile));
+		[SerializeField] EasyButton regenerateMeshes = new(nameof(RegenerateMeshesFinal));
 
 		[Header("Benchmarking")]
 		[SerializeField] bool doBenchmark;

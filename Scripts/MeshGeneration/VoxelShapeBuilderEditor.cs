@@ -1,6 +1,6 @@
 ﻿#if UNITY_EDITOR
 
-using EasyInspector;
+using EasyEditor;
 using MUtility;
 using System.Collections.Generic;
 using UnityEditor;
@@ -32,7 +32,7 @@ namespace VoxelSystem
 			Rect messageRect = GUILayoutUtility.GetRect(fullWidth, 24);
 			EasyMessageDrawer.DrawMessage(messageRect,
 				"Use another Shape for quick generation",
-				EasyInspector.MessageType.Info, 12);
+				EasyEditor.MessageType.Info, 12);
 			EditorGUILayout.PropertyField(quickVersionProperty);
 			EditorGUILayout.Space();
 			CustomMeshPreview preview = builder.meshPreview;
@@ -100,12 +100,12 @@ namespace VoxelSystem
 			Rect full = position.SliceOutLine();
 			position.RemoveOneSpace();
 
-			Rect r = full.SliceOut(100, GeneralDirection2D.Left);
+			Rect r = full.SliceOut(100, Side.Left);
 			GUIContent gUIContent = new("Transformation", null, "Up Direction   /   Vertical Mirroring   /   Vertical Rotation");
 			EditorGUI.LabelField(r, gUIContent);
-			r = full.SliceOut(80, GeneralDirection2D.Left); 
+			r = full.SliceOut(80, Side.Left); 
 			newTransform.upDirection = (GeneralDirection3D)EditorGUI.EnumPopup(r, transformation.upDirection);
-			r = full.SliceOut(18, GeneralDirection2D.Left); 
+			r = full.SliceOut(18, Side.Left); 
 			newTransform.isVerticalFlipped = EditorGUI.Toggle(r, transformation.isVerticalFlipped); 
 			newTransform.verticalRotation = EditorGUI.IntSlider(full, transformation.verticalRotation, 0, 3);
 

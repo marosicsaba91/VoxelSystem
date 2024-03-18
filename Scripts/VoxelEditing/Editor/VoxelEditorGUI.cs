@@ -6,7 +6,7 @@ using System.Linq;
 using System;
 using UnityEditor;
 using UnityEngine;
-using EasyInspector;
+using EasyEditor;
 using MeshUtility;
 
 namespace VoxelSystem
@@ -590,7 +590,7 @@ namespace VoxelSystem
 		static byte lastCubicTransformation = 0;
 		static byte lastExtraVoxelData = 0;
 
-		public static void DrawVoxelPreview(VoxelEditor voxelEditor, ref Rect position, GeneralDirection2D drawTo)
+		public static void DrawVoxelPreview(VoxelEditor voxelEditor, ref Rect position, Side drawTo)
 		{
 			if (voxelEditor.ShapePalette == null) return;
 			VoxelShapeBuilder shape = voxelEditor.ShapePalette.GetBuilder(voxelEditor.SelectedShapeId);

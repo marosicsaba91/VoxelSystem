@@ -13,7 +13,7 @@ internal class VoxelEditorSettings : ScriptableObject
 		get
 		{
 			if (instance == null)
-				instance = ScriptableObjectUtility.GetFromResources<VoxelEditorSettings>();
+				instance = MUtility.ScriptableObjectUtility.GetFromResources<VoxelEditorSettings>();
 
 			return instance;
 		}

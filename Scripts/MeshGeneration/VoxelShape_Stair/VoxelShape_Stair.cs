@@ -1,4 +1,4 @@
-using EasyInspector;
+using EasyEditor;
 using MeshUtility;
 using Microsoft.SqlServer.Server;
 using MUtility;
@@ -217,7 +217,7 @@ namespace VoxelSystem
 
 		// ---------------------------------- Physical Mesh Generation ------------------------------------------------------------
 
-		public override void GetPhysicalSides(List<Vector3[]> resultSides, VoxelMap map, Vector3Int voxelPoint)
+		public override void GetPhysicalSides(List<Vector3[]> resultSides, VoxelMap map, Vector3Int voxelPoint)   // LEGACY?
 		{
 			Voxel voxel = map.GetVoxel(voxelPoint);
 			StairShape stairType = GetStairShape(voxel.extraData);
@@ -255,34 +255,61 @@ namespace VoxelSystem
 			StairShape stairType = GetStairShape(voxel.extraData);
 			CubicTransformation cubicTransform = voxel.CubicTransformation;
 
-			AddFullSide(resultEdges, map, voxelPosition, cubicTransform.Down);
+			AddFullSideNavigationEdges(resultEdges, map, voxelPosition, cubicTransform.Down);
 			if (stairType is StairShape.FullBlock) return;
 			if (stairType is StairShape.SimpleStair or StairShape.InnerCornerStair)
-				AddFullSide(resultEdges, map, voxelPosition, cubicTransform.Forward);
+				AddFullSideNavigationEdges(resultEdges, map, voxelPosition, cubicTransform.Forward);
 			if (stairType is StairShape.InnerCornerStair)
-				AddFullSide(resultEdges, map, voxelPosition, cubicTransform.Right);
+				AddFullSideNavigationEdges(resultEdges, map, voxelPosition, cubicTransform.Right);
+
 			if (stairType is StairShape.SimpleStair)
-				AddStairSide(resultEdges, voxelPosition, cubicTransform);
+				AddSimpleStairNavigationEdges(resultEdges, voxelPosition, cubicTransform);
+
+			if (stairType is StairShape.SimpleStair or StairShape.OuterCornerStair)
+				AddStairSideNavigationEdges(resultEdges, voxelPosition, cubicTransform.Right, cubicTransform.Back, cubicTransform.Up);
+
+			if (stairType is StairShape.SimpleStair or StairShape.InnerCornerStair)
+				AddStairSideNavigationEdges(resultEdges, voxelPosition, cubicTransform.Left, cubicTransform.Back, cubicTransform.Up);
+
+			if (stairType is StairShape.OuterCornerStair)
+				AddStairSideNavigationEdges(resultEdges, voxelPosition, cubicTransform.Forward, cubicTransform.Right, cubicTransform.Up);
+
+			if (stairType is StairShape.InnerCornerStair)
+				AddStairSideNavigationEdges(resultEdges, voxelPosition, cubicTransform.Back, cubicTransform.Right, cubicTransform.Up);
+
+
 		}
 
-		void AddStairSide(List<DirectedEdge> resultEdges, Vector3Int voxelPosition, CubicTransformation transformation)
+		void AddSimpleStairNavigationEdges(List<DirectedEdge> resultEdges, Vector3Int voxelPosition, CubicTransformation transformation)
 		{
 			GeneralDirection3D forward = transformation.Forward;
 			GeneralDirection3D up = transformation.Up;
 			GeneralDirection3D right = transformation.Right;
 			Vector3 center = Vector3.one * 0.5f + voxelPosition;
 			Vector3 forwardVector = forward.ToVector();
-			Vector3 backVector = -forwardVector;
 			Vector3 upVector = up.ToVector();
 			Vector3 rightVector = right.ToVector();
-			Vector3 normal = upVector + backVector;
+			Vector3 normal = upVector - forwardVector;
 			Vector3 p1Vector = rightVector * 0.5f;
 			Vector3 p2Vector = (upVector + forwardVector) / 2f;
 
-			AddEdges(resultEdges, normal, p1Vector, p2Vector, center);
+			AddRectNavigationEdges(resultEdges, normal, p1Vector, p2Vector, center);
 		}
 
-		static void AddFullSide(List<DirectedEdge> resultEdges, VoxelMap map, Vector3Int voxelPosition, GeneralDirection3D direction)
+		void AddStairSideNavigationEdges(List<DirectedEdge> resultEdges, Vector3Int voxelPosition, GeneralDirection3D normal, GeneralDirection3D forward, GeneralDirection3D up)
+		{
+			Vector3 normalVector = normal.ToVector();
+			Vector3 voxelCenter = voxelPosition + Vector3.one * 0.5f;
+			Vector3 sideCenter = voxelCenter + normalVector * 0.5f;
+			Vector3 backVector = -forward.ToVector() *0.5f;
+			Vector3 downVector = -up.ToVector() * 0.5f; 
+			 
+			resultEdges.Add(new(sideCenter, sideCenter + backVector, normalVector));
+			resultEdges.Add(new(sideCenter, sideCenter + downVector, normalVector));
+		}
+
+
+		static void AddFullSideNavigationEdges(List<DirectedEdge> resultEdges, VoxelMap map, Vector3Int voxelPosition, GeneralDirection3D direction)
 		{
 			if (map.TryGetVoxel(voxelPosition + direction.ToVectorInt(), out Voxel neighbor))
 			{
@@ -296,10 +323,10 @@ namespace VoxelSystem
 			Vector3 p2Vector = perpendicular2.ToVector() * 0.5f;
 			Vector3 center = Vector3.one * 0.5f + voxelPosition + normal * 0.5f;
 
-			AddEdges(resultEdges, normal, p1Vector, p2Vector, center);
+			AddRectNavigationEdges(resultEdges, normal, p1Vector, p2Vector, center);
 		}
 
-		private static void AddEdges(List<DirectedEdge> resultEdges, Vector3 normal, Vector3 offset1, Vector3 offset2, Vector3 center)
+		private static void AddRectNavigationEdges(List<DirectedEdge> resultEdges, Vector3 normal, Vector3 offset1, Vector3 offset2, Vector3 center)
 		{
 			resultEdges.Add(new(center, center + offset1, normal));
 			resultEdges.Add(new(center, center + offset2, normal));

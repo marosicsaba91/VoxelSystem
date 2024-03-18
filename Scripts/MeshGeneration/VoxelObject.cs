@@ -1,4 +1,4 @@
-using EasyInspector;
+using EasyEditor;
 using System.IO; 
 using UnityEngine;
 
@@ -10,8 +10,8 @@ namespace VoxelSystem
 		[SerializeField, HideInInspector] ArrayVoxelMap innerMap = null;
 		[SerializeField, HideInInspector] SharedVoxelMap sharedVoxelMap = null;
 		[Header("Voxel Map")]
-		[SerializeField] EasyMember sharedMap = new(nameof(SharedVoxelMap));
-		[SerializeField, DisableIf(nameof(HasSharedMap))] EasyMember exportVoxelMapAsAsset =
+		[SerializeField] EasyProperty sharedMap = new(nameof(SharedVoxelMap));
+		[SerializeField, DisableIf(nameof(HasSharedMap))] EasyProperty exportVoxelMapAsAsset =
 			new(nameof(ExportVoxelMap));
 		[SerializeField, HideInInspector] SharedVoxelMap _lastFrameSharedMap = null;
 
