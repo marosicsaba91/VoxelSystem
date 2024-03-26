@@ -11,7 +11,7 @@ namespace VoxelSystem
 		[SerializeField, HideInInspector] SharedVoxelMap sharedVoxelMap = null;
 		[Header("Voxel Map")]
 		[SerializeField] EasyProperty sharedMap = new(nameof(SharedVoxelMap));
-		[SerializeField, DisableIf(nameof(HasSharedMap))] EasyProperty exportVoxelMapAsAsset =
+		[SerializeField, DisableIf(nameof(HasSharedMap))] EasyButton exportVoxelMapAsAsset =
 			new(nameof(ExportVoxelMap));
 		[SerializeField, HideInInspector] SharedVoxelMap _lastFrameSharedMap = null;
 
