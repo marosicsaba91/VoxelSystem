@@ -1,7 +1,7 @@
 using EasyInspector;
 using MeshUtility;
 using MUtility;
-using System.Collections.Generic; 
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace VoxelSystem

@@ -2,10 +2,8 @@ using UnityEngine;
 using VoxelSystem;
 using System.Text;
 using System.Collections.Generic;
-
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
+using MUtility;
+using EasyEditor;
 
 public class VoxelTester : MonoBehaviour
 {
@@ -52,6 +50,28 @@ public class VoxelTester : MonoBehaviour
 
 	void OnDrawGizmosSelected()
 	{
+		if (lastHitObject != null)
+		{
+			Gizmos.matrix = lastHitObject.transform.localToWorldMatrix;
+			Gizmos.color = selectionColor;
+			DrawCube(lastHitVoxel.voxelIndex);
+			EasyHandles.Matrix = Matrix4x4.identity;
+			Gizmos.matrix = Matrix4x4.identity;
+		}
+
+		if (showOnlyOnSelected)
+			Draw();
+	}
+
+	void OnDrawGizmos()
+	{
+		if (!showOnlyOnSelected)
+			Draw();
+
+	}
+
+	void Draw()
+	{
 #if UNITY_EDITOR
 		if (lastHitObject != null)
 		{
@@ -65,9 +85,9 @@ public class VoxelTester : MonoBehaviour
 		if (enabledTest && testedVoxelObject != null)
 		{
 			Gizmos.matrix = testedVoxelObject.transform.localToWorldMatrix;
-			Handles.matrix = testedVoxelObject.transform.localToWorldMatrix;
-			Gizmos.color = Color.green;
-			Handles.color = Color.magenta;
+			EasyHandles.Matrix = testedVoxelObject.transform.localToWorldMatrix;
+			Gizmos.color = selectedColor;
+			EasyHandles.Color = selectionColor;
 
 			DrawCube(testedVoxelIndex);
 			
@@ -75,8 +95,7 @@ public class VoxelTester : MonoBehaviour
 			// DrawVoxelTransform(testedVoxelObject, testedVoxelIndex);
 			DrawVoxelSides(testedVoxelObject, testedVoxelIndex);
 		}
-
-		Handles.matrix = Matrix4x4.identity;
+		EasyHandles.Matrix = Matrix4x4.identity;
 		Gizmos.matrix = Matrix4x4.identity;
 #endif
 	}
@@ -88,8 +107,7 @@ public class VoxelTester : MonoBehaviour
 	}
 
 	void DrawVoxelInfo(VoxelObject obj, Vector3Int index)
-	{
-#if UNITY_EDITOR
+	{ 
 		if (!showVoxelInfo) return;
 
 		VoxelMap map = obj.GetVoxelMap();
@@ -137,8 +155,8 @@ public class VoxelTester : MonoBehaviour
 		ushort extraVoxelData = voxelValue.extraVoxelData;
 		text.AppendLine("ExtraVoxelData: " + extraVoxelData);
 
-		Handles.Label(position, text.ToString());
-#endif
+		EasyHandles.Color = textColor;
+		EasyHandles.Label(position, text.ToString());
 	}
 
 	void DrawVoxelSides(VoxelObject obj, Vector3Int index)
