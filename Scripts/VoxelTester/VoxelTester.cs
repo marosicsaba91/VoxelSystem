@@ -3,6 +3,8 @@ using VoxelSystem;
 using System.Text;
 using System.Collections.Generic;
 using MUtility;
+using EasyEditor;
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -193,9 +195,8 @@ public class VoxelTester : MonoBehaviour
 		ushort extraVoxelData = voxelValue.extraData;
 		text.AppendLine("ExtraVoxelData: " + extraVoxelData);
 
-		Handles.color = textColor;
-		Handles.Label(position, text.ToString());
-#endif
+		EasyHandles.Color = textColor;
+		EasyHandles.Label(position, text.ToString());
 	}
 
 	void DrawVoxelSides(VoxelObject obj, Vector3Int index)
