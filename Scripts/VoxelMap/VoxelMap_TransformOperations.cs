@@ -98,7 +98,7 @@ namespace VoxelSystem
 				scale *= -1;
 				Mirror(axis);
 			}
-			if (scale != 1 && scale != 0)
+			if (scale is not 1 and not 0)
 			{
 				Resize(positiveDir, (scale - 1) * size);
 			}

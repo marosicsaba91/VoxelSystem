@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using EasyInspector;
+using EasyEditor;
 using MUtility;
 using UnityEngine;
 using UnityEngine.Serialization;

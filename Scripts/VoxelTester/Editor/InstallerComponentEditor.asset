@@ -9,7 +9,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c6f9b53e97e65d34781be6bf6050a15c, type: 3}
-  m_Name: FlyingAgentSetting
+  m_Script: {fileID: 11500000, guid: 1134886e794e4d43a6bad505ce43a95d, type: 3}
+  m_Name: InstallerComponentEditor
   m_EditorClassIdentifier: 
-  allowedDirections: 1

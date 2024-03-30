@@ -5,7 +5,7 @@ using UnityEngine.Serialization;
 namespace VoxelSystem
 {
 	[Serializable]
-	public struct Voxel 
+	public struct Voxel
 	{
 		// The sequence of variables is NOT rearrangeable:
 		// The type is exactly 8 byte now, but it can grow to 12 byte with the wrong order
@@ -13,22 +13,26 @@ namespace VoxelSystem
 		[FormerlySerializedAs("shapeID")] public int shapeId;
 		public byte materialIndex;
 		public byte closednessInfo;
-		public ushort extraVoxelData;
+		public byte cubicTransformationIndex;
+		public byte extraData;
 
-		public Voxel(int shapeId, byte materialIndex, ushort extraVoxelData, byte closednessInfo)
+		public Voxel(int shapeId, byte materialIndex, byte closednessInfo, byte cubicTransformationIndex, byte extraData)
 		{
 			this.shapeId = shapeId;
 			this.materialIndex = materialIndex;
-			this.extraVoxelData = extraVoxelData;
 			this.closednessInfo = closednessInfo;
+			this.cubicTransformationIndex = cubicTransformationIndex;
+			this.extraData = extraData;
 		}
 
 		public Voxel(long longData)
 		{
+			extraData = (byte)(longData & 0xFF);
+			longData >>= 8;
+			cubicTransformationIndex = (byte)(longData & 0xFF);
+			longData >>= 8;
 			closednessInfo = (byte)(longData & 0xFF);
 			longData >>= 8;
-			extraVoxelData = (ushort)(longData & 0xFFFF);
-			longData >>= 16;
 			materialIndex = (byte)(longData & 0xFF);
 			longData >>= 8;
 			shapeId = (int)longData;
@@ -39,10 +43,12 @@ namespace VoxelSystem
 			long longData = shapeId;
 			longData <<= 8;
 			longData |= materialIndex;
-			longData <<= 16;
-			longData |= extraVoxelData;
 			longData <<= 8;
 			longData |= closednessInfo;
+			longData <<= 8;
+			longData |= cubicTransformationIndex;
+			longData <<= 8;
+			longData |= extraData;
 			return longData;
 		}
 
@@ -50,7 +56,7 @@ namespace VoxelSystem
 		{
 			shapeId = 0,
 			materialIndex = 0,
-			extraVoxelData = 0,
+			extraData = 0,
 			closednessInfo = 0,
 		};
 
@@ -58,12 +64,24 @@ namespace VoxelSystem
 		public bool IsFilled() => !IsEmpty();
 		public bool IsFilled(GeneralDirection3D side) => !IsEmpty() && IsSideClosed(side);
 
-		public static bool operator ==(Voxel a, Voxel b) => a.shapeId == b.shapeId && a.materialIndex == b.materialIndex && a.extraVoxelData == b.extraVoxelData && a.closednessInfo == b.closednessInfo;
+		public CubicTransformation CubicTransformation
+		{
+			get => new(cubicTransformationIndex);
+			set => cubicTransformationIndex = value.ToByte();
+		}
+
+		public static bool operator ==(Voxel a, Voxel b) =>
+			a.shapeId == b.shapeId &&
+			a.materialIndex == b.materialIndex &&
+			a.closednessInfo == b.closednessInfo &&
+			a.cubicTransformationIndex == b.cubicTransformationIndex &&
+			a.extraData == b.extraData;
+
 		public static bool operator !=(Voxel a, Voxel b) => !(a == b);
 		public override bool Equals(object obj) => obj is Voxel other && this == other;
-		public override int GetHashCode() => shapeId.GetHashCode() ^ materialIndex.GetHashCode() ^ extraVoxelData.GetHashCode() ^ closednessInfo.GetHashCode();
+		public override int GetHashCode() => shapeId.GetHashCode() ^ materialIndex.GetHashCode() ^ closednessInfo.GetHashCode() ^ cubicTransformationIndex.GetHashCode() ^ extraData.GetHashCode();
 
-		public bool IsSideClosed(GeneralDirection3D side) => 
+		public bool IsSideClosed(GeneralDirection3D side) =>
 			(closednessInfo & (1 << (int)side)) != 0;
 
 		public void SetSideClosed(GeneralDirection3D side, bool closed)

@@ -1,4 +1,4 @@
-using EasyInspector;
+using EasyEditor;
 using System.IO; 
 using UnityEngine;
 
@@ -10,8 +10,8 @@ namespace VoxelSystem
 		[SerializeField, HideInInspector] ArrayVoxelMap innerMap = null;
 		[SerializeField, HideInInspector] SharedVoxelMap sharedVoxelMap = null;
 		[Header("Voxel Map")]
-		[SerializeField] EasyMember sharedMap = new(nameof(SharedVoxelMap));
-		[SerializeField, DisableIf(nameof(HasSharedMap))] EasyMember exportVoxelMapAsAsset =
+		[SerializeField] EasyProperty sharedMap = new(nameof(SharedVoxelMap));
+		[SerializeField, DisableIf(nameof(HasSharedMap))] EasyButton exportVoxelMapAsAsset =
 			new(nameof(ExportVoxelMap));
 		[SerializeField, HideInInspector] SharedVoxelMap _lastFrameSharedMap = null;
 
@@ -49,7 +49,7 @@ namespace VoxelSystem
 		}
 
 		public VoxelMap GetVoxelMap()
-		{
+		{ 
 			if (sharedVoxelMap == null)
 				return innerMap;
 			else
@@ -67,7 +67,7 @@ namespace VoxelSystem
 		{
 			if (Application.isPlaying) return;
 
-			EditorUpdate_Map();
+			EditorUpdate_VoxelMap();
 			EditorUpdate_MeshGeneration();
 		}
 
@@ -91,7 +91,7 @@ namespace VoxelSystem
 				map.MapChangedEvent -= OnMapChanged;
 		}
 
-		void EditorUpdate_Map()
+		void EditorUpdate_VoxelMap()
 		{
 			if (_lastFrameSharedMap == null && sharedVoxelMap == null)
 			{
@@ -118,7 +118,6 @@ namespace VoxelSystem
 		void ExportVoxelMap()
 		{
 #if UNITY_EDITOR
-
 			string path = UnityEditor.EditorUtility.SaveFilePanelInProject("Save Voxel Map", "VoxelMap", "asset", "Save Voxel Map");
 			if (path.Length != 0)
 			{

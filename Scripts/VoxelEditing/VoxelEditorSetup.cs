@@ -113,7 +113,7 @@
 			selectedVoxelValue.shapeId = UnityEditor.EditorPrefs.GetInt(selectedVoxelValue_ShapeId, selectedVoxelValue.shapeId);
 			selectedVoxelValue.materialIndex = (byte)UnityEditor.EditorPrefs.GetInt(selectedVoxelVoxel_MaterialIndex, selectedVoxelValue.materialIndex);
 			selectedVoxelValue.closednessInfo = (byte)UnityEditor.EditorPrefs.GetInt(selectedVoxelVoxel_ClosednessInfo, selectedVoxelValue.closednessInfo);
-			selectedVoxelValue.extraVoxelData = (byte)UnityEditor.EditorPrefs.GetInt(selectedVoxelVoxel_ExtraVoxelData, selectedVoxelValue.extraVoxelData);
+			selectedVoxelValue.extraData = (byte)UnityEditor.EditorPrefs.GetInt(selectedVoxelVoxel_ExtraVoxelData, selectedVoxelValue.extraData);
 #endif
 			areToolsLoaded = true;
 		}
@@ -128,7 +128,7 @@
 			UnityEditor.EditorPrefs.SetInt(selectedVoxelValue_ShapeId, selectedVoxelValue.shapeId);
 			UnityEditor.EditorPrefs.SetInt(selectedVoxelVoxel_MaterialIndex, selectedVoxelValue.materialIndex);
 			UnityEditor.EditorPrefs.SetInt(selectedVoxelVoxel_ClosednessInfo, selectedVoxelValue.closednessInfo);
-			UnityEditor.EditorPrefs.SetInt(selectedVoxelVoxel_ExtraVoxelData, selectedVoxelValue.extraVoxelData);
+			UnityEditor.EditorPrefs.SetInt(selectedVoxelVoxel_ExtraVoxelData, selectedVoxelValue.extraData);
 #endif
 		}
 	}

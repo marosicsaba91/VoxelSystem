@@ -3,8 +3,8 @@ using JetBrains.Annotations;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine; 
-using EasyInspector;
-using ReadOnlyAttribute = EasyInspector.ReadOnlyAttribute;
+using EasyEditor;
+using ReadOnlyAttribute = EasyEditor.ReadOnlyAttribute;
 using MeshUtility;
 
 namespace VoxelSystem

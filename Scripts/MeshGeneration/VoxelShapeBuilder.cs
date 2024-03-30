@@ -17,7 +17,8 @@ namespace VoxelSystem
 		[SerializeField] string niceName;
 		[Space]
 		[HideInInspector] public Material previewMaterial;
-		[HideInInspector] public ushort previewExtraSetting;
+		[HideInInspector] public byte previewExtraSetting;
+		[HideInInspector] public CubicTransformation previewTransformation = CubicTransformation.identity;
 		[HideInInspector] public VoxelShapeBuilder quickVersion;
 
 		public readonly CustomMeshPreview meshPreview = new();
@@ -25,38 +26,16 @@ namespace VoxelSystem
 		protected static readonly Vector3 half = Vector3.one * 0.5f;
 
 		public Material PreviewMaterial => previewMaterial;
-		public ushort PreviewExtraSetting => previewExtraSetting;
-
 		public int VoxelId => voxelId;
 
-
-		protected void OnValidate()
+		void OnValidate()
 		{
 			ValidateQuickVersion();
 			OnValidateInternal();
 			SetupMeshPreview();
-			/*
-#if UNITY_EDITOR
-			AssemblyReloadEvents.beforeAssemblyReload -= Dispose;
-			AssemblyReloadEvents.beforeAssemblyReload += Dispose;
-#endif
-			*/
 			if (voxelId == 0)
 				voxelId = Random.Range(0, int.MaxValue);
 		}
-
-		/*
-		void Dispose()
-		{
-			if (previewMesh != null)
-			{
-				DestroyImmediate(previewMesh);
-				previewMesh = null;
-			}
-
-			meshPreview.Dispose();
-		}
-		*/
 
 		void ValidateQuickVersion()
 		{
@@ -129,6 +108,7 @@ namespace VoxelSystem
 		}
 
 		protected abstract bool IsInitialized { get; }
+		public abstract bool SupportsTransformation { get; }
 
 		protected abstract void GenerateMeshData(
 			VoxelMap map,
@@ -167,7 +147,7 @@ namespace VoxelSystem
 
 		public void RecalculatePreviewMesh()
 		{
-			Voxel voxelValue = new(voxelId, 0, previewExtraSetting, 0);
+			Voxel voxelValue = new(voxelId, 0, 0, previewTransformation.ToByte(), previewExtraSetting);
 			ArrayVoxelMap map = ArrayVoxelMap.GetTestOneVoxelMap(voxelValue);
 
 			previewMeshBuilder.Clear();
@@ -210,15 +190,53 @@ namespace VoxelSystem
 			{ GeneralDirection3D.Back, new Vector3[]{ p000, p010, p110, p100 } },
 		};
 
-		public virtual void BuildPhysicalMeshSides(FlexibleMesh flexMesh, VoxelMap map, Vector3Int startPoint, ref int sideCounter)
+		public virtual void GetPhysicalSides(List<Vector3[]> resultSides, VoxelMap map, Vector3Int startPoint)
 		{
 			for (int i = 0; i < 6; i++)
 			{
 				GeneralDirection3D direction = DirectionUtility.generalDirection3DValues[i];
-				flexMesh.AddFace(sideDictionary[direction], startPoint);
-				sideCounter++;
+				Vector3[] localSide = sideDictionary[direction];
+
+				Vector3[] side = new Vector3[localSide.Length];
+				for (int j = 0; j < localSide.Length; j++)
+					side[j] += localSide[j] + startPoint;
+
+				resultSides.Add(side);
 			}
 		}
+
+		public virtual void GetNavigationEdges(List<DirectedEdge> resultEdges, VoxelMap map, Vector3Int voxelPosition)
+		{
+			Voxel voxel = map.GetVoxel(voxelPosition);
+			for (int i = 0; i < 6; i++)
+			{
+				GeneralDirection3D direction = DirectionUtility.generalDirection3DValues[i];
+
+				if (!voxel.IsSideClosed(direction)) continue;
+
+				if (map.TryGetVoxel(voxelPosition + direction.ToVectorInt(), out Voxel neighbor))
+					if (neighbor.IsSideClosed(direction.Opposite())) continue;
+
+				GeneralDirection3D perpendicular1 = direction.GetPerpendicularNext();
+				GeneralDirection3D perpendicular2 = direction.GetPerpendicularPrevious();
+
+				Vector3 normal = direction.ToVector();
+				Vector3 p1Vector = perpendicular1.ToVector() * 0.5f;
+				Vector3 p2Vector = perpendicular2.ToVector() * 0.5f;
+				Vector3 center = Vector3.one * 0.5f + voxelPosition + normal * 0.5f;
+
+				resultEdges.Add(new (center, center + p1Vector, normal));
+				resultEdges.Add(new (center, center + p2Vector, normal));
+				resultEdges.Add(new(center, center - p1Vector, normal));
+				resultEdges.Add(new(center, center - p2Vector, normal));
+
+				resultEdges.Add(new(center, center + p1Vector + p2Vector, normal));
+				resultEdges.Add(new(center, center + p1Vector - p2Vector, normal));
+				resultEdges.Add(new(center, center - p1Vector + p2Vector, normal));
+				resultEdges.Add(new(center, center - p1Vector - p2Vector, normal));
+			}
+		}
+
 	}
 }
 
@@ -228,19 +246,19 @@ public abstract class ExtraVoxelControl
 {
 	public string name;
 	public abstract Type DataType { get; }
-	public abstract object GetExtraData(ushort extraVoxelData);
-	public abstract ushort SetExtraData(ushort originalExtraVoxelData, object newValue);
+	public abstract object GetExtraData(byte extraVoxelData);
+	public abstract byte SetExtraData(byte originalExtraVoxelData, object newValue);
 }
 
 public class ExtraVoxelControl<T> : ExtraVoxelControl
 {
-	public delegate T GetValueDel(ushort voxelData);
-	public delegate ushort SetValueDel(ushort originalExtraVoxelData, T newValue);
+	public delegate T GetValueDel(byte voxelData);
+	public delegate byte SetValueDel(byte originalExtraVoxelData, T newValue);
 
 	public GetValueDel getValue;
 	public SetValueDel setValue;
-	public sealed override object GetExtraData(ushort extraVoxelData) => getValue(extraVoxelData);
-	public sealed override ushort SetExtraData(ushort originalExtraVoxelData, object newValue) => setValue(originalExtraVoxelData, (T)newValue);
+	public sealed override object GetExtraData(byte extraVoxelData) => getValue(extraVoxelData);
+	public sealed override byte SetExtraData(byte originalExtraVoxelData, object newValue) => setValue(originalExtraVoxelData, (T)newValue);
 	public sealed override Type DataType => typeof(T);
 }
 

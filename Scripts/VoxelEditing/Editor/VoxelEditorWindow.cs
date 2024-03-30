@@ -1,6 +1,7 @@
 ﻿#if UNITY_EDITOR
 
 using EasyEditor;
+using MUtility;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -18,7 +19,6 @@ namespace VoxelSystem
 		}
 
 		// Use old System for Drawing GUI
-
 		public void OnGUI()
 		{
 			foreach (Object item in Selection.objects)
@@ -88,9 +88,10 @@ namespace VoxelSystem
 			VoxelEditorGUI.DrawControlPanel(voxelEditor, ref contentRect);
 			contentRect.y += 6;
 			contentRect.height -= 6;
-			VoxelEditorGUI.DrawPalettes(voxelEditor, ref contentRect);			
-			VoxelEditorGUI.DrawExtraControls(voxelEditor, ref contentRect);			
-			VoxelEditorGUI.DrawVoxelPreview(voxelEditor, ref contentRect, GeneralDirection2D.Up);
+			VoxelEditorGUI.DrawPalettes(voxelEditor, ref contentRect);
+			VoxelEditorGUI.DrawExtraControls(voxelEditor, ref contentRect);		
+			VoxelEditorGUI.DrawCubicTransformation(voxelEditor, ref contentRect);	
+			VoxelEditorGUI.DrawVoxelPreview(voxelEditor, ref contentRect, Side.Up);
 
 			EditorGUILayout.GetControlRect(false, contentRect.y);
 			GUI.EndScrollView();

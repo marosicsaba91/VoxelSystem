@@ -13,11 +13,10 @@ namespace VoxelSystem
 
 		protected override IEnumerable<VoxelHandelInfo> GetHandeles(IVoxelEditor voxelEditor)
 		{
-			Vector3Int size = voxelEditor.GetMapOrSelectionSize();
 			for (int i = 0; i < DirectionUtility.generalDirection3DValues.Length; i++)
 			{
 				GeneralDirection3D side = DirectionUtility.generalDirection3DValues[i];
-				if (!IsMapSideVisible(voxelEditor, size, side)) continue;
+				if (!IsMapSideVisible(voxelEditor, side)) continue;
 				Vector3 position = GetMapSidePosition(voxelEditor, side);
 
 				string text = voxelEditor.HasSelection() ? null :
@@ -29,6 +28,7 @@ namespace VoxelSystem
 					coneType = HandeleConeType.Arrow,
 					position = position,
 					direction = side,
+					side = side,
 					text = text
 				};
 			}

@@ -9,6 +9,7 @@ namespace VoxelSystem
 	{
 		public Vector3 position;
 		public GeneralDirection3D direction;
+		public GeneralDirection3D side;
 		public HandeleConeType coneType;
 		public string text;
 	}
@@ -330,12 +331,15 @@ namespace VoxelSystem
 
 		// ------------------ Static Methods -----------------------------
 
-		protected static bool IsMapSideVisible(IVoxelEditor voxelEditor, Vector3 size, GeneralDirection3D side, float angleAllowed = 5)
+		protected static bool IsMapSideVisible(IVoxelEditor voxelEditor,  GeneralDirection3D side, float angleAllowed = 5)
 		{
+			Vector3 size = voxelEditor.GetMapOrSelectionSize();
+			Vector3 center = voxelEditor.GetMapOrSelectionCenter();
+
 			Vector3 direction = side.ToVectorInt();
 			Vector3 halfSize = size / 2f;
 			Vector3 halfNormalInSize = direction.MultiplyAllAxis(halfSize);
-			Vector3 planeOrigin = halfSize + halfNormalInSize;
+			Vector3 planeOrigin = center + halfNormalInSize;
 
 			// Transform points
 			direction = voxelEditor.Transform.TransformDirection(direction);

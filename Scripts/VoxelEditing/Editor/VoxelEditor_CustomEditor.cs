@@ -1,5 +1,5 @@
 #if UNITY_EDITOR
-using EasyInspector;
+using EasyEditor;
 using MUtility;
 using UnityEditor;
 using UnityEngine;
@@ -134,10 +134,10 @@ namespace VoxelSystem
 				VoxelEditorGUI.DrawControlPanel(voxelEditor, ref contentRect);
 				VoxelEditorGUI.DrawPalettes(voxelEditor, ref contentRect);
 
-				// VoxelEditorGUI.DrawVoxelTransformation(voxelEditor, ref contentRect, GeneralDirection2D.Up);
+				VoxelEditorGUI.DrawCubicTransformation(voxelEditor, ref contentRect);
 				VoxelEditorGUI.DrawExtraControls(voxelEditor, ref contentRect);
 
-				VoxelEditorGUI.DrawVoxelPreview(voxelEditor, ref contentRect, GeneralDirection2D.Up);
+				VoxelEditorGUI.DrawVoxelPreview(voxelEditor, ref contentRect, Side.Up);
 
 				EditorGUILayout.GetControlRect(false, 150); // ???
 			}

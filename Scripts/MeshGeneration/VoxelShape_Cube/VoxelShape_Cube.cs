@@ -33,9 +33,11 @@ namespace VoxelSystem
 		[SerializeField, HideInInspector] MeshBuilderList[] sideMeshCache = new MeshBuilderList[6];
 
 		protected override bool IsInitialized => sideMeshCache[0] != null && sideMeshCache[0].Count > 0;
+		public sealed override bool SupportsTransformation => false;
 
 		readonly List<CubeSide> allSides = new();
 		static readonly GeneralDirection3D[] directions = DirectionUtility.generalDirection3DValues;
+
 		protected override void InitializeCachedData()
 		{
 			if (sideMeshCache == null || sideMeshCache.Length != 6)
@@ -123,14 +125,20 @@ namespace VoxelSystem
 
 						if (voxelExists)
 						{
-							Voxel neighbour = map.GetVoxel(ni);
+							Voxel neighbor = map.GetVoxel(ni);
 
-							if (neighbour.shapeId == voxel.shapeId &&
-								neighbour.materialIndex == voxel.materialIndex) continue;
+							if (neighbor.IsFilled())
+							{
+								if (neighbor.shapeId == voxel.shapeId &&
+									neighbor.materialIndex == voxel.materialIndex)
+								{
+									continue;
+								}
 
-							if (drawSidesBetweenDifferentVoxelTypes) continue;
+								if (drawSidesBetweenDifferentVoxelTypes) continue;
 
-							if (neighbour.IsSideClosed(direction.Opposite())) continue;
+								if (neighbor.IsSideClosed(direction.Opposite())) continue;
+							}
 						}
 						else if (!drawSidesOnTheMapEdge && map.FullSize != Vector3Int.one) continue; 
 
@@ -144,6 +152,7 @@ namespace VoxelSystem
 				}
 			}
 		}
+
 
 		void UpdateMeshData(MeshBuilder meshBuilder)
 		{ 
