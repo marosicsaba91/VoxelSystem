@@ -23,7 +23,7 @@ namespace VoxelSystem
 
 		[SerializeField] float fieldOfView = 30;
 		[SerializeField] float zoom = 1;
-		[SerializeField] bool showDirections = true;
+		[SerializeField] bool showDirections= true;
 
 		public bool isExpandable = true;
 		public bool areChangesLogged = false;
@@ -49,6 +49,8 @@ namespace VoxelSystem
 				isDirty = true;
 			}
 		}
+
+		public bool ShowDirections => showDirections;
 
 		public Mesh Mesh => meshGetter?.Invoke();
 
@@ -176,14 +178,15 @@ namespace VoxelSystem
 		{
 			get
 			{
-#if UNITY_EDITOR
+
 				if (previewTexture == null || isDirty)
 				{
+#if UNITY_EDITOR
 					renderer ??= new PreviewRenderUtility();
 					Render();
 					isDirty = false;
-				}
 #endif
+				}
 				return previewTexture;
 			}
 
@@ -310,8 +313,6 @@ namespace VoxelSystem
 			Texture prev = renderer.EndPreview();
 			return prev;
 		}
-
-
 #endif
 		static Quaternion ToQuaternion(Vector2 rotation)
 		{

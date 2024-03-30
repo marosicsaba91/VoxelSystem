@@ -65,9 +65,11 @@ public class VoxelTester : MonoBehaviour
 		if (lastHitObject != null)
 		{
 			Gizmos.matrix = lastHitObject.transform.localToWorldMatrix;
+			EasyHandles.Matrix = lastHitObject.transform.localToWorldMatrix;
+			EasyHandles.Color = selectionColor;
 			Gizmos.color = selectionColor;
 			DrawCube(lastHitVoxel.voxelIndex);
-			Handles.matrix = Matrix4x4.identity;
+			EasyHandles.Matrix = Matrix4x4.identity;
 			Gizmos.matrix = Matrix4x4.identity;
 		}
 
