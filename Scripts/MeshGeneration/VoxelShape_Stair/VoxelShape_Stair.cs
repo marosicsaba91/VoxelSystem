@@ -1,8 +1,6 @@
 using EasyEditor;
 using MeshUtility;
-using Microsoft.SqlServer.Server;
 using MUtility;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -27,7 +25,6 @@ namespace VoxelSystem
 		[SerializeField, ShowIf(nameof(overrideTextureCoordinates))] CubeUVSetup cubeTextureCoordinates;
 
 		[Header("Other Setup")]
-		// [SerializeField, Range(1, 4)] int slope = 1;
 		[SerializeField] bool isTransparent = false;
 
 		public sealed override bool SupportsTransformation => true;
