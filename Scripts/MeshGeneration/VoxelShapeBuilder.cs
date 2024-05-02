@@ -207,37 +207,45 @@ namespace VoxelSystem
 
 		public virtual void GetNavigationEdges(List<DirectedEdge> resultEdges, VoxelMap map, Vector3Int voxelPosition)
 		{
-			Voxel voxel = map.GetVoxel(voxelPosition);
+			// Voxel voxel = map.GetVoxel(voxelPosition);
 			for (int i = 0; i < 6; i++)
 			{
 				GeneralDirection3D direction = DirectionUtility.generalDirection3DValues[i];
 
-				if (!voxel.IsSideClosed(direction)) continue;
+				// if (!voxel.IsSideClosed(direction)) continue;
 
-				if (map.TryGetVoxel(voxelPosition + direction.ToVectorInt(), out Voxel neighbor))
-					if (neighbor.IsSideClosed(direction.Opposite())) continue;
+                if (map.IsFilledSafe(voxelPosition + direction.ToVectorInt())) continue;
 
-				GeneralDirection3D perpendicular1 = direction.GetPerpendicularNext();
-				GeneralDirection3D perpendicular2 = direction.GetPerpendicularPrevious();
+                //if (map.TryGetVoxel(voxelPosition + direction.ToVectorInt(), out Voxel neighbor))
+                //	if (neighbor.IsSideClosed(direction.Opposite()))
+                //		continue;
 
-				Vector3 normal = direction.ToVector();
-				Vector3 p1Vector = perpendicular1.ToVector() * 0.5f;
-				Vector3 p2Vector = perpendicular2.ToVector() * 0.5f;
-				Vector3 center = Vector3.one * 0.5f + voxelPosition + normal * 0.5f;
+                GetEdgesForSide(resultEdges, voxelPosition, direction);
 
-				resultEdges.Add(new (center, center + p1Vector, normal));
-				resultEdges.Add(new (center, center + p2Vector, normal));
-				resultEdges.Add(new(center, center - p1Vector, normal));
-				resultEdges.Add(new(center, center - p2Vector, normal));
-
-				resultEdges.Add(new(center, center + p1Vector + p2Vector, normal));
-				resultEdges.Add(new(center, center + p1Vector - p2Vector, normal));
-				resultEdges.Add(new(center, center - p1Vector + p2Vector, normal));
-				resultEdges.Add(new(center, center - p1Vector - p2Vector, normal));
-			}
+            }
 		}
 
-	}
+        protected static void GetEdgesForSide(List<DirectedEdge> resultEdges, Vector3Int voxelPosition, GeneralDirection3D side)
+        {
+            GeneralDirection3D perpendicular1 = side.GetPerpendicularNext();
+            GeneralDirection3D perpendicular2 = side.GetPerpendicularPrevious();
+
+            Vector3 normal = side.ToVector();
+            Vector3 p1Vector = perpendicular1.ToVector() * 0.5f;
+            Vector3 p2Vector = perpendicular2.ToVector() * 0.5f;
+            Vector3 center = Vector3.one * 0.5f + voxelPosition + normal * 0.5f;
+
+            resultEdges.Add(new(center, center + p1Vector, normal));
+            resultEdges.Add(new(center, center + p2Vector, normal));
+            resultEdges.Add(new(center, center - p1Vector, normal));
+            resultEdges.Add(new(center, center - p2Vector, normal));
+
+            resultEdges.Add(new(center, center + p1Vector + p2Vector, normal));
+            resultEdges.Add(new(center, center + p1Vector - p2Vector, normal));
+            resultEdges.Add(new(center, center - p1Vector + p2Vector, normal));
+            resultEdges.Add(new(center, center - p1Vector - p2Vector, normal));
+        }
+    }
 }
 
 // ---------- ExtraVoxelControl ------------------------

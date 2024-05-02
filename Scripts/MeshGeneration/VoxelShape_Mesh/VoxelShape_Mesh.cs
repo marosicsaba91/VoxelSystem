@@ -74,5 +74,21 @@ public class VoxelShape_Mesh : VoxelShapeBuilder
 			map.SetVoxel(voxelPosition, voxel);
 		}
 	}
+
+    public override void GetNavigationEdges(List<DirectedEdge> resultEdges, VoxelMap map, Vector3Int voxelPosition)
+    {
+        Voxel voxel = map.GetVoxel(voxelPosition);
+        for (int i = 0; i < 6; i++)
+		{
+			GeneralDirection3D direction = DirectionUtility.generalDirection3DValues[i];
+
+			if (!voxel.IsSideClosed(direction)) continue;
+
+			if (map.IsFilledSafe(voxelPosition + direction.ToVectorInt()))
+				continue;
+
+			GetEdgesForSide(resultEdges, voxelPosition, direction);
+		}
+	}
 }
 

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   voxelId: 10002
   niceName: Column Bottom
-  previewMaterial: {fileID: 2100000, guid: f2f0578f1fa1e0940b44de9941d2e09f, type: 2}
+  previewMaterial: {fileID: 2100000, guid: d90071d7c09e5374380240be130c9dfe, type: 2}
   previewExtraSetting: 24
   previewTransformation:
     upDirection: 0

@@ -19,7 +19,7 @@ MonoBehaviour:
   previewTransformation:
     upDirection: 0
     verticalRotation: 0
-    verticalFlip: 0
+    isVerticalFlipped: 0
   quickVersion: {fileID: 11400000, guid: b9086327e93f7ff41bb9063fd9f17659, type: 2}
   previewMeshBuilder:
     vertices:
@@ -1471,4 +1471,4 @@ MonoBehaviour:
   mergeCloseEdges: 1
   onMapEdge: 0
   drawBetweenVoxelChange: 0
-  isTransparent: 1
+  isTransparent: 0
