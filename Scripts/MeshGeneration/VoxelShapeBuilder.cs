@@ -213,13 +213,11 @@ namespace VoxelSystem
 				GeneralDirection3D direction = DirectionUtility.generalDirection3DValues[i];
 
 				// if (!voxel.IsSideClosed(direction)) continue;
-
-                if (map.IsFilledSafe(voxelPosition + direction.ToVectorInt())) continue;
-
-                //if (map.TryGetVoxel(voxelPosition + direction.ToVectorInt(), out Voxel neighbor))
+                // if (map.TryGetVoxel(voxelPosition + direction.ToVectorInt(), out Voxel neighbor))
                 //	if (neighbor.IsSideClosed(direction.Opposite()))
                 //		continue;
 
+                if (map.IsFilledSafe(voxelPosition + direction.ToVectorInt())) continue;
                 GetEdgesForSide(resultEdges, voxelPosition, direction);
 
             }
