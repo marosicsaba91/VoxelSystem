@@ -167,7 +167,7 @@ namespace VoxelSystem
 		}
 	}
 
-	struct CubeSide
+	public struct CubeSide
 	{
 		public GeneralDirection3D direction;
 		public Vector3Int voxelIndex;

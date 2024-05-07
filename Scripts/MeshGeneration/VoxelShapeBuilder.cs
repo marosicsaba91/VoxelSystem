@@ -207,19 +207,11 @@ namespace VoxelSystem
 
 		public virtual void GetNavigationEdges(List<DirectedEdge> resultEdges, VoxelMap map, Vector3Int voxelPosition)
 		{
-			// Voxel voxel = map.GetVoxel(voxelPosition);
 			for (int i = 0; i < 6; i++)
 			{
 				GeneralDirection3D direction = DirectionUtility.generalDirection3DValues[i];
-
-				// if (!voxel.IsSideClosed(direction)) continue;
-                // if (map.TryGetVoxel(voxelPosition + direction.ToVectorInt(), out Voxel neighbor))
-                //	if (neighbor.IsSideClosed(direction.Opposite()))
-                //		continue;
-
                 if (map.IsFilledSafe(voxelPosition + direction.ToVectorInt())) continue;
                 GetEdgesForSide(resultEdges, voxelPosition, direction);
-
             }
 		}
 
