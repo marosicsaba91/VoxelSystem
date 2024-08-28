@@ -4,7 +4,7 @@ using MUtility;
 using JetBrains.Annotations;
 using UnityEngine;
 using EasyEditor;
-using Benchmark;
+using Benchmarking;
 using MeshUtility;
 
 namespace VoxelSystem
