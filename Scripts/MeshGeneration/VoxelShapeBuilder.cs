@@ -210,32 +210,76 @@ namespace VoxelSystem
 			for (int i = 0; i < 6; i++)
 			{
 				GeneralDirection3D direction = DirectionUtility.generalDirection3DValues[i];
-                if (map.IsFilledSafe(voxelPosition + direction.ToVectorInt())) continue;
-                GetEdgesForSide(resultEdges, voxelPosition, direction);
-            }
+				if (map.IsFilledSafe(voxelPosition + direction.ToVectorInt())) continue;
+				GetEdgesForSide(resultEdges, voxelPosition, direction);
+			}
 		}
 
-        protected static void GetEdgesForSide(List<DirectedEdge> resultEdges, Vector3Int voxelPosition, GeneralDirection3D side)
-        {
-            GeneralDirection3D perpendicular1 = side.GetPerpendicularNext();
-            GeneralDirection3D perpendicular2 = side.GetPerpendicularPrevious();
+		protected static void GetEdgesForSide(List<DirectedEdge> resultEdges, Vector3Int voxelPosition, GeneralDirection3D side)
+		{
+			GeneralDirection3D perpendicular1 = side.GetPerpendicularNext();
+			GeneralDirection3D perpendicular2 = side.GetPerpendicularPrevious();
 
-            Vector3 normal = side.ToVector();
-            Vector3 p1Vector = perpendicular1.ToVector() * 0.5f;
-            Vector3 p2Vector = perpendicular2.ToVector() * 0.5f;
-            Vector3 center = Vector3.one * 0.5f + voxelPosition + normal * 0.5f;
+			Vector3 normal = side.ToVector();
+			Vector3 p1Vector = perpendicular1.ToVector() * 0.5f;
+			Vector3 p2Vector = perpendicular2.ToVector() * 0.5f;
+			Vector3 center = Vector3.one * 0.5f + voxelPosition + normal * 0.5f;
 
-            resultEdges.Add(new(center, center + p1Vector, normal));
-            resultEdges.Add(new(center, center + p2Vector, normal));
-            resultEdges.Add(new(center, center - p1Vector, normal));
-            resultEdges.Add(new(center, center - p2Vector, normal));
 
-            resultEdges.Add(new(center, center + p1Vector + p2Vector, normal));
-            resultEdges.Add(new(center, center + p1Vector - p2Vector, normal));
-            resultEdges.Add(new(center, center - p1Vector + p2Vector, normal));
-            resultEdges.Add(new(center, center - p1Vector - p2Vector, normal));
-        }
-    }
+			// From center to the Sides
+			resultEdges.Add(new(center, center + p1Vector, normal));
+			resultEdges.Add(new(center, center + p2Vector, normal));
+			resultEdges.Add(new(center, center - p1Vector, normal));
+			resultEdges.Add(new(center, center - p2Vector, normal));
+
+			// From Sides to the corners
+			resultEdges.Add(new(center, center + p1Vector + p2Vector, normal));
+			resultEdges.Add(new(center, center + p1Vector - p2Vector, normal));
+			resultEdges.Add(new(center, center - p1Vector + p2Vector, normal));
+			resultEdges.Add(new(center, center - p1Vector - p2Vector, normal));
+
+			/*
+			// From corners to sides
+			resultEdges.Add(new(center + p1Vector, center + p1Vector + p2Vector, normal));
+			resultEdges.Add(new(center + p1Vector, center + p1Vector - p2Vector, normal));
+			resultEdges.Add(new(center - p1Vector, center - p1Vector + p2Vector, normal));
+			resultEdges.Add(new(center - p1Vector, center - p1Vector - p2Vector, normal));
+
+			resultEdges.Add(new(center + p2Vector, center + p1Vector + p2Vector, normal));
+			resultEdges.Add(new(center + p2Vector, center - p1Vector + p2Vector, normal));
+			resultEdges.Add(new(center - p2Vector, center + p1Vector - p2Vector, normal));
+			resultEdges.Add(new(center - p2Vector, center - p1Vector - p2Vector, normal));
+			*/
+		}
+
+
+		public virtual void GetNavigationSides(List<DirectedSide> resultSides, VoxelMap map, Vector3Int voxelPosition)
+		{
+			for (int i = 0; i < 6; i++)
+			{
+				GeneralDirection3D direction = DirectionUtility.generalDirection3DValues[i];
+				if (map.IsFilledSafe(voxelPosition + direction.ToVectorInt())) continue;
+				resultSides.Add(GetDirectedSide(voxelPosition, direction));
+			}
+		}
+
+		protected static DirectedSide GetDirectedSide(Vector3Int voxelPosition, GeneralDirection3D sideDir)
+		{
+			GeneralDirection3D perpendicular1 = sideDir.GetPerpendicularNext();
+			GeneralDirection3D perpendicular2 = sideDir.GetPerpendicularPrevious();
+
+			Vector3 normal = sideDir.ToVector();
+			Vector3 p1Vector = perpendicular1.ToVector() * 0.5f;
+			Vector3 p2Vector = perpendicular2.ToVector() * 0.5f;
+			Vector3 center = Vector3.one * 0.5f + voxelPosition + normal * 0.5f;
+
+			return new(normal,
+				center + p1Vector + p2Vector,
+				center - p1Vector + p2Vector,
+				center - p1Vector - p2Vector,
+				center + p1Vector - p2Vector);
+		}
+	}
 }
 
 // ---------- ExtraVoxelControl ------------------------
@@ -259,5 +303,3 @@ public class ExtraVoxelControl<T> : ExtraVoxelControl
 	public sealed override byte SetExtraData(byte originalExtraVoxelData, object newValue) => setValue(originalExtraVoxelData, (T)newValue);
 	public sealed override Type DataType => typeof(T);
 }
-
-

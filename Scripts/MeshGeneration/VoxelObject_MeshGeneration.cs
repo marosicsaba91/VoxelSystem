@@ -333,7 +333,7 @@ namespace VoxelSystem
 		public void GeneratePhysicalMesh(List<Vector3[]> resultSides)
 		{
 			VoxelMap map = GetVoxelMap();
-			BuildVoxelPositionDictionary(map); 
+			BuildVoxelPositionDictionary(map);
 			foreach (KeyValuePair<VoxelInfo, List<Vector3Int>> chunk in voxelsByType)
 			{
 				if (chunk.Value.Count == 0) continue;
@@ -343,7 +343,7 @@ namespace VoxelSystem
 
 				foreach (Vector3Int voxelPosition in chunk.Value)
 					shapeBuilder.GetPhysicalSides(resultSides, map, voxelPosition);
-			} 
+			}
 		}
 
 		public void GetNavigationEdges(List<DirectedEdge> resultEdges)
@@ -361,9 +361,26 @@ namespace VoxelSystem
 					shapeBuilder.GetNavigationEdges(resultEdges, map, voxelPosition);
 			}
 		}
+
+
+		public void GetNavigationSides(List<DirectedSide> sides)
+		{
+			VoxelMap map = GetVoxelMap();
+			BuildVoxelPositionDictionary(map);
+			foreach (KeyValuePair<VoxelInfo, List<Vector3Int>> chunk in voxelsByType)
+			{
+				if (chunk.Value.Count == 0) continue;
+
+				int shapeId = chunk.Key.shapeId;
+				VoxelShapeBuilder shapeBuilder = shapePalette.GetBuilder(shapeId);
+
+				foreach (Vector3Int voxelPosition in chunk.Value)
+					shapeBuilder.GetNavigationSides(sides, map, voxelPosition);
+			}
+		}
 	}
 
-	public struct DirectedEdge 
+	public struct DirectedEdge
 	{
 		public Vector3 a, b, normal;
 		public DirectedEdge(Vector3 a, Vector3 b, Vector3 normal)
@@ -372,5 +389,19 @@ namespace VoxelSystem
 			this.b = b;
 			this.normal = normal;
 		}
+	}
+
+	public struct DirectedSide
+	{
+		public Vector3[] points;
+		public Vector3 normal;
+
+		// Constructor
+		public DirectedSide(Vector3 normal, params Vector3[] points)
+		{
+			this.points = points;
+			this.normal = normal;
+		}
+
 	}
 }
