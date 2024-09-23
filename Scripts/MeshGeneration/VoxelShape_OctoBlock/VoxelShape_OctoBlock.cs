@@ -30,9 +30,9 @@ namespace VoxelSystem
 		public sealed override bool SupportsTransformation => false;
 		protected override bool IsInitialized => blockLibrary != null;
 
-		readonly Dictionary<Vector3Int, OctoBlock> blocks = new();
+		readonly Dictionary<Vector3Int, OctoBlock> blocks = new(FastVector3IntComparer.instance);
 
-		static Dictionary<Vector3Int, OctoBlock> _block = new();
+		static Dictionary<Vector3Int, OctoBlock> _block = new(FastVector3IntComparer.instance);
 		static readonly NeighbourType[,,] neighbours = new NeighbourType[3, 3, 3];
 
 		static VoxelMap _currentVoxelMap;

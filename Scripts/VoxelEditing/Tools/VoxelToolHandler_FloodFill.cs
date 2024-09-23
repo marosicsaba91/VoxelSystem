@@ -14,7 +14,7 @@ namespace VoxelSystem
 			return true;
 		}
 
-		static readonly HashSet<Vector3Int> chunk = new();
+		static readonly HashSet<Vector3Int> chunk = new(FastVector3IntComparer.instance);
 
 		protected sealed override void OnDrawCursor(IVoxelEditor voxelEditor, Color actionColor, VoxelHit hit)
 		{

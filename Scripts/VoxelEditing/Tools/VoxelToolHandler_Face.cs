@@ -13,7 +13,7 @@ namespace VoxelSystem
 			return true;
 		}
 
-		readonly HashSet<Vector3Int> _originalSide = new();
+		readonly HashSet<Vector3Int> _originalSide = new(FastVector3IntComparer.instance);
 
 		GeneralDirection3D surfaceDirection;
 		Vector3Int surfaceNormal;
