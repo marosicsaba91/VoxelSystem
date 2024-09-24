@@ -5,15 +5,15 @@ namespace VoxelSystem
 {
 
 	[Serializable]
-	public partial class ArrayVoxelMap : VoxelMap,  ISerializationCallbackReceiver
+	public partial class ArrayVoxelMap : VoxelMap, ISerializationCallbackReceiver
 	{
 		public const int defaultMapSize = 8;
 
 		[SerializeField] Vector3Int size;
 		[SerializeField] long[] longVoxelData = new long[0];
-		Voxel[] voxelData;
-		 
-		public void OnBeforeSerialize() 
+		Voxel[] voxelData = new Voxel[0];
+
+		public void OnBeforeSerialize()
 		{
 			longVoxelData = new long[voxelData.Length];
 			for (int i = 0; i < voxelData.Length; i++)
@@ -29,7 +29,7 @@ namespace VoxelSystem
 			for (int i = 0; i < voxelData.Length; i++)
 			{
 				voxelData[i] = new Voxel(longVoxelData[i]);
-			} 
+			}
 		}
 
 		public sealed override Vector3Int FullSize
@@ -51,7 +51,7 @@ namespace VoxelSystem
 
 		// Constructor -----------------------------------------------------------------------------     
 
-		public ArrayVoxelMap() { SetupUniqueID(); }
+		public ArrayVoxelMap() => Setup(Vector3Int.one * 10, emptyValue);
 
 		public ArrayVoxelMap(Vector3Int size) => Setup(size, emptyValue);
 		public ArrayVoxelMap(Vector3Int size, Voxel value)
@@ -59,7 +59,7 @@ namespace VoxelSystem
 			SetupUniqueID();
 			Setup(size, value);
 		}
-				 
+
 		public sealed override void Setup(Vector3Int size, Voxel value)
 		{
 			FullSize = size;
@@ -169,7 +169,7 @@ namespace VoxelSystem
 			voxelData = new Voxel[Length];
 			Array.Fill(voxelData, emptyValue);
 
-			return true; 
+			return true;
 		}
 
 		public sealed override bool SetRange
