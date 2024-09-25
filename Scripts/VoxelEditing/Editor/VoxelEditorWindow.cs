@@ -10,16 +10,27 @@ namespace VoxelSystem
 {
 	public class VoxelEditorWindow : EditorWindow
 	{
-		[MenuItem("Window/" + EditorConstants.categoryPath + "Voxel Editor Window")]
+		static GUIContent _titleContent;
+
+		[MenuItem("Window/" + EditorConstants.categoryPath + "Voxel Editor")]
 		public static void ShowExample()
 		{
-			VoxelEditorWindow ew = GetWindow<VoxelEditorWindow>();
-			ew.titleContent = new GUIContent("Voxel Editor Window");
+			VoxelEditorWindow window = GetWindow<VoxelEditorWindow>();
+			SetTitle(window);
+		}
+
+		static void SetTitle(VoxelEditorWindow window)
+		{
+			if (_titleContent != null) return;
+			_titleContent = new GUIContent("Voxel Editor");
+			window.titleContent = _titleContent;
 		}
 
 		// Use old System for Drawing GUI
 		public void OnGUI()
 		{
+			SetTitle(this);
+
 			foreach (Object item in Selection.objects)
 			{
 				if (item is GameObject go && go.TryGetComponent(out VoxelEditor voxelEditor))
