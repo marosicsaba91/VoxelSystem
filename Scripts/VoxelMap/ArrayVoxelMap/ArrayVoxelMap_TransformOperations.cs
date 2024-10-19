@@ -142,9 +142,9 @@ namespace VoxelSystem
 					if (repeat)
 					{
 						oldIndex = Index(
-							MathHelper.Mod(ox, size.x),
-							MathHelper.Mod(oy, size.y),
-							MathHelper.Mod(oz, size.z));
+							MathHelper.ModuloPositive(ox, size.x),
+							MathHelper.ModuloPositive(oy, size.y),
+							MathHelper.ModuloPositive(oz, size.z));
 					}
 					else 
 						oldIndex = -1;

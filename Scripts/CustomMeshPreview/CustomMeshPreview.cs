@@ -316,8 +316,8 @@ namespace VoxelSystem
 #endif
 		static Quaternion ToQuaternion(Vector2 rotation)
 		{
-			rotation.x = MathHelper.Mod(rotation.x, 360);
-			rotation.y = MathHelper.Mod(rotation.y, 360);
+			rotation.x = MathHelper.ModuloPositive(rotation.x, 360);
+			rotation.y = MathHelper.ModuloPositive(rotation.y, 360);
 			if (rotation.x < 0)
 				rotation.x += 360;
 			if (rotation.y < 0)
