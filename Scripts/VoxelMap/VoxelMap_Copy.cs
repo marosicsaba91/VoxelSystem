@@ -46,7 +46,7 @@ namespace VoxelSystem
 						if (destinationZ >= FullSize.z || destinationZ < 0) continue;
 						if (sourceZ >= sourceMap.FullSize.z || sourceZ < 0) continue;
 
-						// Copy Voxel
+						// TryGetCopy Voxel
 						Voxel val = sourceMap.GetVoxel(sourceX, sourceY, sourceZ);
 						mapChanged |= SetVoxel(destinationX, destinationY, destinationZ, action, val);
 					}
