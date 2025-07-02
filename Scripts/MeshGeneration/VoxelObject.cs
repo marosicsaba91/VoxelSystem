@@ -5,13 +5,13 @@ using UnityEngine;
 namespace VoxelSystem
 {
 	[ExecuteAlways]
-	partial class VoxelObject : MonoBehaviour
+	partial class VoxelObject : EasyMonoBehaviour
 	{
 		[SerializeField, HideInInspector] ArrayVoxelMap innerMap = null;
 		[SerializeField, HideInInspector] SharedVoxelMap sharedVoxelMap = null;
 		[Header("Voxel Map")]
-		[SerializeField] EasyProperty sharedMap = new(nameof(SharedVoxelMap));
-		[SerializeField, DisableIf(nameof(HasSharedMap))] EasyButton exportVoxelMapAsAsset =
+		public EasyProperty sharedMap = new(nameof(SharedVoxelMap));
+		[DisableIf(nameof(HasSharedMap))] public EasyButton exportVoxelMapAsAsset =
 			new(nameof(ExportVoxelMap));
 		[SerializeField, HideInInspector] SharedVoxelMap _lastFrameSharedMap = null;
 

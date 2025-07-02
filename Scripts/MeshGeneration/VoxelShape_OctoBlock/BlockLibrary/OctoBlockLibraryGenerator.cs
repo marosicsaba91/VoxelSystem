@@ -46,7 +46,7 @@ namespace VoxelSystem
 	}
 
 	[ExecuteAlways]
-	public class OctoBlockLibraryGenerator : MonoBehaviour
+	public class OctoBlockLibraryGenerator : EasyMonoBehaviour
 	{
 		// SETTINGS
 		[SerializeField] OctoBlockLibrary voxelBlockLibrary;

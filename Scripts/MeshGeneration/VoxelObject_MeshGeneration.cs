@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace VoxelSystem
 {
-	public partial class VoxelObject : MonoBehaviour
+	public partial class VoxelObject : EasyMonoBehaviour
 	{
 		enum MeshGenerationMode
 		{
