@@ -1,11 +1,9 @@
-using System;
 using System.Collections.Generic;
-using MUtility;
-using JetBrains.Annotations;
-using UnityEngine;
+using VoxelSystem.MeshUtility;
 using EasyEditor;
-using Benchmarking;
-using MeshUtility;
+using UnityEngine;
+using MUtility;
+using System;
 
 namespace VoxelSystem
 {
@@ -47,8 +45,6 @@ namespace VoxelSystem
 		public List<MeshInfoNew> meshInfo;
 	}
 
-
-
 	[ExecuteAlways]
 	public class OctoBlockLibraryGenerator : MonoBehaviour
 	{
@@ -57,18 +53,10 @@ namespace VoxelSystem
 		[SerializeField] OctoBlockSetup[] blockSetups;
 		[SerializeField] Material material;
 		 
-		// BUTTONS
-		[Header("Actions")]
-		[SerializeField, UsedImplicitly] EasyButton clearLibrary = new(nameof(Clear));
-		[SerializeField, UsedImplicitly] EasyButton regenerateLibrary = new(nameof(RegenerateLibrary));
-
-		// -------------------------------------------------------------------------------------------------------------
-
-		readonly BenchmarkTimer _benchmarkTimer = new("Whole Building Process");
-
 		public Material Material => material;
 
-		void Clear()
+		[EasyDraw]
+		public void ClearLibrary()
 		{
 			if (ErrorTest())
 				return;
@@ -86,7 +74,8 @@ namespace VoxelSystem
 			return false;
 		}
 
-		void RegenerateLibrary()
+		[EasyDraw]
+		public void RegenerateLibrary()
 		{
 			if (ErrorTest())
 				return;
@@ -116,7 +105,5 @@ namespace VoxelSystem
 		}
 
 		bool EnableRegenerate() => gameObject.scene.isLoaded;
-
-		// -------------------------------------------------------------------------------------------------------------
 	}
 }

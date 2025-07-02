@@ -5,7 +5,7 @@ using System.Text;
 using UnityEngine; 
 using EasyEditor;
 using ReadOnlyAttribute = EasyEditor.ReadOnlyAttribute;
-using MeshUtility;
+using VoxelSystem.MeshUtility;
 
 namespace VoxelSystem
 {

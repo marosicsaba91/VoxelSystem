@@ -1,13 +1,11 @@
-using Benchmarking;
 using EasyEditor;
-using MeshUtility;
+using VoxelSystem.MeshUtility;
 using MUtility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace VoxelSystem
 {
@@ -38,10 +36,7 @@ namespace VoxelSystem
 		[SerializeField] VoxelShapePalette shapePalette;
 		[SerializeField] bool autoRegenerateMeshes = true;
 
-		[SerializeField, FormerlySerializedAs("destination")] MeshDestination meshDestination = new();
-		[SerializeField] EasyButton createQuickMeshFile = new(nameof(CreateQuickMeshFile));
-		[SerializeField] EasyButton createFullMeshFile = new(nameof(CreateFullMeshFile));
-		[SerializeField] EasyButton regenerateMeshes = new(nameof(RegenerateMeshesFinal));
+		[SerializeField] MeshDestination meshDestination = new();
 
 		[Header("Benchmarking")]
 		[SerializeField] bool doBenchmark;
@@ -50,10 +45,16 @@ namespace VoxelSystem
 		public List<Material> MaterialPalette { get; } = new();
 		public VoxelShapePalette ShapePalette => shapePalette;
 
+		[EasyDraw]
 		public void CreateFullMeshFile() => CreateMeshFile(false);
-
+		[EasyDraw]
 		public void CreateQuickMeshFile() => CreateMeshFile(true);
+		[EasyDraw]
+		public void RegenerateMeshesFinal() => RegenerateMeshesAndUpdateMeshComponents(isFinal: true);
 
+		public event Action<Mesh> MeshGenerated;
+		public event Action<Mesh> FullMeshGenerated;
+		public event Action<Mesh> QuickMeshGenerated;
 
 		public void CreateMeshFile(bool quick)
 		{
@@ -83,8 +84,6 @@ namespace VoxelSystem
 				meshDestination.meshRenderer.GetSharedMaterials(MaterialPalette);
 		}
 
-		public void RegenerateMeshesFinal() => RegenerateMeshesAndUpdateMeshComponents(isFinal: true);
-
 		void RegenerateMeshesAndUpdateMeshComponents(bool isFinal)
 		{
 			if (!autoRegenerateMeshes) return;
@@ -111,6 +110,14 @@ namespace VoxelSystem
 				RegenerateMesh(isQuick: false, ref meshDestination.fullMesh);
 
 			UpdateMeshComponents(isFinal);
+
+			MeshGenerated?.Invoke(isFinal ? meshDestination.fullMesh : meshDestination.quickMesh);
+
+			if (generateQuick)
+				QuickMeshGenerated?.Invoke(meshDestination.quickMesh);
+
+			if (generateFull)
+				FullMeshGenerated?.Invoke(meshDestination.fullMesh);
 		}
 
 		void OnValidate()
@@ -123,7 +130,7 @@ namespace VoxelSystem
 				meshDestination.meshRenderer = GetComponent<MeshRenderer>();
 		}
 
-		static BenchmarkTimer benchmarkTimer;
+		static ModularStopwatch benchmarkTimer;
 
 		static readonly MeshBuilder meshBuilder = new();
 
@@ -193,7 +200,7 @@ namespace VoxelSystem
 
 
 			if (doBenchmark)
-				benchmarkTimer ??= new BenchmarkTimer(name + " " + GetType());
+				benchmarkTimer ??= new ModularStopwatch(name + " " + GetType());
 			else
 				benchmarkTimer = null;
 

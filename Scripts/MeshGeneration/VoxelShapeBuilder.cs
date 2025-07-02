@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
-using MeshUtility;
+using VoxelSystem.MeshUtility;
 
 #if UNITY_EDITOR
 using UnityEditor;
