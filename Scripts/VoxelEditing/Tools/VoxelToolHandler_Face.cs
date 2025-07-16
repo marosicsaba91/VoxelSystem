@@ -1,4 +1,5 @@
 ﻿using MUtility;
+using Shapes;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -128,10 +129,10 @@ namespace VoxelSystem
 			Ray localRay = globalRay.Transform(voxelEditor.Transform.worldToLocalMatrix);
 			Vector3 paneRight = Vector3.Cross(localRay.direction, surfaceNormal);
 			Vector3 paneNormal = Vector3.Cross(paneRight, surfaceNormal);
-			Plain plane = new(hitPosition, paneNormal);
+			MUtility.Plain plane = new(hitPosition, paneNormal);
 			Vector3 intersectPoint = plane.Intersect(localRay);
 
-			Line line = new(hitPosition, hitPosition + surfaceNormal);
+			MUtility.Line line = new(hitPosition, hitPosition + surfaceNormal);
 			Vector3 cursorPoint = line.ClosestPointOnLineToPoint(intersectPoint);
 
 			Vector3Int offsetVector = (cursorPoint - hitPosition).RoundToInt();

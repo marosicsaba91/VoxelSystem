@@ -1,5 +1,6 @@
 ﻿using EasyEditor;
 using MUtility;
+using Shapes;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -314,7 +315,7 @@ namespace VoxelSystem
 			Ray localRay = globalRay.Transform(editor.Transform.worldToLocalMatrix);
 			Vector3 paneRight = Vector3.Cross(localRay.direction, normal);
 			Vector3 paneNormal = Vector3.Cross(paneRight, normal);
-			Plain plane = new(startPoint, paneNormal);
+			Shapes.Plain plane = new(startPoint, paneNormal);
 
 			Vector3 intersect = plane.Intersect(ray);
 			Vector3 cursorMovement = intersect - startPoint;
