@@ -1,5 +1,5 @@
 using EasyEditor;
-using System.IO; 
+using System.IO;
 using UnityEngine;
 
 namespace VoxelSystem
@@ -11,7 +11,8 @@ namespace VoxelSystem
 		[SerializeField, HideInInspector] SharedVoxelMap sharedVoxelMap = null;
 		[Header("Voxel Map")]
 		public EasyProperty sharedMap = new(nameof(SharedVoxelMap));
-		[DisableIf(nameof(HasSharedMap))] public EasyButton exportVoxelMapAsAsset =
+		[DisableIf(nameof(HasSharedMap))]
+		public EasyButton exportVoxelMapAsAsset =
 			new(nameof(ExportVoxelMap));
 		[SerializeField, HideInInspector] SharedVoxelMap _lastFrameSharedMap = null;
 
@@ -49,7 +50,7 @@ namespace VoxelSystem
 		}
 
 		public VoxelMap GetVoxelMap()
-		{ 
+		{
 			if (sharedVoxelMap == null)
 				return innerMap;
 			else
@@ -67,8 +68,14 @@ namespace VoxelSystem
 		{
 			if (Application.isPlaying) return;
 
-			EditorUpdate_VoxelMap();
-			EditorUpdate_MeshGeneration();
+			SubscribeSharedMapChanges();
+			RegenrateMaterialPalette();
+		}
+
+		void Start()
+		{
+			SubscribeSharedMapChanges();
+			RegenrateMaterialPalette();
 		}
 
 		void OnEnable()
@@ -91,7 +98,7 @@ namespace VoxelSystem
 				map.MapChangedEvent -= OnMapChanged;
 		}
 
-		void EditorUpdate_VoxelMap()
+		void SubscribeSharedMapChanges()
 		{
 			if (_lastFrameSharedMap == null && sharedVoxelMap == null)
 			{

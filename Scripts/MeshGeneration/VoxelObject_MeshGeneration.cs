@@ -77,7 +77,7 @@ namespace VoxelSystem
 #endif
 		}
 
-		void EditorUpdate_MeshGeneration()
+		void RegenrateMaterialPalette()
 		{
 			MaterialPalette.Clear();
 			if (meshDestination.meshRenderer != null)
