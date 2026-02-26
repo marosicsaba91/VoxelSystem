@@ -137,7 +137,7 @@ namespace VoxelSystem
 				VoxelEditorGUI.DrawCubicTransformation(voxelEditor, ref contentRect);
 				VoxelEditorGUI.DrawExtraControls(voxelEditor, ref contentRect);
 
-				VoxelEditorGUI.DrawVoxelPreview(voxelEditor, ref contentRect, Side.Up);
+				VoxelEditorGUI.DrawVoxelPreview(voxelEditor, ref contentRect, Side.Top);
 
 				EditorGUILayout.GetControlRect(false, 150); // ???
 			}
