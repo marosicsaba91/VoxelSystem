@@ -1,10 +1,12 @@
 ﻿using MUtility;
 using System;
 using System.Collections.Generic;
+using Unity.Scripting.LifecycleManagement;
 using UnityEngine;
 
 namespace VoxelSystem
 {
+	[NoAutoStaticsCleanup]
 	public static class VoxelMap_Search
 	{
 		public static int roundLimit = 1000;
@@ -12,7 +14,7 @@ namespace VoxelSystem
 		static readonly HashSet<Vector3Int> _alreadyChecked = new();
 		static readonly HashSet<Vector3Int> _tempIndices1 = new();
 		static readonly HashSet<Vector3Int> _tempIndices2 = new();
-		static int _roundIndex = 0;
+		static int _roundIndex = 0; 
 		static readonly List<Vector3Int> _searchDirections = new ();
 		static bool _planeOnly;
 		static Vector3Int _normal;
