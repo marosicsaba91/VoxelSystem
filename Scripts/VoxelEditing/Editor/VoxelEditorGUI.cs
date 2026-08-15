@@ -8,88 +8,90 @@ using UnityEngine;
 using EasyEditor;
 using MUtility;
 using System;
+using Unity.Scripting.LifecycleManagement;
 
 namespace VoxelSystem
 {
+	[NoAutoStaticsCleanup]
 	static class VoxelEditorGUI
 	{
 
-		static VoxelEditorSettings iconSettings;
+		static VoxelEditorSettings _iconSettings;
 		static Dictionary<VoxelAction, GUIContent> _actionToContent = new();
 		static Dictionary<VoxelTool, GUIContent> _toolToContent = new();
 		static Dictionary<(VoxelTool, VoxelAction), GUIContent> _toolWithActionToContent = new();
 
-		const int _actionButtonHeight = 20;  // 16+4
-		const int _toolButtonHeight = 36;    // 32 + 4
-		const int _paletteButtonSize = 26;
-		static readonly float singleLineHeight = EditorGUIUtility.singleLineHeight;
-		static readonly float vSpacing = EditorGUIUtility.standardVerticalSpacing;
+		const int actionButtonHeight = 20;  // 16+4
+		const int toolButtonHeight = 36;    // 32 + 4
+		const int paletteButtonSize = 26;
+		static readonly float _singleLineHeight = EditorGUIUtility.singleLineHeight;
+		static readonly float _vSpacing = EditorGUIUtility.standardVerticalSpacing;
 
-		static readonly VoxelTool[] transformTools =
+		static readonly VoxelTool[] _transformTools =
 			VoxelEditor_EnumHelper.allVoxelTools.Where(t => t.IsTransformTool()).ToArray();
 
-		static readonly VoxelTool[] cursorTools =
+		static readonly VoxelTool[] _cursorTools =
 			VoxelEditor_EnumHelper.allVoxelTools.Where(t => t.IsCursorTool()).ToArray();
 
-		static GUIStyle headerStyle;
-		static GUIStyle paletteDarkStyle;
-		static Texture warningIcon;
+		static GUIStyle _headerStyle;
+		static GUIStyle _paletteDarkStyle;
+		static Texture _warningIcon;
 
-		static GUIStyle notSelectedButtonStyle;
-		static GUIStyle selectedButtonStyle;
-		static GUIStyle selectedButtonAttachStyle;
-		static GUIStyle selectedButtonEraseStyle;
-		static GUIStyle selectedButtonOverWriteStyle;
-		static GUIStyle selectedButtonRecolorStyle;
-		static GUIStyle paletteButton;
+		static GUIStyle _notSelectedButtonStyle;
+		static GUIStyle _selectedButtonStyle;
+		static GUIStyle _selectedButtonAttachStyle;
+		static GUIStyle _selectedButtonEraseStyle;
+		static GUIStyle _selectedButtonOverWriteStyle;
+		static GUIStyle _selectedButtonRecolorStyle;
+		static GUIStyle _paletteButton;
 
 		static GUIStyle GetSelectedButtonStyle(VoxelAction current, VoxelAction[] supported)
 		{
 			if (!supported.Contains(current))
 			{
 				if (supported.IsEmpty())
-					return selectedButtonStyle;
+					return _selectedButtonStyle;
 				current = supported.FirstOrDefault();
 			}
 			return
-				current == VoxelAction.Attach ? selectedButtonAttachStyle :
-				current == VoxelAction.Erase ? selectedButtonEraseStyle :
-				current == VoxelAction.Overwrite ? selectedButtonOverWriteStyle :
-				current == VoxelAction.Repaint ? selectedButtonRecolorStyle : selectedButtonStyle;
+				current == VoxelAction.Attach ? _selectedButtonAttachStyle :
+				current == VoxelAction.Erase ? _selectedButtonEraseStyle :
+				current == VoxelAction.Overwrite ? _selectedButtonOverWriteStyle :
+				current == VoxelAction.Repaint ? _selectedButtonRecolorStyle : _selectedButtonStyle;
 		}
 
 		public static void SetupGuiContentAndStyle()
 		{
-			iconSettings = VoxelEditorSettings.Instance;
-			if (headerStyle == null)
+			_iconSettings = VoxelEditorSettings.Instance;
+			if (_headerStyle == null)
 			{
 				try
 				{
-					headerStyle = new GUIStyle(EditorStyles.boldLabel) { alignment = TextAnchor.MiddleCenter };
-					paletteDarkStyle = new GUIStyle(EditorStyles.label) { alignment = TextAnchor.MiddleCenter };
-					notSelectedButtonStyle = new GUIStyle(GUI.skin.button);
-					selectedButtonStyle = new GUIStyle(GUI.skin.button);
-					selectedButtonAttachStyle = new GUIStyle(GUI.skin.button);
-					selectedButtonEraseStyle = new GUIStyle(GUI.skin.button);
-					selectedButtonOverWriteStyle = new GUIStyle(GUI.skin.button);
-					selectedButtonRecolorStyle = new GUIStyle(GUI.skin.button);
-					paletteButton = new GUIStyle(GUI.skin.button);
-					selectedButtonStyle.normal.background = iconSettings.selectedButton;
-					selectedButtonAttachStyle.normal.background = iconSettings.selectedButtonAttach;
-					selectedButtonEraseStyle.normal.background = iconSettings.selectedButtonErase;
-					selectedButtonOverWriteStyle.normal.background = iconSettings.selectedButtonOverWrite;
-					selectedButtonRecolorStyle.normal.background = iconSettings.selectedButtonRecolor;
+					_headerStyle = new GUIStyle(EditorStyles.boldLabel) { alignment = TextAnchor.MiddleCenter };
+					_paletteDarkStyle = new GUIStyle(EditorStyles.label) { alignment = TextAnchor.MiddleCenter };
+					_notSelectedButtonStyle = new GUIStyle(GUI.skin.button);
+					_selectedButtonStyle = new GUIStyle(GUI.skin.button);
+					_selectedButtonAttachStyle = new GUIStyle(GUI.skin.button);
+					_selectedButtonEraseStyle = new GUIStyle(GUI.skin.button);
+					_selectedButtonOverWriteStyle = new GUIStyle(GUI.skin.button);
+					_selectedButtonRecolorStyle = new GUIStyle(GUI.skin.button);
+					_paletteButton = new GUIStyle(GUI.skin.button);
+					_selectedButtonStyle.normal.background = _iconSettings.selectedButton;
+					_selectedButtonAttachStyle.normal.background = _iconSettings.selectedButtonAttach;
+					_selectedButtonEraseStyle.normal.background = _iconSettings.selectedButtonErase;
+					_selectedButtonOverWriteStyle.normal.background = _iconSettings.selectedButtonOverWrite;
+					_selectedButtonRecolorStyle.normal.background = _iconSettings.selectedButtonRecolor;
 
 				}
 				catch (NullReferenceException) { }
 			}
 
-			warningIcon = EditorGUIUtility.IconContent("Warning").image;
+			_warningIcon = EditorGUIUtility.IconContent("Warning").image;
 
 			if (!_actionToContent.IsNullOrEmpty() && !_toolWithActionToContent.IsNullOrEmpty())
 				return;
 
-			iconSettings = VoxelEditorSettings.Instance;
+			_iconSettings = VoxelEditorSettings.Instance;
 
 			_actionToContent = new Dictionary<VoxelAction, GUIContent>();
 			_toolToContent = new Dictionary<VoxelTool, GUIContent>();
@@ -97,7 +99,7 @@ namespace VoxelSystem
 
 			foreach (VoxelTool tool in VoxelEditor_EnumHelper.allVoxelTools)
 			{
-				Texture texture = iconSettings.GetToolIcon(tool);
+				Texture texture = _iconSettings.GetToolIcon(tool);
 				if (texture != null)
 				{
 					string toolTip = tool.ToString();
@@ -109,7 +111,7 @@ namespace VoxelSystem
 
 			foreach (VoxelAction action in VoxelEditor_EnumHelper.allVoxelActions)
 			{
-				Texture texture = iconSettings.GetActionIcon(action);
+				Texture texture = _iconSettings.GetActionIcon(action);
 				string label = action.GetLabel();
 				string tooltip = action.GetTooltip();
 				GUIContent content = new(label, texture, tooltip);
@@ -117,7 +119,7 @@ namespace VoxelSystem
 
 				foreach (VoxelTool tool in VoxelEditor_EnumHelper.allVoxelTools)
 				{
-					texture = iconSettings.GetToolIcon(tool, action);
+					texture = _iconSettings.GetToolIcon(tool, action);
 					if (texture != null)
 					{
 						string toolTip = tool.ToString() + " - " + action.ToString();
@@ -135,7 +137,7 @@ namespace VoxelSystem
 			const float negativeSpace = -6;
 			if (voxelEditor.enabled)
 			{
-				EditorGUI.LabelField(position.SliceOutLine(), "Map Name:   " + voxelEditor.MapName, headerStyle);
+				EditorGUI.LabelField(position.SliceOutLine(), "Map Name:   " + voxelEditor.MapName, _headerStyle);
 				position.RemoveSpace(negativeSpace);
 				EditorGUI.LabelField(position.SliceOutLine(), voxelEditor.Map.FullSize.ToString(), EditorStyles.centeredGreyMiniLabel);
 				position.RemoveOneSpace();
@@ -143,7 +145,7 @@ namespace VoxelSystem
 			else
 			{
 				GUI.color = EditorHelper.ErrorRedColor;
-				EditorGUI.LabelField(position.SliceOutLine(), "Editing is disabled!", headerStyle);
+				EditorGUI.LabelField(position.SliceOutLine(), "Editing is disabled!", _headerStyle);
 				position.RemoveSpace(negativeSpace);
 
 				EditorGUI.LabelField(position.SliceOutLine(), "Enable the VoxelEditor component to edit voxel map.", EditorStyles.centeredGreyMiniLabel);
@@ -159,8 +161,8 @@ namespace VoxelSystem
 			VoxelAction selectedAction = voxelEditor.SelectedAction;
 			VoxelTool selectedTool = voxelEditor.SelectedTool;
 			DrawVoxelActions(voxelEditor, selectedAction, selectedTool, ref position);
-			DrawToolRow(voxelEditor, cursorTools, selectedTool, selectedAction, ref position);
-			DrawToolRow(voxelEditor, transformTools, selectedTool, selectedAction, ref position);
+			DrawToolRow(voxelEditor, _cursorTools, selectedTool, selectedAction, ref position);
+			DrawToolRow(voxelEditor, _transformTools, selectedTool, selectedAction, ref position);
 			position.RemoveOneSpace();
 			DrawSelectionTools(voxelEditor, ref position);
 			position.RemoveOneSpace();
@@ -186,26 +188,26 @@ namespace VoxelSystem
 			bool enableEdit = voxelEditor.IsEditingEnabled();
 			GUI.enabled = enableEdit;
 
-			Rect rect = position.SliceOut(singleLineHeight);
+			Rect rect = position.SliceOut(_singleLineHeight);
 			int count = 3;
-			float width = (rect.width - (count - 1) * vSpacing) / count;
+			float width = (rect.width - (count - 1) * _vSpacing) / count;
 			rect.width = width;
 
 			bool change = false;
-			rect.height = singleLineHeight;
+			rect.height = _singleLineHeight;
 			if (GUI.Button(rect, "Clear Map"))
 			{
 				voxelEditor.RecordForUndo("Map Cleared", RecordType.Map);
 				change = voxelEditor.Map.ClearWhole();
 			}
 
-			rect.x += width + vSpacing;
+			rect.x += width + _vSpacing;
 			if (GUI.Button(rect, "Fill Map"))
 			{
 				voxelEditor.RecordForUndo("Map Filled", RecordType.Map);
 				change = voxelEditor.Map.SetWhole(voxelEditor.SelectedVoxelValue);
 			}
-			rect.x += width + vSpacing;
+			rect.x += width + _vSpacing;
 			GUI.enabled = VoxelClipboard.HaveContent && enableEdit;
 			if (GUI.Button(rect, "SetupFromMesh from Clipboard"))
 			{
@@ -232,7 +234,7 @@ namespace VoxelSystem
 			TransformLock tLock = voxelEditor.transformLock;
 
 			int count = 3;
-			float width = (fullLineRect.width - (count - 1) * vSpacing) / count;
+			float width = (fullLineRect.width - (count - 1) * _vSpacing) / count;
 			Rect rect = new(fullLineRect.x, fullLineRect.y, width, fullLineRect.height);
 			TransformLock tLockOriginal = tLock;
 
@@ -267,11 +269,11 @@ namespace VoxelSystem
 			bool DrawOneLock(bool b, string text)
 			{
 
-				GUIContent cont = new(text, b ? iconSettings.lockOnIcon : iconSettings.lockOffIcon, "Locking Transform " + text + " to whole values");
+				GUIContent cont = new(text, b ? _iconSettings.lockOnIcon : _iconSettings.lockOffIcon, "Locking Transform " + text + " to whole values");
 				GUI.color = b ? new Color(0.75f, 0.75f, 0.75f) : Color.white;
 				if (GUI.Button(rect, cont))
 					b = !b;
-				rect.x += width + vSpacing;
+				rect.x += width + _vSpacing;
 				return b;
 			}
 		}
@@ -281,19 +283,19 @@ namespace VoxelSystem
 			bool tempEnabled = GUI.enabled;
 			bool enableEdit = voxelEditor.IsEditingEnabled();
 			GUI.enabled = enableEdit;
-			Rect fullRow = position.SliceOut(singleLineHeight * 4 + 3 * vSpacing);
+			Rect fullRow = position.SliceOut(_singleLineHeight * 4 + 3 * _vSpacing);
 
 			int count = 3;
-			float width = (fullRow.width - (count - 1) * vSpacing) / count;
+			float width = (fullRow.width - (count - 1) * _vSpacing) / count;
 			Rect buttonRect = fullRow;
 			buttonRect.width = width;
 
-			buttonRect.height = singleLineHeight * 2 + vSpacing;
+			buttonRect.height = _singleLineHeight * 2 + _vSpacing;
 			DrawVoxelTool(voxelEditor, voxelEditor.SelectedTool, voxelEditor.SelectedAction, buttonRect, VoxelTool.Select);
-			buttonRect.x += width + vSpacing;
+			buttonRect.x += width + _vSpacing;
 
 			bool change = false;
-			buttonRect.height = singleLineHeight;
+			buttonRect.height = _singleLineHeight;
 
 			Vector3Int fullMapSize = voxelEditor.Map.FullSize;
 			GUI.enabled = enableEdit && voxelEditor.HasSelection();
@@ -302,7 +304,7 @@ namespace VoxelSystem
 				voxelEditor.RecordForUndo("Remove Selection", RecordType.Editor);
 				voxelEditor.Deselect();
 			}
-			buttonRect.x += width + vSpacing;
+			buttonRect.x += width + _vSpacing;
 			GUI.enabled = enableEdit && voxelEditor.Selection.size != fullMapSize;
 			if (GUI.Button(buttonRect, " SelectAll"))
 			{
@@ -311,14 +313,14 @@ namespace VoxelSystem
 			}
 			GUI.enabled = enableEdit;
 
-			buttonRect.x -= width + vSpacing;
-			buttonRect.y += singleLineHeight + vSpacing;
+			buttonRect.x -= width + _vSpacing;
+			buttonRect.y += _singleLineHeight + _vSpacing;
 			GUI.enabled = enableEdit && voxelEditor.HasSelection();
 			if (GUI.Button(buttonRect, " Copy"))
 			{
 				voxelEditor.Copy();
 			}
-			buttonRect.x += width + vSpacing;
+			buttonRect.x += width + _vSpacing;
 			GUI.enabled = enableEdit && VoxelClipboard.HaveContent;
 			if (GUI.Button(buttonRect, " Paste"))
 			{
@@ -327,10 +329,10 @@ namespace VoxelSystem
 				change = true;
 			}
 
-			width = (fullRow.width - vSpacing) / 2;
+			width = (fullRow.width - _vSpacing) / 2;
 			buttonRect = fullRow;
-			buttonRect.y += singleLineHeight * 2 + 2 * vSpacing;
-			buttonRect.height = singleLineHeight;
+			buttonRect.y += _singleLineHeight * 2 + 2 * _vSpacing;
+			buttonRect.height = _singleLineHeight;
 			buttonRect.width = width;
 
 			GUI.enabled = enableEdit && voxelEditor.HasSelection();
@@ -340,7 +342,7 @@ namespace VoxelSystem
 				change = voxelEditor.ClearInsideSelection();
 			}
 
-			buttonRect.x += width + vSpacing;
+			buttonRect.x += width + _vSpacing;
 			GUI.enabled = enableEdit && voxelEditor.HasSelection();
 			if (GUI.Button(buttonRect, "Fill Selection"))
 			{
@@ -348,8 +350,8 @@ namespace VoxelSystem
 				change = voxelEditor.FillInsideSelection();
 			}
 
-			buttonRect.y += singleLineHeight + vSpacing;
-			buttonRect.x -= width + vSpacing;
+			buttonRect.y += _singleLineHeight + _vSpacing;
+			buttonRect.x -= width + _vSpacing;
 
 			Transform upperSibling = voxelEditor.transform.GetUpperSibling();
 			VoxelEditor upperVoxelEditor = upperSibling == null ? null : upperSibling.GetComponent<VoxelEditor>();
@@ -363,7 +365,7 @@ namespace VoxelSystem
 			{
 				voxelEditor.MergeInto(upperVoxelEditor);
 			}
-			buttonRect.x += width + vSpacing;
+			buttonRect.x += width + _vSpacing;
 			GUI.enabled = enableEdit && voxelEditor.HasSelection();
 			if (GUI.Button(buttonRect, "Separate Selection"))
 			{
@@ -380,16 +382,16 @@ namespace VoxelSystem
 
 		static void DrawToolRow(VoxelEditor voxelEditor, VoxelTool[] tools, VoxelTool selectedTool, VoxelAction selectedAction, ref Rect position)
 		{
-			Rect fullRowRect = position.SliceOut(_toolButtonHeight);
+			Rect fullRowRect = position.SliceOut(toolButtonHeight);
 
 			int count = tools.Length;
-			float width = (fullRowRect.width - (count - 1) * vSpacing) / count;
+			float width = (fullRowRect.width - (count - 1) * _vSpacing) / count;
 			Rect rect = new(fullRowRect.x, fullRowRect.y, width, fullRowRect.height);
 
 			foreach (VoxelTool tool in tools)
 			{
 				DrawVoxelTool(voxelEditor, selectedTool, selectedAction, rect, tool);
-				rect.x += width + vSpacing;
+				rect.x += width + _vSpacing;
 			}
 			GUI.color = Color.white;
 		}
@@ -412,7 +414,7 @@ namespace VoxelSystem
 
 			GUIStyle style = selectedTool == drawnTool
 				? GetSelectedButtonStyle(selectedAction, selectedTool.GetHandler().GetSupportedActions(voxelEditor))
-				: notSelectedButtonStyle;
+				: _notSelectedButtonStyle;
 
 			if (GUI.Button(rect, content, style))
 			{
@@ -426,10 +428,10 @@ namespace VoxelSystem
 			bool tempEnabled = GUI.enabled;
 			bool enableEdit = voxelEditor.IsEditingEnabled();
 			GUI.enabled = enableEdit;
-			Rect fullLine = position.SliceOut(_actionButtonHeight);
+			Rect fullLine = position.SliceOut(actionButtonHeight);
 
 			int count = VoxelEditor_EnumHelper.allVoxelActions.Length;
-			float width = (fullLine.width - (count - 1) * vSpacing) / count;
+			float width = (fullLine.width - (count - 1) * _vSpacing) / count;
 			Rect rect = new(fullLine.x, fullLine.y, width, fullLine.height);
 
 			VoxelAction[] supportedActions = selectedTool == VoxelTool.None
@@ -444,16 +446,16 @@ namespace VoxelSystem
 
 				GUI.enabled = enableEdit && isActionEnabled;
 
-				GUIStyle style = !isSelected ? notSelectedButtonStyle :
-					action == VoxelAction.Attach ? selectedButtonAttachStyle :
-					action == VoxelAction.Erase ? selectedButtonEraseStyle :
-					action == VoxelAction.Overwrite ? selectedButtonOverWriteStyle :
-					action == VoxelAction.Repaint ? selectedButtonRecolorStyle : selectedButtonStyle;
+				GUIStyle style = !isSelected ? _notSelectedButtonStyle :
+					action == VoxelAction.Attach ? _selectedButtonAttachStyle :
+					action == VoxelAction.Erase ? _selectedButtonEraseStyle :
+					action == VoxelAction.Overwrite ? _selectedButtonOverWriteStyle :
+					action == VoxelAction.Repaint ? _selectedButtonRecolorStyle : _selectedButtonStyle;
 
 				if (GUI.Button(rect, content, style))
 					voxelEditor.SelectedAction = action;
 
-				rect.x += width + vSpacing;
+				rect.x += width + _vSpacing;
 			}
 
 			GUI.enabled = tempEnabled;
@@ -494,7 +496,7 @@ namespace VoxelSystem
 		{
 			if (count == 0) return 0;
 			int rows = Mathf.CeilToInt(count / (float)itemsInARow);
-			return rows * _paletteButtonSize + (rows - 1) * vSpacing;
+			return rows * paletteButtonSize + (rows - 1) * _vSpacing;
 		}
 
 		static void DrawPalette(
@@ -512,13 +514,13 @@ namespace VoxelSystem
 			rect.width = colorPickerWidth;
 			DrawVoxelTool(voxelEditor, voxelEditor.SelectedTool, voxelEditor.SelectedAction, rect, voxel);
 
-			rect.x += colorPickerWidth + vSpacing;
-			rect.width = oneRowRect.width - colorPickerWidth + vSpacing;
+			rect.x += colorPickerWidth + _vSpacing;
+			rect.width = oneRowRect.width - colorPickerWidth + _vSpacing;
 
 			if (!isValidValue(selectedValue))
 			{
 				title.tooltip = "This index is over the list's range!";
-				title.image = warningIcon;
+				title.image = _warningIcon;
 			}
 
 
@@ -526,7 +528,7 @@ namespace VoxelSystem
 			newValue = Math.Max(newValue, 0);
 
 			int index = 0;
-			float itemWidth = (oneRowRect.width - (itemsInARow - 1) * vSpacing) / itemsInARow;
+			float itemWidth = (oneRowRect.width - (itemsInARow - 1) * _vSpacing) / itemsInARow;
 			if (names != null)
 				foreach (string name in names)
 				{
@@ -534,18 +536,18 @@ namespace VoxelSystem
 
 					if (index % itemsInARow == 0)
 					{
-						oneRowRect = position.SliceOut(_paletteButtonSize);
+						oneRowRect = position.SliceOut(paletteButtonSize);
 						oneRowRect.width = itemWidth;
 					}
 
 					GUI.color = indexToValue(index) == selectedValue ? Color.white : new Color(1, 1, 1, 0.4f);
-					bool click = GUI.Button(oneRowRect, name, paletteButton);
+					bool click = GUI.Button(oneRowRect, name, _paletteButton);
 
-					GUI.Label(oneRowRect, name, paletteDarkStyle);
+					GUI.Label(oneRowRect, name, _paletteDarkStyle);
 					if (click)
 						newValue = indexToValue(index);
 
-					oneRowRect.x += (itemWidth + vSpacing);
+					oneRowRect.x += (itemWidth + _vSpacing);
 					index++;
 				}
 
@@ -582,13 +584,13 @@ namespace VoxelSystem
 
 		// Draw Preview
 
-		static readonly CustomMeshPreview customMeshPreview = new();
-		static readonly MeshBuilder previewMeshBuilder = new();
-		static Mesh previewMesh;
-		static Mesh GetPreviewMesh() => previewMesh;
-		static int lastPreviewedShapeIndex = 0;
-		static byte lastCubicTransformation = 0;
-		static byte lastExtraVoxelData = 0;
+		static readonly CustomMeshPreview _customMeshPreview = new();
+		static readonly MeshBuilder _previewMeshBuilder = new();
+		static Mesh _previewMesh;
+		static Mesh GetPreviewMesh() => _previewMesh;
+		static int _lastPreviewedShapeIndex = 0;
+		static byte _lastCubicTransformation = 0;
+		static byte _lastExtraVoxelData = 0;
 
 		public static void DrawVoxelPreview(VoxelEditor voxelEditor, ref Rect position, Side drawTo)
 		{
@@ -599,39 +601,39 @@ namespace VoxelSystem
 
 			Rect rect = position.SliceOut(150, drawTo);
 
-			customMeshPreview.TextureSize = new Vector2(rect.width, rect.height);
-			customMeshPreview.BackgroundType = CameraClearFlags.Skybox;
+			_customMeshPreview.TextureSize = new Vector2(rect.width, rect.height);
+			_customMeshPreview.BackgroundType = CameraClearFlags.Skybox;
 			Vector3 cameraEulerAngles = SceneView.lastActiveSceneView.camera.transform.eulerAngles;
-			customMeshPreview.CameraAngle = new Vector2(-cameraEulerAngles.y, cameraEulerAngles.x);
-			customMeshPreview.Material = voxelEditor.SelectedMaterial;
-			customMeshPreview.meshGetter = GetPreviewMesh;
-			customMeshPreview.SetDirty();
+			_customMeshPreview.CameraAngle = new Vector2(-cameraEulerAngles.y, cameraEulerAngles.x);
+			_customMeshPreview.Material = voxelEditor.SelectedMaterial;
+			_customMeshPreview.meshGetter = GetPreviewMesh;
+			_customMeshPreview.SetDirty();
 
 			int shapeId = voxelEditor.SelectedShapeId;
 			byte cubicTransformation = voxelEditor.SelectedVoxelValue.cubicTransformationIndex;
 			byte extraVoxelData = voxelEditor.SelectedVoxelValue.extraData;
 
-			if (shapeId != lastPreviewedShapeIndex ||
-				cubicTransformation != lastCubicTransformation ||
-				lastExtraVoxelData != extraVoxelData)
+			if (shapeId != _lastPreviewedShapeIndex ||
+				cubicTransformation != _lastCubicTransformation ||
+				_lastExtraVoxelData != extraVoxelData)
 			{
-				lastPreviewedShapeIndex = shapeId;
-				lastCubicTransformation = cubicTransformation;
-				lastExtraVoxelData = extraVoxelData;
+				_lastPreviewedShapeIndex = shapeId;
+				_lastCubicTransformation = cubicTransformation;
+				_lastExtraVoxelData = extraVoxelData;
 
 				ArrayVoxelMap map = ArrayVoxelMap.GetTestOneVoxelMap(voxelEditor.SelectedVoxelValue);
-				previewMeshBuilder.Clear();
-				shape.GenerateMeshData(map, new() { Vector3Int.one }, shapeId, previewMeshBuilder, false);
+				_previewMeshBuilder.Clear();
+				shape.GenerateMeshData(map, new() { Vector3Int.one }, shapeId, _previewMeshBuilder, false);
 
-				if (previewMesh == null)
-					previewMesh = new Mesh();
+				if (_previewMesh == null)
+					_previewMesh = new Mesh();
 				else
-					previewMesh.Clear();
+					_previewMesh.Clear();
 
-				previewMeshBuilder.CopyToMesh(previewMesh);
+				_previewMeshBuilder.CopyToMesh(_previewMesh);
 			}
 
-			EditorGUI.DrawPreviewTexture(rect, customMeshPreview.PreviewTexture);
+			EditorGUI.DrawPreviewTexture(rect, _customMeshPreview.PreviewTexture);
 		}
 	}
 }

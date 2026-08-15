@@ -20,9 +20,9 @@ namespace VoxelSystem
 				axis == Axis3D.Y ? size.x :
 				axis == Axis3D.Z ? size.z : 0;
 
-			Voxel[] newVoxelData = new Voxel[voxelData.Length];
+			Voxel[] newVoxelData = new Voxel[_voxelData.Length];
 
-			for (int i = 0; i < voxelData.Length; i++)
+			for (int i = 0; i < _voxelData.Length; i++)
 			{
 				Vector3Int original = GetCoordinate(i);
 				int nx =
@@ -40,7 +40,7 @@ namespace VoxelSystem
 
 				int ni = nx + (ny * newW) + (nz * newW * newH);
 
-				Voxel voxel = voxelData[i];
+				Voxel voxel = _voxelData[i];
 				CubicTransformation transformation = voxel.CubicTransformation;
 				transformation.Turn(axis, leftHandPositive);
 				voxel.CubicTransformation = transformation;
@@ -48,14 +48,14 @@ namespace VoxelSystem
 			}
 
 			size = new Vector3Int(newW, newH, newD);
-			voxelData = newVoxelData;
+			_voxelData = newVoxelData;
 		}
 
 		public sealed override void Mirror(Axis3D axis)
 		{
-			Voxel[] newVoxelData = new Voxel[voxelData.Length];
+			Voxel[] newVoxelData = new Voxel[_voxelData.Length];
 
-			for (int i = 0; i < voxelData.Length; i++)
+			for (int i = 0; i < _voxelData.Length; i++)
 			{
 				Vector3Int o = GetCoordinate(i);
 				if (axis == Axis3D.X)
@@ -66,13 +66,13 @@ namespace VoxelSystem
 					o.z = size.z - o.z - 1;
 				int ni = o.x + (o.y * size.x) + (o.z * size.x * size.y);
 
-				Voxel voxel = voxelData[i];
+				Voxel voxel = _voxelData[i];
 				CubicTransformation transformation = voxel.CubicTransformation;
 				transformation.Mirror(axis);
 				voxel.CubicTransformation = transformation;
 				newVoxelData[ni] = voxel;
 			}
-			voxelData = newVoxelData;
+			_voxelData = newVoxelData;
 		}
 
 		public sealed override void Resize(GeneralDirection3D direction, int steps)
@@ -94,7 +94,7 @@ namespace VoxelSystem
 				int oz = Mathf.Clamp((int)((float)nz / newSize.z * size.z), 0, size.z - 1);
 				oldIndex = Index(ox, oy, oz);
 
-				if (oldIndex < 0 || oldIndex >= voxelData.Length)
+				if (oldIndex < 0 || oldIndex >= _voxelData.Length)
 				{
 					Debug.Log("W: " + size.x + " -> " + newSize.x);
 					Debug.Log("X: " + ox + " -> " + nx);
@@ -109,11 +109,11 @@ namespace VoxelSystem
 				if (oldIndex < 0)
 					newVoxelData[i] = Voxel.emptyValue;
 				else
-					newVoxelData[i] = voxelData[oldIndex];
+					newVoxelData[i] = _voxelData[oldIndex];
 			}
 
 			size = newSize;
-			voxelData = newVoxelData;
+			_voxelData = newVoxelData;
 		}
 
 		public sealed override void ResizeCanvas(GeneralDirection3D direction, int steps, bool repeat)
@@ -154,11 +154,11 @@ namespace VoxelSystem
 				if (oldIndex < 0)
 					newVoxelData[i]= Voxel.emptyValue;
 				else
-					newVoxelData[i] = voxelData[oldIndex];
+					newVoxelData[i] = _voxelData[oldIndex];
 			}
 
 			size = newSize;
-			voxelData = newVoxelData;
+			_voxelData = newVoxelData;
 		}
 	}
 }

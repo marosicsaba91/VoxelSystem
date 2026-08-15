@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using VoxelSystem.MeshUtility;
-using System.Linq;
-using UnityEditor;
+using System.Linq; 
 using UnityEngine;
 using MUtility;
+using Unity.Scripting.LifecycleManagement;
 
 namespace VoxelSystem
 {
@@ -16,6 +16,7 @@ namespace VoxelSystem
 
 	[CreateAssetMenu(fileName = "OctoBlockVoxelShape", menuName = EditorConstants.categoryPath + "VoxelShape: OctoBlock", order = EditorConstants.soOrder_VoxelShape)]
 
+	[NoAutoStaticsCleanup]
 	public class VoxelShape_OctoBlock : VoxelShapeBuilder
 	{
 		[SerializeField] OctoBlockLibrary blockLibrary;
@@ -30,10 +31,10 @@ namespace VoxelSystem
 		public sealed override bool SupportsTransformation => false;
 		protected override bool IsInitialized => blockLibrary != null;
 
-		readonly Dictionary<Vector3Int, OctoBlock> blocks = new(FastVector3IntComparer.instance);
+		readonly Dictionary<Vector3Int, OctoBlock> _blocks = new(FastVector3IntComparer.instance);
 
 		static Dictionary<Vector3Int, OctoBlock> _block = new(FastVector3IntComparer.instance);
-		static readonly NeighbourType[,,] neighbours = new NeighbourType[3, 3, 3];
+		static readonly NeighbourType[,,] _neighbours = new NeighbourType[3, 3, 3];
 
 		static VoxelMap _currentVoxelMap;
 
@@ -46,10 +47,10 @@ namespace VoxelSystem
 			int shapeIndex,
 			MeshBuilder meshBuilder)
 		{
-			CalculateBlocks(blocks, voxelPositions, map);
+			CalculateBlocks(_blocks, voxelPositions, map);
 			Vector3 quarter = Vector3.one * 0.25f;
 
-			foreach (KeyValuePair<Vector3Int, OctoBlock> blockWithPosition in blocks)
+			foreach (KeyValuePair<Vector3Int, OctoBlock> blockWithPosition in _blocks)
 			{
 				Vector3Int subVoxelIndex = blockWithPosition.Key;
 				OctoBlock block = blockWithPosition.Value;
@@ -57,7 +58,7 @@ namespace VoxelSystem
 					continue;
 				Vector3 offset = block.Center(subVoxelIndex);
 
-				// OPTIMALIZÁLHATÓ:
+				// Optimization:
 				meshBuilder.vertices.AddRange(mesh.vertices.Select(v => v + offset));
 				meshBuilder.normals.AddRange(mesh.normals);
 				meshBuilder.uv.AddRange(mesh.uv);
@@ -84,7 +85,7 @@ namespace VoxelSystem
 						for (int dZ = -1; dZ <= 1; dZ += 1)
 						{
 							NeighbourType n = GetAnyNeighbour(voxelValue, index.x, index.y, index.z, dX, dY, dZ);
-							neighbours[1 + dX, 1 + dY, 1 + dZ] = n;
+							_neighbours[1 + dX, 1 + dY, 1 + dZ] = n;
 						}
 
 
@@ -133,33 +134,33 @@ namespace VoxelSystem
 		void SubVoxelToBlock(int vXi, int vYi, int vZi, int dX, int dY, int dZ)
 		{
 
-			NeighbourType nX = neighbours[1 + dX, 1, 1];
-			NeighbourType nY = neighbours[1, 1 + dY, 1];
-			NeighbourType nZ = neighbours[1, 1, 1 + dZ];
-			NeighbourType nXY = neighbours[1 + dX, 1 + dY, 1];
-			NeighbourType nYZ = neighbours[1, 1 + dY, 1 + dZ];
-			NeighbourType nZX = neighbours[1 + dX, 1, 1 + dZ];
-			NeighbourType nXYZ = neighbours[1 + dX, 1 + dY, 1 + dZ];
+			NeighbourType nX = _neighbours[1 + dX, 1, 1];
+			NeighbourType nY = _neighbours[1, 1 + dY, 1];
+			NeighbourType nZ = _neighbours[1, 1, 1 + dZ];
+			NeighbourType nXY = _neighbours[1 + dX, 1 + dY, 1];
+			NeighbourType nYZ = _neighbours[1, 1 + dY, 1 + dZ];
+			NeighbourType nZx = _neighbours[1 + dX, 1, 1 + dZ];
+			NeighbourType nXYZ = _neighbours[1 + dX, 1 + dY, 1 + dZ];
 
 			// ---------------------------------------------------------------------------------------------
 
 			// Between Two Different Type
 			if (!drawBetweenVoxelChange &&
 				nX.IsFilled() && nY.IsFilled() && nZ.IsFilled() &&
-				nXY.IsFilled() && nYZ.IsFilled() && nZX.IsFilled() &&
+				nXY.IsFilled() && nYZ.IsFilled() && nZx.IsFilled() &&
 				nXYZ.IsFilled())
 				return;
 
 			//On The Edge of the Map
 			if (onMapEdge == VoxelConnectionType.CloseEdge &&
-				nX.SameOrOut() && nY.SameOrOut() && nZ.SameOrOut() && nXY.SameOrOut() && nYZ.SameOrOut() && nZX.SameOrOut() && nXYZ.SameOrOut())
+				nX.SameOrOut() && nY.SameOrOut() && nZ.SameOrOut() && nXY.SameOrOut() && nYZ.SameOrOut() && nZx.SameOrOut() && nXYZ.SameOrOut())
 				return;
 
 			// ---------------------------------------------------------------------------------------------
 
 			int neighbourCount = (nX.IsSame() ? 1 : 0) + (nY.IsSame() ? 1 : 0) + (nZ.IsSame() ? 1 : 0);
-			int crossNeighbourCount = (nXY.IsSame() ? 1 : 0) + (nYZ.IsSame() ? 1 : 0) + (nZX.IsSame() ? 1 : 0);
-			int crossNeighbour2Count = (nXY.IsSame() ? 1 : 0) + (nYZ.IsSame() ? 1 : 0) + (nZX.IsSame() ? 1 : 0) + (nXYZ.IsSame() ? 1 : 0);
+			int crossNeighbourCount = (nXY.IsSame() ? 1 : 0) + (nYZ.IsSame() ? 1 : 0) + (nZx.IsSame() ? 1 : 0);
+			int crossNeighbour2Count = (nXY.IsSame() ? 1 : 0) + (nYZ.IsSame() ? 1 : 0) + (nZx.IsSame() ? 1 : 0) + (nXYZ.IsSame() ? 1 : 0);
 
 
 			// ---------------------------------------------------------------------------------------------
@@ -210,7 +211,7 @@ namespace VoxelSystem
 				}
 
 				Vector3Int inPlaneNeighbourIndex = Vector3Int.one + subVoxel - normal;
-				NeighbourType inPlaneNeighbour = neighbours[inPlaneNeighbourIndex.x, inPlaneNeighbourIndex.y, inPlaneNeighbourIndex.z];
+				NeighbourType inPlaneNeighbour = _neighbours[inPlaneNeighbourIndex.x, inPlaneNeighbourIndex.y, inPlaneNeighbourIndex.z];
 
 				if (crossNeighbour2Count == 1 && inPlaneNeighbour.IsSame()) // SIDE
 				{
@@ -234,7 +235,7 @@ namespace VoxelSystem
 
 					SeparateVector(subVoxel - normal, out Vector3Int normal1, out Vector3Int normal2);
 					Vector3Int crossEdgeIndex = Vector3Int.one + normal + normal1;
-					NeighbourType crossEdgeNeighbour = neighbours[crossEdgeIndex.x, crossEdgeIndex.y, crossEdgeIndex.z];
+					NeighbourType crossEdgeNeighbour = _neighbours[crossEdgeIndex.x, crossEdgeIndex.y, crossEdgeIndex.z];
 					subVoxel -= normal * 2;
 					Axis3D axis = crossEdgeNeighbour.IsSame() ? normal2.ToAxis() : normal1.ToAxis();
 					_block.TryAdd(subVoxelIndex + normal, new OctoBlock(OctoBlockType.EdgeNegative, subVoxel, axis));
@@ -260,7 +261,7 @@ namespace VoxelSystem
 				}
 
 				Vector3Int crossEdgeIndex = Vector3Int.one + normal;
-				NeighbourType crossEdgeNeighbour = neighbours[crossEdgeIndex.x, crossEdgeIndex.y, crossEdgeIndex.z];
+				NeighbourType crossEdgeNeighbour = _neighbours[crossEdgeIndex.x, crossEdgeIndex.y, crossEdgeIndex.z];
 
 
 				bool negativeEdge =
@@ -288,7 +289,7 @@ namespace VoxelSystem
 						{
 							SeparateVector(normal, out Vector3Int normal1, out Vector3Int normal2);
 							crossEdgeIndex = Vector3Int.one + subVoxel - normal + normal1;
-							crossEdgeNeighbour = neighbours[crossEdgeIndex.x, crossEdgeIndex.y, crossEdgeIndex.z];
+							crossEdgeNeighbour = _neighbours[crossEdgeIndex.x, crossEdgeIndex.y, crossEdgeIndex.z];
 							Axis3D connectingAxis = crossEdgeNeighbour.IsSame() ? normal2.ToAxis() : normal1.ToAxis();
 							if (axis == Axis3D.X && connectingAxis != Axis3D.Y)
 								return;

@@ -11,7 +11,7 @@ namespace VoxelSystem
 
 		public override VoxelAction[] GetSupportedActions(IVoxelEditor voxelEditor) => GetTransformActions(voxelEditor);
 
-		protected override IEnumerable<VoxelHandelInfo> GetHandeles(IVoxelEditor voxelEditor)
+		protected override IEnumerable<VoxelHandleInfo> GetHandles(IVoxelEditor voxelEditor)
 		{
 			for (int i = 0; i < DirectionUtility.generalDirection3DValues.Length; i++)
 			{
@@ -23,9 +23,9 @@ namespace VoxelSystem
 					voxelEditor.ToolState == ToolState.Drag && handleDragDirection == side
 					? handleSteps.ToString() : null;
 
-				yield return new VoxelHandelInfo()
+				yield return new VoxelHandleInfo()
 				{
-					coneType = HandeleConeType.Arrow,
+					coneType = HandleConeType.Arrow,
 					position = position,
 					direction = side,
 					side = side,
@@ -34,14 +34,14 @@ namespace VoxelSystem
 			}
 		}
 
-		protected override MapChange OnHandleDown(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo)
+		protected override MapChange OnHandleDown(IVoxelEditor voxelEditor, VoxelHandleInfo handleInfo)
 		{
 			_originalSelectionMap = voxelEditor.SeparateSelection();
 			_lastOffset = Vector3Int.zero;
 			return MapChange.None;
 		}
 
-		protected override MapChange OnHandleDrag(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo, int steps)
+		protected override MapChange OnHandleDrag(IVoxelEditor voxelEditor, VoxelHandleInfo handleInfo, int steps)
 		{
 			if (voxelEditor.HasSelection())
 				return DragSelection(voxelEditor, handleInfo, steps);
@@ -53,7 +53,7 @@ namespace VoxelSystem
 		}
 
 
-		MapChange DragSelection(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo, int steps)
+		MapChange DragSelection(IVoxelEditor voxelEditor, VoxelHandleInfo handleInfo, int steps)
 		{
 			BoundsInt selection = originalSelection;
 			GeneralDirection3D direction = handleInfo.direction;
@@ -82,10 +82,10 @@ namespace VoxelSystem
 			return MapChange.Edit;
 		}
 
-		protected sealed override MapChange OnHandleUp(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo, int steps) =>
+		protected sealed override MapChange OnHandleUp(IVoxelEditor voxelEditor, VoxelHandleInfo handleInfo, int steps) =>
 			voxelEditor.HasSelection() ? MapChange.Final : MapChange.None;
 
-		static void DragWholeMap(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo, int steps)
+		static void DragWholeMap(IVoxelEditor voxelEditor, VoxelHandleInfo handleInfo, int steps)
 		{
 			voxelEditor.RecordForUndo("VoxelMap Moved", RecordType.Transform);
 			Translate(voxelEditor, handleInfo.direction, steps);

@@ -1,9 +1,11 @@
 ﻿using Shapes;
 using System.Collections.Generic;
+using Unity.Scripting.LifecycleManagement;
 using UnityEngine;
 
 namespace VoxelSystem
 {
+	[NoAutoStaticsCleanup]
 	public class VoxelToolHandler_FloodFill : VoxelToolHandler
 	{
 		public sealed override VoxelAction[] GetSupportedActions(IVoxelEditor voxelEditor) => allVoxelActions;
@@ -14,7 +16,7 @@ namespace VoxelSystem
 			return true;
 		}
 
-		static readonly HashSet<Vector3Int> chunk = new(FastVector3IntComparer.instance);
+		static readonly HashSet<Vector3Int> _chunk = new(FastVector3IntComparer.instance);
 
 		protected sealed override void OnDrawCursor(IVoxelEditor voxelEditor, Color actionColor, VoxelHit hit)
 		{
@@ -23,12 +25,12 @@ namespace VoxelSystem
 
 			VoxelMap map = voxelEditor.Map;
 			VoxelMap_Search.roundLimit = 5; 
-			map.SearchChunk(chunk, hit.voxelIndex, voxelEditor.SelectedAction.GetEqualityTestFunction());
+			map.SearchChunk(_chunk, hit.voxelIndex, voxelEditor.SelectedAction.GetEqualityTestFunction());
 			VoxelMap_Search.roundLimit = 1000;
 
 			Vector3 half = Vector3.one * 0.5f;
 			float maxDistance = 3;
-			foreach (Vector3Int index in chunk)
+			foreach (Vector3Int index in _chunk)
 			{
 				Vector3 center = index + half;
 				float distance = Vector3.Distance(index, hit.voxelIndex);
@@ -50,10 +52,10 @@ namespace VoxelSystem
 				return MapChange.None;
 			if (voxel.IsEmpty() && voxelEditor.SelectedAction == VoxelAction.Erase)
 				return MapChange.None;
-			map.SearchChunk(chunk, hit.voxelIndex, voxelEditor.SelectedAction.GetEqualityTestFunction());
+			map.SearchChunk(_chunk, hit.voxelIndex, voxelEditor.SelectedAction.GetEqualityTestFunction());
 
 			bool changed = false;
-			foreach (Vector3Int voxelI in chunk)
+			foreach (Vector3Int voxelI in _chunk)
 				changed |= map.SetVoxel(voxelI, voxelEditor.SelectedAction, voxelEditor.SelectedVoxelValue);
 			return changed ? MapChange.Final : MapChange.None;
 		}

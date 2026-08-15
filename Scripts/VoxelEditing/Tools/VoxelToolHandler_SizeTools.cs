@@ -47,7 +47,7 @@ namespace VoxelSystem
 			return text;
 		}
 
-		protected override IEnumerable<VoxelHandelInfo> GetHandeles(IVoxelEditor voxelEditor)
+		protected override IEnumerable<VoxelHandleInfo> GetHandles(IVoxelEditor voxelEditor)
 		{
 			for (int i = 0; i < DirectionUtility.generalDirection3DValues.Length; i++)
 			{
@@ -65,9 +65,9 @@ namespace VoxelSystem
 				else
 					text = originalSize.ToString();
 
-				yield return new VoxelHandelInfo()
+				yield return new VoxelHandleInfo()
 				{
-					coneType = HandeleConeType.Box,
+					coneType = HandleConeType.Box,
 					position = position,
 					direction = side,
 					side = side,
@@ -76,14 +76,14 @@ namespace VoxelSystem
 			}
 		}
 
-		protected override MapChange OnHandleDown(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo) 
+		protected override MapChange OnHandleDown(IVoxelEditor voxelEditor, VoxelHandleInfo handleInfo) 
 		{
 			_lastStepsClamped = 0;
 			voxelEditor.SeparateSelection();
 			return MapChange.None;
 		}
 
-		protected override MapChange OnHandleDrag(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo, int steps)
+		protected override MapChange OnHandleDrag(IVoxelEditor voxelEditor, VoxelHandleInfo handleInfo, int steps)
 		{
 			GeneralDirection3D direction = handleInfo.direction;
 
@@ -153,7 +153,7 @@ namespace VoxelSystem
 			return MapChange.Edit;
 		}
 
-		protected override MapChange OnHandleUp(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo, int steps)
+		protected override MapChange OnHandleUp(IVoxelEditor voxelEditor, VoxelHandleInfo handleInfo, int steps)
 		{
 			OnHandleDrag(voxelEditor, handleInfo, steps);
 			return MapChange.Final;

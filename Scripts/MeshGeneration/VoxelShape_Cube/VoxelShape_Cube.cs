@@ -7,7 +7,6 @@ using System;
 
 namespace VoxelSystem
 {
-
 	[CreateAssetMenu(fileName = "CubeVoxelShape", menuName = EditorConstants.categoryPath + "VoxelShape: Cube", order = 1)]
 	public class VoxelShape_Cube : VoxelShapeBuilder
 	{
@@ -35,15 +34,15 @@ namespace VoxelSystem
 		protected override bool IsInitialized => sideMeshCache[0] != null && sideMeshCache[0].Count > 0;
 		public sealed override bool SupportsTransformation => false;
 
-		readonly List<CubeSide> allSides = new();
-		static readonly GeneralDirection3D[] directions = DirectionUtility.generalDirection3DValues;
+		readonly List<CubeSide> _allSides = new();
+		static readonly GeneralDirection3D[] _directions = DirectionUtility.generalDirection3DValues;
 
 		protected override void InitializeCachedData()
 		{
-			if (sideMeshCache == null || sideMeshCache.Length != 6)
+			if (sideMeshCache is not { Length: 6 })
 				sideMeshCache = new MeshBuilderList[6];
 
-			for (int dirIndex = 0; dirIndex < directions.Length; dirIndex++)
+			for (int dirIndex = 0; dirIndex < _directions.Length; dirIndex++)
 			{
 				MeshBuilderList meshList = sideMeshCache[dirIndex];
 				if (meshList == null)
@@ -51,7 +50,7 @@ namespace VoxelSystem
 				else
 					meshList.Clear();
 
-				GeneralDirection3D direction = directions[dirIndex];
+				GeneralDirection3D direction = _directions[dirIndex];
 
 				List<Mesh> setupMeshes = GetSetupMeshes(direction);
 				if (setupMeshes.Count == 0)
@@ -104,7 +103,7 @@ namespace VoxelSystem
 
 		void GenerateSideList(VoxelMap map, List<Vector3Int> voxelIndices)
 		{
-			allSides.Clear();
+			_allSides.Clear();
 			Vector3Int mapSize = map.FullSize;
 			for (int i = 0; i < voxelIndices.Count; i++)
 			{
@@ -115,13 +114,16 @@ namespace VoxelSystem
 
 				int materialIndex = voxel.materialIndex;
 
-				for (int dirIndex = 0; dirIndex < directions.Length; dirIndex++)
+				for (int dirIndex = 0; dirIndex < _directions.Length; dirIndex++)
 				{
-					GeneralDirection3D direction = directions[dirIndex];
+					GeneralDirection3D direction = _directions[dirIndex];
 					{
 						Vector3Int normal = direction.ToVectorInt();
 						Vector3Int ni = voxelIndex + normal;
-						bool voxelExists = ni.x >= 0 && ni.y >= 0 && ni.z >= 0 && ni.x < mapSize.x && ni.y < mapSize.y && ni.z < mapSize.z;
+						bool voxelExists =
+							ni is { x: >= 0, y: >= 0, z: >= 0 } &&
+							ni.x < mapSize.x && ni.y < mapSize.y &&
+							ni.z < mapSize.z;
 
 						if (voxelExists)
 						{
@@ -142,7 +144,7 @@ namespace VoxelSystem
 						}
 						else if (!drawSidesOnTheMapEdge && map.FullSize != Vector3Int.one) continue; 
 
-						allSides.Add(new CubeSide
+						_allSides.Add(new CubeSide
 						{
 							direction = direction,
 							voxelIndex = voxelIndex,
@@ -156,9 +158,9 @@ namespace VoxelSystem
 
 		void UpdateMeshData(MeshBuilder meshBuilder)
 		{ 
-			for (int sideIndex = 0; sideIndex < allSides.Count; sideIndex++)
+			for (int sideIndex = 0; sideIndex < _allSides.Count; sideIndex++)
 			{
-				CubeSide side = allSides[sideIndex];
+				CubeSide side = _allSides[sideIndex];
 				MeshBuilder sideMesh = sideMeshCache[(int)side.direction].GetRandom(Random.Range(0, 100));  // TODO: use seed 
 
 				Vector3 center = side.voxelIndex + half;

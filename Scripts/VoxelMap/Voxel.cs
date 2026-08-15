@@ -1,11 +1,13 @@
 ﻿using MUtility;
 using System;
+using Unity.Scripting.LifecycleManagement;
 using UnityEngine.Serialization;
 
 namespace VoxelSystem
 {
 	[Serializable]
-	public struct Voxel
+	[NoAutoStaticsCleanup]
+	public struct Voxel : IEquatable<Voxel>
 	{
 		// The sequence of variables is NOT rearrangeable:
 		// The type is exactly 8 byte now, but it can grow to 12 byte with the wrong order
@@ -79,6 +81,8 @@ namespace VoxelSystem
 
 		public static bool operator !=(Voxel a, Voxel b) => !(a == b);
 		public override bool Equals(object obj) => obj is Voxel other && this == other;
+		public bool Equals(Voxel other) => this == other; 
+		
 		public override int GetHashCode() => shapeId.GetHashCode() ^ materialIndex.GetHashCode() ^ closednessInfo.GetHashCode() ^ cubicTransformationIndex.GetHashCode() ^ extraData.GetHashCode();
 
 		public bool IsSideClosed(GeneralDirection3D side) =>

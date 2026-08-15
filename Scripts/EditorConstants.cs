@@ -10,3 +10,4 @@ namespace VoxelSystem
 		public const int soOrder_OctoBlock = 3;
 	}
 }
+

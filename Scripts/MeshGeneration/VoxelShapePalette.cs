@@ -1,33 +1,37 @@
 using MUtility;
 using System.Collections.Generic;
+using Unity.Scripting.LifecycleManagement;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace VoxelSystem
 {
+	[NoAutoStaticsCleanup]
 	[CreateAssetMenu(fileName = "VoxelShapePalette", menuName = EditorConstants.categoryPath + "Voxel Shape Palette", order = EditorConstants.soOrder_Palette)]
 	public class VoxelShapePalette : ScriptableObject
 	{
-		[SerializeField] List<VoxelShapeBuilder> _items;
+		[FormerlySerializedAs("_items"),SerializeField] 
+		List<VoxelShapeBuilder> items;
 
 		// public IReadOnlyList<VoxelShapeBuilder> Shapes => _items;
 
-		public int ItemCount => _items.Count;
+		public int ItemCount => items.Count;
 
 		public IEnumerable<int> GetVoxelIds()
 		{
-			foreach (VoxelShapeBuilder item in _items)
+			foreach (VoxelShapeBuilder item in items)
 				yield return item.VoxelId;
 		}
 
 		public IEnumerable<string> GetNames()
 		{
-			foreach (VoxelShapeBuilder item in _items)
+			foreach (VoxelShapeBuilder item in items)
 				yield return item.NiceName;
 		}
 
 		public int GetID(int index)
 		{
-			VoxelShapeBuilder builder = _items.IndexClamped(index);
+			VoxelShapeBuilder builder = items.IndexClamped(index);
 			if (builder != null)
 				return builder.VoxelId;
 			return 1;
@@ -36,7 +40,7 @@ namespace VoxelSystem
 
 		public VoxelShapeBuilder GetBuilder(int id)
 		{
-			foreach (VoxelShapeBuilder item in _items)
+			foreach (VoxelShapeBuilder item in items)
 			{
 				if (item.VoxelId == id)
 					return item;
@@ -46,7 +50,7 @@ namespace VoxelSystem
 
 		public bool TryGetBuilder(int id, out VoxelShapeBuilder builder)
 		{
-			foreach (VoxelShapeBuilder item in _items)
+			foreach (VoxelShapeBuilder item in items)
 			{
 				if (item.VoxelId == id)
 				{
@@ -60,9 +64,9 @@ namespace VoxelSystem
 
 		public int GetIndexOf(int id)
 		{
-			for (int i = 0; i < _items.Count; i++)
+			for (int i = 0; i < items.Count; i++)
 			{
-				VoxelShapeBuilder item = _items[i];
+				VoxelShapeBuilder item = items[i];
 				if (item.VoxelId == id)
 					return i;
 			}
@@ -70,25 +74,25 @@ namespace VoxelSystem
 		}
 
 
-		public VoxelShapeBuilder GetBuilderByIndex(int index) => _items[index];
+		public VoxelShapeBuilder GetBuilderByIndex(int index) => items[index];
 
 
-		static VoxelShapeBuilder dummyBuilder;
+		static VoxelShapeBuilder _dummyBuilder;
 
 		static VoxelShapeBuilder GetDummyBuilder()
 		{
-			if (dummyBuilder == null)
+			if (_dummyBuilder == null)
 			{
-				dummyBuilder = CreateInstance<VoxelShape_Cube>(); 
-				dummyBuilder.InitializeMeshCacheAndSave();
-				dummyBuilder.NiceName = "Dummy";
+				_dummyBuilder = CreateInstance<VoxelShape_Cube>(); 
+				_dummyBuilder.InitializeMeshCacheAndSave();
+				_dummyBuilder.NiceName = "Dummy";
 			}
-			return dummyBuilder;
+			return _dummyBuilder;
 		}
 
 		internal bool ContainsID(int value) 
 		{ 
-			foreach (VoxelShapeBuilder item in _items)
+			foreach (VoxelShapeBuilder item in items)
 			{
 				if (item.VoxelId == value)
 					return true;

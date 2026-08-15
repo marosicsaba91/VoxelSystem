@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Scripting.LifecycleManagement;
 
 namespace VoxelSystem
 {
@@ -16,6 +17,7 @@ namespace VoxelSystem
 
 	public enum VoxelTool { None, Box, Face, FloodFill, Move, Turn, Resize, Mirror, Repeat, ResizeCanvas, Select, MaterialPicker, ShapePicker }
 
+	[NoAutoStaticsCleanup]
 	public static class VoxelEditor_EnumHelper
 	{
 		public static readonly VoxelAction[] allVoxelActions = Enum.GetValues(typeof(VoxelAction)).Cast<VoxelAction>().ToArray();
@@ -40,7 +42,7 @@ namespace VoxelSystem
 
 		public static Func<Voxel, Voxel, bool> GetEqualityTestFunction(this VoxelAction action) => action switch
 		{
-			VoxelAction.Attach => (a, b) => b.IsEmpty(),
+			VoxelAction.Attach => (_, b) => b.IsEmpty(),
 			VoxelAction.RepaintShapeOnly => (a, b) => a.shapeId == b.shapeId,
 			VoxelAction.Erase => (a, b) => a.materialIndex == b.materialIndex && a.shapeId == b.shapeId,
 			VoxelAction.RepaintMaterialOnly => (a, b) => a.materialIndex == b.materialIndex && a.IsFilled() && b.IsFilled(),
@@ -49,14 +51,14 @@ namespace VoxelSystem
 
 		// --------------------- Voxel Tool Handlers ---------------------
 
-		static readonly Dictionary<VoxelTool, VoxelToolHandler> handlers = new();
+		static readonly Dictionary<VoxelTool, VoxelToolHandler> _handlers = new();
 
 		public static VoxelToolHandler GetHandler(this VoxelTool tool)
 		{
 			if (tool == VoxelTool.None)
 				return null;
 
-			if (handlers.TryGetValue(tool, out VoxelToolHandler handler))
+			if (_handlers.TryGetValue(tool, out VoxelToolHandler handler))
 				return handler;
 
 			Type t = (tool) switch
@@ -78,7 +80,7 @@ namespace VoxelSystem
 			};
 
 			VoxelToolHandler instance = (VoxelToolHandler)Activator.CreateInstance(t);
-			handlers.Add(tool, instance);
+			_handlers.Add(tool, instance);
 			return instance;
 		}
 

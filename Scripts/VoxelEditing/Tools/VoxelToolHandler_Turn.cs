@@ -8,7 +8,7 @@ namespace VoxelSystem
 	{
 		public override VoxelAction[] GetSupportedActions(IVoxelEditor voxelEditor) => GetTransformActions(voxelEditor);
 
-		protected override IEnumerable<VoxelHandelInfo> GetHandeles(IVoxelEditor voxelEditor)
+		protected override IEnumerable<VoxelHandleInfo> GetHandles(IVoxelEditor voxelEditor)
 		{
 			for (int i = 0; i < DirectionUtility.generalDirection3DValues.Length; i++)
 			{
@@ -18,18 +18,18 @@ namespace VoxelSystem
 
 				GeneralDirection3D dir1 = side.GetPerpendicularNext();
 				 
-				yield return new VoxelHandelInfo()
+				yield return new VoxelHandleInfo()
 				{
-					coneType = HandeleConeType.Arrow,
+					coneType = HandleConeType.Arrow,
 					position = position + dir1.ToVector() * standardSpacing,
 					direction = dir1,
 					side = side,
 				};
 
 				GeneralDirection3D dir2 = dir1.Opposite();
-				yield return new VoxelHandelInfo()
+				yield return new VoxelHandleInfo()
 				{
-					coneType = HandeleConeType.Arrow,
+					coneType = HandleConeType.Arrow,
 					position = position + dir2.ToVector() * standardSpacing,
 					direction = dir2,
 					side = side,
@@ -37,7 +37,7 @@ namespace VoxelSystem
 			}
 		}
 
-		protected override MapChange OnHandleClick(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo)
+		protected override MapChange OnHandleClick(IVoxelEditor voxelEditor, VoxelHandleInfo handleInfo)
 		{
 			voxelEditor.RecordForUndo("VoxelMap Turned", RecordType.Map | RecordType.Transform);
 

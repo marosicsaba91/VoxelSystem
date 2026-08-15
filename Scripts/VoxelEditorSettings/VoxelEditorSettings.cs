@@ -1,20 +1,21 @@
 using System;
+using Unity.Scripting.LifecycleManagement;
 using UnityEngine;
 using VoxelSystem;
 
-// [CreateAssetMenu]
+[NoAutoStaticsCleanup]
 internal class VoxelEditorSettings : ScriptableObject
 {
 
-	static VoxelEditorSettings instance = null;
+	static VoxelEditorSettings _instance = null;
 	public static VoxelEditorSettings Instance
 	{
 		get
 		{
-			if (instance == null)
-				instance = MUtility.ScriptableObjectUtility.GetFromResources<VoxelEditorSettings>();
+			if (_instance == null)
+				_instance = MUtility.ScriptableObjectUtility.GetFromResources<VoxelEditorSettings>();
 
-			return instance;
+			return _instance;
 		}
 	}
 
@@ -103,8 +104,7 @@ internal class VoxelEditorSettings : ScriptableObject
 		VoxelTool.Box => overWriteBoxVoxelToolIcon,
 		VoxelTool.Face => overWriteFaceVoxelToolIcon,
 		VoxelTool.FloodFill => overWriteFaceVoxelToolIcon,
-
-		VoxelTool.None => null,
+		
 		_ => null,
 	};
 
@@ -176,7 +176,7 @@ internal class VoxelEditorSettings : ScriptableObject
 			VoxelTool.MaterialPicker => colorPickerVoxelToolIcon,
 			VoxelTool.ShapePicker => colorPickerVoxelToolIcon,
 			VoxelTool.Select => selectVoxelToolIcon,
-			VoxelTool.None => null,
+			
 			_ => null,
 
 		};

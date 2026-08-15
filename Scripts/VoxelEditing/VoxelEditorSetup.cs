@@ -1,24 +1,26 @@
-﻿namespace VoxelSystem
+﻿using Unity.Scripting.LifecycleManagement;
+namespace VoxelSystem
 {
+	[NoAutoStaticsCleanup]
 	static class VoxelEditorSetup
 	{
-		static VoxelAction selectedAction = VoxelAction.Attach;
-		static VoxelTool selectedTool = VoxelTool.None;
-		static ToolState toolState = ToolState.None;
-		static Voxel selectedVoxelValue = Voxel.emptyValue;
+		static VoxelAction _selectedAction = VoxelAction.Attach;
+		static VoxelTool _selectedTool = VoxelTool.None;
+		static ToolState _toolState = ToolState.None;
+		static Voxel _selectedVoxelValue = Voxel.emptyValue;
 
 		public static VoxelTool SelectedTool
 		{
 			get
 			{
 				Load();
-				return selectedTool;
+				return _selectedTool;
 			}
 
 			set
 			{
-				if (value == selectedTool) return;
-				selectedTool = value;
+				if (value == _selectedTool) return;
+				_selectedTool = value;
 				Save();
 			}
 		}
@@ -27,13 +29,13 @@
 			get
 			{
 				Load();
-				return selectedAction;
+				return _selectedAction;
 			}
 
 			set
 			{
-				if (value == selectedAction) return;
-				selectedAction = value;
+				if (value == _selectedAction) return;
+				_selectedAction = value;
 				Save();
 			}
 		}
@@ -42,13 +44,13 @@
 			get
 			{
 				Load();
-				return toolState;
+				return _toolState;
 			}
 
 			set
 			{
-				if (value == toolState) return;
-				toolState = value;
+				if (value == _toolState) return;
+				_toolState = value;
 				Save();
 			}
 		}
@@ -57,13 +59,13 @@
 			get
 			{
 				Load();
-				return selectedVoxelValue;
+				return _selectedVoxelValue;
 			}
 
 			set
 			{
-				if (value == selectedVoxelValue) return;
-				selectedVoxelValue = value;
+				if (value == _selectedVoxelValue) return;
+				_selectedVoxelValue = value;
 				Save();
 			}
 		}
@@ -73,7 +75,7 @@
 			get => SelectedVoxelValue.shapeId;
 			set
 			{
-				selectedVoxelValue.shapeId = value;
+				_selectedVoxelValue.shapeId = value;
 				Save();
 			}
 		}
@@ -83,7 +85,7 @@
 			get => SelectedVoxelValue.materialIndex;
 			set 
 			{
-				selectedVoxelValue.materialIndex = value;
+				_selectedVoxelValue.materialIndex = value;
 				Save();
 			}
 		}
@@ -97,38 +99,38 @@
 		const string selectedVoxelVoxel_ClosednessInfo = "VoxelEditor_SelectedVoxel_ClosednessInfo";
 		const string selectedVoxelVoxel_ExtraVoxelData = "VoxelEditor_SelectedVoxel_ExtraVoxelData";	
 
-		static bool areToolsLoaded = false;
+		static bool _areToolsLoaded = false;
 
 		static void Load()
 		{
-			if (areToolsLoaded) return;
+			if (_areToolsLoaded) return;
 
 #if UNITY_EDITOR
 			if (!UnityEditor.EditorPrefs.HasKey(selectedToolKey)) return;
 
-			selectedTool = (VoxelTool)UnityEditor.EditorPrefs.GetInt(selectedToolKey, (int)selectedTool);
-			selectedAction = (VoxelAction)UnityEditor.EditorPrefs.GetInt(selectedActionKey, (int)selectedAction);
-			toolState = (ToolState)UnityEditor.EditorPrefs.GetInt(toolStateKey, (int)toolState);
+			_selectedTool = (VoxelTool)UnityEditor.EditorPrefs.GetInt(selectedToolKey, (int)_selectedTool);
+			_selectedAction = (VoxelAction)UnityEditor.EditorPrefs.GetInt(selectedActionKey, (int)_selectedAction);
+			_toolState = (ToolState)UnityEditor.EditorPrefs.GetInt(toolStateKey, (int)_toolState);
 
-			selectedVoxelValue.shapeId = UnityEditor.EditorPrefs.GetInt(selectedVoxelValue_ShapeId, selectedVoxelValue.shapeId);
-			selectedVoxelValue.materialIndex = (byte)UnityEditor.EditorPrefs.GetInt(selectedVoxelVoxel_MaterialIndex, selectedVoxelValue.materialIndex);
-			selectedVoxelValue.closednessInfo = (byte)UnityEditor.EditorPrefs.GetInt(selectedVoxelVoxel_ClosednessInfo, selectedVoxelValue.closednessInfo);
-			selectedVoxelValue.extraData = (byte)UnityEditor.EditorPrefs.GetInt(selectedVoxelVoxel_ExtraVoxelData, selectedVoxelValue.extraData);
+			_selectedVoxelValue.shapeId = UnityEditor.EditorPrefs.GetInt(selectedVoxelValue_ShapeId, _selectedVoxelValue.shapeId);
+			_selectedVoxelValue.materialIndex = (byte)UnityEditor.EditorPrefs.GetInt(selectedVoxelVoxel_MaterialIndex, _selectedVoxelValue.materialIndex);
+			_selectedVoxelValue.closednessInfo = (byte)UnityEditor.EditorPrefs.GetInt(selectedVoxelVoxel_ClosednessInfo, _selectedVoxelValue.closednessInfo);
+			_selectedVoxelValue.extraData = (byte)UnityEditor.EditorPrefs.GetInt(selectedVoxelVoxel_ExtraVoxelData, _selectedVoxelValue.extraData);
 #endif
-			areToolsLoaded = true;
+			_areToolsLoaded = true;
 		}
 
 		static void Save()
 		{
 #if UNITY_EDITOR
-			UnityEditor.EditorPrefs.SetInt(selectedToolKey, (int)selectedTool);
-			UnityEditor.EditorPrefs.SetInt(selectedActionKey, (int)selectedAction);
-			UnityEditor.EditorPrefs.SetInt(toolStateKey, (int)toolState);
+			UnityEditor.EditorPrefs.SetInt(selectedToolKey, (int)_selectedTool);
+			UnityEditor.EditorPrefs.SetInt(selectedActionKey, (int)_selectedAction);
+			UnityEditor.EditorPrefs.SetInt(toolStateKey, (int)_toolState);
 
-			UnityEditor.EditorPrefs.SetInt(selectedVoxelValue_ShapeId, selectedVoxelValue.shapeId);
-			UnityEditor.EditorPrefs.SetInt(selectedVoxelVoxel_MaterialIndex, selectedVoxelValue.materialIndex);
-			UnityEditor.EditorPrefs.SetInt(selectedVoxelVoxel_ClosednessInfo, selectedVoxelValue.closednessInfo);
-			UnityEditor.EditorPrefs.SetInt(selectedVoxelVoxel_ExtraVoxelData, selectedVoxelValue.extraData);
+			UnityEditor.EditorPrefs.SetInt(selectedVoxelValue_ShapeId, _selectedVoxelValue.shapeId);
+			UnityEditor.EditorPrefs.SetInt(selectedVoxelVoxel_MaterialIndex, _selectedVoxelValue.materialIndex);
+			UnityEditor.EditorPrefs.SetInt(selectedVoxelVoxel_ClosednessInfo, _selectedVoxelValue.closednessInfo);
+			UnityEditor.EditorPrefs.SetInt(selectedVoxelVoxel_ExtraVoxelData, _selectedVoxelValue.extraData);
 #endif
 		}
 	}

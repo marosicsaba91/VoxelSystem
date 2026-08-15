@@ -2,7 +2,8 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering; 
+using UnityEngine.Rendering;
+using UnityEngine.Serialization;
 
 namespace VoxelSystem.MeshUtility
 {
@@ -15,13 +16,13 @@ namespace VoxelSystem.MeshUtility
 		public List<int> triangles = new();
 		public List<SubMeshDescriptor> descriptors = new();
 
-		[SerializeField] int _lastMaterialStartTriangleIndex = 0;
+		[FormerlySerializedAs("_lastMaterialStartTriangleIndex"),SerializeField] int lastMaterialStartTriangleIndex = 0;
 		public int VertexCount => vertices.Count;
 		public bool IsEmpty => vertices.IsNullOrEmpty();
 
 		public int TriangleCount => triangles.Count;
 
-		static readonly Matrix4x4 rightToLeftHanded = Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(-90, 0, 0), new Vector3(-1, -1, 1));
+		static readonly Matrix4x4 _rightToLeftHanded = Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(-90, 0, 0), new Vector3(-1, -1, 1));
 
 
 		public MeshBuilder() { }
@@ -49,7 +50,7 @@ namespace VoxelSystem.MeshUtility
 		public MeshBuilder(Mesh mesh, bool fromRightHanded)
 		{
 			if (fromRightHanded)
-				SetupFromMesh(mesh, rightToLeftHanded);
+				SetupFromMesh(mesh, _rightToLeftHanded);
 			else
 				SetupFromMesh(mesh);
 		}
@@ -122,7 +123,7 @@ namespace VoxelSystem.MeshUtility
 			uv.Clear();
 			triangles.Clear();
 			descriptors.Clear();
-			_lastMaterialStartTriangleIndex = 0;
+			lastMaterialStartTriangleIndex = 0;
 		}
 
 		public Mesh ToMesh()
@@ -249,9 +250,9 @@ namespace VoxelSystem.MeshUtility
 
 		public void EndMaterialDescriptor()
 		{
-			int triangleCount = TriangleCount - _lastMaterialStartTriangleIndex;
-			descriptors.Add(new SubMeshDescriptor(_lastMaterialStartTriangleIndex, triangleCount));
-			_lastMaterialStartTriangleIndex = TriangleCount;
+			int triangleCount = TriangleCount - lastMaterialStartTriangleIndex;
+			descriptors.Add(new SubMeshDescriptor(lastMaterialStartTriangleIndex, triangleCount));
+			lastMaterialStartTriangleIndex = TriangleCount;
 		}
 
 		public void Transform(Matrix4x4 transformation)

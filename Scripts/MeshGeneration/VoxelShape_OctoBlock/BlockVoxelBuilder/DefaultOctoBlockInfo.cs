@@ -1,4 +1,5 @@
 ﻿using System;
+using Unity.Scripting.LifecycleManagement;
 using UnityEngine;
 using Utility.SerializableCollection;
 
@@ -8,6 +9,7 @@ namespace VoxelSystem
 	[Serializable]
 	class MeshDictionary : SerializableDictionary<OctoBlockType, Mesh> { }
 
+	[NoAutoStaticsCleanup]
 	[CreateAssetMenu(menuName = EditorConstants.categoryPath + "Default Oct Block Info", order = EditorConstants.soOrder_OctoBlock)]
 	class DefaultOctoBlockInfo : ScriptableObject
 	{

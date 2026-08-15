@@ -1,34 +1,36 @@
 using System;
+using Unity.Scripting.LifecycleManagement;
 using UnityEngine;
 
 namespace VoxelSystem
 {
 
 	[Serializable]
+	[NoAutoStaticsCleanup]
 	public partial class ArrayVoxelMap : VoxelMap, ISerializationCallbackReceiver
 	{
 		public const int defaultMapSize = 8;
 
 		[SerializeField] Vector3Int size;
-		[SerializeField] long[] longVoxelData = new long[0];
-		Voxel[] voxelData = new Voxel[0];
+		[SerializeField] long[] longVoxelData = Array.Empty<long>();
+		Voxel[] _voxelData = Array.Empty<Voxel>();
 
 		public void OnBeforeSerialize()
 		{
-			longVoxelData = new long[voxelData.Length];
-			for (int i = 0; i < voxelData.Length; i++)
+			longVoxelData = new long[_voxelData.Length];
+			for (int i = 0; i < _voxelData.Length; i++)
 			{
-				longVoxelData[i] = voxelData[i].ToLong();
+				longVoxelData[i] = _voxelData[i].ToLong();
 			}
 		}
 
 		public void OnAfterDeserialize()
 		{
 			if (longVoxelData == null) return;
-			voxelData = new Voxel[longVoxelData.Length];
-			for (int i = 0; i < voxelData.Length; i++)
+			_voxelData = new Voxel[longVoxelData.Length];
+			for (int i = 0; i < _voxelData.Length; i++)
 			{
-				voxelData[i] = new Voxel(longVoxelData[i]);
+				_voxelData[i] = new Voxel(longVoxelData[i]);
 			}
 		}
 
@@ -40,10 +42,10 @@ namespace VoxelSystem
 				bool isSizeInvalid = value.x <= 0 || value.y <= 0 || value.z <= 0;
 				if (isSizeInvalid)
 					throw new ArgumentException("Size must be positive");
-				if (voxelData != null && size == value) return;
+				if (_voxelData != null && size == value) return;
 
 				size = value;
-				voxelData = new Voxel[Length];
+				_voxelData = new Voxel[Length];
 			}
 		}
 
@@ -100,23 +102,23 @@ namespace VoxelSystem
 
 		// GET Voxels ----------------------------
 
-		public sealed override Voxel GetVoxel(int x, int y, int z) => voxelData[Index(x, y, z)];
+		public sealed override Voxel GetVoxel(int x, int y, int z) => _voxelData[Index(x, y, z)];
 
 		// SET Voxels ----------------------------
 
 		public sealed override bool SetVoxel(int x, int y, int z, Voxel voxel)
 		{
 			int index = Index(x, y, z);
-			if (voxelData[index] == voxel) return false;
-			voxelData[index] = voxel;
+			if (_voxelData[index] == voxel) return false;
+			_voxelData[index] = voxel;
 			return true;
 		}
 
 		public sealed override bool SetVoxel(int x, int y, int z, VoxelAction action, Voxel value)
 		{
 			int index = Index(x, y, z);
-			if (index < 0 || index >= voxelData.Length) return false;
-			Voxel v = voxelData[index];
+			if (index < 0 || index >= _voxelData.Length) return false;
+			Voxel v = _voxelData[index];
 			Voxel oldVal = v;
 			switch (action)
 			{
@@ -151,23 +153,23 @@ namespace VoxelSystem
 			if (oldVal == v)
 				return false;
 
-			voxelData[index] = v;
+			_voxelData[index] = v;
 			return true;
 		}
 
 		public sealed override bool SetWhole(Voxel value)
 		{
-			for (int i = 0; i < voxelData.Length; i++)
+			for (int i = 0; i < _voxelData.Length; i++)
 			{
-				voxelData[i] = value;
+				_voxelData[i] = value;
 			}
 			return true;  // Faster to say, it is always changed.
 		}
 
 		public sealed override bool ClearWhole()
 		{
-			voxelData = new Voxel[Length];
-			Array.Fill(voxelData, emptyValue);
+			_voxelData = new Voxel[Length];
+			Array.Fill(_voxelData, emptyValue);
 
 			return true;
 		}
@@ -192,9 +194,9 @@ namespace VoxelSystem
 						{
 							int index = x + (y * size.x) + (z * size.x * size.y);
 
-							if (voxelData[index] != value)
+							if (_voxelData[index] != value)
 							{
-								voxelData[index] = value;
+								_voxelData[index] = value;
 								changed |= true;
 							}
 						}
@@ -206,10 +208,10 @@ namespace VoxelSystem
 						for (int z = minZ; z <= maxZ; z++)
 						{
 							int index = x + (y * size.x) + (z * size.x * size.y);
-							Voxel originalValue = voxelData[index];
+							Voxel originalValue = _voxelData[index];
 							if (originalValue.IsFilled() && originalValue != value)
 							{
-								voxelData[index] = value;
+								_voxelData[index] = value;
 								changed |= true;
 							}
 						}
@@ -221,10 +223,10 @@ namespace VoxelSystem
 						for (int z = minZ; z <= maxZ; z++)
 						{
 							int index = x + (y * size.x) + (z * size.x * size.y);
-							Voxel originalValue = voxelData[index];
+							Voxel originalValue = _voxelData[index];
 							if (originalValue.IsEmpty() && originalValue != value)
 							{
-								voxelData[index] = value;
+								_voxelData[index] = value;
 								changed |= true;
 							}
 						}
@@ -236,10 +238,10 @@ namespace VoxelSystem
 						for (int z = minZ; z <= maxZ; z++)
 						{
 							int index = x + (y * size.x) + (z * size.x * size.y);
-							Voxel originalValue = voxelData[index];
+							Voxel originalValue = _voxelData[index];
 							if (originalValue.IsFilled())
 							{
-								voxelData[index] = emptyValue;
+								_voxelData[index] = emptyValue;
 								changed |= true;
 							}
 						}
@@ -251,10 +253,10 @@ namespace VoxelSystem
 						for (int z = minZ; z <= maxZ; z++)
 						{
 							int index = x + (y * size.x) + (z * size.x * size.y);
-							Voxel originalValue = voxelData[index];
+							Voxel originalValue = _voxelData[index];
 							if (originalValue.IsFilled())
 							{
-								voxelData[index].materialIndex = value.materialIndex;
+								_voxelData[index].materialIndex = value.materialIndex;
 								changed |= true;
 							}
 						}
@@ -266,14 +268,14 @@ namespace VoxelSystem
 						for (int z = minZ; z <= maxZ; z++)
 						{
 							int index = x + (y * size.x) + (z * size.x * size.y);
-							Voxel originalValue = voxelData[index];
+							Voxel originalValue = _voxelData[index];
 							if (originalValue.IsFilled())
 							{
-								Voxel v = voxelData[index];
+								Voxel v = _voxelData[index];
 								v.shapeId = value.shapeId;
 								v.extraData = value.extraData;
-								voxelData[index] = v;
-								changed |= true;
+								_voxelData[index] = v;
+								changed = true;
 							}
 						}
 			}
@@ -281,19 +283,17 @@ namespace VoxelSystem
 			return changed;
 		}
 
-		static ArrayVoxelMap oneVoxelMap;
+		static ArrayVoxelMap _oneVoxelMap;
 
 		internal static ArrayVoxelMap GetTestOneVoxelMap(Voxel value)
 		{
-			if (oneVoxelMap == null)
+			if (_oneVoxelMap == null)
 			{
-				oneVoxelMap = new ArrayVoxelMap();
-				oneVoxelMap.Setup(Vector3Int.one * 3);
+				_oneVoxelMap = new();
+				_oneVoxelMap.Setup(Vector3Int.one * 3);
 			}
-			oneVoxelMap.SetVoxel(Vector3Int.one, value);
-			Voxel v = oneVoxelMap.GetVoxel(Vector3Int.one);
-
-			return oneVoxelMap;
+			_oneVoxelMap.SetVoxel(Vector3Int.one, value);
+			return _oneVoxelMap;
 		}
 	}
 }

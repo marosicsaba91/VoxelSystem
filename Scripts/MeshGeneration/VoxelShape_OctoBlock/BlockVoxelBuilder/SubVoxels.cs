@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Scripting.LifecycleManagement;
 using UnityEngine;
 
 namespace VoxelSystem
@@ -32,6 +33,7 @@ namespace VoxelSystem
 	}
 
 
+	[NoAutoStaticsCleanup]
 	public static class SubVoxelUtility
 	{
 		static readonly List<SubVoxelFlags> _allSubVoxel;

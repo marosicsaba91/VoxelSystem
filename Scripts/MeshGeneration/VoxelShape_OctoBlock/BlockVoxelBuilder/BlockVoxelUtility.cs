@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using MUtility;
+using Unity.Scripting.LifecycleManagement;
 
 namespace VoxelSystem
 {
+	[NoAutoStaticsCleanup]
 	public static class BlockVoxelUtility
 	{
 		static readonly List<OctoBlockType> _allBlockType;

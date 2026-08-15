@@ -1,6 +1,7 @@
 ﻿using MUtility;
 using System;
 using System.Collections.Generic;
+using Unity.Scripting.LifecycleManagement;
 using UnityEngine;
 using Random = UnityEngine.Random;
 using VoxelSystem.MeshUtility;
@@ -11,6 +12,7 @@ using UnityEditor;
 
 namespace VoxelSystem
 {
+	[NoAutoStaticsCleanup]
 	public abstract class VoxelShapeBuilder : ScriptableObject
 	{
 		[SerializeField] int voxelId;
@@ -163,31 +165,28 @@ namespace VoxelSystem
 #if UNITY_EDITOR
 			EditorUtility.SetDirty(this);
 #endif
-
 		}
 
 		public virtual IReadOnlyList<ExtraVoxelControl> GetExtraControls() => null;
 
-
-
 		// ---------- PhysicalVoxelShape ------------------------
-		static readonly Vector3 p000 = new(0, 0, 0);
-		static readonly Vector3 p001 = new(0, 0, 1);
-		static readonly Vector3 p010 = new(0, 1, 0);
-		static readonly Vector3 p011 = new(0, 1, 1);
-		static readonly Vector3 p100 = new(1, 0, 0);
-		static readonly Vector3 p101 = new(1, 0, 1);
-		static readonly Vector3 p110 = new(1, 1, 0);
-		static readonly Vector3 p111 = new(1, 1, 1);
-		static readonly Dictionary<GeneralDirection3D, Vector3[]> sideDictionary = new()
+		static readonly Vector3 _p000 = new(0, 0, 0);
+		static readonly Vector3 _p001 = new(0, 0, 1);
+		static readonly Vector3 _p010 = new(0, 1, 0);
+		static readonly Vector3 _p011 = new(0, 1, 1);
+		static readonly Vector3 _p100 = new(1, 0, 0);
+		static readonly Vector3 _p101 = new(1, 0, 1);
+		static readonly Vector3 _p110 = new(1, 1, 0);
+		static readonly Vector3 _p111 = new(1, 1, 1);
+		static readonly Dictionary<GeneralDirection3D, Vector3[]> _sideDictionary = new()
 		{
-			{ GeneralDirection3D.Right, new Vector3[]{ p100, p110, p111, p101 } },
-			{ GeneralDirection3D.Left, new Vector3[]{ p000, p001, p011, p010 } },
+			{ GeneralDirection3D.Right, new []{ _p100, _p110, _p111, _p101 } },
+			{ GeneralDirection3D.Left, new []{ _p000, _p001, _p011, _p010 } },
 
-			{ GeneralDirection3D.Up, new Vector3[]{ p010, p011, p111, p110 } },
-			{ GeneralDirection3D.Down, new Vector3[]{ p000, p100, p101, p001 } },
-			{ GeneralDirection3D.Forward, new Vector3[]{ p001, p101, p111, p011 } },
-			{ GeneralDirection3D.Back, new Vector3[]{ p000, p010, p110, p100 } },
+			{ GeneralDirection3D.Up, new []{ _p010, _p011, _p111, _p110 } },
+			{ GeneralDirection3D.Down, new []{ _p000, _p100, _p101, _p001 } },
+			{ GeneralDirection3D.Forward, new []{ _p001, _p101, _p111, _p011 } },
+			{ GeneralDirection3D.Back, new []{ _p000, _p010, _p110, _p100 } },
 		};
 
 		public virtual void GetPhysicalSides(List<Vector3[]> resultSides, VoxelMap map, Vector3Int startPoint)
@@ -195,7 +194,7 @@ namespace VoxelSystem
 			for (int i = 0; i < 6; i++)
 			{
 				GeneralDirection3D direction = DirectionUtility.generalDirection3DValues[i];
-				Vector3[] localSide = sideDictionary[direction];
+				Vector3[] localSide = _sideDictionary[direction];
 
 				Vector3[] side = new Vector3[localSide.Length];
 				for (int j = 0; j < localSide.Length; j++)

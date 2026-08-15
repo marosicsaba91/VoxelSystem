@@ -1,6 +1,7 @@
 ﻿using VoxelSystem.MeshUtility;
 using MUtility;
 using System;
+using Unity.Scripting.LifecycleManagement;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -8,19 +9,20 @@ namespace VoxelSystem
 {
 
 	[Serializable]
+	[NoAutoStaticsCleanup]
 	class StairMeshSetup
 	{
 		// SIMPLE STAIR ROTATIONS
-		// transformation index == 0 -> stair raises in forward diagonal
-		// transformation index == 1 -> stair raises in leftSideVector diagonal
-		// transformation index == 2 -> stair raises in back diagonal
-		// transformation index == 3 -> stair raises in rightSideVector diagonal
+		// transformation index == 0 -> stair rises in forward diagonal
+		// transformation index == 1 -> stair rises in leftSideVector diagonal
+		// transformation index == 2 -> stair rises in back diagonal
+		// transformation index == 3 -> stair rises in rightSideVector diagonal
 
 		// CORNER STAIR ROTATIONS
-		// transformation index == 0 -> stair raises in forward-rightSideVector diagonal
-		// transformation index == 1 -> stair raises in forward-leftSideVector diagonal
-		// transformation index == 2 -> stair raises in back-leftSideVector diagonal
-		// transformation index == 3 -> stair raises in back-rightSideVector diagonal
+		// transformation index == 0 -> stair rises in forward-rightSideVector diagonal
+		// transformation index == 1 -> stair rises in forward-leftSideVector diagonal
+		// transformation index == 2 -> stair rises in back-leftSideVector diagonal
+		// transformation index == 3 -> stair rises in back-rightSideVector diagonal
 
 		// INNER CORNER
 		// Back2 -> right
@@ -56,74 +58,74 @@ namespace VoxelSystem
 
 		const int transformCount = CubicTransformation.allTransformationCount;
 
-		static readonly Vector3[] simpleStairs_Points = { new(0, 0, 0), new(0, 1, 1), new(1, 1, 1), new(1, 0, 0) };
-		static readonly Vector3[] outerCornerStairs_Points1 = { new(0, 0, 0), new(1, 1, 1), new(1, 0, 0) };
-		static readonly Vector3[] outerCornerStairs_Points2 = { new(0, 0, 0), new(0, 0, 1), new(1, 1, 1) };
-		static readonly Vector3[] innerCornerStairs_Points1 = { new(0, 0, 0), new(1, 1, 1), new(1, 1, 0) };
-		static readonly Vector3[] innerCornerStairs_Points2 = { new(0, 0, 0), new(0, 1, 1), new(1, 1, 1) };
-		static readonly Vector3[] bottom_Points = { new(0, 0, 0), new(1, 0, 0), new(1, 0, 1), new(0, 0, 1) };
-		static readonly Vector3[] leftSide_Points = { new(0, 0, 0), new(0, 0, 1), new(0, 1, 1) };
-		static readonly Vector3[] rightSide_Points = { new(1, 0, 1), new(1, 0, 0), new(1, 1, 1) };
-		static readonly Vector3[] frontSide_Points = { new(0, 0, 1), new(1, 0, 1), new(1, 1, 1), new(0, 1, 1) };
+		static readonly Vector3[] _simpleStairs_Points = { new(0, 0, 0), new(0, 1, 1), new(1, 1, 1), new(1, 0, 0) };
+		static readonly Vector3[] _outerCornerStairs_Points1 = { new(0, 0, 0), new(1, 1, 1), new(1, 0, 0) };
+		static readonly Vector3[] _outerCornerStairs_Points2 = { new(0, 0, 0), new(0, 0, 1), new(1, 1, 1) };
+		static readonly Vector3[] _innerCornerStairs_Points1 = { new(0, 0, 0), new(1, 1, 1), new(1, 1, 0) };
+		static readonly Vector3[] _innerCornerStairs_Points2 = { new(0, 0, 0), new(0, 1, 1), new(1, 1, 1) };
+		static readonly Vector3[] _bottom_Points = { new(0, 0, 0), new(1, 0, 0), new(1, 0, 1), new(0, 0, 1) };
+		static readonly Vector3[] _leftSide_Points = { new(0, 0, 0), new(0, 0, 1), new(0, 1, 1) };
+		static readonly Vector3[] _rightSide_Points = { new(1, 0, 1), new(1, 0, 0), new(1, 1, 1) };
+		static readonly Vector3[] _frontSide_Points = { new(0, 0, 1), new(1, 0, 1), new(1, 1, 1), new(0, 1, 1) };
 
-		static readonly Vector3[] leftSide_Points2 = { new(0, 0, 1), new(1, 0, 1), new(1, 1, 1) };
-		static readonly Vector3[] rightSide_Points2 = { new(1, 0, 0), new(0, 0, 0), new(1, 1, 0) };
-		static readonly Vector3[] frontSide_Points2 = { new(1, 0, 0), new(1, 1, 0), new(1, 1, 1), new(1, 0, 1) };
+		static readonly Vector3[] _leftSide_Points2 = { new(0, 0, 1), new(1, 0, 1), new(1, 1, 1) };
+		static readonly Vector3[] _rightSide_Points2 = { new(1, 0, 0), new(0, 0, 0), new(1, 1, 0) };
+		static readonly Vector3[] _frontSide_Points2 = { new(1, 0, 0), new(1, 1, 0), new(1, 1, 1), new(1, 0, 1) };
 
-		public static readonly Vector3[][] simpleStair_PhysicalSides = { simpleStairs_Points, bottom_Points, frontSide_Points, rightSide_Points, leftSide_Points };
-		public static readonly Vector3[][] innerCorner_PhysicalSides = { innerCornerStairs_Points1, innerCornerStairs_Points2, bottom_Points, frontSide_Points, frontSide_Points2, rightSide_Points2, leftSide_Points };
-		public static readonly Vector3[][] outerCorner_PhysicalSides = { outerCornerStairs_Points1, outerCornerStairs_Points2, bottom_Points, rightSide_Points, leftSide_Points2 };
+		public static readonly Vector3[][] simpleStair_PhysicalSides = { _simpleStairs_Points, _bottom_Points, _frontSide_Points, _rightSide_Points, _leftSide_Points };
+		public static readonly Vector3[][] innerCorner_PhysicalSides = { _innerCornerStairs_Points1, _innerCornerStairs_Points2, _bottom_Points, _frontSide_Points, _frontSide_Points2, _rightSide_Points2, _leftSide_Points };
+		public static readonly Vector3[][] outerCorner_PhysicalSides = { _outerCornerStairs_Points1, _outerCornerStairs_Points2, _bottom_Points, _rightSide_Points, _leftSide_Points2 };
 
-		static readonly MeshBuilder simpleStairs_Default = new(
-			simpleStairs_Points,
+		static readonly MeshBuilder _simpleStairs_Default = new(
+			_simpleStairs_Points,
 			new Vector3[] { new(0, 1, -1), new(0, 1, -1), new(0, 1, -1), new(0, 1, -1), new(0, 1, -1), new(0, 1, -1) },
 			new Vector2[] { new(0, 0), new(0, 1), new(1, 1), new(1, 0) },
-			new int[] { 0, 1, 2, 0, 2, 3 }
+			new [] { 0, 1, 2, 0, 2, 3 }
 		);
 
-		static readonly MeshBuilder outerCornerStairs_Default = new(
+		static readonly MeshBuilder _outerCornerStairs_Default = new(
 			new Vector3[] {
 				new(0, 0, 0), new(1, 1, 1), new(1, 0, 0),
 				new(0, 0, 0), new(0, 0, 1), new(1, 1, 1),},
 			new Vector3[] { new(0, 1, -1), new(0, 1, -1), new(0, 1, -1), new(-1, 1, 0), new(-1, 1, 0), new(-1, 1, 0) },
 			new Vector2[] { new(1, 0), new(0, 1), new(1, 1), new(1, 0), new(0, 0), new(0, 1) },
-			new int[] { 0, 1, 2, 3, 4, 5 }
+			new [] { 0, 1, 2, 3, 4, 5 }
 		);
 
-		static readonly MeshBuilder innerCornerStairs_Default = new(
+		static readonly MeshBuilder _innerCornerStairs_Default = new(
 			new Vector3[] {
 				new(0, 0, 0), new(1, 1, 1), new(1, 1, 0),
 				new(0, 0, 0), new(0, 1, 1), new(1, 1, 1), },
 			new Vector3[] { new(-1, 1, 0), new(-1, 1, 0), new(-1, 1, 0), new(0, 1, -1), new(0, 1, -1), new(0, 1, -1) },
 			new Vector2[] { new(1, 0), new(0, 1), new(1, 1), new(1, 0), new(0, 0), new(0, 1) },
-			new int[] { 0, 1, 2, 3, 4, 5 }
+			new [] { 0, 1, 2, 3, 4, 5 }
 		);
 
-		static readonly MeshBuilder bottom_Default = new(
-			bottom_Points,
-			new Vector3[] { Vector3.back, Vector3.back, Vector3.back, Vector3.back, Vector3.back, Vector3.back },
+		static readonly MeshBuilder _bottom_Default = new(
+			_bottom_Points,
+			new [] { Vector3.back, Vector3.back, Vector3.back, Vector3.back, Vector3.back, Vector3.back },
 			new Vector2[] { new(0, 0), new(1, 0), new(1, 1), new(0, 1) },
-			new int[] { 0, 1, 2, 0, 2, 3 }
+			new [] { 0, 1, 2, 0, 2, 3 }
 		);
 
-		static readonly MeshBuilder frontSide_Default = new(
-			frontSide_Points,
+		static readonly MeshBuilder _frontSide_Default = new(
+			_frontSide_Points,
 			new Vector3[] { new(0, 0, 1), new(0, 0, 1), new(0, 0, 1), new(0, 0, 1), new(0, 0, 1), new(0, 0, 1) },
 			new Vector2[] { new(0, 0), new(1, 0), new(1, 1), new(0, 1) },
-			new int[] { 0, 1, 2, 0, 2, 3 }
+			new [] { 0, 1, 2, 0, 2, 3 }
 		);
 
-		static readonly MeshBuilder leftSide_Default = new(
-			leftSide_Points,
-			new Vector3[] { Vector3.left, Vector3.left, Vector3.left, Vector3.left },
+		static readonly MeshBuilder _leftSide_Default = new(
+			_leftSide_Points,
+			new [] { Vector3.left, Vector3.left, Vector3.left, Vector3.left },
 			new Vector2[] { new(0, 0), new(1, 0), new(1, 1) },
-			new int[] { 0, 1, 2 }
+			new [] { 0, 1, 2 }
 		);
-		static readonly MeshBuilder rightSide_Default = new(
-			rightSide_Points,
-			new Vector3[] { Vector3.right, Vector3.right, Vector3.right, Vector3.right },
+		static readonly MeshBuilder _rightSide_Default = new(
+			_rightSide_Points,
+			new [] { Vector3.right, Vector3.right, Vector3.right, Vector3.right },
 			new Vector2[] { new(0, 0), new(1, 0), new(1, 1), new(1, 1) },
-			new int[] { 0, 1, 2 }
+			new [] { 0, 1, 2 }
 		);
 
 
@@ -182,17 +184,17 @@ namespace VoxelSystem
 				Matrix4x4 transformation = ct.GetTransformationMatrix();
 				transformation = Matrix4x4.Translate(Vector3.one * 0.5f) * transformation;
 
-				transformedSimpleStairs[i] = GenerateSide(simpleStairs_Default, simpleStairs, transformation, uvSetup, GeneralDirection3D.Up); 
-				transformedInnerCornerStairs[i] = GenerateSide(innerCornerStairs_Default, innerCornerStairs, transformation, uvSetup, GeneralDirection3D.Up); 
-				transformedOuterCornerStairs[i] = GenerateSide(outerCornerStairs_Default, outerCornerStairs, transformation, uvSetup, GeneralDirection3D.Up); 
-				transformedRightSide[i] = GenerateSide(rightSide_Default, rightSide, transformation, uvSetup, GeneralDirection3D.Right); 
-				transformedLeftSide[i] = GenerateSide(leftSide_Default, leftSide, transformation, uvSetup, GeneralDirection3D.Left); 
-				transformedFrontSide[i] = GenerateSide(frontSide_Default, frontSide, transformation, uvSetup, GeneralDirection3D.Forward); 
-				transformedBottom[i] = GenerateSide(bottom_Default, bottom, transformation, uvSetup, GeneralDirection3D.Down); 
+				transformedSimpleStairs[i] = GenerateSide(_simpleStairs_Default, simpleStairs, transformation, uvSetup, GeneralDirection3D.Up); 
+				transformedInnerCornerStairs[i] = GenerateSide(_innerCornerStairs_Default, innerCornerStairs, transformation, uvSetup, GeneralDirection3D.Up); 
+				transformedOuterCornerStairs[i] = GenerateSide(_outerCornerStairs_Default, outerCornerStairs, transformation, uvSetup, GeneralDirection3D.Up); 
+				transformedRightSide[i] = GenerateSide(_rightSide_Default, rightSide, transformation, uvSetup, GeneralDirection3D.Right); 
+				transformedLeftSide[i] = GenerateSide(_leftSide_Default, leftSide, transformation, uvSetup, GeneralDirection3D.Left); 
+				transformedFrontSide[i] = GenerateSide(_frontSide_Default, frontSide, transformation, uvSetup, GeneralDirection3D.Forward); 
+				transformedBottom[i] = GenerateSide(_bottom_Default, bottom, transformation, uvSetup, GeneralDirection3D.Down); 
 
-				transformedRightSide2[i] = GenerateSide(rightSide_Default, rightSide, transformation * rotateRight, uvSetup, GeneralDirection3D.Right); 
-				transformedLeftSide2[i] = GenerateSide(leftSide_Default, leftSide, transformation * rotateRight, uvSetup, GeneralDirection3D.Left); 
-				transformedFrontSide2[i] = GenerateSide(frontSide_Default, frontSide, transformation * rotateRight, uvSetup, GeneralDirection3D.Forward);
+				transformedRightSide2[i] = GenerateSide(_rightSide_Default, rightSide, transformation * rotateRight, uvSetup, GeneralDirection3D.Right); 
+				transformedLeftSide2[i] = GenerateSide(_leftSide_Default, leftSide, transformation * rotateRight, uvSetup, GeneralDirection3D.Left); 
+				transformedFrontSide2[i] = GenerateSide(_frontSide_Default, frontSide, transformation * rotateRight, uvSetup, GeneralDirection3D.Forward);
 			}
 		}
 

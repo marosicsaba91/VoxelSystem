@@ -2,12 +2,14 @@
 
 using EasyEditor;
 using System.Collections.Generic;
+using Unity.Scripting.LifecycleManagement;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace VoxelSystem
 {
+	[NoAutoStaticsCleanup]
 	public class VoxelEditorWindow : EditorWindow
 	{
 		static GUIContent _titleContent;
@@ -47,7 +49,7 @@ namespace VoxelSystem
 			EditorGUILayout.LabelField("Select a GameObject with a VoxelEditor component", paletteDarkStyle);
 		}
 
-		Vector2 scrollPos = Vector2.zero;
+		Vector2 _scrollPos = Vector2.zero;
 
 		void DrawEditor(VoxelEditor voxelEditor)
 		{
@@ -88,7 +90,7 @@ namespace VoxelSystem
 			contentRect.width = Mathf.Max(contentRect.width - verticalScrollbarWidth, minWith);
 
 
-			scrollPos = GUI.BeginScrollView(windowRect, scrollPos, contentRect);
+			_scrollPos = GUI.BeginScrollView(windowRect, _scrollPos, contentRect);
 
 			VoxelEditorGUI.DrawHeader(voxelEditor, ref contentRect);
 			VoxelEditorGUI.DrawMapActions(voxelEditor, ref contentRect);

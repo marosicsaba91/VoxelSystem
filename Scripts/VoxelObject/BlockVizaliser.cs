@@ -1,6 +1,7 @@
 ﻿using MUtility;
 using System;
 using System.Collections.Generic;
+using Unity.Scripting.LifecycleManagement;
 using UnityEngine;
 using Utility.SerializableCollection;
 
@@ -19,6 +20,7 @@ namespace VoxelSystem
 		[Range(0, 0.25f)] public float margin = 0.1f;
 	}
 
+	[NoAutoStaticsCleanup]
 	class BlockVisualizer : MonoBehaviour
 	{
 		[SerializeField] BlockDrawingSettings drawingSettings = new();
@@ -27,7 +29,7 @@ namespace VoxelSystem
 
 		static System.Random _gizmoRandom;
 
-		public void DrawGizmos(VoxelMap map, List<(Vector3Int,OctoBlock)> _blocks)
+		public void DrawGizmos(VoxelMap map, List<(Vector3Int,OctoBlock)> blocks)
 		{
 			// Draw whole voxel map
 			if (drawingSettings.drawVoxels)
@@ -47,7 +49,7 @@ namespace VoxelSystem
 			if (drawingSettings.drawBlocks)
 			{
 				_gizmoRandom = new System.Random(randomSeed);
-				foreach ((Vector3Int, OctoBlock) block in _blocks)
+				foreach ((Vector3Int, OctoBlock) block in blocks)
 				{
 					Gizmos.color = drawingSettings.blockColors.TryGetValue(block.Item2.blockType, out Color color)
 						? color
@@ -181,7 +183,7 @@ namespace VoxelSystem
 			Gizmos.DrawLine(center + d1 + d2, center + d1 - d2);
 		}
 
-		void DrawAnything(OctoBlock block, Vector3Int subVoxelIndex, System.Random random)
+		static void DrawAnything(OctoBlock block, Vector3Int subVoxelIndex, System.Random random)
 		{
 			Vector3 center = block.Center(subVoxelIndex);
 			float rand = (float)random.NextDouble();

@@ -5,11 +5,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using Unity.Scripting.LifecycleManagement;
 using UnityEngine;
+
 
 namespace VoxelSystem
 {
-	public partial class VoxelObject : EasyMonoBehaviour
+	[NoAutoStaticsCleanup]
+	public partial class VoxelObject 
 	{
 		enum MeshGenerationMode
 		{
@@ -68,7 +71,7 @@ namespace VoxelSystem
 				MapName + ".asset",
 				"asset");
 
-			int index = path.IndexOf("Assets/");
+			int index = path.IndexOf("Assets/", StringComparison.Ordinal);
 			if (index >= 0)
 				path = path[index..];
 
@@ -130,9 +133,9 @@ namespace VoxelSystem
 				meshDestination.meshRenderer = GetComponent<MeshRenderer>();
 		}
 
-		static ModularStopwatch benchmarkTimer;
+		static ModularStopwatch _benchmarkTimer;
 
-		static readonly MeshBuilder meshBuilder = new();
+		static readonly MeshBuilder _meshBuilder = new();
 
 		struct VoxelInfo : IComparable
 		{
@@ -149,7 +152,7 @@ namespace VoxelSystem
 			public override readonly string ToString() => $"Material: {materialIndex} Shape: {shapeId}";
 		}
 
-		static readonly SortedDictionary<VoxelInfo, List<Vector3Int>> voxelsByType = new();
+		static readonly SortedDictionary<VoxelInfo, List<Vector3Int>> _voxelsByType = new();
 
 		void BuildVoxelPositionDictionary(VoxelMap map)
 		{
@@ -167,10 +170,10 @@ namespace VoxelSystem
 						byte materialIndex = voxel.materialIndex;
 						VoxelInfo voxelInfo = new() { materialIndex = materialIndex, shapeId = shapeIndex };
 
-						if (!voxelsByType.TryGetValue(voxelInfo, out List<Vector3Int> list))
+						if (!_voxelsByType.TryGetValue(voxelInfo, out List<Vector3Int> list))
 						{
 							list = new List<Vector3Int>();
-							voxelsByType.Add(voxelInfo, list);
+							_voxelsByType.Add(voxelInfo, list);
 						}
 
 						list.Add(new Vector3Int(x, y, z));
@@ -179,7 +182,7 @@ namespace VoxelSystem
 
 		void ClearDictionary()
 		{
-			List<KeyValuePair<VoxelInfo, List<Vector3Int>>> pairs = voxelsByType.Select(kvp => kvp).ToList();
+			List<KeyValuePair<VoxelInfo, List<Vector3Int>>> pairs = _voxelsByType.Select(kvp => kvp).ToList();
 			for (int i = pairs.Count - 1; i >= 0; i--)
 			{
 				KeyValuePair<VoxelInfo, List<Vector3Int>> kvp = pairs[i];
@@ -189,7 +192,7 @@ namespace VoxelSystem
 				if (coordinates.Count > 0)
 					coordinates.Clear();
 				else
-					voxelsByType.Remove(voxelInfo);
+					_voxelsByType.Remove(voxelInfo);
 			}
 		}
 
@@ -200,34 +203,37 @@ namespace VoxelSystem
 
 
 			if (doBenchmark)
-				benchmarkTimer ??= new ModularStopwatch(name + " " + GetType());
+				_benchmarkTimer ??= new ModularStopwatch(name + " " + GetType());
 			else
-				benchmarkTimer = null;
+				_benchmarkTimer = null;
 
-			benchmarkTimer?.StartModule("Clear Lists");
-			meshBuilder.Clear();
+			_benchmarkTimer?.StartModule("Clear Lists");
+			_meshBuilder.Clear();
 
-			benchmarkTimer?.StartModule("Build Voxel Position Dictionary");
+			_benchmarkTimer?.StartModule("Build Voxel Position Dictionary");
 			BuildVoxelPositionDictionary(GetVoxelMap());
 
 			CalculateAllMeshData(isQuick);
 
-			benchmarkTimer?.StartModule("Copy Vertex data to Mesh");
+			_benchmarkTimer?.StartModule("Copy Vertex data to Mesh");
 
 			if (destinationMesh == null)
 				destinationMesh = new() { name = MapName };
 			else
 				destinationMesh.Clear();
-			meshBuilder.CopyToMesh(destinationMesh);
+			_meshBuilder.CopyToMesh(destinationMesh);
 
 			if (doBenchmark)
 			{
-				string benchmarkResult = benchmarkTimer.ToString();
-				if (benchmarkOutput != null)
-					benchmarkOutput.text = benchmarkResult;
-				Debug.Log(benchmarkResult);
+				if (_benchmarkTimer != null)
+				{
+					string benchmarkResult = _benchmarkTimer.ToString();
+					if (benchmarkOutput != null)
+						benchmarkOutput.text = benchmarkResult;
+					Debug.Log(benchmarkResult);
+				}
 
-				benchmarkTimer.Clear();
+				_benchmarkTimer?.Clear();
 			}
 		}
 
@@ -274,23 +280,23 @@ namespace VoxelSystem
 			VoxelMap map = GetVoxelMap();
 
 			// Pre-calculate VoxelData if needed
-			foreach (KeyValuePair<VoxelInfo, List<Vector3Int>> chunk in voxelsByType)
+			foreach (KeyValuePair<VoxelInfo, List<Vector3Int>> chunk in _voxelsByType)
 			{
 				if (chunk.Value.Count == 0) continue;
 
 				int shapeId = chunk.Key.shapeId;
 				VoxelShapeBuilder shapeBuilder = shapePalette.GetBuilder(shapeId);
-				benchmarkTimer?.StartModule("Pre-calculate Vertex Data: " + shapeBuilder.NiceName);
+				_benchmarkTimer?.StartModule("Pre-calculate Vertex Data: " + shapeBuilder.NiceName);
 				shapeBuilder.SetupVoxelData(map, chunk.Value, shapeId, quick);
 			}
 
 			// Calculate every side of every Voxel side if they are open or not
-			foreach (KeyValuePair<VoxelInfo, List<Vector3Int>> chunk in voxelsByType)
+			foreach (KeyValuePair<VoxelInfo, List<Vector3Int>> chunk in _voxelsByType)
 			{
 				if (chunk.Value.Count == 0) continue;
 				int shapeId = chunk.Key.shapeId;
 				VoxelShapeBuilder shapeBuilder = shapePalette.GetBuilder(shapeId);
-				benchmarkTimer?.StartModule("Calculate opened/closed data for voxel resultSides: " + shapeBuilder.NiceName);
+				_benchmarkTimer?.StartModule("Calculate opened/closed data for voxel resultSides: " + shapeBuilder.NiceName);
 				List<Vector3Int> voxels = chunk.Value;
 				shapeBuilder.SetupClosedSides(map, voxels, quick);
 			}
@@ -298,7 +304,7 @@ namespace VoxelSystem
 			// SetupMesh for every direction
 			byte lastMaterialIndex = 0;
 
-			foreach (KeyValuePair<VoxelInfo, List<Vector3Int>> chunk in voxelsByType)
+			foreach (KeyValuePair<VoxelInfo, List<Vector3Int>> chunk in _voxelsByType)
 			{
 				int shapeId = chunk.Key.shapeId;
 				byte materialIndex = chunk.Key.materialIndex;
@@ -308,7 +314,7 @@ namespace VoxelSystem
 
 				while (lastMaterialIndex < materialIndex)
 				{
-					meshBuilder.EndMaterialDescriptor();
+					_meshBuilder.EndMaterialDescriptor();
 					lastMaterialIndex++;
 				}
 
@@ -316,13 +322,13 @@ namespace VoxelSystem
 				if (!hasBuilder)
 					Debug.LogWarning($"No shape builder found for: {chunk.Key}.    VoxelCount: {voxelIndexes.Count}");
 
-				benchmarkTimer?.StartModule("Calculate resultSides side data: " + shapeBuilder.NiceName);
-				shapeBuilder.GenerateMeshData(map, voxelIndexes, shapeBuilder.VoxelId, meshBuilder, quick);
+				_benchmarkTimer?.StartModule("Calculate resultSides side data: " + shapeBuilder.NiceName);
+				shapeBuilder.GenerateMeshData(map, voxelIndexes, shapeBuilder.VoxelId, _meshBuilder, quick);
 			}
 
 			while (lastMaterialIndex < MaterialPalette.Count)
 			{
-				meshBuilder.EndMaterialDescriptor();
+				_meshBuilder.EndMaterialDescriptor();
 				lastMaterialIndex++;
 			}
 		}
@@ -341,7 +347,7 @@ namespace VoxelSystem
 		{
 			VoxelMap map = GetVoxelMap();
 			BuildVoxelPositionDictionary(map);
-			foreach (KeyValuePair<VoxelInfo, List<Vector3Int>> chunk in voxelsByType)
+			foreach (KeyValuePair<VoxelInfo, List<Vector3Int>> chunk in _voxelsByType)
 			{
 				if (chunk.Value.Count == 0) continue;
 
@@ -357,7 +363,7 @@ namespace VoxelSystem
 		{
 			VoxelMap map = GetVoxelMap();
 			BuildVoxelPositionDictionary(map);
-			foreach (KeyValuePair<VoxelInfo, List<Vector3Int>> chunk in voxelsByType)
+			foreach (KeyValuePair<VoxelInfo, List<Vector3Int>> chunk in _voxelsByType)
 			{
 				if (chunk.Value.Count == 0) continue;
 
@@ -374,7 +380,7 @@ namespace VoxelSystem
 		{
 			VoxelMap map = GetVoxelMap();
 			BuildVoxelPositionDictionary(map);
-			foreach (KeyValuePair<VoxelInfo, List<Vector3Int>> chunk in voxelsByType)
+			foreach (KeyValuePair<VoxelInfo, List<Vector3Int>> chunk in _voxelsByType)
 			{
 				if (chunk.Value.Count == 0) continue;
 

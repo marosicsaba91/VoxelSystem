@@ -1,12 +1,14 @@
 #if UNITY_EDITOR
 using EasyEditor;
 using MUtility;
+using Unity.Scripting.LifecycleManagement;
 using UnityEditor;
 using UnityEngine;
 
 
 namespace VoxelSystem
 {
+	[NoAutoStaticsCleanup]
 	[CustomEditor(typeof(VoxelEditor))]
 	partial class VoxelEditor_CustomEditor : Editor
 	{

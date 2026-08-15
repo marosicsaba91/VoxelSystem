@@ -1,20 +1,23 @@
-﻿using EasyEditor;
+﻿using System;
+using EasyEditor;
 using MUtility;
 using Shapes;
 using System.Collections.Generic;
+using Unity.Scripting.LifecycleManagement;
 using UnityEngine;
 
 namespace VoxelSystem
 {
-	public struct VoxelHandelInfo
+	public struct VoxelHandleInfo
 	{
 		public Vector3 position;
 		public GeneralDirection3D direction;
 		public GeneralDirection3D side;
-		public HandeleConeType coneType;
+		public HandleConeType coneType;
 		public string text;
 	}
 
+	[NoAutoStaticsCleanup]
 	public abstract class VoxelToolHandler
 	{
 		protected static ArrayVoxelMap originalMap = null; // Target Voxel Map before Mouse Down
@@ -38,11 +41,11 @@ namespace VoxelSystem
 		protected static GeneralDirection3D handleDragDirection;
 		protected static int handleSteps = 0;
 
-		protected static GUIStyle textStyle = new()
+		protected static readonly GUIStyle textStyle = new()
 		{
 			alignment = TextAnchor.MiddleCenter,
 			fontSize = 15,
-			normal = new GUIStyleState() { textColor = Color.white }
+			normal = new(){ textColor = Color.white }
 		};
 
 		// --------------------- CONTROL ---------------------------
@@ -101,7 +104,7 @@ namespace VoxelSystem
 		protected virtual void OnDrawCursor(IVoxelEditor voxelEditor, Color actionColor, VoxelHit hit)
 		{
 			Color fadedColor = new(actionColor.r, actionColor.g, actionColor.b, actionColor.a / 4f);
-			Vector3 voxelCenter = (Vector3)hit.voxelIndex + Vector3.one * 0.5f;
+			Vector3 voxelCenter = hit.voxelIndex + Vector3.one * 0.5f;
 			WireShape cube = new Cuboid(Vector3.one).ToDrawable();
 			cube.Translate(voxelCenter);
 			Draw(cube, fadedColor);
@@ -197,19 +200,18 @@ namespace VoxelSystem
 		void ExecutedHandles(IVoxelEditor voxelEditor, Ray ray, out bool useEvent)
 		{
 			useEvent = false;
-			foreach (VoxelHandelInfo handleInfo in GetHandeles(voxelEditor))
+			foreach (VoxelHandleInfo handleInfo in GetHandles(voxelEditor))
 			{
 				ExecuteOneHandle(voxelEditor, handleInfo, ray, out bool useE);
 				useEvent |= useE;
 			}
 		}
 
-		void ExecuteOneHandle(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo, Ray ray, out bool useEvent)
+		void ExecuteOneHandle(IVoxelEditor voxelEditor, VoxelHandleInfo handleInfo, Ray ray, out bool useEvent)
 		{
 			useEvent = false;
 #if UNITY_EDITOR
 			VoxelMap map = voxelEditor.Map;
-			VoxelTool _tool = voxelEditor.SelectedTool;
 			GeneralDirection3D direction = handleInfo.direction;
 			Axis3D axis = direction.GetAxis();
 			Vector3 handlePos = handleInfo.position;
@@ -224,11 +226,11 @@ namespace VoxelSystem
 			Vector3 directionVector = direction.ToVector();
 			Quaternion rotation = Quaternion.LookRotation(directionVector);
 
-			UnityEditor.Handles.CapFunction capFunction = handleInfo.coneType == HandeleConeType.Arrow
+			UnityEditor.Handles.CapFunction capFunction = handleInfo.coneType == HandleConeType.Arrow
 				? UnityEditor.Handles.ConeHandleCap
 				: UnityEditor.Handles.CubeHandleCap;
 
-			if (handleInfo.coneType == HandeleConeType.Box)
+			if (handleInfo.coneType == HandleConeType.Box)
 				sizeMultiplier *= 0.7f;
 
 			HandleResult handleResult =
@@ -426,7 +428,7 @@ namespace VoxelSystem
 
 		// ------------------ Supported Actions -----------------------------
 
-		protected static readonly VoxelAction[] noVoxelAction = new VoxelAction[0];
+		protected static readonly VoxelAction[] noVoxelAction = Array.Empty<VoxelAction>();
 		protected static readonly VoxelAction[] allVoxelActions = VoxelEditor_EnumHelper.allVoxelActions;
 		public virtual VoxelAction[] GetSupportedActions(IVoxelEditor voxelEditor) => noVoxelAction;
 
@@ -446,14 +448,14 @@ namespace VoxelSystem
 
 		// ------------------ Virtual Methods: Handles -----------------------------
 
-		protected virtual IEnumerable<VoxelHandelInfo> GetHandeles(IVoxelEditor voxelEditor)
+		protected virtual IEnumerable<VoxelHandleInfo> GetHandles(IVoxelEditor voxelEditor)
 		{
 			yield break;
 		}
 
-		protected virtual MapChange OnHandleClick(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo) => MapChange.None;
-		protected virtual MapChange OnHandleDown(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo) => MapChange.None;
-		protected virtual MapChange OnHandleDrag(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo, int steps) => MapChange.None;
-		protected virtual MapChange OnHandleUp(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo, int steps) => MapChange.None;
+		protected virtual MapChange OnHandleClick(IVoxelEditor voxelEditor, VoxelHandleInfo handleInfo) => MapChange.None;
+		protected virtual MapChange OnHandleDown(IVoxelEditor voxelEditor, VoxelHandleInfo handleInfo) => MapChange.None;
+		protected virtual MapChange OnHandleDrag(IVoxelEditor voxelEditor, VoxelHandleInfo handleInfo, int steps) => MapChange.None;
+		protected virtual MapChange OnHandleUp(IVoxelEditor voxelEditor, VoxelHandleInfo handleInfo, int steps) => MapChange.None;
 	}
 }

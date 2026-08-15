@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using MUtility;
+using Unity.Scripting.LifecycleManagement;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -10,6 +11,7 @@ using UnityEditor;
 namespace VoxelSystem
 {
 	[Serializable]
+	[NoAutoStaticsCleanup]
 	public class CustomMeshPreview
 	{
 		[SerializeField] Vector2 textureSize = new(200, 200);
@@ -30,13 +32,13 @@ namespace VoxelSystem
 
 		public Func<Mesh> meshGetter;
 
-		static Material standardMaterial;
+		static Material _standardMaterial;
 		public Texture previewTexture;
 
-		static Material redMaterial;
-		static Material greenMaterial;
-		static Material blueMaterial;
-		static Mesh cube;
+		static Material _redMaterial;
+		static Material _greenMaterial;
+		static Material _blueMaterial;
+		static Mesh _cube;
 
 		public Vector2 TextureSize
 		{
@@ -46,7 +48,7 @@ namespace VoxelSystem
 				if (textureSize == value) return;
 				textureSize = value;
 
-				isDirty = true;
+				_isDirty = true;
 			}
 		}
 
@@ -61,7 +63,7 @@ namespace VoxelSystem
 			{
 				if (materials == value) return;
 				materials = value;
-				isDirty = true;
+				_isDirty = true;
 			}
 		}
 
@@ -76,7 +78,7 @@ namespace VoxelSystem
 				else
 					materials[0] = value;
 
-				isDirty = true;
+				_isDirty = true;
 			}
 		}
 
@@ -87,7 +89,7 @@ namespace VoxelSystem
 			{
 				if (backgroundType == value) return;
 				backgroundType = value;
-				isDirty = true;
+				_isDirty = true;
 			}
 		}
 
@@ -98,7 +100,7 @@ namespace VoxelSystem
 			{
 				if (backgroundColor == value) return;
 				backgroundColor = value;
-				isDirty = true;
+				_isDirty = true;
 			}
 		}
 
@@ -109,7 +111,7 @@ namespace VoxelSystem
 			{
 				if (isExpandable == value) return;
 				isExpandable = value;
-				isDirty = true;
+				_isDirty = true;
 			}
 		}
 
@@ -120,7 +122,7 @@ namespace VoxelSystem
 			{
 				if (cameraAngle == value) return;
 				cameraAngle = value;
-				isDirty = true;
+				_isDirty = true;
 			}
 		}
 
@@ -131,7 +133,7 @@ namespace VoxelSystem
 			{
 				if (lightAngle == value) return;
 				lightAngle = value;
-				isDirty = true;
+				_isDirty = true;
 			}
 		}
 
@@ -142,7 +144,7 @@ namespace VoxelSystem
 			{
 				if (rotateMesh == value) return;
 				rotateMesh = value;
-				isDirty = true;
+				_isDirty = true;
 			}
 		}
 
@@ -153,7 +155,7 @@ namespace VoxelSystem
 			{
 				if (fieldOfView == value) return;
 				fieldOfView = value;
-				isDirty = true;
+				_isDirty = true;
 			}
 		}
 
@@ -164,7 +166,7 @@ namespace VoxelSystem
 			{
 				if (zoom == value) return;
 				zoom = value;
-				isDirty = true;
+				_isDirty = true;
 			}
 		}
 
@@ -172,19 +174,19 @@ namespace VoxelSystem
 
 		//-------------------------------------
 
-		bool isDirty = true;
+		bool _isDirty = true;
 
 		public Texture PreviewTexture
 		{
 			get
 			{
 
-				if (previewTexture == null || isDirty)
+				if (previewTexture == null || _isDirty)
 				{
 #if UNITY_EDITOR
-					renderer ??= new PreviewRenderUtility();
+					_renderer ??= new PreviewRenderUtility();
 					Render();
-					isDirty = false;
+					_isDirty = false;
 #endif
 				}
 				return previewTexture;
@@ -201,7 +203,7 @@ namespace VoxelSystem
 
 
 #if UNITY_EDITOR
-		PreviewRenderUtility renderer;
+		PreviewRenderUtility _renderer;
 #endif
 
 		public void Render()
@@ -210,32 +212,32 @@ namespace VoxelSystem
 			AssemblyReloadEvents.beforeAssemblyReload -= Dispose;
 			AssemblyReloadEvents.beforeAssemblyReload += Dispose;
 
-			if (standardMaterial == null)
-				standardMaterial = new(Shader.Find("Standard"));
+			if (_standardMaterial == null)
+				_standardMaterial = new(Shader.Find("Standard"));
 
-			renderer ??= new PreviewRenderUtility();
+			_renderer ??= new PreviewRenderUtility();
 			if (previewTexture != null)
 				UnityEngine.Object.DestroyImmediate(previewTexture);
-			previewTexture = Render(this, renderer);
-			isDirty = false;
+			previewTexture = Render(this, _renderer);
+			_isDirty = false;
 #endif
 		}
 
 		public void Dispose()
 		{
 #if UNITY_EDITOR
-			renderer?.Cleanup();
-			renderer = null;
+			_renderer?.Cleanup();
+			_renderer = null;
 
 			if (previewTexture != null)
 			{
 				UnityEngine.Object.DestroyImmediate(previewTexture);
 				previewTexture = null;
 			}
-			if (standardMaterial != null)
+			if (_standardMaterial != null)
 			{
-				UnityEngine.Object.DestroyImmediate(standardMaterial);
-				standardMaterial = null;
+				UnityEngine.Object.DestroyImmediate(_standardMaterial);
+				_standardMaterial = null;
 			}
 #endif
 		}
@@ -284,7 +286,7 @@ namespace VoxelSystem
 				for (int subMeshIndex = 0; subMeshIndex < mesh.subMeshCount; subMeshIndex++)
 				{
 					int materialIndex = Mathf.Min(subMeshIndex, preview.materials.Count - 1);
-					Material material = materialIndex == -1 ? standardMaterial : preview.materials[materialIndex];
+					Material material = materialIndex == -1 ? _standardMaterial : preview.materials[materialIndex];
 
 					renderer.DrawMesh(mesh, Matrix4x4.identity, material, 0);
 				}
@@ -292,20 +294,20 @@ namespace VoxelSystem
 
 			if (preview.showDirections)
 			{
-				if (cube == null && redMaterial == null || greenMaterial == null || blueMaterial == null)
+				if (_cube == null && _redMaterial == null || _greenMaterial == null || _blueMaterial == null)
 				{
 					// Shader standardShader = Shader.Find("Standard");
 					Shader standardShader = Shader.Find("Universal Render Pipeline/Lit");
-					cube = Resources.GetBuiltinResource<Mesh>("Cube.fbx");
-					redMaterial = new(standardShader) { color = Color.red };
-					greenMaterial = new(standardShader) { color = Color.green };
-					blueMaterial = new(standardShader) { color = Color.blue };
+					_cube = Resources.GetBuiltinResource<Mesh>("Cube.fbx");
+					_redMaterial = new(standardShader) { color = Color.red };
+					_greenMaterial = new(standardShader) { color = Color.green };
+					_blueMaterial = new(standardShader) { color = Color.blue };
 				}
 
 				Vector3 cubeSize = Vector3.one * (bounds.size.Mean() * 0.1f);
-				renderer.DrawMesh(cube, Matrix4x4.TRS(bounds.center + 1.6f * bounds.extents.x * Vector3.right, Quaternion.identity, cubeSize), redMaterial, 0);
-				renderer.DrawMesh(cube, Matrix4x4.TRS(bounds.center + 1.6f * bounds.extents.y * Vector3.up, Quaternion.identity, cubeSize), greenMaterial, 0);
-				renderer.DrawMesh(cube, Matrix4x4.TRS(bounds.center + 1.6f * bounds.extents.z * Vector3.forward, Quaternion.identity, cubeSize), blueMaterial, 0);
+				renderer.DrawMesh(_cube, Matrix4x4.TRS(bounds.center + 1.6f * bounds.extents.x * Vector3.right, Quaternion.identity, cubeSize), _redMaterial, 0);
+				renderer.DrawMesh(_cube, Matrix4x4.TRS(bounds.center + 1.6f * bounds.extents.y * Vector3.up, Quaternion.identity, cubeSize), _greenMaterial, 0);
+				renderer.DrawMesh(_cube, Matrix4x4.TRS(bounds.center + 1.6f * bounds.extents.z * Vector3.forward, Quaternion.identity, cubeSize), _blueMaterial, 0);
 			}
 
 
@@ -326,6 +328,6 @@ namespace VoxelSystem
 			return Quaternion.Euler(rotation.y, -rotation.x, 0);
 		}
 
-		public void SetDirty() => isDirty = true;
+		public void SetDirty() => _isDirty = true;
 	}
 }

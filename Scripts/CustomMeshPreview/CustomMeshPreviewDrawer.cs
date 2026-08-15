@@ -1,14 +1,16 @@
 ﻿#if UNITY_EDITOR
 using EasyEditor;
+using Unity.Scripting.LifecycleManagement;
 using UnityEditor;
 using UnityEngine;
 
 namespace VoxelSystem
 {
+	[NoAutoStaticsCleanup]
 	[CustomPropertyDrawer(typeof(CustomMeshPreview))]
 	class CustomMeshPreviewDrawer : PropertyDrawer
 	{
-		static PreviewRenderUtility renderer;
+		static PreviewRenderUtility _renderer;
 
 		public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
 		{
@@ -21,25 +23,28 @@ namespace VoxelSystem
 			AssemblyReloadEvents.beforeAssemblyReload -= SetupMeshPreview;
 
 			position.height = EditorGUIUtility.singleLineHeight;
-			if (preview.isExpandable)
+			if (preview is { isExpandable: true })
 			{
 				property.isExpanded = EditorGUI.Foldout(position, property.isExpanded, label, true);
 				position.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
 				if (!property.isExpanded) return;
 			}
 
-			position.height = preview.TextureSize.y;
+			if (preview != null)
+			{
+				position.height = preview.TextureSize.y;
 
-			if (Event.current.type == EventType.Repaint)
-				DrawMesh(preview, position);
+				if (Event.current.type == EventType.Repaint)
+					DrawMesh(preview, position);
 
-			HandleMouseMovement(position, preview);
+				HandleMouseMovement(position, preview);
+			}
 		}
 
 		void SetupMeshPreview()
 		{
-			renderer?.Cleanup();
-			renderer = null;
+			_renderer?.Cleanup();
+			_renderer = null;
 		}
 
 		public static void DrawMesh(CustomMeshPreview preview, Rect position)
@@ -54,16 +59,16 @@ namespace VoxelSystem
 			GUI.DrawTexture(position, preview.PreviewTexture);
 		}
 
-		static Vector2 mouseDownPos = Vector2.zero;
+		static Vector2 _mouseDownPos = Vector2.zero;
 
 		public static bool HandleMouseMovement(Rect position, CustomMeshPreview preview)
 		{
 			EventType type = Event.current.type;
 
 			if (type == EventType.MouseDown)
-				mouseDownPos = Event.current.mousePosition;
+				_mouseDownPos = Event.current.mousePosition;
 
-			else if (type == EventType.MouseDrag && position.Contains(mouseDownPos))
+			else if (type == EventType.MouseDrag && position.Contains(_mouseDownPos))
 			{
 				float x = -Event.current.delta.x / position.width * 60;
 				float y = Event.current.delta.y / position.height * 60;
@@ -115,9 +120,10 @@ namespace VoxelSystem
 
 		public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
 		{
-			CustomMeshPreview preview = property.GetObjectOfProperty() as CustomMeshPreview;
+			if (property.GetObjectOfProperty() is not CustomMeshPreview preview) 
+				return EditorGUIUtility.singleLineHeight;
 
-			if (!preview.isExpandable)
+			if (preview is { isExpandable: false })
 				return preview.TextureSize.y;
 
 			if (!property.isExpanded)

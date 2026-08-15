@@ -14,7 +14,7 @@ namespace VoxelSystem
 		protected override void OnDrawCursor(IVoxelEditor voxelEditor, Color actionColor, VoxelHit hit) => 
 			base.OnDrawCursor(voxelEditor, Color.yellow, hit);
 
-		protected override IEnumerable<VoxelHandelInfo> GetHandeles(IVoxelEditor voxelEditor)
+		protected override IEnumerable<VoxelHandleInfo> GetHandles(IVoxelEditor voxelEditor)
 		{
 			if (useCursor || !voxelEditor.HasSelection())
 				yield break;
@@ -24,17 +24,17 @@ namespace VoxelSystem
 				GeneralDirection3D side = DirectionUtility.generalDirection3DValues[i];
 				Vector3 position = GetMapSidePosition(voxelEditor, side);
 
-				yield return new VoxelHandelInfo()
+				yield return new VoxelHandleInfo()
 				{
-					coneType = HandeleConeType.Box,
+					coneType = HandleConeType.Box,
 					position = position,
 					direction = side,
 					side = side,
 					text = null
 				};
-				yield return new VoxelHandelInfo()
+				yield return new VoxelHandleInfo()
 				{
-					coneType = HandeleConeType.Arrow,
+					coneType = HandleConeType.Arrow,
 					position = position + side.ToVector() * standardSpacing,
 					direction = side,
 					side = side,
@@ -78,17 +78,17 @@ namespace VoxelSystem
 		// -----------------------------------------------------------------------------------------
 
 
-		protected override MapChange OnHandleDown(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo) 
+		protected override MapChange OnHandleDown(IVoxelEditor voxelEditor, VoxelHandleInfo handleInfo) 
 		{
 			useHandle = true;
 			return MapChange.None;
 		}
 
-		protected override MapChange OnHandleDrag(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo, int steps)
+		protected override MapChange OnHandleDrag(IVoxelEditor voxelEditor, VoxelHandleInfo handleInfo, int steps)
 		{
 			voxelEditor.RecordForUndo("Selection Changed", RecordType.Editor);
 			GeneralDirection3D direction = handleInfo.direction;
-			if(handleInfo.coneType == HandeleConeType.Box)
+			if(handleInfo.coneType == HandleConeType.Box)
 				voxelEditor.Selection = originalSelection.ResizeWithLimits(direction, steps, Vector3Int.zero, originalMapSize, Vector3Int.one);
 			else
 				voxelEditor.Selection = originalSelection.MoveWithLimits(direction, steps, Vector3Int.zero, originalMapSize);
@@ -96,7 +96,7 @@ namespace VoxelSystem
 			return MapChange.None;
 		}
 
-		protected override MapChange OnHandleUp(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo, int steps)
+		protected override MapChange OnHandleUp(IVoxelEditor voxelEditor, VoxelHandleInfo handleInfo, int steps)
 		{ 
 			useHandle = false;
 			return MapChange.None;

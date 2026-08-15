@@ -2,11 +2,13 @@
 using MUtility;
 using System;
 using System.Collections.Generic;
+using Unity.Scripting.LifecycleManagement;
 using UnityEngine;
 
 namespace VoxelSystem.MeshUtility
 {
 	[Serializable]
+	[NoAutoStaticsCleanup]
 	public class CubeUVSetup
 	{
 		enum TextureType { SameSides, TopSideBottom, SixSide }
@@ -27,8 +29,8 @@ namespace VoxelSystem.MeshUtility
 		[SerializeField, HideInInspector] Rect frontRect;
 		[SerializeField, HideInInspector] Rect backRect;
 
-		static readonly List<int> positiveWinding = new() { 0, 1, 2, 0, 2, 3 };
-		static readonly List<int> negativeWinding = new() { 0, 2, 1, 0, 3, 2 };
+		static readonly List<int> _positiveWinding = new() { 0, 1, 2, 0, 2, 3 };
+		static readonly List<int> _negativeWinding = new() { 0, 2, 1, 0, 3, 2 };
 
 		public void OnValidate()
 		{
@@ -82,13 +84,13 @@ namespace VoxelSystem.MeshUtility
 			if (!perpendicularDir2.IsPositive())
 				perpendicularDir2 = perpendicularDir2.Opposite();
 
-			Vector3 normal = (Vector3)direction.ToVectorInt();
+			Vector3 normal = direction.ToVectorInt();
 			Vector3 p1 = perpendicularDir1.ToVector() * (size / 2f);
 			Vector3 p2 = perpendicularDir2.ToVector() * (size / 2f);
 			Vector3 center = normal * (size / 2 + normalOffset);
 
 			Rect rect = GetRect(direction);
-			List<int> winding = faceOut ^ direction.IsPositive() ? negativeWinding : positiveWinding;
+			List<int> winding = faceOut ^ direction.IsPositive() ? _negativeWinding : _positiveWinding;
 
 			builder.AddVertex(center - p1 - p2, normal, rect.BottomLeft());
 			builder.AddVertex(center - p1 + p2, normal, rect.TopLeft());

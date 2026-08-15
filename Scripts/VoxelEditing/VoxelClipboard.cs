@@ -1,24 +1,25 @@
-﻿using UnityEngine;
+﻿using Unity.Scripting.LifecycleManagement;
+using UnityEngine;
 
 namespace VoxelSystem
 {
+	[NoAutoStaticsCleanup]
 	static class VoxelClipboard
 	{
-		static VoxelMap _clipboard = null;
-		public static VoxelMap ClipboardMap => _clipboard;
+		public static VoxelMap ClipboardMap { get; private set; } = null;
 
-		public static bool IsEmpty => _clipboard == null || _clipboard.FullSize == Vector3Int.zero;
-		public static bool HaveContent => _clipboard != null && _clipboard.FullSize != Vector3Int.zero;
-		public static Vector3Int Size => _clipboard.FullSize;
+		public static bool IsEmpty => ClipboardMap == null || ClipboardMap.FullSize == Vector3Int.zero;
+		public static bool HaveContent => ClipboardMap != null && ClipboardMap.FullSize != Vector3Int.zero;
+		public static Vector3Int Size => ClipboardMap.FullSize;
 
-		public static void Clear() => _clipboard = null;
-		public static void Copy(this IVoxelEditor editor) => _clipboard = editor.SeparateSelection();
+		public static void Clear() => ClipboardMap = null;
+		public static void Copy(this IVoxelEditor editor) => ClipboardMap = editor.SeparateSelection();
 		public static void Paste(this IVoxelEditor editor)
 		{
 			VoxelMap map = editor.Map;
 			BoundsInt sel = new(editor.Selection.min, Size);
 			sel.size = Vector3Int.Min(sel.size, map.FullSize - sel.position);
-			editor.Map.CopyFrom(_clipboard, Vector3Int.zero, sel.min, sel.size);
+			editor.Map.CopyFrom(ClipboardMap, Vector3Int.zero, sel.min, sel.size);
 			editor.Selection = sel;
 		}
 	}

@@ -1,6 +1,7 @@
 ﻿using MUtility;
 using System;
 using System.Collections.Generic;
+using Unity.Scripting.LifecycleManagement;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -19,15 +20,16 @@ namespace VoxelSystem
 	public delegate void MapChangedDelegate(bool isFinal);
 
 	[Serializable]
+	[NoAutoStaticsCleanup]
 	public abstract partial class VoxelMap
 	{
 		// public abstract void GetSize();
 
-		static readonly Dictionary<string, VoxelMap> mapDictionary = new();
+		static readonly Dictionary<string, VoxelMap> _mapDictionary = new();
 		public static bool TryGetMapByGuid(string guid, out VoxelMap map)
 		{
 			map = null;
-			foreach (KeyValuePair<string, VoxelMap> item in mapDictionary)
+			foreach (KeyValuePair<string, VoxelMap> item in _mapDictionary)
 			{
 				if (item.Key == guid)
 				{
@@ -40,7 +42,7 @@ namespace VoxelSystem
 			foreach (VoxelObject filter in filters)
 			{
 				VoxelMap vMap = filter.GetVoxelMap();
-				mapDictionary.TryAdd(vMap.UniqueID, vMap);
+				_mapDictionary.TryAdd(vMap.UniqueID, vMap);
 				if (vMap.UniqueID.Equals(guid))
 					map = vMap;
 			}
@@ -94,7 +96,7 @@ namespace VoxelSystem
 		protected void SetupUniqueID()
 		{
 			uniqueID = Guid.NewGuid().ToString();
-			mapDictionary.TryAdd(UniqueID, this);
+			_mapDictionary.TryAdd(UniqueID, this);
 		}
 
 		public void Setup() => Setup(FullSize, emptyValue);

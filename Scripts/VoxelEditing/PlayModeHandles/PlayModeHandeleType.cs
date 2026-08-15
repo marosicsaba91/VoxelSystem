@@ -1,4 +1,4 @@
 ﻿namespace VoxelSystem
 {
-	public enum HandeleConeType { Arrow, Box }
+	public enum HandleConeType { Arrow, Box }
 }

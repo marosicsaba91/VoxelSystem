@@ -1,6 +1,7 @@
 using EasyEditor;
 using System.IO;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace VoxelSystem
 {
@@ -14,7 +15,7 @@ namespace VoxelSystem
 		[DisableIf(nameof(HasSharedMap))]
 		public EasyButton exportVoxelMapAsAsset =
 			new(nameof(ExportVoxelMap));
-		[SerializeField, HideInInspector] SharedVoxelMap _lastFrameSharedMap = null;
+		[FormerlySerializedAs("_lastFrameSharedMap"),SerializeField, HideInInspector] SharedVoxelMap lastFrameSharedMap = null;
 
 		public event MapChangedDelegate MapChanged;
 
@@ -100,17 +101,17 @@ namespace VoxelSystem
 
 		void SubscribeSharedMapChanges()
 		{
-			if (_lastFrameSharedMap == null && sharedVoxelMap == null)
+			if (lastFrameSharedMap == null && sharedVoxelMap == null)
 			{
 				innerMap.MapChangedEvent -= OnMapChanged;
 				innerMap.MapChangedEvent += OnMapChanged;
 			}
 
-			if (_lastFrameSharedMap == sharedVoxelMap)
+			if (lastFrameSharedMap == sharedVoxelMap)
 				return;
 
-			if (_lastFrameSharedMap != null)
-				_lastFrameSharedMap.Map.MapChangedEvent -= OnMapChanged;
+			if (lastFrameSharedMap != null)
+				lastFrameSharedMap.Map.MapChangedEvent -= OnMapChanged;
 			else if (innerMap != null)
 				innerMap.MapChangedEvent -= OnMapChanged;
 
@@ -119,7 +120,7 @@ namespace VoxelSystem
 			else if (innerMap != null)
 				innerMap.MapChangedEvent += OnMapChanged;
 
-			_lastFrameSharedMap = sharedVoxelMap;
+			lastFrameSharedMap = sharedVoxelMap;
 		}
 
 		void ExportVoxelMap()

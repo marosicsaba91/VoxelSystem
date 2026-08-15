@@ -8,7 +8,7 @@ namespace VoxelSystem
 	{
 		public override VoxelAction[] GetSupportedActions(IVoxelEditor voxelEditor) => GetTransformActions(voxelEditor);
 
-		protected override IEnumerable<VoxelHandelInfo> GetHandeles(IVoxelEditor voxelEditor)
+		protected override IEnumerable<VoxelHandleInfo> GetHandles(IVoxelEditor voxelEditor)
 		{
 			for (int i = 0; i < DirectionUtility.generalDirection3DValues.Length; i++)
 			{
@@ -17,9 +17,9 @@ namespace VoxelSystem
 				 
 				Vector3 position = GetMapSidePosition(voxelEditor, side);
 
-				yield return new VoxelHandelInfo()
+				yield return new VoxelHandleInfo()
 				{
-					coneType = HandeleConeType.Arrow, 
+					coneType = HandleConeType.Arrow, 
 					position = position,
 					direction = side,
 					side = side,
@@ -27,7 +27,7 @@ namespace VoxelSystem
 			}
 		}
 
-		protected override MapChange OnHandleClick(IVoxelEditor voxelEditor, VoxelHandelInfo handleInfo)
+		protected override MapChange OnHandleClick(IVoxelEditor voxelEditor, VoxelHandleInfo handleInfo)
 		{
 			if (voxelEditor.HasSelection())
 			{
